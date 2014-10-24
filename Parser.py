@@ -10,9 +10,11 @@ class Parser:
 
     def parse(self, bindingPower):
         token = self.lexer.peep()        # token = leftToken
-        token2 = self.lexer.advance()     # token2 = rightToken
+        token2 = self.lexer.advance()     # token2 = operatorToken
+        token = token.nud()
+        token2 = self.lexer.peep()
         while bindingPower < token2.bindingPower:  # left < right
-            newToken = self.lexer.advance()
+            self.lexer.advance()
             token = token2.led(token)
             token2 = self.lexer.peep()
         return token  # number token: come in first time, else operator token: after rolling in the while loop
