@@ -68,33 +68,17 @@ class Context:
         symClass.nud = nud
         symClass.led = led
         return symClass
-
-    def addInfixOperator(self, id, bindingPower = 0):
+    def addInfixPrefixOperator(self, id, bindingPower = 0):
         thisContext = self
-        def led(self, leftToken):
-            self.data.append(leftToken)
-            returnedToken = thisContext.parser.parse(self.bindingPower)
+        symClass = self.addInfixOperator(id,bindingPower)
+
+        def nud(self):
+            returnedToken = thisContext.parser.parse(120)
             self.data.append(returnedToken)
             return self
-        def nud(self):
-            return self
-        symClass = self.symbol(id)
-        symClass.arity = self.BINARY
-        symClass.bindingPower = bindingPower
+
         symClass.nud = nud
-        symClass.led = led
         return symClass
-
-
-
-        return symClass
-
-
-    def prefixNud(self):
-        pass
-
-    def perfixLed(self, leftToken = None):
-        return self
 
     def createLiteral(self, value):
         sym = self.symbol('(literal)')

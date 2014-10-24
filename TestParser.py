@@ -6,7 +6,6 @@ class MyTestCase(unittest.TestCase):
     def test_parse_2_plus_3(self):
         context = Context()
         addClass = context.addInfixOperator('+', 70)
-        end = context.addInfixOperator('(end)', 0)
         parser = Parser('2 + 3', [context])
         context.setParser(parser)
         token = parser.parse(0)
@@ -28,7 +27,6 @@ class MyTestCase(unittest.TestCase):
         context = Context()
         addClass = context.addInfixOperator('+', 70)
         mulClass = context.addInfixOperator('*', 100)
-        end = context.addInfixOperator('(end)', 0)
 
         parser = Parser('2 + 3 * 4', [context])
         context.setParser(parser)
@@ -54,8 +52,6 @@ class MyTestCase(unittest.TestCase):
         context = Context()
         mulClass = context.addInfixOperator('*', 100)
         addClass = context.addInfixOperator('+', 70)
-        end = context.addInfixOperator('(end)', 0)
-
         parser = Parser('2 * 3 + 4', [context])
         context.setParser(parser)
         token = parser.parse(0)
@@ -83,8 +79,6 @@ class MyTestCase(unittest.TestCase):
         mulClass = context.addInfixOperator('*', 100)
         addClass = context.addInfixOperator('+', 70)
         subClass = context.addInfixOperator('-', 70)
-        end = context.addInfixOperator('(end)', 0)
-
         parser = Parser('2 * 3 + 4 - 5', [context])
         context.setParser(parser)
         token = parser.parse(0)
@@ -112,7 +106,6 @@ class MyTestCase(unittest.TestCase):
         context = Context()
         mulClass = context.addInfixOperator('*', 100)
         addClass = context.addInfixOperator('+', 70)
-        end = context.addInfixOperator('(end)', 0)
 
         parser = Parser('2 * 3 + 4 * 5', [context])
         context.setParser(parser)
@@ -143,7 +136,6 @@ class MyTestCase(unittest.TestCase):
         context = Context()
         mulClass = context.addInfixOperator('*', 100)
         addClass = context.addInfixOperator('+', 70)
-        end = context.addInfixOperator('(end)', 0)
 
         parser = Parser('2 + 3 * 4 + 5', [context])
         context.setParser(parser)
@@ -173,7 +165,6 @@ class MyTestCase(unittest.TestCase):
         context = Context()
         context.addPrefixOperator('!',120)
         context.addInfixOperator('+', 70)
-        context.addInfixOperator('(end)', 0)
 
         parser = Parser('! 2 + 3 ', [context])
         context.setParser(parser)
@@ -196,7 +187,6 @@ class MyTestCase(unittest.TestCase):
         context = Context()
         context.addPrefixOperator('-',120)
         context.addInfixOperator('+', 70)
-        context.addInfixOperator('(end)', 0)
 
         parser = Parser('- 2 + 3 ', [context])
         context.setParser(parser)
@@ -219,7 +209,6 @@ class MyTestCase(unittest.TestCase):
         context = Context()
         context.addPrefixOperator('-',120)
         context.addInfixOperator('+', 70)
-        context.addInfixOperator('(end)', 0)
 
         parser = Parser(' 2 + - 3 ', [context])
         context.setParser(parser)
@@ -240,9 +229,7 @@ class MyTestCase(unittest.TestCase):
         :return:
         """
         context = Context()
-        context.addPrefixOperator('-',120)
-        context.addInfixOperator('-', 70)
-        context.addInfixOperator('(end)', 0)
+        context.addInfixPrefixOperator('-', 70)
 
         parser = Parser(' 2 - - 3 ', [context])
         context.setParser(parser)
@@ -250,7 +237,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual('-', token.id)
         self.assertEqual(2, token.data[0].data[0])
         self.assertEqual( '-' , token.data[1].id)
-        self.assertEqual( 3 , token.data[1].data[0].id)
+        self.assertEqual( 3 , token.data[1].data[0].data[0])
 
     def test_parse_negative_2_minus_3(self):
         """
@@ -262,9 +249,8 @@ class MyTestCase(unittest.TestCase):
         :return:
         """
         context = Context()
-        classMinus = context.addInfixOperator('-', 70)
-        classMinus.nud = nud
-        context.addInfixOperator('(end)', 0)
+        context.addInfixPrefixOperator('-', 70)
+
 
         parser = Parser(' - 2 - 3 ', [context])
         context.setParser(parser)
