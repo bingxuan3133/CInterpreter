@@ -37,12 +37,6 @@ class Context:
             return self.symbolTable[id]
 
     def addInfixOperator(self, id, bindingPower = 0):
-        """
-        Add Infix operator into symbol table
-        :param id:
-        :param bindingPower:
-        :return:
-        """
         thisContext = self
         def led(self, leftToken):
             self.data.append(leftToken)
@@ -59,9 +53,40 @@ class Context:
         return symClass
 
     def addPrefixOperator(self, id, bindingPower = 0):
+        thisContext = self
         symClass = self.symbol(id)
         symClass.arity = self.PREFIX_UNARY
         symClass.bindingPower = bindingPower
+        def led(self):
+            return self
+
+        def nud(self):
+            returnedToken = thisContext.parser.parse(self.bindingPower)
+            self.data.append(returnedToken)
+            return self
+
+        symClass.nud = nud
+        symClass.led = led
+        return symClass
+
+    def addInfixOperator(self, id, bindingPower = 0):
+        thisContext = self
+        def led(self, leftToken):
+            self.data.append(leftToken)
+            returnedToken = thisContext.parser.parse(self.bindingPower)
+            self.data.append(returnedToken)
+            return self
+        def nud(self):
+            return self
+        symClass = self.symbol(id)
+        symClass.arity = self.BINARY
+        symClass.bindingPower = bindingPower
+        symClass.nud = nud
+        symClass.led = led
+        return symClass
+
+
+
         return symClass
 
 
