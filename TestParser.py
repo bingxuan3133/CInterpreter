@@ -2,7 +2,7 @@ import unittest
 from Context import *
 from Parser import *
 
-class MyTestCase(unittest.TestCase):
+class TestParseInfix(unittest.TestCase):
     def setUp(self):
         self.context = Context()
         self.context.addInfixOperator('*', 100)
@@ -137,6 +137,15 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(4, token.data[0].data[1].data[1].data[0])
         self.assertEqual(5, token.data[1].data[0])
 
+class TestParsePrefix(unittest.TestCase):
+    def setUp(self):
+        self.context = Context()
+        self.context.addInfixOperator('*', 100)
+        self.context.addPrefixInfixOperator('+', 70)
+        self.context.addPrefixInfixOperator('-', 70)
+        self.context.addPostfixOperator('++', 150)
+        self.context.addPrefixOperator('--', 120)
+
     def test_parse_negative_2_plus_3(self):
         """
                 +
@@ -217,16 +226,16 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(2, token.data[0].data[0].data[0])
         self.assertEqual(3, token.data[1].data[0].data[0])
 
-    def xtest_parse_post_increment_i(self):
-        self.context.addInfixOperator('++', 150)
+    def test_parse_post_increment_i(self):
         parser = Parser('i ++', [self.context])
         self.context.setParser(parser)
         token = parser.parse(0)
-        self.assertEqual('(identifier)', token.id)
-        self.assertEqual('i', token.data[0])
-        self.assertEqual('++', token.data[1].id)
+        self.assertEqual('++', token.id)
+        self.assertEqual('(identifier)', token.data[0].id)
+        self.assertEqual('i', token.data[0].data[0])
+        self.assertEqual(1, len(token.data))
 
-    def xtest_parse_i_plus_j(self):
+    def test_parse_i_plus_j(self):
         parser = Parser('i + j', [self.context])
         self.context.setParser(parser)
         token = parser.parse(0)
@@ -235,6 +244,53 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual('(identifier)', token.data[1].id)
         self.assertEqual('i', token.data[0].data[0])
         self.assertEqual('j', token.data[1].data[0])
+
+    def test_parse_post_increment_i_plus_pre_decrement_j(self):
+        parser = Parser('i ++ + -- j', [self.context])
+        self.context.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('+', token.id)
+        self.assertEqual('++', token.data[0].id)
+        self.assertEqual('--', token.data[1].id)
+        self.assertEqual('(identifier)', token.data[0].data[0].id)
+        self.assertEqual('(identifier)', token.data[1].data[0].id)
+        self.assertEqual('i', token.data[0].data[0].data[0])
+        self.assertEqual('j', token.data[1].data[0].data[0])
+
+class TestParsePrefixGroup(unittest.TestCase):
+    def setUp(self):
+        self.context = Context()
+        self.context.addInfixOperator('*', 100)
+        self.context.addPrefixInfixOperator('+', 70)
+        self.context.addPrefixInfixOperator('-', 70)
+        self.context.addPostfixOperator('++', 150)
+        self.context.addPrefixOperator('--', 120)
+
+    def test_parse_bracket_2_plus_3_mul_4_(self):
+        """
+                *
+             /     \
+            (       4
+            |
+            +
+          /   \
+        2      3
+        :return:
+        """
+        self.context.addPrefixOperator('(', 0)
+        self.context.addOperator(')', 0)
+        parser = Parser('( 2 + 3 ) * 4', [self.context])
+        self.context.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('*', token.id)
+        self.assertEqual('(', token.data[0].id)
+        self.assertEqual('+', token.data[0].data[0].id)
+        self.assertEqual('(literal)', token.data[0].data[0].data[0].id)
+        self.assertEqual('(literal)', token.data[0].data[0].data[1].id)
+        self.assertEqual('(literal)', token.data[1].id)
+        self.assertEqual(2, token.data[0].data[0].data[0].data[0])
+        self.assertEqual(3, token.data[0].data[0].data[1].data[0])
+        self.assertEqual(4, token.data[1].data[0])
 
 if __name__ == '__main__':
     unittest.main()

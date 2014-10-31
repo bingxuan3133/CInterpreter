@@ -33,6 +33,13 @@ class Context:
         else:
             return self.symbolTable[id]
 
+    def addOperator(self, id, bindingPower = 0):
+        symClass = self.symbol(id)
+        symClass.bindingPower = bindingPower
+        #symClass.nud = self.nud
+        symClass.led = led
+        return symClass
+
     def addInfixOperator(self, id, bindingPower = 0):
         """
         Add Infix operator into symbol table
@@ -49,6 +56,19 @@ class Context:
             return self
         symClass = self.symbol(id)
         symClass.arity = self.BINARY
+        symClass.bindingPower = bindingPower
+        #symClass.nud = self.nud
+        symClass.led = led
+        return symClass
+
+    def addPostfixOperator(self, id, bindingPower = 0):
+        thisContext = self
+        def led(self, leftToken):
+            self.data.append(leftToken)
+            thisContext.parser.lexer.advance()
+            return self
+        symClass = self.symbol(id)
+        symClass.arity = self.POSTFIX_UNARY
         symClass.bindingPower = bindingPower
         #symClass.nud = self.nud
         symClass.led = led
