@@ -44,12 +44,12 @@ class Context:
         :return:
         """
         thisContext = self
+        #def nud(self):
+        #    return self
         def led(self, leftToken):
             self.data.append(leftToken)
             returnedToken = thisContext.parser.parse(self.bindingPower)
             self.data.append(returnedToken)
-            return self
-        def nud(self):
             return self
         symClass = self.symbol(id)
         symClass.arity = self.BINARY
@@ -59,10 +59,26 @@ class Context:
         return symClass
 
     def addPrefixOperator(self, id, bindingPower = 0):
+        thisContext = self
+        def nud(self):
+            returnedToken = thisContext.parser.parse(self.bindingPower)
+            self.data.append(returnedToken)
+            return self
         symClass = self.symbol(id)
         symClass.arity = self.PREFIX_UNARY
         symClass.bindingPower = bindingPower
+        symClass.nud = nud
         return symClass
+
+    def addPrefixInfixOperator(self, id, infixBindingPower = 0):
+        thisContext = self
+        def nud(self):
+            returnedToken = thisContext.parser.parse(self.prefixBindingPower)
+            self.data.append(returnedToken)
+            return self
+        sym = self.addInfixOperator(id, infixBindingPower)
+        sym.prefixBindingPower = 120
+        sym.nud = nud
 
 
     def prefixNud(self):
