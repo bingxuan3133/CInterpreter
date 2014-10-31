@@ -20,14 +20,12 @@ class Parser:
             return token  # number token: come in first time, else operator token: after rolling in the while loop
     """
     def parse(self, bindingPower):
-        token = self.lexer.advance()        # token = leftToken
-        token2 = self.lexer.peepAHead()     # token2 = rightToken
+        token = self.lexer.peep()        # token = leftToken
         token = token.nud()
-        token2 = self.lexer.peepAHead()
+        token2 = self.lexer.peep()     # token2 = rightToken
         while bindingPower < token2.bindingPower:  # left < right
-            token2 = self.lexer.advance()
             token = token2.led(token)
-            token2 = self.lexer.peepAHead()
+            token2 = self.lexer.peep()
         return token  # number token: come in first time, else operator token: after rolling in the while loop
 
 """

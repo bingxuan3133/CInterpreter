@@ -7,9 +7,6 @@ class SymbolBase:
     def nud(self):
         raise SyntaxError('No nud(.) function defined!')
 
-def nud(self):
-    return self
-
 class Context:
     PREFIX_UNARY = 1
     POSTFIX_UNARY = 2
@@ -44,23 +41,23 @@ class Context:
         :return:
         """
         thisContext = self
-        #def nud(self):
-        #    return self
         def led(self, leftToken):
             self.data.append(leftToken)
+            thisContext.parser.lexer.advance()
             returnedToken = thisContext.parser.parse(self.bindingPower)
             self.data.append(returnedToken)
             return self
         symClass = self.symbol(id)
         symClass.arity = self.BINARY
         symClass.bindingPower = bindingPower
-        symClass.nud = nud
+        #symClass.nud = self.nud
         symClass.led = led
         return symClass
 
     def addPrefixOperator(self, id, bindingPower = 0):
         thisContext = self
         def nud(self):
+            thisContext.parser.lexer.advance()
             returnedToken = thisContext.parser.parse(self.bindingPower)
             self.data.append(returnedToken)
             return self
@@ -73,6 +70,7 @@ class Context:
     def addPrefixInfixOperator(self, id, infixBindingPower = 0):
         thisContext = self
         def nud(self):
+            thisContext.parser.lexer.advance()
             returnedToken = thisContext.parser.parse(self.prefixBindingPower)
             self.data.append(returnedToken)
             return self
@@ -88,6 +86,10 @@ class Context:
         return self
 
     def createLiteral(self, value):
+        thisContext = self
+        def nud(self):
+            thisContext.parser.lexer.advance()
+            return self
         sym = self.symbol('(literal)')
         sym.arity = None
         sym.__repr__ = revealSelf
@@ -97,6 +99,10 @@ class Context:
         return symObj
 
     def createIdentifier(self, value):
+        thisContext = self
+        def nud(self):
+            thisContext.parser.lexer.advance()
+            return self
         sym = self.symbol('(identifier)')
         sym.content = None
         sym.arity = None
@@ -108,6 +114,10 @@ class Context:
         return symObj
 
     def createSystemToken(self, value):
+        thisContext = self
+        def nud(self):
+            thisContext.parser.lexer.advance()
+            return self
         sym = self.symbol('(systemToken)')
         sym.arity = None
         sym.__repr__ = revealSelf

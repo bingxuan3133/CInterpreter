@@ -5,13 +5,12 @@ class Lexer:
         self.lists = []
         self.string = string
         self.contexts = contexts
-        self.nextValue = None
         self.wordGenerator = self.createWordGenerator()
         if string is not None:
             statements = string.split('\n')
             for statement in statements:
                 self.lists.append(statement.split())
-        #self.currentToken = self.advance()
+        self.currentToken = self.advance()
 
     def setContext(self, contexts):
         self.contexts = contexts
@@ -23,15 +22,14 @@ class Lexer:
         while True:
             yield None
 
-    """
-        def advance(self):
-            self.currentToken = self.contexts[0].createToken(next(self.wordGenerator))
-            return self.currentToken
+    def advance(self):
+        self.currentToken = self.contexts[0].createToken(next(self.wordGenerator))
+        return self.currentToken
 
-        def peep(self):
-            return self.currentToken
-    """
+    def peep(self):
+        return self.currentToken
 
+    """
     def advance(self):
         if self.nextValue is not None:
             self.lastValue = self.nextValue
@@ -45,7 +43,7 @@ class Lexer:
         if self.nextValue is None:
             self.nextValue = next(self.wordGenerator)
         return self.contexts[0].createToken(self.nextValue)
-
+    """
     """
     for context in self.contexts:
         token = context.createToken(word)
