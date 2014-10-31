@@ -153,6 +153,9 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(5, token.data[1].data[0])
 
 
+    """
+        The following test consisted prefix operator
+    """
     def test_parse_negation_2_plus_3(self):
         """
                 +
@@ -185,7 +188,7 @@ class MyTestCase(unittest.TestCase):
         :return:
         """
         context = Context()
-        context.addPrefixOperator('-',120)
+        context.addInfixPrefixOperator('-', 70)
         context.addInfixOperator('+', 70)
 
         parser = Parser('- 2 + 3 ', [context])
@@ -207,7 +210,7 @@ class MyTestCase(unittest.TestCase):
         :return:
         """
         context = Context()
-        context.addPrefixOperator('-',120)
+        context.addInfixPrefixOperator('-', 70)
         context.addInfixOperator('+', 70)
 
         parser = Parser(' 2 + - 3 ', [context])
@@ -259,6 +262,26 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual('-', token.data[0].id)
         self.assertEqual( 3 , token.data[1].data[0])
         self.assertEqual( 2 , token.data[0].data[0].data[0])
+
+    def test_parse_2_plus_not_3(self):
+        """
+                +
+              /   \
+             2     !
+                    \
+                     3
+        :return:
+        """
+        context = Context()
+        context.addPrefixOperator('!',120)
+        context.addInfixPrefixOperator('+', 70)
+        parser = Parser(' 2 + ! 3 ', [context])
+        context.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('+', token.id)
+        self.assertEqual(2, token.data[0].data[0])
+        self.assertEqual( '!' , token.data[1].id)
+        self.assertEqual( 3 , token.data[1].data[0].data[0])
 
 
 if __name__ == '__main__':
