@@ -266,7 +266,7 @@ class TestParsePrefixGroup(unittest.TestCase):
         self.context.addPostfixOperator('++', 150)
         self.context.addPrefixOperator('--', 120)
 
-    def test_parse_bracket_2_plus_3_mul_4_(self):
+    def test_parse_bracket_2_plus_3_mul_4(self):
         """
                 *
              /     \
@@ -277,8 +277,8 @@ class TestParsePrefixGroup(unittest.TestCase):
         2      3
         :return:
         """
-        self.context.addPrefixOperator('(', 0)
-        self.context.addOperator(')', 0)
+        self.context.addPrefixGroupOperator('(', 0)
+        #self.context.addPrefixGroupOperator(')', 0)
         parser = Parser('( 2 + 3 ) * 4', [self.context])
         self.context.setParser(parser)
         token = parser.parse(0)
@@ -291,6 +291,56 @@ class TestParsePrefixGroup(unittest.TestCase):
         self.assertEqual(2, token.data[0].data[0].data[0].data[0])
         self.assertEqual(3, token.data[0].data[0].data[1].data[0])
         self.assertEqual(4, token.data[1].data[0])
+
+    def test_parse_2_mul_bracket_3_plus_4(self):
+        """
+            *
+         /     \
+        2       (
+                |
+                +
+              /   \
+            3      4
+        :return:
+        """
+        self.context.addPrefixGroupOperator('(', 0)
+        #self.context.addPrefixGroupOperator(')', 0)
+        parser = Parser('2 * ( 3 + 4 )', [self.context])
+        self.context.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('*', token.id)
+        self.assertEqual('(', token.data[1].id)
+        self.assertEqual('+', token.data[1].data[0].id)
+        self.assertEqual('(literal)', token.data[1].data[0].data[0].id)
+        self.assertEqual('(literal)', token.data[1].data[0].data[1].id)
+        self.assertEqual('(literal)', token.data[0].id)
+        self.assertEqual(2, token.data[0].data[0])
+        self.assertEqual(3, token.data[1].data[0].data[0].data[0])
+        self.assertEqual(4, token.data[1].data[0].data[1].data[0])
+
+    def test_parse_neg_bracket_3_plus_4_(self):
+        """
+            -
+            |
+            (
+            |
+            +
+          /   \
+        3      4
+        :return:
+        """
+        self.context.addPrefixGroupOperator('(', 0)
+        #self.context.addPrefixGroupOperator(')', 0)
+        parser = Parser('- ( 3 + 4 )', [self.context])
+        self.context.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('-', token.id)
+        self.assertEqual('(', token.data[0].id)
+        self.assertEqual('+', token.data[0].data[0].id)
+        self.assertEqual('(literal)', token.data[0].data[0].data[0].id)
+        self.assertEqual('(literal)', token.data[0].data[0].data[1].id)
+        self.assertEqual(3, token.data[0].data[0].data[0].data[0])
+        self.assertEqual(4, token.data[0].data[0].data[1].data[0])
 
 if __name__ == '__main__':
     unittest.main()

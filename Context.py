@@ -33,10 +33,10 @@ class Context:
         else:
             return self.symbolTable[id]
 
-    def addOperator(self, id, bindingPower = 0):
+    def addOperator(self, id, bindingPower, nud, led):
         symClass = self.symbol(id)
         symClass.bindingPower = bindingPower
-        #symClass.nud = self.nud
+        symClass.nud = nud
         symClass.led = led
         return symClass
 
@@ -56,19 +56,6 @@ class Context:
             return self
         symClass = self.symbol(id)
         symClass.arity = self.BINARY
-        symClass.bindingPower = bindingPower
-        #symClass.nud = self.nud
-        symClass.led = led
-        return symClass
-
-    def addPostfixOperator(self, id, bindingPower = 0):
-        thisContext = self
-        def led(self, leftToken):
-            self.data.append(leftToken)
-            thisContext.parser.lexer.advance()
-            return self
-        symClass = self.symbol(id)
-        symClass.arity = self.POSTFIX_UNARY
         symClass.bindingPower = bindingPower
         #symClass.nud = self.nud
         symClass.led = led
@@ -98,6 +85,33 @@ class Context:
         sym.prefixBindingPower = 120
         sym.nud = nud
 
+    def addPostfixOperator(self, id, bindingPower = 0):
+        thisContext = self
+        def led(self, leftToken):
+            self.data.append(leftToken)
+            thisContext.parser.lexer.advance()
+            return self
+        symClass = self.symbol(id)
+        symClass.arity = self.POSTFIX_UNARY
+        symClass.bindingPower = bindingPower
+        #symClass.nud = self.nud
+        symClass.led = led
+        return symClass
+
+    def addPrefixGroupOperator(self, id, bindingPower = 0):
+        thisContext = self
+        def nud(self):
+            thisContext.parser.lexer.advance()
+            returnedToken = thisContext.parser.parse(self.bindingPower)
+            self.data.append(returnedToken)
+            if thisContext.parser.lexer.peep().id == ')':
+                thisContext.parser.lexer.advance()
+            return self
+        def led(self, leftToken):
+            thisContext.parser.lexer.advance()
+            return self
+        sym = self.addOperator(id, bindingPower, nud, led)
+        return sym
 
     def prefixNud(self):
         pass

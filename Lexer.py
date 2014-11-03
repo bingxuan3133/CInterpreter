@@ -11,6 +11,10 @@ class Lexer:
             for statement in statements:
                 self.lists.append(statement.split())
         self.currentToken = self.advance()
+        self.__repr__ = self.revealSelf
+
+    def revealSelf(self):
+        return '{0}'.format(self.currentToken)
 
     def setContext(self, contexts):
         self.contexts = contexts
