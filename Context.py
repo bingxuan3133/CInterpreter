@@ -1,11 +1,13 @@
 def revealSelf(self):
     return '{0} {1}'.format(self.id, self.data)
 
+
 class SymbolBase:
     def led(self):
         raise SyntaxError('No led(.) function defined!')
     def nud(self):
         raise SyntaxError('No nud(.) function defined!')
+
 
 class Context:
     PREFIX_UNARY = 1
@@ -50,7 +52,6 @@ class Context:
         symClass.nud = nud
         symClass.led = led
         return symClass
-
 
     def addPostfixOperator(self, id, bindingPower = 0):
         thisContext = self

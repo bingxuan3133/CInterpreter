@@ -1,6 +1,6 @@
 # Pratt's parser implementation
 from Lexer import *
-from Context import *
+
 
 class Parser:
     def __init__(self, statement, contexts):
@@ -16,6 +16,3 @@ class Parser:
             token = token2.led(token)
             token2 = self.lexer.peep()
         return token  # number token: come in first time, else operator token: after rolling in the while loop
-
-
-
