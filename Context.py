@@ -169,10 +169,11 @@ class Context:
                 nextToken = thisContext.parser.lexer.advance()
             while(nextToken.id != '}'):
                 returnedToken = thisContext.parser.parse(self.bindingPower)
+                self.data.append(returnedToken)
                 nextToken = thisContext.parser.lexer.advance()
 
             thisContext.parser.lexer.advance()
-            self.data.append(returnedToken)
+
             return self
 
         symClass.nud = nud

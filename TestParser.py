@@ -380,7 +380,7 @@ class TestBraces(unittest.TestCase):
         context.setParser(parser)
         token = parser.parse(0)
         self.assertEqual('{', token.id)
-        self.assertEqual([None], token.data)
+        self.assertEqual([], token.data)
 
     def test_parse_will_identify_the_semicolon_in_the_braces(self):
         """
@@ -429,6 +429,38 @@ class TestBraces(unittest.TestCase):
         self.assertEqual('+', token.data[0].id)
         self.assertEqual(2, token.data[0].data[0].data[0])
         self.assertEqual(3, token.data[0].data[1].data[0])
+
+    def test_parse_will_build_an_ast_for_expressions_in_the_brace(self):
+        """
+                {           -   /
+            /       \        /     \
+            +       *       5       9
+          /   \    /    \
+         2     3  3     4
+        :return:
+        """
+        context = Context()
+        context.addExpression('{', 0)
+        context.addInfixPrefixOperator('+', 70)
+        context.addInfixOperator('*', 100)
+        context.addInfixOperator('/', 100)
+        #context.addExpression('}',0)
+        parser = Parser('{ 2 + 3 ; \
+                        3 * 4 ; \
+                        5 / 9 ; \
+                        } ', [context])
+        context.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('{', token.id)
+        self.assertEqual('+', token.data[0].id)
+        self.assertEqual(2, token.data[0].data[0].data[0])
+        self.assertEqual(3, token.data[0].data[1].data[0])
+        self.assertEqual('*', token.data[1].id)
+        self.assertEqual(3, token.data[1].data[0].data[0])
+        self.assertEqual(4, token.data[1].data[1].data[0])
+        self.assertEqual('/', token.data[2].id)
+        self.assertEqual(5, token.data[2].data[0].data[0])
+        self.assertEqual(9, token.data[2].data[1].data[0])
 
     def test_parse_will_build_an_AST_for_longer_expression_in_the_brace(self):
         """
@@ -517,6 +549,29 @@ class TestBraces(unittest.TestCase):
         self.assertEqual('(literal)', token.data[0].data[0].data[1].id)
         self.assertEqual(3, token.data[0].data[0].data[0].data[0])
         self.assertEqual(4, token.data[0].data[0].data[1].data[0])
+
+
+class TestFlowControl(unittest.TestCase):
+
+    def xtest_parse_will_build_an_if_AST(self):
+        """
+                if
+            /       \
+           ==       {
+          / \
+        2    3
+        :return:
+        """
+        context = Context()
+        #context.addExpression('}',0)
+        parser = Parser('if ( 2 == 3 ) {} ', [context])
+        context.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('if', token.id)
+        self.assertEqual('==', token.data[0].id)
+        self.assertEqual(2, token.data[0].data[0].data[0])
+        self.assertEqual(3, token.data[0].data[1].data[0])
+        self.assertEqual('{', token.data[1].id)
 
 if __name__ == '__main__':
     unittest.main()
