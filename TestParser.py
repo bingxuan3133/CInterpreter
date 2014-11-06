@@ -368,6 +368,10 @@ class TestPostfix(unittest.TestCase):
 
 class TestBraces(unittest.TestCase):
     def test_parse_will_identify_the_braces(self):
+        """
+            {
+        :return:
+        """
         context = Context()
         context.addExpression('{', 0)
         context.addExpression('}', 0)
@@ -379,6 +383,10 @@ class TestBraces(unittest.TestCase):
         self.assertEqual([None], token.data)
 
     def test_parse_will_identify_the_semicolon_in_the_braces(self):
+        """
+            {
+        :return:
+        """
         context = Context()
         context.addExpression('{', 0)
         #context.addExpression('}',0)
@@ -388,6 +396,10 @@ class TestBraces(unittest.TestCase):
         self.assertEqual('{', token.id)
 
     def test_parse_will_point_to_the_next_location_after_finished_parse(self):
+        """
+            {
+        :return:
+        """
         context = Context()
         context.addExpression('{', 0)
         #context.addExpression('}',0)
@@ -398,6 +410,14 @@ class TestBraces(unittest.TestCase):
         self.assertEqual('(end)', parser.lexer.peep().data[0])
 
     def test_parse_will_build_an_ast_for_expression_in_the_brace(self):
+        """
+            {
+            |
+            +
+          /   \
+         2     3
+        :return:
+        """
         context = Context()
         context.addExpression('{', 0)
         context.addInfixPrefixOperator('+', 70)
@@ -411,6 +431,18 @@ class TestBraces(unittest.TestCase):
         self.assertEqual(3, token.data[0].data[1].data[0])
 
     def test_parse_will_build_an_AST_for_longer_expression_in_the_brace(self):
+        """
+            {
+            |
+            +
+          /   \
+         2     /
+             /  \
+            *   9
+          /  \
+         3    8
+        :return:
+        """
         context = Context()
         context.addExpression('{', 0)
         context.addInfixOperator('*', 100)
@@ -428,6 +460,63 @@ class TestBraces(unittest.TestCase):
         self.assertEqual(3, token.data[0].data[1].data[0].data[0].data[0])
         self.assertEqual(8, token.data[0].data[1].data[0].data[1].data[0])
         self.assertEqual(9, token.data[0].data[1].data[1].data[0])
+
+    def test_parse_2_mul_bracket_3_plus_4(self):
+        """
+            *
+         /     \
+        2       (
+                |
+               +
+              /   \
+            3      4
+        :return:
+        """
+        context = Context()
+        context.addPrefixGroupOperator('(', 0)
+        context.addInfixOperator('*', 100)
+        context.addInfixPrefixOperator('+', 70)
+        #self.context.addPrefixGroupOperator(')', 0)
+        parser = Parser('2 * ( 3 + 4 )', [context])
+        context.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('*', token.id)
+        self.assertEqual('(', token.data[1].id)
+        self.assertEqual('+', token.data[1].data[0].id)
+        self.assertEqual('(literal)', token.data[1].data[0].data[0].id)
+        self.assertEqual('(literal)', token.data[1].data[0].data[1].id)
+        self.assertEqual('(literal)', token.data[0].id)
+        self.assertEqual(2, token.data[0].data[0])
+        self.assertEqual(3, token.data[1].data[0].data[0].data[0])
+        self.assertEqual(4, token.data[1].data[0].data[1].data[0])
+
+    def test_parse_neg_bracket_3_plus_4_(self):
+        """
+            -
+            |
+            (
+            |
+            +
+          /   \
+        3      4
+        :return:
+        """
+        context = Context()
+        context.addPrefixGroupOperator('(', 0)
+        context.addInfixPrefixOperator('-', 70)
+        context.addInfixPrefixOperator('+', 70)
+
+        #self.context.addPrefixGroupOperator(')', 0)
+        parser = Parser('- ( 3 + 4 )', [context])
+        context.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('-', token.id)
+        self.assertEqual('(', token.data[0].id)
+        self.assertEqual('+', token.data[0].data[0].id)
+        self.assertEqual('(literal)', token.data[0].data[0].data[0].id)
+        self.assertEqual('(literal)', token.data[0].data[0].data[1].id)
+        self.assertEqual(3, token.data[0].data[0].data[0].data[0])
+        self.assertEqual(4, token.data[0].data[0].data[1].data[0])
 
 if __name__ == '__main__':
     unittest.main()

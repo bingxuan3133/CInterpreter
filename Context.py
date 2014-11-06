@@ -178,3 +178,22 @@ class Context:
         symClass.nud = nud
         symClass.led = led
         return symClass
+
+
+#new added information , delete it any failure
+    def addPrefixGroupOperator(self, id, bindingPower = 0): #for bracket ( and )
+        thisContext = self
+        def nud(self):
+            thisContext.parser.lexer.advance()
+            returnedToken = thisContext.parser.parse(self.bindingPower)
+            self.data.append(returnedToken)
+            if thisContext.parser.lexer.peep().id == ')':
+                thisContext.parser.lexer.advance()
+            return self
+        def led(self, leftToken):
+            thisContext.parser.lexer.advance()
+            return self
+        symClass = self.symbol(id,bindingPower)
+        symClass.nud = nud
+        symClass.led = led
+        return symClass
