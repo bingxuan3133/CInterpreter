@@ -32,7 +32,7 @@ class Context:
             return symClass
         else:
             return self.symbolTable[id]
-
+#The following function is to add the relevant function into the context for
     def addInfixOperator(self, id, bindingPower = 0):
         thisContext = self
         def led(self, leftToken):
@@ -45,9 +45,8 @@ class Context:
             thisContext.parser.lexer.advance()
             return self
 
-        symClass = self.symbol(id)
+        symClass = self.symbol(id, bindingPower)
         symClass.arity = self.BINARY
-        symClass.bindingPower = bindingPower
         symClass.nud = nud
         symClass.led = led
         return symClass
@@ -63,18 +62,16 @@ class Context:
             thisContext.parser.lexer.advance()
             return self
 
-        symClass = self.symbol(id)
+        symClass = self.symbol(id,bindingPower)
         symClass.arity = self.POSTFIX_UNARY
-        symClass.bindingPower = bindingPower
         symClass.nud = nud
         symClass.led = led
         return symClass
 
     def addPrefixOperator(self, id, bindingPower = 0):
         thisContext = self
-        symClass = self.symbol(id)
+        symClass = self.symbol(id,bindingPower)
         symClass.arity = self.PREFIX_UNARY
-        symClass.bindingPower = bindingPower
         def led(self):
             return self
 
@@ -101,6 +98,8 @@ class Context:
         symClass.nud = nud
         return symClass
 
+
+#The following function is used to create a token when createToken() is been called.
     def createLiteral(self, value):
         thisContext = self
         def nud(self):
@@ -139,6 +138,7 @@ class Context:
         symObj.data.append(value)
         return symObj
 
+#This function is use to determine which function should be used to create a token.
     def createToken(self, word):
         if word is None:
             return self.createSystemToken('(end)')
@@ -152,3 +152,28 @@ class Context:
                 return symClass()
             else:
                 raise SyntaxError('Syntax error: \'{0}\' is an unknown token'.format(word))
+
+
+#The following function is use in expression context.
+    def addExpression(self,id,bindingPower = 0 ):
+        thisContext = self
+        symClass = self.symbol(id,bindingPower)
+        def led(self):
+            return self
+
+        def nud(self):
+            returnedToken =None
+            nextToken = thisContext.parser.lexer.advance()
+            if(nextToken.id== ';'):
+                nextToken = thisContext.parser.lexer.advance()
+            while(nextToken.id != '}'):
+                returnedToken = thisContext.parser.parse(self.bindingPower)
+                nextToken = thisContext.parser.lexer.advance()
+
+            thisContext.parser.lexer.advance()
+            self.data.append(returnedToken)
+            return self
+
+        symClass.nud = nud
+        symClass.led = led
+        return symClass

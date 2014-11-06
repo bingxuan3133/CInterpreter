@@ -17,14 +17,5 @@ class Parser:
             token2 = self.lexer.peep()
         return token  # number token: come in first time, else operator token: after rolling in the while loop
 
-"""
-        if(token2.bindingPower > bindingPower):  # right bindingPower is greater
 
-        else:  # left bindingPower is greater or equal
-            token.led(token)
-            token2.led(token)
-"""
-"""
-        token2.data.append(token)
-        token2.data.append(token3)
-"""
+

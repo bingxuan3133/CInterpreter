@@ -23,8 +23,11 @@ class Lexer:
         while True:
             yield None
 
-    def advance(self):
+    def advance(self,expectedSymbol = None):
         self.currentToken = self.contexts[0].createToken(next(self.wordGenerator))
+        if expectedSymbol is not None:
+            if self.currentToken.id != expectedSymbol:
+                 raise SyntaxError('Expected '+ expectedSymbol + ' but is ' + self.currentToken.id)
         return self.currentToken
 
     def peep(self):
