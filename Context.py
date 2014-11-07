@@ -1,7 +1,7 @@
 def revealSelf(self):
     return '{0} {1}'.format(self.id, self.data)
 
-
+	
 class SymbolBase:
     def led(self):
         raise SyntaxError('No led(.) function defined!')
@@ -34,7 +34,7 @@ class Context:
             return symClass
         else:
             return self.symbolTable[id]
-#The following function is to add the relevant function into the context for
+    #The following function is to add the relevant function into the context for
     def addInfixOperator(self, id, bindingPower = 0):
         thisContext = self
         def led(self, leftToken):
@@ -100,7 +100,7 @@ class Context:
         return symClass
 
 
-#The following function is used to create a token when createToken() is been called.
+    #The following function is used to create a token when createToken() is been called.
     def createLiteral(self, value):
         thisContext = self
         def nud(self):
@@ -139,23 +139,22 @@ class Context:
         symObj.data.append(value)
         return symObj
 
-#This function is use to determine which function should be used to create a token.
+    #This function is use to determine which function should be used to create a token.
     def createToken(self, word):
         if word is None:
             return self.createSystemToken('(end)')
+        symClass = self.symbol(word)
+
+        if word.isnumeric():
+            return self.createLiteral(word)
+        elif symClass is not None:
+            return symClass()
+        elif symClass is None:
+            raise SyntaxError('Syntax error: \'{0}\' is an unknown token'.format(word))
         elif word.isidentifier():
             return self.createIdentifier(word)
-        elif word.isnumeric():
-            return self.createLiteral(word)
-        else:
-            symClass = self.symbol(word)
-            if symClass is not None:
-                return symClass()
-            else:
-                raise SyntaxError('Syntax error: \'{0}\' is an unknown token'.format(word))
 
-
-#The following function is use in expression context.
+    #The following function is use in expression context.
     def addExpression(self,id,bindingPower = 0 ):
         thisContext = self
         symClass = self.symbol(id,bindingPower)
@@ -173,15 +172,12 @@ class Context:
                 nextToken = thisContext.parser.lexer.advance()
 
             thisContext.parser.lexer.advance()
-
             return self
 
         symClass.nud = nud
         symClass.led = led
         return symClass
 
-
-#new added information , delete it any failure
     def addPrefixGroupOperator(self, id, bindingPower = 0): #for bracket ( and )
         thisContext = self
         def nud(self):
@@ -195,6 +191,30 @@ class Context:
             thisContext.parser.lexer.advance()
             return self
         symClass = self.symbol(id,bindingPower)
+        symClass.nud = nud
+        symClass.led = led
+        return symClass
+
+    #The following is use for flow control
+    def addControl(self,id,bindingPower=0):
+        thisContext = self
+        def nud(self):
+            thisContext.parser.lexer.advance('(')
+            thisContext.parser.lexer.advance()
+            returnedToken = thisContext.parser.parse(bindingPower)
+            self.data.append(returnedToken)
+            thisContext.parser.lexer.advance('{')
+            returnedToken = thisContext.parser.parse(bindingPower)
+            self.data.append(returnedToken)
+            returnedToken = thisContext.parser.lexer.peep()
+            if (returnedToken.id == 'else'):
+                thisContext.parser.lexer.advance('{')
+                returnedToken.data.append(thisContext.parser.parse(bindingPower))
+                self.data.append(returnedToken)
+            return self
+        def led(self, leftToken):
+            return self
+        symClass = self.symbol(id, bindingPower)
         symClass.nud = nud
         symClass.led = led
         return symClass

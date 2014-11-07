@@ -553,7 +553,7 @@ class TestBraces(unittest.TestCase):
 
 class TestFlowControl(unittest.TestCase):
 
-    def xtest_parse_will_build_an_if_AST(self):
+    def test_parse_will_build_an_if_AST(self):
         """
                 if
             /       \
@@ -564,7 +564,10 @@ class TestFlowControl(unittest.TestCase):
         """
         context = Context()
         #context.addExpression('}',0)
-        parser = Parser('if ( 2 == 3 ) {} ', [context])
+        context.addControl('if', 0)
+        context.addInfixOperator('==', 20)
+        context.addExpression('{', 0)
+        parser = Parser('if ( 2 == 3 ) { } ', [context])
         context.setParser(parser)
         token = parser.parse(0)
         self.assertEqual('if', token.id)
@@ -572,6 +575,33 @@ class TestFlowControl(unittest.TestCase):
         self.assertEqual(2, token.data[0].data[0].data[0])
         self.assertEqual(3, token.data[0].data[1].data[0])
         self.assertEqual('{', token.data[1].id)
+
+    def test_parse_will_build_an_if_else_AST(self):
+        """
+                if
+            /       \
+           ==       {
+          / \
+        2    3
+        :return:
+        """
+        context = Context()
+        #context.addExpression('}',0)
+        context.addControl('if', 0)
+        context.addInfixOperator('==', 20)
+        context.addExpression('{', 0)
+        parser = Parser('if ( 2 == 3 ) { }\
+                        else { } ', [context])
+        context.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('if', token.id)
+        self.assertEqual('==', token.data[0].id)
+        self.assertEqual(2, token.data[0].data[0].data[0])
+        self.assertEqual(3, token.data[0].data[1].data[0])
+        self.assertEqual('{', token.data[1].id)
+        self.assertEqual('else', token.data[2].id)
+        self.assertEqual('{', token.data[2].data[0].id)
+
 
 if __name__ == '__main__':
     unittest.main()
