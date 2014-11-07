@@ -1,10 +1,11 @@
 import unittest
 from Context import *
+from ExpressionContext import *
 from Parser import *
 
 class TestParseInfix(unittest.TestCase):
     def setUp(self):
-        self.context = Context()
+        self.context = ExpressionContext()
         self.context.addInfixOperator('*', 100)
         self.context.addPrefixInfixOperator('+', 70)
         self.context.addPrefixInfixOperator('-', 70)
@@ -139,7 +140,7 @@ class TestParseInfix(unittest.TestCase):
 
 class TestParsePrefix(unittest.TestCase):
     def setUp(self):
-        self.context = Context()
+        self.context = ExpressionContext()
         self.context.addInfixOperator('*', 100)
         self.context.addPrefixInfixOperator('+', 70)
         self.context.addPrefixInfixOperator('-', 70)
@@ -259,7 +260,7 @@ class TestParsePrefix(unittest.TestCase):
 
 class TestParsePrefixGroup(unittest.TestCase):
     def setUp(self):
-        self.context = Context()
+        self.context = ExpressionContext()
         self.context.addInfixOperator('*', 100)
         self.context.addPrefixInfixOperator('+', 70)
         self.context.addPrefixInfixOperator('-', 70)
@@ -278,7 +279,7 @@ class TestParsePrefixGroup(unittest.TestCase):
         :return:
         """
         self.context.addPrefixGroupOperator('(', 0)
-        #self.context.addPrefixGroupOperator(')', 0)
+        self.context.addPrefixGroupOperator(')', 0)
         parser = Parser('( 2 + 3 ) * 4', [self.context])
         self.context.setParser(parser)
         token = parser.parse(0)
@@ -304,7 +305,7 @@ class TestParsePrefixGroup(unittest.TestCase):
         :return:
         """
         self.context.addPrefixGroupOperator('(', 0)
-        #self.context.addPrefixGroupOperator(')', 0)
+        self.context.addPrefixGroupOperator(')', 0)
         parser = Parser('2 * ( 3 + 4 )', [self.context])
         self.context.setParser(parser)
         token = parser.parse(0)
@@ -330,7 +331,7 @@ class TestParsePrefixGroup(unittest.TestCase):
         :return:
         """
         self.context.addPrefixGroupOperator('(', 0)
-        #self.context.addPrefixGroupOperator(')', 0)
+        self.context.addPrefixGroupOperator(')', 0)
         parser = Parser('- ( 3 + 4 )', [self.context])
         self.context.setParser(parser)
         token = parser.parse(0)
@@ -341,6 +342,17 @@ class TestParsePrefixGroup(unittest.TestCase):
         self.assertEqual('(literal)', token.data[0].data[0].data[1].id)
         self.assertEqual(3, token.data[0].data[0].data[0].data[0])
         self.assertEqual(4, token.data[0].data[0].data[1].data[0])
+
+    def test_parse_an_empty_bracket_should_raise_an_error(self):
+        """
+            (
+        :return:
+        """
+        self.context.addPrefixGroupOperator('(', 0)
+        self.context.addPrefixGroupOperator(')', 0)
+        parser = Parser('( )', [self.context])
+        self.context.setParser(parser)
+        self.assertRaises(SyntaxError, parser.parse, 0)
 
 if __name__ == '__main__':
     unittest.main()

@@ -26,31 +26,17 @@ class Lexer:
         while True:
             yield None
 
-    def advance(self):
-        self.currentToken = self.contexts[0].createToken(next(self.wordGenerator))
+    def advance(self, expectedSymbol = None):
+        nextWord = next(self.wordGenerator)
+        for context in self.contexts:
+            self.currentToken = context.createToken(nextWord)
+            if self.currentToken != SyntaxError:
+                break
+        if expectedSymbol is not None and self.currentToken.id != expectedSymbol:
+            raise SyntaxError('Expected ' + expectedSymbol + ' but is ' + self.currentToken.id)
         return self.currentToken
 
-    def peep(self):
+    def peep(self, expectedSymbol = None):
+        if expectedSymbol is not None and self.currentToken.id != expectedSymbol:
+            raise SyntaxError('Expected ' + expectedSymbol + ' but is ' + self.currentToken.id)
         return self.currentToken
-
-    """
-    def advance(self):
-        if self.nextValue is not None:
-            self.lastValue = self.nextValue
-            self.nextValue = None
-        else:
-            self.lastValue = next(self.wordGenerator)
-        token = self.contexts[0].createToken(self.lastValue)
-        return token
-
-    def peepAHead(self):
-        if self.nextValue is None:
-            self.nextValue = next(self.wordGenerator)
-        return self.contexts[0].createToken(self.nextValue)
-    """
-    """
-    for context in self.contexts:
-        token = context.createToken(word)
-        if(token != SyntaxError):
-            break
-    """
