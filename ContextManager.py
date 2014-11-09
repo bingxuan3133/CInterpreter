@@ -4,6 +4,9 @@ class ContextManager:
         self.currentContexts = []
         self.contextsStack = []
 
+    def setParser(self, parser):
+        self.parser = parser
+
     def addContext(self, contextName, context):
         if context not in self.contexts:
             self.contexts[contextName] = context

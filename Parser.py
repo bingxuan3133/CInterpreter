@@ -3,10 +3,11 @@ from Lexer import *
 from Context import *
 
 class Parser:
-    def __init__(self, statement, contexts):
-        self.lexer = Lexer(statement, contexts)
-        self.contexts = contexts
-        self.lexer.setContext(self.contexts)
+    def __init__(self, lexer, contexts):
+        self.lexer = lexer
+        #self.lexer = Lexer(statement, contexts)
+        #self.contexts = contexts
+        #self.lexer.setContext(self.contexts)
 
     def parse(self, bindingPower):
         token = self.lexer.peep()        # token = leftToken

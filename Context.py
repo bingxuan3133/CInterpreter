@@ -1,3 +1,5 @@
+from ContextManager import *
+
 def revealSelf(self):
     return '{0} {1}'.format(self.id, self.data)
 
@@ -12,11 +14,9 @@ class Context:
     POSTFIX_UNARY = 2
     BINARY = 3
 
-    def __init__(self):
+    def __init__(self, contextManager):
         self.symbolTable = {}
-
-    def setParser(self, parser):
-        self.parser = parser
+        self.contextManager = contextManager
 
     def symbol(self, id, bindingPower = 0, Type = True):
         if id not in self.symbolTable:
@@ -44,7 +44,7 @@ class Context:
     def createLiteral(self, value):
         thisContext = self
         def nud(self):
-            token = thisContext.parser.lexer.advance()
+            token = thisContext.contextManager.parser.lexer.advance()
             return self
         sym = self.symbol('(literal)')
         sym.arity = None
@@ -57,7 +57,7 @@ class Context:
     def createIdentifier(self, value):
         thisContext = self
         def nud(self):
-            thisContext.parser.lexer.advance()
+            thisContext.contextManager.parser.lexer.advance()
             return self
         sym = self.symbol('(identifier)')
         sym.content = None
@@ -72,7 +72,7 @@ class Context:
     def createSystemToken(self, value):
         thisContext = self
         def nud(self):
-            thisContext.parser.lexer.advance()
+            thisContext.contextManager.parser.lexer.advance()
             return self
         sym = self.symbol('(systemToken)')
         sym.arity = None
@@ -83,14 +83,13 @@ class Context:
         return symObj
 
     def createToken(self, word):
+        for currentContext in self.contextManager.currentContexts:
+            if word in currentContext.symbolTable:
+                symClass = currentContext.symbol(word)
+                if symClass is not None:
+                    return symClass()
         if word is None:
             return self.createSystemToken('(end)')
-        elif word in self.symbolTable:
-            symClass = self.symbol(word)
-            if symClass is not None:
-                return symClass()
-            else:
-                raise SyntaxError('Syntax error: \'{0}\' is an unknown token'.format(word))
         elif word.isidentifier():
             return self.createIdentifier(word)
         elif word.isnumeric():
