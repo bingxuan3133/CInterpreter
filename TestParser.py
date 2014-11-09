@@ -1,19 +1,27 @@
 import unittest
+from Parser import *
+from ContextManager import *
 from Context import *
 from ExpressionContext import *
-from Parser import *
 
 class TestParseInfix(unittest.TestCase):
-    def setUp(self):
-        self.context = ExpressionContext()
-        self.context.addInfixOperator('*', 100)
-        self.context.addPrefixInfixOperator('+', 70)
-        self.context.addPrefixInfixOperator('-', 70)
-
     def test_parse_2_plus_3(self):
-        parser = Parser('2 + 3', [self.context])
-        self.context.setParser(parser)
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addInfixOperator('+', 70)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('2 + 3', manager.currentContexts)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+
         token = parser.parse(0)
+
         self.assertEqual('+', token.id)
         self.assertEqual('(literal)', token.data[0].id)
         self.assertEqual('(literal)', token.data[1].id)
@@ -29,9 +37,23 @@ class TestParseInfix(unittest.TestCase):
             3     4
         :return:
         """
-        parser = Parser('2 + 3 * 4', [self.context])
-        self.context.setParser(parser)
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addInfixOperator('*', 100)
+        expressionContext.addInfixOperator('+', 70)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('2 + 3 * 4', manager.currentContexts)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+
         token = parser.parse(0)
+
         self.assertEqual('+', token.id)
         self.assertEqual('(literal)', token.data[0].id)
         self.assertEqual('*', token.data[1].id)
@@ -50,9 +72,23 @@ class TestParseInfix(unittest.TestCase):
         2      3
         :return:
         """
-        parser = Parser('2 * 3 + 4', [self.context])
-        self.context.setParser(parser)
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addInfixOperator('*', 100)
+        expressionContext.addInfixOperator('+', 70)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('2 * 3 + 4', manager.currentContexts)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+
         token = parser.parse(0)
+
         self.assertEqual('+', token.id)
         self.assertEqual('*', token.data[0].id)
         self.assertEqual('(literal)', token.data[0].data[0].id)
@@ -73,9 +109,24 @@ class TestParseInfix(unittest.TestCase):
         2      3
         :return:
         """
-        parser = Parser('2 * 3 + 4 - 5', [self.context])
-        self.context.setParser(parser)
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addInfixOperator('*', 100)
+        expressionContext.addInfixOperator('+', 70)
+        expressionContext.addInfixOperator('-', 70)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('2 * 3 + 4 - 5', manager.currentContexts)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+
         token = parser.parse(0)
+
         self.assertEqual('-', token.id)
         self.assertEqual('+', token.data[0].id)
         self.assertEqual('*', token.data[0].data[0].id)
@@ -97,9 +148,23 @@ class TestParseInfix(unittest.TestCase):
         2    3  4    5
         :return:
         """
-        parser = Parser('2 * 3 + 4 * 5', [self.context])
-        self.context.setParser(parser)
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addInfixOperator('*', 100)
+        expressionContext.addInfixOperator('+', 70)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('2 * 3 + 4 * 5', manager.currentContexts)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+
         token = parser.parse(0)
+
         self.assertEqual('+', token.id)
         self.assertEqual('*', token.data[0].id)
         self.assertEqual('*', token.data[1].id)
@@ -123,9 +188,23 @@ class TestParseInfix(unittest.TestCase):
             3    4
         :return:
         """
-        parser = Parser('2 + 3 * 4 + 5', [self.context])
-        self.context.setParser(parser)
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addInfixOperator('*', 100)
+        expressionContext.addInfixOperator('+', 70)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('2 + 3 * 4 + 5', manager.currentContexts)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+
         token = parser.parse(0)
+
         self.assertEqual('+', token.id)
         self.assertEqual('+', token.data[0].id)
         self.assertEqual('*', token.data[0].data[1].id)
@@ -138,15 +217,29 @@ class TestParseInfix(unittest.TestCase):
         self.assertEqual(4, token.data[0].data[1].data[1].data[0])
         self.assertEqual(5, token.data[1].data[0])
 
-class TestParsePrefix(unittest.TestCase):
-    def setUp(self):
-        self.context = ExpressionContext()
-        self.context.addInfixOperator('*', 100)
-        self.context.addPrefixInfixOperator('+', 70)
-        self.context.addPrefixInfixOperator('-', 70)
-        self.context.addPostfixOperator('++', 150)
-        self.context.addPrefixOperator('--', 120)
+    def test_parse_i_plus_j(self):
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
 
+        expressionContext.addInfixOperator('+', 70)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('i + j', manager.currentContexts)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+
+        token = parser.parse(0)
+        self.assertEqual('+', token.id)
+        self.assertEqual('(identifier)', token.data[0].id)
+        self.assertEqual('(identifier)', token.data[1].id)
+        self.assertEqual('i', token.data[0].data[0])
+        self.assertEqual('j', token.data[1].data[0])
+
+class TestParsePrefix(unittest.TestCase):
     def test_parse_negative_2_plus_3(self):
         """
                 +
@@ -156,9 +249,23 @@ class TestParsePrefix(unittest.TestCase):
         2
         :return:
         """
-        parser = Parser('- 2 + 3', [self.context])
-        self.context.setParser(parser)
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addInfixOperator('+', 70)
+        expressionContext.addPrefixOperator('-', 70)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('- 2 + 3', manager.currentContexts)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+
         token = parser.parse(0)
+
         self.assertEqual('+', token.id)
         self.assertEqual('-', token.data[0].id)
         self.assertEqual('(literal)', token.data[0].data[0].id)
@@ -175,9 +282,23 @@ class TestParsePrefix(unittest.TestCase):
         2       3
         :return:
         """
-        parser = Parser('- 2 + - 3', [self.context])
-        self.context.setParser(parser)
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addInfixOperator('+', 70)
+        expressionContext.addPrefixOperator('-', 70)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('- 2 + - 3', manager.currentContexts)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+
         token = parser.parse(0)
+
         self.assertEqual('+', token.id)
         self.assertEqual('-', token.data[0].id)
         self.assertEqual('-', token.data[1].id)
@@ -195,9 +316,22 @@ class TestParsePrefix(unittest.TestCase):
         2       3
         :return:
         """
-        parser = Parser('- 2 - - 3', [self.context])
-        self.context.setParser(parser)
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addPrefixInfixOperator('-', 70)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('- 2 - - 3', manager.currentContexts)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+
         token = parser.parse(0)
+
         self.assertEqual('-', token.id)
         self.assertEqual('-', token.data[0].id)
         self.assertEqual('-', token.data[1].id)
@@ -215,9 +349,21 @@ class TestParsePrefix(unittest.TestCase):
         2       3
         :return:
         """
-        self.context.addPrefixOperator('!', 120)
-        parser = Parser('! 2 - ! 3', [self.context])
-        self.context.setParser(parser)
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addInfixOperator('-', 70)
+        expressionContext.addPrefixOperator('!', 120)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('! 2 - ! 3', manager.currentContexts)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+
         token = parser.parse(0)
         self.assertEqual('-', token.id)
         self.assertEqual('!', token.data[0].id)
@@ -228,28 +374,46 @@ class TestParsePrefix(unittest.TestCase):
         self.assertEqual(3, token.data[1].data[0].data[0])
 
     def test_parse_post_increment_i(self):
-        parser = Parser('i ++', [self.context])
-        self.context.setParser(parser)
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addPostfixOperator('++', 150)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('i ++', manager.currentContexts)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+
         token = parser.parse(0)
+
         self.assertEqual('++', token.id)
         self.assertEqual('(identifier)', token.data[0].id)
         self.assertEqual('i', token.data[0].data[0])
         self.assertEqual(1, len(token.data))
 
-    def test_parse_i_plus_j(self):
-        parser = Parser('i + j', [self.context])
-        self.context.setParser(parser)
-        token = parser.parse(0)
-        self.assertEqual('+', token.id)
-        self.assertEqual('(identifier)', token.data[0].id)
-        self.assertEqual('(identifier)', token.data[1].id)
-        self.assertEqual('i', token.data[0].data[0])
-        self.assertEqual('j', token.data[1].data[0])
-
     def test_parse_post_increment_i_plus_pre_decrement_j(self):
-        parser = Parser('i ++ + -- j', [self.context])
-        self.context.setParser(parser)
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addInfixOperator('+', 70)
+        expressionContext.addPostfixOperator('++', 150)
+        expressionContext.addPrefixOperator('--', 120)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('i ++ + -- j', manager.currentContexts)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+
         token = parser.parse(0)
+
         self.assertEqual('+', token.id)
         self.assertEqual('++', token.data[0].id)
         self.assertEqual('--', token.data[1].id)
@@ -259,14 +423,6 @@ class TestParsePrefix(unittest.TestCase):
         self.assertEqual('j', token.data[1].data[0].data[0])
 
 class TestParsePrefixGroup(unittest.TestCase):
-    def setUp(self):
-        self.context = ExpressionContext()
-        self.context.addInfixOperator('*', 100)
-        self.context.addPrefixInfixOperator('+', 70)
-        self.context.addPrefixInfixOperator('-', 70)
-        self.context.addPostfixOperator('++', 150)
-        self.context.addPrefixOperator('--', 120)
-
     def test_parse_bracket_2_plus_3_mul_4(self):
         """
                 *
@@ -278,11 +434,25 @@ class TestParsePrefixGroup(unittest.TestCase):
         2      3
         :return:
         """
-        self.context.addPrefixGroupOperator('(', 0)
-        self.context.addPrefixGroupOperator(')', 0)
-        parser = Parser('( 2 + 3 ) * 4', [self.context])
-        self.context.setParser(parser)
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addInfixOperator('+', 70)
+        expressionContext.addInfixOperator('*', 100)
+        expressionContext.addPrefixGroupOperator('(', 0)
+        expressionContext.addPrefixGroupOperator(')', 0)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('( 2 + 3 ) * 4', manager.currentContexts)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+
         token = parser.parse(0)
+
         self.assertEqual('*', token.id)
         self.assertEqual('(', token.data[0].id)
         self.assertEqual('+', token.data[0].data[0].id)
@@ -304,11 +474,25 @@ class TestParsePrefixGroup(unittest.TestCase):
             3      4
         :return:
         """
-        self.context.addPrefixGroupOperator('(', 0)
-        self.context.addPrefixGroupOperator(')', 0)
-        parser = Parser('2 * ( 3 + 4 )', [self.context])
-        self.context.setParser(parser)
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addInfixOperator('+', 70)
+        expressionContext.addInfixOperator('*', 100)
+        expressionContext.addPrefixGroupOperator('(', 0)
+        expressionContext.addPrefixGroupOperator(')', 0)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('2 * ( 3 + 4 )', manager.currentContexts)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+
         token = parser.parse(0)
+
         self.assertEqual('*', token.id)
         self.assertEqual('(', token.data[1].id)
         self.assertEqual('+', token.data[1].data[0].id)
@@ -330,11 +514,25 @@ class TestParsePrefixGroup(unittest.TestCase):
         3      4
         :return:
         """
-        self.context.addPrefixGroupOperator('(', 0)
-        self.context.addPrefixGroupOperator(')', 0)
-        parser = Parser('- ( 3 + 4 )', [self.context])
-        self.context.setParser(parser)
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addInfixOperator('+', 70)
+        expressionContext.addPrefixInfixOperator('-', 70)
+        expressionContext.addPrefixGroupOperator('(', 0)
+        expressionContext.addPrefixGroupOperator(')', 0)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('- ( 3 + 4 )', manager.currentContexts)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+
         token = parser.parse(0)
+
         self.assertEqual('-', token.id)
         self.assertEqual('(', token.data[0].id)
         self.assertEqual('+', token.data[0].data[0].id)
@@ -348,10 +546,21 @@ class TestParsePrefixGroup(unittest.TestCase):
             (
         :return:
         """
-        self.context.addPrefixGroupOperator('(', 0)
-        self.context.addPrefixGroupOperator(')', 0)
-        parser = Parser('( )', [self.context])
-        self.context.setParser(parser)
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addPrefixGroupOperator('(', 0)
+        expressionContext.addPrefixGroupOperator(')', 0)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('( )', manager.currentContexts)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+
         self.assertRaises(SyntaxError, parser.parse, 0)
 
 if __name__ == '__main__':
