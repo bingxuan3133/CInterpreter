@@ -8,7 +8,6 @@ class SymbolBase:
     def nud(self):
         raise SyntaxError('No nud(.) function defined!')
 
-
 class Context:
     PREFIX_UNARY = 1
     POSTFIX_UNARY = 2
@@ -19,7 +18,7 @@ class Context:
     def setParser(self, parser):
         self.parser = parser
 
-    def symbol(self, id, bindingPower = 0, Type = True):
+    def symbol(self, id, bindingPower = 0):
         if id not in self.symbolTable:
             class Symbol(SymbolBase):
                 def __init__(self):
@@ -27,14 +26,20 @@ class Context:
 
             symClass = Symbol
             symClass.id = id
-            symClass.left = Type
             symClass.bindingPower = bindingPower
             symClass.__repr__ = revealSelf
             self.symbolTable[id] = symClass
             return symClass
         else:
             return self.symbolTable[id]
+
     #The following function is to add the relevant function into the context for
+    def addOperator(self, id, bindingPower=0, nud=None, led=None):
+        symClass = self.symbol(id,bindingPower)
+        symClass.nud = nud
+        symClass.led = led
+        return symClass
+
     def addInfixOperator(self, id, bindingPower = 0):
         thisContext = self
         def led(self, leftToken):
@@ -95,7 +100,8 @@ class Context:
             returnedToken = thisContext.parser.parse(120)
             self.data.append(returnedToken)
             return self
-
+        symClass = self.symbol(id,bindingPower)
+        symClass.arity = self.PREFIX_UNARY
         symClass.nud = nud
         return symClass
 
@@ -106,7 +112,6 @@ class Context:
         def nud(self):
             thisContext.parser.lexer.advance()
             return self
-
         sym = self.symbol('(literal)')
         sym.arity = None
         sym.__repr__ = revealSelf
@@ -131,6 +136,10 @@ class Context:
         return symObj
 
     def createSystemToken(self, value):
+        thisContext = self
+        def nud(self):
+            thisContext.parser.lexer.advance()
+            return self
         sym = self.symbol('(systemToken)')
         sym.arity = None
         sym.__repr__ = revealSelf
@@ -143,19 +152,16 @@ class Context:
     def createToken(self, word):
         if word is None:
             return self.createSystemToken('(end)')
-        symClass = self.symbol(word)
-
-        if word.isnumeric():
+        elif word.isnumeric():
             return self.createLiteral(word)
-        elif symClass is not None:
+        elif word in self.symbolTable:
+            symClass = self.symbol(word)
             return symClass()
-        elif symClass is None:
-            raise SyntaxError('Syntax error: \'{0}\' is an unknown token'.format(word))
         elif word.isidentifier():
             return self.createIdentifier(word)
 
     #The following function is use in expression context.
-    def addExpression(self,id,bindingPower = 0 ):
+    def addBlockOperator(self,id,bindingPower = 0 ):
         thisContext = self
         symClass = self.symbol(id,bindingPower)
         def led(self):
@@ -178,7 +184,7 @@ class Context:
         symClass.led = led
         return symClass
 
-    def addPrefixGroupOperator(self, id, bindingPower = 0): #for bracket ( and )
+    def addGroupOperator(self, id, bindingPower = 0): #for bracket ( and )
         thisContext = self
         def nud(self):
             thisContext.parser.lexer.advance()

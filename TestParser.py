@@ -1,5 +1,6 @@
 import unittest
 from Parser import *
+from Context import *
 
 
 class TestInfix(unittest.TestCase):
@@ -27,8 +28,7 @@ class TestInfix(unittest.TestCase):
         context = Context()
         context.addInfixOperator('+', 70)
         context.addInfixOperator('*', 100)
-
-        parser = Parser('2 + 3 * 4', [context])
+        parser = Parser(' 2 + 3 * 4 ', [context])
         context.setParser(parser)
         token = parser.parse(0)
         self.assertEqual('+', token.id)
@@ -199,6 +199,7 @@ class TestPrefix(unittest.TestCase):
         self.assertEqual('!', token.data[0].id)
         self.assertEqual(2, token.data[0].data[0].data[0])
         self.assertEqual(3, token.data[1].data[0])
+
 
     def test_parse_negative_2_plus_3(self):
         """
@@ -373,9 +374,9 @@ class TestBraces(unittest.TestCase):
         :return:
         """
         context = Context()
-        context.addExpression('{', 0)
-        context.addExpression('}', 0)
-        context.addExpression(';', 0)
+        context.addBlockOperator('{', 0)
+        context.addBlockOperator('}', 0)
+        context.addBlockOperator(';', 0)
         parser = Parser('{ } ', [context])
         context.setParser(parser)
         token = parser.parse(0)
@@ -388,8 +389,9 @@ class TestBraces(unittest.TestCase):
         :return:
         """
         context = Context()
-        context.addExpression('{', 0)
-        #context.addExpression('}',0)
+        context.addBlockOperator('{', 0)
+        context.addOperator(';')
+        context.addBlockOperator('}',0)
         parser = Parser('{ ; } ', [context])
         context.setParser(parser)
         token = parser.parse(0)
@@ -401,8 +403,9 @@ class TestBraces(unittest.TestCase):
         :return:
         """
         context = Context()
-        context.addExpression('{', 0)
-        #context.addExpression('}',0)
+        context.addBlockOperator('{', 0)
+        context.addOperator(';')
+        context.addBlockOperator('}',0)
         parser = Parser('{ ; } ', [context])
         context.setParser(parser)
         token = parser.parse(0)
@@ -419,9 +422,10 @@ class TestBraces(unittest.TestCase):
         :return:
         """
         context = Context()
-        context.addExpression('{', 0)
+        context.addBlockOperator('{', 0)
         context.addInfixPrefixOperator('+', 70)
-        #context.addExpression('}',0)
+        context.addOperator(';')
+        context.addBlockOperator('}',0)
         parser = Parser('{ 2 + 3 ; } ', [context])
         context.setParser(parser)
         token = parser.parse(0)
@@ -440,11 +444,12 @@ class TestBraces(unittest.TestCase):
         :return:
         """
         context = Context()
-        context.addExpression('{', 0)
+        context.addBlockOperator('{', 0)
         context.addInfixPrefixOperator('+', 70)
         context.addInfixOperator('*', 100)
+        context.addOperator(';')
         context.addInfixOperator('/', 100)
-        #context.addExpression('}',0)
+        context.addBlockOperator('}',0)
         parser = Parser('{ 2 + 3 ; \
                         3 * 4 ; \
                         5 / 9 ; \
@@ -476,11 +481,12 @@ class TestBraces(unittest.TestCase):
         :return:
         """
         context = Context()
-        context.addExpression('{', 0)
+        context.addBlockOperator('{', 0)
         context.addInfixOperator('*', 100)
         context.addInfixOperator('/', 100)
         context.addInfixPrefixOperator('+', 70)
-        #context.addExpression('}',0)
+        context.addOperator(';')
+        context.addBlockOperator('}',0)
         parser = Parser('{ 2 + 3 * 8 / 9 ; } ', [context])
         context.setParser(parser)
         token = parser.parse(0)
@@ -493,22 +499,182 @@ class TestBraces(unittest.TestCase):
         self.assertEqual(8, token.data[0].data[1].data[0].data[1].data[0])
         self.assertEqual(9, token.data[0].data[1].data[1].data[0])
 
+    def test_parse_negative_2_plus_3(self):
+        """
+                +
+              /  \
+            -     3
+          /
+        2
+        :return:
+        """
+        context = Context()
+        context.addInfixPrefixOperator('-', 70)
+        context.addInfixPrefixOperator('+', 70)
+        parser = Parser('- 2 + 3 ', [context])
+        context.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('+', token.id)
+        self.assertEqual('-', token.data[0].id)
+        self.assertEqual('(literal)', token.data[0].data[0].id)
+        self.assertEqual('(literal)', token.data[1].id)
+        self.assertEqual(2, token.data[0].data[0].data[0])
+        self.assertEqual(3, token.data[1].data[0])
+
+    def test_parse_negative_2_plus_negative_3(self):
+        """
+            +
+         /     \
+        -       -
+        |       |
+        2       3
+        :return:
+        """
+        context = Context()
+        context.addInfixPrefixOperator('-', 70)
+        context.addInfixPrefixOperator('+', 70)
+        parser = Parser('- 2 + - 3', [context])
+        context.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('+', token.id)
+        self.assertEqual('-', token.data[0].id)
+        self.assertEqual('-', token.data[1].id)
+        self.assertEqual('(literal)', token.data[0].data[0].id)
+        self.assertEqual('(literal)', token.data[1].data[0].id)
+        self.assertEqual(2, token.data[0].data[0].data[0])
+        self.assertEqual(3, token.data[1].data[0].data[0])
+
+    def test_parse_negative_2_minus_negative_3(self):
+        """
+            -
+         /     \
+        -       -
+        |       |
+        2       3
+        :return:
+        """
+        context = Context()
+        context.addInfixPrefixOperator('-', 70)
+        parser = Parser('- 2 - - 3', [context])
+        context.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('-', token.id)
+        self.assertEqual('-', token.data[0].id)
+        self.assertEqual('-', token.data[1].id)
+        self.assertEqual('(literal)', token.data[0].data[0].id)
+        self.assertEqual('(literal)', token.data[1].data[0].id)
+        self.assertEqual(2, token.data[0].data[0].data[0])
+        self.assertEqual(3, token.data[1].data[0].data[0])
+
+    def test_parse_not_2_minus_not_3(self):
+        """
+            -
+         /     \
+        !       !
+        |       |
+        2       3
+        :return:
+        """
+        context = Context()
+        context.addPrefixOperator('!', 120)
+        context.addInfixPrefixOperator('-', 70)
+        parser = Parser('! 2 - ! 3', [context])
+        context.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('-', token.id)
+        self.assertEqual('!', token.data[0].id)
+        self.assertEqual('!', token.data[1].id)
+        self.assertEqual('(literal)', token.data[0].data[0].id)
+        self.assertEqual('(literal)', token.data[1].data[0].id)
+        self.assertEqual(2, token.data[0].data[0].data[0])
+        self.assertEqual(3, token.data[1].data[0].data[0])
+
+    def test_parse_post_increment_i(self):
+        context = Context()
+        context.addPostfixOperator('++', 70)
+        parser = Parser('i ++', [context])
+        context.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('++', token.id)
+        self.assertEqual('(identifier)', token.data[0].id)
+        self.assertEqual('i', token.data[0].data[0])
+        self.assertEqual(1, len(token.data))
+
+    def test_parse_i_plus_j(self):
+        context = Context()
+        context.addInfixOperator('+', 70)
+        parser = Parser('i + j', [context])
+        context.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('+', token.id)
+        self.assertEqual('(identifier)', token.data[0].id)
+        self.assertEqual('(identifier)', token.data[1].id)
+        self.assertEqual('i', token.data[0].data[0])
+        self.assertEqual('j', token.data[1].data[0])
+
+    def test_parse_post_increment_i_plus_pre_decrement_j(self):
+        context = Context()
+        context.addPostfixOperator('++', 120)
+        context.addInfixPrefixOperator('+',70)
+        context.addPrefixOperator('--',120)
+        parser = Parser('i ++ + -- j', [context])
+        context.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('+', token.id)
+        self.assertEqual('++', token.data[0].id)
+        self.assertEqual('--', token.data[1].id)
+        self.assertEqual('(identifier)', token.data[0].data[0].id)
+        self.assertEqual('(identifier)', token.data[1].data[0].id)
+        self.assertEqual('i', token.data[0].data[0].data[0])
+        self.assertEqual('j', token.data[1].data[0].data[0])
+
+class TestParsePrefixGroup(unittest.TestCase):
+
+    def test_parse_bracket_2_plus_3_mul_4(self):
+        """
+                *
+             /     \
+            (       4
+            |
+            +
+          /   \
+        2      3
+        :return:
+        """
+        context = Context()
+        context.addGroupOperator('(', 0)
+        context.addInfixPrefixOperator('+',70)
+        context.addInfixPrefixOperator('*',100)
+        context.addGroupOperator(')', 0)
+        parser = Parser('( 2 + 3 ) * 4', [context])
+        context.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('*', token.id)
+        self.assertEqual('(', token.data[0].id)
+        self.assertEqual('+', token.data[0].data[0].id)
+        self.assertEqual('(literal)', token.data[0].data[0].data[0].id)
+        self.assertEqual('(literal)', token.data[0].data[0].data[1].id)
+        self.assertEqual('(literal)', token.data[1].id)
+        self.assertEqual(2, token.data[0].data[0].data[0].data[0])
+        self.assertEqual(3, token.data[0].data[0].data[1].data[0])
+        self.assertEqual(4, token.data[1].data[0])
+
     def test_parse_2_mul_bracket_3_plus_4(self):
         """
             *
          /     \
         2       (
                 |
-               +
+                +
               /   \
             3      4
         :return:
         """
         context = Context()
-        context.addPrefixGroupOperator('(', 0)
+        context.addGroupOperator('(', 0)
         context.addInfixOperator('*', 100)
         context.addInfixPrefixOperator('+', 70)
-        #self.context.addPrefixGroupOperator(')', 0)
+        context.addGroupOperator(')', 0)
         parser = Parser('2 * ( 3 + 4 )', [context])
         context.setParser(parser)
         token = parser.parse(0)
@@ -534,11 +700,10 @@ class TestBraces(unittest.TestCase):
         :return:
         """
         context = Context()
-        context.addPrefixGroupOperator('(', 0)
+        context.addGroupOperator('(', 0)
         context.addInfixPrefixOperator('-', 70)
         context.addInfixPrefixOperator('+', 70)
-
-        #self.context.addPrefixGroupOperator(')', 0)
+        context.addGroupOperator(')', 0)
         parser = Parser('- ( 3 + 4 )', [context])
         context.setParser(parser)
         token = parser.parse(0)
@@ -563,10 +728,12 @@ class TestFlowControl(unittest.TestCase):
         :return:
         """
         context = Context()
-        #context.addExpression('}',0)
+        context.addBlockOperator('}',0)
+        context.addGroupOperator('(',0)
+        context.addGroupOperator(')',0)
         context.addControl('if', 0)
         context.addInfixOperator('==', 20)
-        context.addExpression('{', 0)
+        context.addBlockOperator('{', 0)
         parser = Parser('if ( 2 == 3 ) { } ', [context])
         context.setParser(parser)
         token = parser.parse(0)
@@ -586,10 +753,13 @@ class TestFlowControl(unittest.TestCase):
         :return:
         """
         context = Context()
-        #context.addExpression('}',0)
+        context.addBlockOperator('}',0)
+        context.addGroupOperator('(',0)
+        context.addGroupOperator(')',0)
         context.addControl('if', 0)
+        context.addControl('else', 0)
         context.addInfixOperator('==', 20)
-        context.addExpression('{', 0)
+        context.addBlockOperator('{', 0)
         parser = Parser('if ( 2 == 3 ) { }\
                         else { } ', [context])
         context.setParser(parser)

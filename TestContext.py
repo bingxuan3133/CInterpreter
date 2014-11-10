@@ -2,7 +2,7 @@ import unittest
 from Context import *
 
 
-class MyTestCase(unittest.TestCase):
+class TestContext(unittest.TestCase):
     def testCreateInfixOperator(self):
         context = Context()
         addClass = context.addInfixOperator('+', 70)
@@ -17,8 +17,6 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(context.symbolTable['+'], addClass)
         self.assertEqual(context.symbolTable['-'], subClass)
 
-    def test_(self):
-        pass
 
 if __name__ == '__main__':
     unittest.main()

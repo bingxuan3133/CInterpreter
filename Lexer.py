@@ -1,4 +1,3 @@
-from Context import *
 
 class Lexer:
     def __init__(self, string, contexts):
@@ -11,7 +10,10 @@ class Lexer:
             for statement in statements:
                 self.lists.append(statement.split())
         self.currentToken = self.advance()
+        self.__repr__ = self.revealSelf
 
+    def revealSelf(self):
+        return '{0}'.format(self.currentToken)
 
     def setContext(self, contexts):
         self.contexts = contexts
@@ -32,25 +34,3 @@ class Lexer:
 
     def peep(self):
         return self.currentToken
-"""
-def advance(self):
-    if self.nextValue is not None:
-        self.lastValue = self.nextValue
-        self.nextValue = None
-    else:
-        self.lastValue = next(self.wordGenerator)
-    token = self.contexts[0].createToken(self.lastValue)
-    return token
-
-def lookAHead(self):
-    if self.nextValue is None:
-        self.nextValue = next(self.wordGenerator)
-    return self.contexts[0].createToken(self.nextValue)
-"""
-
-"""
-for context in self.contexts:
-    token = context.createToken(word)
-    if(token != SyntaxError):
-        break
-"""
