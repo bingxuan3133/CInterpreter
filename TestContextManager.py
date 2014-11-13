@@ -6,8 +6,8 @@ from FlowControlContext import *
 class TestContextManager(unittest.TestCase):
     def setUp(self):
         self.manager = ContextManager()
-        self.expression = ExpressionContext()
-        self.flowControl = FlowControlContext()
+        self.expression = ExpressionContext(self.manager)
+        self.flowControl = FlowControlContext(self.manager)
 
     def test_context_manager_function_should_work_properly(self):
         self.manager.addContext('Expression', self.expression)

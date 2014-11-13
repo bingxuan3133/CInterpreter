@@ -3,9 +3,9 @@
 import unittest
 from Lexer import *
 from Context import *
+from ExpressionContext import *
 
 class MyTestCase(unittest.TestCase):
-
 
     def setUp(self):
         pass
@@ -14,8 +14,10 @@ class MyTestCase(unittest.TestCase):
         pass
 
     def testLexerAndSymbolGetIdentifierAndLiteral(self):
-        context = Context()
-        lexer = Lexer('xyz 1234',[context])
+        manager = ContextManager()
+        context = Context(manager)
+        manager.setContexts([context])
+        lexer = Lexer('xyz 1234', [context])
         token = lexer.peep()
         self.assertEqual(token.id, '(identifier)')
         self.assertEqual(token.data[0], 'xyz')
@@ -24,49 +26,64 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(token.data[0], 1234)
 
     def testGetInfixAddOperatorTokens(self):
-        context = Context()
-        context.addInfixOperator('+', 70)
-        context.addInfixOperator('-', 70)
-        lexer = Lexer('+ -', [context])
+        manager = ContextManager()
+        context = Context(manager)
+        expression = ExpressionContext(manager)
+        manager.setContexts([context, expression])
+        expression.addInfixOperator('+', 70)
+        expression.addInfixOperator('-', 70)
+        lexer = Lexer('+ -', [context, expression])
         token = lexer.peep()
         self.assertEqual(token.id, '+')
-        self.assertEqual(token.arity,Context.BINARY)
+        self.assertEqual(token.arity, Context.BINARY)
         token = lexer.advance()
         self.assertEqual(token.id, '-')
-        self.assertEqual(token.arity,Context.BINARY)
+        self.assertEqual(token.arity, Context.BINARY)
 
     def testLookAHeadWillShowTheNextToken(self):
-        context = Context()
-        context.addInfixOperator('+',70)
-        context.addInfixOperator('-',70)
-        lexer = Lexer('3 + 5 - 6',[context])
+        manager = ContextManager()
+        context = Context(manager)
+        expression = ExpressionContext(manager)
+        manager.setContexts([context, expression])
+        expression.addInfixOperator('+', 70)
+        expression.addInfixOperator('-', 70)
+        lexer = Lexer('3 + 5 - 6', [context, expression])
         token = lexer.peep()
-        self.assertEqual(token.id,'(literal)')
-        self.assertEqual(token.data[0],3)
+        self.assertEqual(token.id, '(literal)')
+        self.assertEqual(token.data[0], 3)
         token = lexer.advance()
-        self.assertEqual(token.id,'+')
+        self.assertEqual(token.id, '+')
 
     def testLookAHeadWillShowTheNextTokenAfterAdvance(self):
-        context = Context()
-        context.addInfixOperator('+',70)
-        context.addInfixOperator('-',70)
+        manager = ContextManager()
+        context = Context(manager)
+        expression = ExpressionContext(manager)
+        manager.setContexts([context, expression])
+        expression.addInfixOperator('+', 70)
+        expression.addInfixOperator('-', 70)
         lexer = Lexer('13 + 5 - 6', [context])
         token = lexer.peep()
-        self.assertEqual(token.id,'(literal)')
-        self.assertEqual(token.data[0],13)
+        self.assertEqual(token.id, '(literal)')
+        self.assertEqual(token.data[0], 13)
         token = lexer.advance()
-        self.assertEqual(token.id,'+')
+        self.assertEqual(token.id, '+')
 
 
     def testAdvanceWillReturnAnEmptyTokenWhenItReachedTheEndOfTheStatement(self):
-        context = Context()
-        context.addInfixOperator('+', 70)
+        manager = ContextManager()
+        context = Context(manager)
+        expression = ExpressionContext(manager)
+        manager.setContexts([context, expression])
+        expression.addInfixOperator('+', 70)
         lexer = Lexer('13 + 5', [context])
         token = lexer.peep()
         self.assertEqual(token.id, '(literal)')
         self.assertEqual(token.data[0], 13)
         token = lexer.advance()
+        self.assertEqual(token.id, '+')
         token = lexer.advance()
+        self.assertEqual(token.id, '(literal)')
+        self.assertEqual(token.data[0], 5)
         token = lexer.advance()
         self.assertEqual(token.id, '(systemToken)')
         self.assertEqual(token.data[0], '(end)')

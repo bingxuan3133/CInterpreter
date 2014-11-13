@@ -34,7 +34,7 @@ class Context:
         else:
             return self.symbolTable[id]
 
-    def addOperator(self, id, bindingPower, nud, led):
+    def addOperator(self, id, bindingPower = 0, nud = None, led = None):
         symClass = self.symbol(id)
         symClass.bindingPower = bindingPower
         symClass.nud = nud
