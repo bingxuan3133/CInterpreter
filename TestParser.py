@@ -16,7 +16,7 @@ class TestParseInfix(unittest.TestCase):
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('2 + 3', manager.currentContexts)
+        lexer = Lexer('2 + 3', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -48,7 +48,7 @@ class TestParseInfix(unittest.TestCase):
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('2 + 3 * 4', manager.currentContexts)
+        lexer = Lexer('2 + 3 * 4', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -83,7 +83,7 @@ class TestParseInfix(unittest.TestCase):
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('2 * 3 + 4', manager.currentContexts)
+        lexer = Lexer('2 * 3 + 4', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -121,7 +121,7 @@ class TestParseInfix(unittest.TestCase):
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('2 * 3 + 4 - 5', manager.currentContexts)
+        lexer = Lexer('2 * 3 + 4 - 5', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -159,7 +159,7 @@ class TestParseInfix(unittest.TestCase):
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('2 * 3 + 4 * 5', manager.currentContexts)
+        lexer = Lexer('2 * 3 + 4 * 5', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -199,7 +199,7 @@ class TestParseInfix(unittest.TestCase):
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('2 + 3 * 4 + 5', manager.currentContexts)
+        lexer = Lexer('2 + 3 * 4 + 5', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -228,7 +228,7 @@ class TestParseInfix(unittest.TestCase):
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('i + j', manager.currentContexts)
+        lexer = Lexer('i + j', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -260,7 +260,7 @@ class TestParsePrefix(unittest.TestCase):
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('- 2 + 3', manager.currentContexts)
+        lexer = Lexer('- 2 + 3', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -293,7 +293,7 @@ class TestParsePrefix(unittest.TestCase):
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('- 2 + - 3', manager.currentContexts)
+        lexer = Lexer('- 2 + - 3', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -326,7 +326,7 @@ class TestParsePrefix(unittest.TestCase):
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('- 2 - - 3', manager.currentContexts)
+        lexer = Lexer('- 2 - - 3', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -360,7 +360,7 @@ class TestParsePrefix(unittest.TestCase):
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('! 2 - ! 3', manager.currentContexts)
+        lexer = Lexer('! 2 - ! 3', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -384,7 +384,7 @@ class TestParsePrefix(unittest.TestCase):
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('i ++', manager.currentContexts)
+        lexer = Lexer('i ++', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -408,7 +408,7 @@ class TestParsePrefix(unittest.TestCase):
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('i ++ + -- j', manager.currentContexts)
+        lexer = Lexer('i ++ + -- j', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -441,13 +441,13 @@ class TestParsePrefixGroup(unittest.TestCase):
 
         expressionContext.addInfixOperator('+', 70)
         expressionContext.addInfixOperator('*', 100)
-        expressionContext.addPrefixGroupOperator('(', 0)
-        expressionContext.addPrefixGroupOperator(')', 0)
+        expressionContext.addGroupOperator('(', 0)
+        expressionContext.addGroupOperator(')', 0)
 
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('( 2 + 3 ) * 4', manager.currentContexts)
+        lexer = Lexer('( 2 + 3 ) * 4', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -481,13 +481,13 @@ class TestParsePrefixGroup(unittest.TestCase):
 
         expressionContext.addInfixOperator('+', 70)
         expressionContext.addInfixOperator('*', 100)
-        expressionContext.addPrefixGroupOperator('(', 0)
-        expressionContext.addPrefixGroupOperator(')', 0)
+        expressionContext.addGroupOperator('(', 0)
+        expressionContext.addGroupOperator(')', 0)
 
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('2 * ( 3 + 4 )', manager.currentContexts)
+        lexer = Lexer('2 * ( 3 + 4 )', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -521,13 +521,13 @@ class TestParsePrefixGroup(unittest.TestCase):
 
         expressionContext.addInfixOperator('+', 70)
         expressionContext.addPrefixInfixOperator('-', 70)
-        expressionContext.addPrefixGroupOperator('(', 0)
-        expressionContext.addPrefixGroupOperator(')', 0)
+        expressionContext.addGroupOperator('(', 0)
+        expressionContext.addGroupOperator(')', 0)
 
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('- ( 3 + 4 )', manager.currentContexts)
+        lexer = Lexer('- ( 3 + 4 )', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -551,13 +551,13 @@ class TestParsePrefixGroup(unittest.TestCase):
         expressionContext = ExpressionContext(manager)
         contexts = [expressionContext]
 
-        expressionContext.addPrefixGroupOperator('(', 0)
-        expressionContext.addPrefixGroupOperator(')', 0)
+        expressionContext.addGroupOperator('(', 0)
+        expressionContext.addGroupOperator(')', 0)
 
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('( )', manager.currentContexts)
+        lexer = Lexer('( )', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 

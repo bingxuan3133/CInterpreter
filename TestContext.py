@@ -1,21 +1,29 @@
 import unittest
-from Context import *
-
+from ExpressionContext import *
+from ContextManager import *
 
 class MyTestCase(unittest.TestCase):
     def testCreateInfixOperator(self):
-        context = Context()
-        addClass = context.addInfixOperator('+', 70)
-        subClass = context.addInfixOperator('-', 70)
-        self.assertEqual(context.symbolTable['+'], addClass)
-        self.assertEqual(context.symbolTable['-'], subClass)
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        addClass = expressionContext.addInfixOperator('+', 70)
+        subClass = expressionContext.addInfixOperator('-', 70)
+        self.assertEqual(expressionContext .symbolTable['+'], addClass)
+        self.assertEqual(expressionContext.symbolTable['-'], subClass)
 
     def testCreatePrefixOperator(self):
-        context = Context()
-        addClass = context.addPrefixOperator('+', 200)
-        subClass = context.addPrefixOperator('-', 200)
-        self.assertEqual(context.symbolTable['+'], addClass)
-        self.assertEqual(context.symbolTable['-'], subClass)
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        addClass = expressionContext.addPrefixOperator('+', 200)
+        subClass = expressionContext.addPrefixOperator('-', 200)
+        self.assertEqual(expressionContext.symbolTable['+'], addClass)
+        self.assertEqual(expressionContext.symbolTable['-'], subClass)
 
     def test_(self):
         pass

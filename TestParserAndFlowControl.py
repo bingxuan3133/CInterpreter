@@ -14,14 +14,14 @@ class TestParseFlowControl(unittest.TestCase):
         contexts = [expressionContext, flowControlContext]
 
         flowControlContext.addFlowControlOperator('while', 0)
-        expressionContext.addPrefixGroupOperator('(', 0)
-        expressionContext.addPrefixGroupOperator(')', 0)
+        expressionContext.addGroupOperator('(', 0)
+        expressionContext.addGroupOperator(')', 0)
 
         manager.addContext('FlowControl', flowControlContext)
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('while ( 1 )', manager.currentContexts)
+        lexer = Lexer('while ( 1 )', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -39,14 +39,14 @@ class TestParseFlowControl(unittest.TestCase):
         contexts = [expressionContext, flowControlContext]
 
         flowControlContext.addFlowControlOperator('while', 0)
-        expressionContext.addPrefixGroupOperator('(', 0)
-        expressionContext.addPrefixGroupOperator(')', 0)
+        expressionContext.addGroupOperator('(', 0)
+        expressionContext.addGroupOperator(')', 0)
 
         manager.addContext('FlowControl', flowControlContext)
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('while ( 1 ) while ( 1 )', manager.currentContexts)
+        lexer = Lexer('while ( 1 ) while ( 1 )', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -67,15 +67,15 @@ class TestParseFlowControl(unittest.TestCase):
         contexts = [expressionContext, flowControlContext]
 
         flowControlContext.addFlowControlOperator('while', 0)
-        expressionContext.addPrefixGroupOperator('(', 0)
-        expressionContext.addPrefixGroupOperator(')', 0)
+        expressionContext.addGroupOperator('(', 0)
+        expressionContext.addGroupOperator(')', 0)
         expressionContext.addPostfixOperator('++', 150)
 
         manager.addContext('FlowControl', flowControlContext)
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('while ( 1 ) i ++', manager.currentContexts)
+        lexer = Lexer('while ( 1 ) i ++', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -97,14 +97,14 @@ class TestParseFlowControl(unittest.TestCase):
         contexts = [expressionContext, flowControlContext]
 
         flowControlContext.addFlowControlOperator('while', 0)
-        expressionContext.addPrefixGroupOperator('(', 0)
-        expressionContext.addPrefixGroupOperator(')', 0)
+        expressionContext.addGroupOperator('(', 0)
+        expressionContext.addGroupOperator(')', 0)
 
         manager.addContext('FlowControl', flowControlContext)
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('while ( while ( 1 ) )', manager.currentContexts)
+        lexer = Lexer('while ( while ( 1 ) )', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -118,14 +118,14 @@ class TestParseFlowControl(unittest.TestCase):
         contexts = [expressionContext, flowControlContext]
 
         flowControlContext.addFlowControlOperator('while', 0)
-        expressionContext.addPrefixGroupOperator('(', 0)
-        expressionContext.addPrefixGroupOperator(')', 0)
+        expressionContext.addGroupOperator('(', 0)
+        expressionContext.addGroupOperator(')', 0)
 
         manager.addContext('FlowControl', flowControlContext)
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('while ( 1', manager.currentContexts)
+        lexer = Lexer('while ( 1', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
