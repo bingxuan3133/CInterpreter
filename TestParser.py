@@ -563,5 +563,193 @@ class TestParsePrefixGroup(unittest.TestCase):
 
         self.assertRaises(SyntaxError, parser.parse, 0)
 
+
+    def test_parse_will_identify_the_braces(self):
+        """
+            {
+        :return:
+        """
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addBlockOperator('{', 0)
+        expressionContext.addBlockOperator('}', 0)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('{ } ', context)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('{', token.id)
+        self.assertEqual([], token.data)
+
+    def test_parse_will_identify_the_semicolon_in_the_braces(self):
+        """
+            {
+        :return:
+        """
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addBlockOperator('{', 0)
+        expressionContext.addOperator(';')
+        expressionContext.addBlockOperator('}', 0)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('{ ; } ', context)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('{', token.id)
+
+    def test_parse_will_point_to_the_next_location_after_finished_parse(self):
+        """
+            {
+        :return:
+        """
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addBlockOperator('{', 0)
+        expressionContext.addOperator(';')
+        expressionContext.addBlockOperator('}', 0)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('{ ; } ', context)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('{', token.id)
+        self.assertEqual('(end)', parser.lexer.peep().data[0])
+
+    def test_parse_will_build_an_ast_for_expression_in_the_brace(self):
+        """
+            {
+            |
+            +
+          /   \
+         2     3
+        :return:
+        """
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addBlockOperator('{', 0)
+        expressionContext.addInfixOperator('+',70)
+        expressionContext.addOperator(';')
+        expressionContext.addBlockOperator('}', 0)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('{ 2 + 3 ; } ', context)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('{', token.id)
+        self.assertEqual('+', token.data[0].id)
+        self.assertEqual(2, token.data[0].data[0].data[0])
+        self.assertEqual(3, token.data[0].data[1].data[0])
+
+    def test_parse_will_build_an_ast_for_expressions_in_the_brace(self):
+        """
+                {           -   /
+            /       \        /     \
+            +       *       5       9
+          /   \    /    \
+         2     3  3     4
+        :return:
+        """
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addBlockOperator('{', 0)
+        expressionContext.addInfixOperator('+',70)
+        expressionContext.addInfixOperator('*',100)
+        expressionContext.addInfixOperator('/',100)
+        expressionContext.addOperator(';')
+        expressionContext.addBlockOperator('}', 0)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('{ 2 + 3 ; \
+                        3 * 4 ; \
+                        5 / 9 ; \
+                        } ', context)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+        token = parser.parse(0)
+
+        self.assertEqual('{', token.id)
+        self.assertEqual('+', token.data[0].id)
+        self.assertEqual(2, token.data[0].data[0].data[0])
+        self.assertEqual(3, token.data[0].data[1].data[0])
+        self.assertEqual('*', token.data[1].id)
+        self.assertEqual(3, token.data[1].data[0].data[0])
+        self.assertEqual(4, token.data[1].data[1].data[0])
+        self.assertEqual('/', token.data[2].id)
+        self.assertEqual(5, token.data[2].data[0].data[0])
+        self.assertEqual(9, token.data[2].data[1].data[0])
+
+    def test_parse_will_build_an_AST_for_longer_expression_in_the_brace(self):
+        """
+            {
+            |
+            +
+          /   \
+         2     /
+             /  \
+            *   9
+          /  \
+         3    8
+        :return:
+        """
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addBlockOperator('{', 0)
+        expressionContext.addInfixOperator('+',70)
+        expressionContext.addInfixOperator('*',100)
+        expressionContext.addInfixOperator('/',100)
+        expressionContext.addOperator(';')
+        expressionContext.addBlockOperator('}', 0)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('{ 2 + 3 * 8 / 9 ; } ', context)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+        token = parser.parse(0)
+
+        self.assertEqual('{', token.id)
+        self.assertEqual('+', token.data[0].id)
+        self.assertEqual(2, token.data[0].data[0].data[0])
+        self.assertEqual('/', token.data[0].data[1].id)
+        self.assertEqual('*', token.data[0].data[1].data[0].id)
+        self.assertEqual(3, token.data[0].data[1].data[0].data[0].data[0])
+        self.assertEqual(8, token.data[0].data[1].data[0].data[1].data[0])
+        self.assertEqual(9, token.data[0].data[1].data[1].data[0])
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -26,8 +26,8 @@ class Context:
 
             symClass = Symbol
             symClass.id = id
-            symClass.left = Type
             symClass.bindingPower = bindingPower
+            symClass.left = Type
             symClass.__repr__ = revealSelf
             self.symbolTable[id] = symClass
             return symClass

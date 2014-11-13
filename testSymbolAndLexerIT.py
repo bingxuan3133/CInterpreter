@@ -16,6 +16,7 @@ class MyTestCase(unittest.TestCase):
     def testLexerAndSymbolGetIdentifierAndLiteral(self):
         manager = ContextManager()
         context = Context(manager)
+        manager.setContexts([context])
         lexer = Lexer('xyz 1234', context)
         token = lexer.peep()
         self.assertEqual(token.id, '(identifier)')
