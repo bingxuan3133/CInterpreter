@@ -49,14 +49,12 @@ class ExpressionContext(Context):
 
     def addPrefixInfixOperator(self, id, bindingPower = 0):
         thisContext = self
-        self.addInfixOperator(id, bindingPower)
+        symClass = self.addInfixOperator(id, bindingPower)
         def nud(self):
             thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.contextManager.parser.parse(120)
             self.data.append(returnedToken)
             return self
-        symClass = self.symbol(id,bindingPower)
-        symClass.arity = self.PREFIX_UNARY
         symClass.nud = nud
 
 

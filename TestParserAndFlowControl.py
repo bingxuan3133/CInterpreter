@@ -21,7 +21,7 @@ class TestParseFlowControl(unittest.TestCase):
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('while ( 1 )', manager.currentContexts)
+        lexer = Lexer('while ( 1 )', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -46,7 +46,7 @@ class TestParseFlowControl(unittest.TestCase):
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('while ( 1 ) while ( 1 )', manager.currentContexts)
+        lexer = Lexer('while ( 1 ) while ( 1 )', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -75,7 +75,7 @@ class TestParseFlowControl(unittest.TestCase):
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('while ( 1 ) i ++', manager.currentContexts)
+        lexer = Lexer('while ( 1 ) i ++', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -104,7 +104,7 @@ class TestParseFlowControl(unittest.TestCase):
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('while ( while ( 1 ) )', manager.currentContexts)
+        lexer = Lexer('while ( while ( 1 ) )', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -125,7 +125,7 @@ class TestParseFlowControl(unittest.TestCase):
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('while ( 1', manager.currentContexts)
+        lexer = Lexer('while ( 1', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
 
@@ -157,7 +157,7 @@ class TestParseFlowControl(unittest.TestCase):
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
 
-        lexer = Lexer('if ( 2 == 3 ) { } ', manager.currentContexts)
+        lexer = Lexer('if ( 2 == 3 ) { } ', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
         token = parser.parse(0)
@@ -196,7 +196,7 @@ class TestParseFlowControl(unittest.TestCase):
         manager.setContexts(contexts)
 
         lexer = Lexer('if ( 2 == 3 ) { }\
-                        else { } ', manager.currentContexts)
+                        else { } ', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
         token = parser.parse(0)
@@ -222,7 +222,7 @@ class TestParseFlowControl(unittest.TestCase):
         manager.addContext('FlowControl', flowControlContext)
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
-        lexer = Lexer('if ( ) { } ', manager.currentContexts)
+        lexer = Lexer('if ( ) { } ', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
         self.assertRaises(SyntaxError, parser.parse, 0)
