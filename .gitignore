@@ -1,6 +1,3 @@
 __pycache__/*
-<<<<<<< HEAD
 .idea/*
-=======
-".idea/*"
->>>>>>> 230e09b4d947b6b34125ba8a168e7fca49ae88bc
+.idea/workspace.xml
