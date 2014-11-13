@@ -17,7 +17,8 @@ class ExpressionContext(Context):
             returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
             self.data.append(returnedToken)
             return self
-        symClass = self.symbol(id,bindingPower)
+
+        symClass = self.symbol(id, bindingPower)
         symClass.arity = self.BINARY
         #symClass.nud = self.nud
         symClass.led = led
@@ -30,6 +31,7 @@ class ExpressionContext(Context):
             returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
             self.data.append(returnedToken)
             return self
+
         symClass = self.symbol(id,bindingPower)
         symClass.arity = self.PREFIX_UNARY
         symClass.nud = nud
@@ -41,6 +43,7 @@ class ExpressionContext(Context):
             self.data.append(leftToken)
             thisContext.contextManager.parser.lexer.advance()
             return self
+
         symClass = self.symbol(id,bindingPower)
         symClass.arity = self.POSTFIX_UNARY
         #symClass.nud = self.nud
@@ -56,11 +59,12 @@ class ExpressionContext(Context):
             self.data.append(returnedToken)
             return self
         symClass.nud = nud
-
+        return symClass
 
     def addGroupOperator(self, id, bindingPower = 0):
         thisContext = self
         def nud(self):
+            thisContext.contextManager.parser.lexer.peep('(')
             thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
             self.data.append(returnedToken)
@@ -94,4 +98,5 @@ class ExpressionContext(Context):
 
         symClass.nud = nud
         symClass.led = led
+        symClass = self.addOperator(id, bindingPower, nud, led)
         return symClass

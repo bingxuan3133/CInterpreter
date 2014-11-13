@@ -563,6 +563,7 @@ class TestParsePrefixGroup(unittest.TestCase):
 
         self.assertRaises(SyntaxError, parser.parse, 0)
 
+
     def test_parse_will_identify_the_braces(self):
         """
             {
