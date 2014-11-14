@@ -33,7 +33,7 @@ class TestLexer(unittest.TestCase):
     def test_peep_should_raise_error_when_the_returned_symbol_is_not_equal_to_the_expected_symbol(self):
         manager = ContextManager()
         context = Context(manager)
-        manager.setContexts([context])
+        manager.setCurrentContexts([context])
         context.addOperator('(')
         lexer = Lexer('(', context)
         self.assertRaises(SyntaxError, lexer.peep, '*')
@@ -41,7 +41,7 @@ class TestLexer(unittest.TestCase):
     def test_peep_should_not_raise_error_when_the_returned_symbol_is_equal_to_the_expected_symbol(self):
         manager = ContextManager()
         context = Context(manager)
-        manager.setContexts([context])
+        manager.setCurrentContexts([context])
         context.addOperator('(')
         lexer = Lexer('(', context)
         lexer.peep()
@@ -50,7 +50,7 @@ class TestLexer(unittest.TestCase):
     def test_peep_should_not_raise_error_when_the_expected_symbol_is_none(self):
         manager = ContextManager()
         context = Context(manager)
-        manager.setContexts([context])
+        manager.setCurrentContexts([context])
         context.addOperator('(')
         lexer = Lexer('(', context)
         lexer.peep()
@@ -58,7 +58,7 @@ class TestLexer(unittest.TestCase):
     def test_advance_should_raise_error_when_the_returned_token_is_not_equal_to_the_expected_token(self):
         manager = ContextManager()
         context = Context(manager)
-        manager.setContexts([context])
+        manager.setCurrentContexts([context])
         context.addOperator('(')
         context.addOperator(')')
         lexer = Lexer('( )', context)
@@ -67,7 +67,7 @@ class TestLexer(unittest.TestCase):
     def test_advance_should_not_raise_error_when_the_returned_token_is_equal_to_the_expected_token(self):
         manager = ContextManager()
         context = Context(manager)
-        manager.setContexts([context])
+        manager.setCurrentContexts([context])
         context.addOperator('(')
         context.addOperator(')')
         lexer = Lexer('( )', context)
@@ -77,7 +77,7 @@ class TestLexer(unittest.TestCase):
     def test_advance_should_not_raise_error_when_expected_symbol_is_none(self):
         manager = ContextManager()
         context = Context(manager)
-        manager.setContexts([context])
+        manager.setCurrentContexts([context])
         context.addOperator('(')
         context.addOperator(')')
         lexer = Lexer('( )', context)

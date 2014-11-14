@@ -18,10 +18,10 @@ class TestContextManager(unittest.TestCase):
         self.assertEqual(self.expression, self.manager.getContext('Expression'))
         self.assertEqual(self.flowControl, self.manager.getContext('FlowControl'))
 
-        self.manager.setContexts(self.expression)
-        self.assertEqual(self.expression, self.manager.currentContexts)
-        self.manager.setContexts([self.expression, self.flowControl])
-        self.assertEqual([self.expression, self.flowControl], self.manager.currentContexts)
+        self.manager.setCurrentContexts(self.expression)
+        self.assertEqual(self.expression, self.manager.getCurrentContexts())
+        self.manager.setCurrentContexts([self.expression, self.flowControl])
+        self.assertEqual([self.expression, self.flowControl], self.manager.getCurrentContexts())
 
     def test_popContext_into_contextsStack(self):
         self.manager.contextsStack = [[self.expression, self.flowControl], [self.expression]]
@@ -32,6 +32,12 @@ class TestContextManager(unittest.TestCase):
         self.manager.contextsStack = [[self.expression]]
         self.manager.pushContexts([self.expression, self.flowControl])
         self.assertEqual([[self.expression], [self.expression, self.flowControl]], self.manager.contextsStack)
+
+    def test_access_into_symbolTable_before_push_and_after_pop(self):
+        self.manager.contextsStack = []
+        self.manager.setCurrentContexts([self.expression, self.flowControl])
+
+        self.manager.pushContexts([self.expression, self.flowControl])
 
     def test_popContext_should_raise_overflow_error_given_contextsStack_is_empty(self):
         self.manager.contextsStack = []

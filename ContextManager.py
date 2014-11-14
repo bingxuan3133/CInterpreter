@@ -14,8 +14,11 @@ class ContextManager:
     def getContext(self, contextName):
         return self.contexts[contextName]
 
-    def setContexts(self, contexts):
+    def setCurrentContexts(self, contexts):
         self.currentContexts = contexts
+
+    def getCurrentContexts(self):
+        return self.currentContexts
 
     def popContexts(self):
         if self.contextsStack.__len__() is 0:
