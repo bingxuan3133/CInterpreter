@@ -76,27 +76,3 @@ class ExpressionContext(Context):
             return self
         sym = self.addOperator(id, bindingPower, nud, led)
         return sym
-
-    def addBlockOperator(self,id,bindingPower = 0 ):
-        thisContext = self
-        symClass = self.symbol(id,bindingPower)
-        def led(self):
-            return self
-
-        def nud(self):
-            returnedToken =None
-            nextToken = thisContext.contextManager.parser.lexer.advance()
-            if(nextToken.id== ';'):
-                nextToken = thisContext.contextManager.parser.lexer.advance()
-            while(nextToken.id != '}'):
-                returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
-                self.data.append(returnedToken)
-                nextToken = thisContext.contextManager.parser.lexer.advance()
-
-            thisContext.contextManager.parser.lexer.advance()
-            return self
-
-        symClass.nud = nud
-        symClass.led = led
-        symClass = self.addOperator(id, bindingPower, nud, led)
-        return symClass
