@@ -33,6 +33,12 @@ class TestContextManager(unittest.TestCase):
         self.manager.pushContexts([self.expression, self.flowControl])
         self.assertEqual([[self.expression], [self.expression, self.flowControl]], self.manager.contextsStack)
 
+    def test_access_into_symbolTable_before_push_and_after_pop(self):
+        self.manager.contextsStack = []
+        self.manager.setCurrentContexts([self.expression, self.flowControl])
+
+        self.manager.pushContexts([self.expression, self.flowControl])
+
     def test_popContext_should_raise_overflow_error_given_contextsStack_is_empty(self):
         self.manager.contextsStack = []
         self.assertRaises(RuntimeError, self.manager.popContexts)
