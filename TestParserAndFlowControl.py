@@ -1,5 +1,6 @@
 import unittest
 from Context import *
+from DefaultContext import *
 from ExpressionContext import *
 from FlowControlContext import *
 from Parser import *
@@ -181,15 +182,18 @@ class TestParseWhileFlowControl(unittest.TestCase):
     def setUp(self):
         self.manager = ContextManager()
         self.context = Context(self.manager)
+        self.defaultContext = DefaultContext(self.manager)
         self.flowControlContext = FlowControlContext(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
-        self.contexts = [self.expressionContext, self.flowControlContext]
+        self.contexts = [self.expressionContext, self.flowControlContext, self.defaultContext]
 
         self.flowControlContext.addWhileControl('while', 0)
         self.expressionContext.addGroupOperator('(', 0)
         self.expressionContext.addGroupOperator(')', 0)
         self.expressionContext.addPostfixOperator('++', 150)
+        self.defaultContext.addKeyword('while')
 
+        self.manager.addContext('Default', self.defaultContext)
         self.manager.addContext('FlowControl', self.flowControlContext)
         self.manager.addContext('Expression', self.expressionContext)
         self.manager.setCurrentContexts(self.contexts)

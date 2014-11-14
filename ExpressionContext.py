@@ -2,7 +2,6 @@ from Context import *
 from ContextManager import *
 
 class ExpressionContext(Context):
-
     def addInfixOperator(self, id, bindingPower = 0):
         """
         Add Infix operator into symbol table
