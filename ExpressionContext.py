@@ -32,7 +32,7 @@ class ExpressionContext(Context):
             self.data.append(returnedToken)
             return self
 
-        symClass = self.symbol(id,bindingPower)
+        symClass = self.symbol(id, bindingPower)
         symClass.arity = self.PREFIX_UNARY
         symClass.nud = nud
         return symClass
@@ -44,7 +44,7 @@ class ExpressionContext(Context):
             thisContext.contextManager.parser.lexer.advance()
             return self
 
-        symClass = self.symbol(id,bindingPower)
+        symClass = self.symbol(id, bindingPower)
         symClass.arity = self.POSTFIX_UNARY
         #symClass.nud = self.nud
         symClass.led = led
