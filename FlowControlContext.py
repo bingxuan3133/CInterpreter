@@ -5,6 +5,7 @@ class FlowControlContext(Context):
     def addBlockOperator(self, id, bindingPower = 0 ):
         thisContext = self
         symClass = self.symbol(id, bindingPower)
+        """
         def led(self):
             return self
 
@@ -23,9 +24,11 @@ class FlowControlContext(Context):
             thisContext.contextManager.parser.lexer.advance()
             return self
 
+
         symClass.nud = nud
         symClass.led = led
-        symClass = self.addOperator(id, bindingPower, nud, led)
+        """
+        symClass = self.addOperator(id, bindingPower) #removed the nud and led.
         return symClass
 
     def addWhileControl(self, id, bindingPower):
@@ -84,12 +87,19 @@ class FlowControlContext(Context):
             thisContext.contextManager.pushContexts(thisContext.contextManager.currentContexts)
             newContext = thisContext.contextManager.getContext('Expression')
             thisContext.contextManager.setContexts([newContext])
-            thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.contextManager.parser.parse(bindingPower)
             self.data.append(returnedToken)
-            thisContext.contextManager.parser.lexer.advance(')')
+
+            """
+
+
+            thisContext.contextManager.parser.lexer.advance()
+
+
+            thisContext.contextManager.parser.lexer.peep(')')
             previousContext = thisContext.contextManager.popContexts()
-            thisContext.contextManager.setContexts([previousContext])
+            thisContext.contextManager.setContexts(previousContext)
+            thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.contextManager.parser.parse(bindingPower)
             self.data.append(returnedToken)
             returnedToken = thisContext.contextManager.parser.lexer.peep()
@@ -97,10 +107,32 @@ class FlowControlContext(Context):
                 thisContext.contextManager.parser.lexer.advance('{')
                 returnedToken.data.append(thisContext.contextManager.parser.parse(bindingPower))
                 self.data.append(returnedToken)
+                """
             return self
+
         def led(self, leftToken):
             return self
         symClass = self.symbol(id, bindingPower)
         symClass.nud = nud
         symClass.led = led
         return symClass
+
+    def parseStatement(self,bindingPower):
+        nextToken = None
+        head = self.contextManager.parser.lexer.peep('{')
+        self.contextManager.parser.lexer.advance()
+        self.ignoreTheSemicolon()
+
+        nextToken = self.contextManager.parser.lexer.peep()
+        while nextToken.id is not '}':
+            returnedToken = self.contextManager.parser.parse(bindingPower)
+            head.data.append(returnedToken)
+            self.contextManager.parser.lexer.peep(';')
+            self.ignoreTheSemicolon()
+            nextToken = self.contextManager.parser.lexer.peep()
+        return head
+
+    def ignoreTheSemicolon(self): #Helper function for parseStatement
+        while self.contextManager.parser.lexer.peep().id is ';':
+            self.contextManager.parser.lexer.advance()
+

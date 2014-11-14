@@ -6,6 +6,7 @@ from FlowControlContext import *
 from Parser import *
 from ContextManager import *
 
+
 class TestParseBlockOperator(unittest.TestCase):
     def xtest_parse_will_identify_the_braces(self):
         """
@@ -177,6 +178,7 @@ class TestParseBlockOperator(unittest.TestCase):
         self.assertEqual(3, token.data[0].data[1].data[0].data[0].data[0])
         self.assertEqual(8, token.data[0].data[1].data[0].data[1].data[0])
         self.assertEqual(9, token.data[0].data[1].data[1].data[0])
+
 
 class TestParseWhileFlowControl(unittest.TestCase):
     def setUp(self):
