@@ -91,6 +91,15 @@ class ExpressionContext(Context):
             while(nextToken.id != '}'):
                 returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
                 self.data.append(returnedToken)
+
+                if thisContext.contextManager.parser.lexer.peep().id is ';':
+                    pass
+                else:
+                    raise SyntaxError('Semicolon is missing!')
+
+                if thisContext.contextManager.parser.lexer.peep().id is '}':
+                    break
+
                 nextToken = thisContext.contextManager.parser.lexer.advance()
 
             thisContext.contextManager.parser.lexer.advance()

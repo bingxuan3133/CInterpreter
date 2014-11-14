@@ -587,6 +587,32 @@ class TestParsePrefixGroup(unittest.TestCase):
         self.assertEqual('{', token.id)
         self.assertEqual([], token.data)
 
+    def test_parse_will_identify_the_braces_inside_the_brace(self):
+        """
+            {
+            |
+            {
+        :return:
+        """
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addBlockOperator('{', 0)
+        expressionContext.addBlockOperator('}', 0)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('{ { } } ', context)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('{', token.id)
+        self.assertEqual('{', token.data[0].id)
+
+
     def test_parse_will_identify_the_semicolon_in_the_braces(self):
         """
             {
@@ -751,5 +777,31 @@ class TestParsePrefixGroup(unittest.TestCase):
         self.assertEqual(9, token.data[0].data[1].data[1].data[0])
 
 
+    def test_parse_throw_an_error_when_the_semicolon_is_missing(self):
+        """
+            {
+            |
+            +
+          /   \
+         2     3
+        :return:
+        """
+        manager = ContextManager()
+        context = Context(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext]
+
+        expressionContext.addBlockOperator('{', 0)
+        expressionContext.addInfixOperator('+',70)
+        expressionContext.addOperator(';')
+        expressionContext.addBlockOperator('}', 0)
+
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('{ 2 + 3 } ', context)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+        self.assertRaises(SyntaxError, parser.parse, 0)
 if __name__ == '__main__':
     unittest.main()

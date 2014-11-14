@@ -3,6 +3,8 @@ from ContextManager import *
 def revealSelf(self):
     return '{0} {1}'.format(self.id, self.data)
 
+
+
 class SymbolBase:
     def led(self):
         raise SyntaxError('No led(.) function defined!')
@@ -13,6 +15,10 @@ class Context:
     PREFIX_UNARY = 1
     POSTFIX_UNARY = 2
     BINARY = 3
+
+    keywordTable = {'if'    :   'Reserved keyword should not be here!',\
+                'while' :   'Reserved keyword should not be here!'\
+                }
 
     def __init__(self, contextManager):
         self.symbolTable = {}
@@ -55,6 +61,9 @@ class Context:
 
     def createIdentifier(self, value):
         thisContext = self
+        if value in self.keywordTable:
+            raise SyntaxError(self.keywordTable[value])
+
         def nud(self):
             thisContext.contextManager.parser.lexer.advance()
             return self

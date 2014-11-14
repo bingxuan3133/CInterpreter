@@ -2,7 +2,7 @@ from Context import *
 from ContextManager import *
 
 class FlowControlContext(Context):
-    def addFlowControlOperator(self, id, bindingPower):
+    def addWhileControl(self, id, bindingPower):
         thisContext = self
         def nud(self):
             thisContext.contextManager.parser.lexer.advance('(')
@@ -25,14 +25,19 @@ class FlowControlContext(Context):
         symClass.led = led
         return symClass
 
-    def addControl(self,id,bindingPower=0):
+    def addIfControl(self,id,bindingPower=0):
         thisContext = self
         def nud(self):
             thisContext.contextManager.parser.lexer.advance('(')
+            thisContext.contextManager.pushContexts(thisContext.contextManager.currentContexts)
+            newContext = thisContext.contextManager.getContext('Expression')
+            thisContext.contextManager.setContexts([newContext])
             thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.contextManager.parser.parse(bindingPower)
             self.data.append(returnedToken)
-            thisContext.contextManager.parser.lexer.advance('{')
+            thisContext.contextManager.parser.lexer.advance(')')
+            previousContext = thisContext.contextManager.popContexts()
+            thisContext.contextManager.setContexts([previousContext])
             returnedToken = thisContext.contextManager.parser.parse(bindingPower)
             self.data.append(returnedToken)
             returnedToken = thisContext.contextManager.parser.lexer.peep()

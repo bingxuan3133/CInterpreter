@@ -13,7 +13,7 @@ class TestParseFlowControl(unittest.TestCase):
         expressionContext = ExpressionContext(manager)
         contexts = [expressionContext, flowControlContext]
 
-        flowControlContext.addFlowControlOperator('while', 0)
+        flowControlContext.addWhileControl('while', 0)
         expressionContext.addGroupOperator('(', 0)
         expressionContext.addGroupOperator(')', 0)
 
@@ -38,7 +38,7 @@ class TestParseFlowControl(unittest.TestCase):
         expressionContext = ExpressionContext(manager)
         contexts = [expressionContext, flowControlContext]
 
-        flowControlContext.addFlowControlOperator('while', 0)
+        flowControlContext.addWhileControl('while', 0)
         expressionContext.addGroupOperator('(', 0)
         expressionContext.addGroupOperator(')', 0)
 
@@ -66,7 +66,7 @@ class TestParseFlowControl(unittest.TestCase):
         expressionContext = ExpressionContext(manager)
         contexts = [expressionContext, flowControlContext]
 
-        flowControlContext.addFlowControlOperator('while', 0)
+        flowControlContext.addWhileControl('while', 0)
         expressionContext.addGroupOperator('(', 0)
         expressionContext.addGroupOperator(')', 0)
         expressionContext.addPostfixOperator('++', 150)
@@ -96,7 +96,7 @@ class TestParseFlowControl(unittest.TestCase):
         expressionContext = ExpressionContext(manager)
         contexts = [expressionContext, flowControlContext]
 
-        flowControlContext.addFlowControlOperator('while', 0)
+        flowControlContext.addWhileControl('while', 0)
         expressionContext.addGroupOperator('(', 0)
         expressionContext.addGroupOperator(')', 0)
 
@@ -117,7 +117,7 @@ class TestParseFlowControl(unittest.TestCase):
         expressionContext = ExpressionContext(manager)
         contexts = [expressionContext, flowControlContext]
 
-        flowControlContext.addFlowControlOperator('while', 0)
+        flowControlContext.addWhileControl('while', 0)
         expressionContext.addGroupOperator('(', 0)
         expressionContext.addGroupOperator(')', 0)
 
@@ -149,7 +149,7 @@ class TestParseFlowControl(unittest.TestCase):
         expressionContext.addBlockOperator('}',0)
         expressionContext.addGroupOperator('(',0)
         expressionContext.addGroupOperator(')',0)
-        flowControlContext.addControl('if', 0)
+        flowControlContext.addIfControl('if', 0)
         expressionContext.addInfixOperator('==', 20)
         expressionContext.addBlockOperator('{', 0)
 
@@ -167,6 +167,50 @@ class TestParseFlowControl(unittest.TestCase):
         self.assertEqual(2, token.data[0].data[0].data[0])
         self.assertEqual(3, token.data[0].data[1].data[0])
         self.assertEqual('{', token.data[1].id)
+
+    def test_parse_will_build_an_if_AST_that_contain_expression(self):
+        """
+                if
+            /       \
+           ==       {
+          / \
+        2    3
+        :return:
+        """
+        manager = ContextManager()
+        context = Context(manager)
+        flowControlContext = FlowControlContext(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext, flowControlContext]
+
+        expressionContext.addBlockOperator('}',0)
+        expressionContext.addGroupOperator('(',0)
+        expressionContext.addGroupOperator(')',0)
+        expressionContext.addOperator(';')
+        flowControlContext.addIfControl('if', 0)
+        expressionContext.addInfixOperator('==', 20)
+        expressionContext.addInfixOperator('+', 70)
+        expressionContext.addInfixOperator('=', 20)
+        expressionContext.addInfixOperator('*', 100)
+        expressionContext.addBlockOperator('{', 0)
+
+        manager.addContext('FlowControl', flowControlContext)
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer(' if ( 2 == 3 ) { 5 * 6 ; } ', context)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+        token = parser.parse(0)
+
+        self.assertEqual('if', token.id)
+        self.assertEqual('==', token.data[0].id)
+        self.assertEqual(2, token.data[0].data[0].data[0])
+        self.assertEqual(3, token.data[0].data[1].data[0])
+        self.assertEqual('{', token.data[1].id)
+        self.assertEqual('*', token.data[1].data[0].id)
+        self.assertEqual(5, token.data[1].data[0].data[0].data[0])
+        self.assertEqual(6, token.data[1].data[0].data[1].data[0])
 
     def test_parse_will_build_an_if_else_AST(self):
         """
@@ -186,8 +230,8 @@ class TestParseFlowControl(unittest.TestCase):
         expressionContext.addBlockOperator('}',0)
         expressionContext.addGroupOperator('(',0)
         expressionContext.addGroupOperator(')',0)
-        flowControlContext.addControl('if', 0)
-        flowControlContext.addControl('else', 0)
+        flowControlContext.addIfControl('if', 0)
+        flowControlContext.addIfControl('else', 0)
         expressionContext.addInfixOperator('==', 20)
         expressionContext.addBlockOperator('{', 0)
 
@@ -217,15 +261,205 @@ class TestParseFlowControl(unittest.TestCase):
 
         expressionContext.addGroupOperator('(',0)
         expressionContext.addGroupOperator(')',0)
-        flowControlContext.addControl('if', 0)
+        flowControlContext.addIfControl('if', 0)
 
         manager.addContext('FlowControl', flowControlContext)
         manager.addContext('Expression', expressionContext)
         manager.setContexts(contexts)
-        lexer = Lexer('if ( ) { } ', context)
+        lexer = Lexer('if ( ) ', context)
         parser = Parser(lexer, contexts)
         manager.setParser(parser)
         self.assertRaises(SyntaxError, parser.parse, 0)
 
+    def test_parse_will_build_an_if_statement_with_expression_inside(self):
+        """
+                if
+            /       \
+           ==       {
+          / \       |
+        2    3      =
+                  /   \
+                 x     *
+                     /   \
+                    2    3
+        :return:
+        """
+        manager = ContextManager()
+        context = Context(manager)
+        flowControlContext = FlowControlContext(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext, flowControlContext]
+
+        expressionContext.addBlockOperator('}',0)
+        expressionContext.addGroupOperator('(',0)
+        expressionContext.addGroupOperator(')',0)
+        flowControlContext.addIfControl('if', 0)
+        expressionContext.addInfixOperator('=',20)
+        expressionContext.addInfixOperator('*',100)
+        expressionContext.addOperator(';')
+        expressionContext.addInfixOperator('==', 20)
+        expressionContext.addBlockOperator('{', 0)
+
+        manager.addContext('FlowControl', flowControlContext)
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('if ( 2 == 3 ) { x = 2 * 3 ; } ', context)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('if', token.id)
+        self.assertEqual('==', token.data[0].id)
+        self.assertEqual(2, token.data[0].data[0].data[0])
+        self.assertEqual(3, token.data[0].data[1].data[0])
+        self.assertEqual('{', token.data[1].id)
+        self.assertEqual('=', token.data[1].data[0].id)
+        self.assertEqual('x', token.data[1].data[0].data[0].data[0])
+        self.assertEqual('*', token.data[1].data[0].data[1].id)
+        self.assertEqual(2, token.data[1].data[0].data[1].data[0].data[0])
+        self.assertEqual(3, token.data[1].data[0].data[1].data[1].data[0])
+
+    def test_parse_will_build_an_if_statement_with_multiple_expression_inside(self):
+        """
+                if
+            /       \
+           ==       {
+          / \       |
+        2    3      =
+                  /   \
+                 x     *
+                     /   \
+                    2    3
+        :return:
+        """
+        manager = ContextManager()
+        context = Context(manager)
+        flowControlContext = FlowControlContext(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext, flowControlContext]
+
+        expressionContext.addBlockOperator('}',0)
+        expressionContext.addGroupOperator('(',0)
+        expressionContext.addGroupOperator(')',0)
+        flowControlContext.addIfControl('if', 0)
+        expressionContext.addInfixOperator('=',20)
+        expressionContext.addInfixOperator('*',100)
+        expressionContext.addInfixOperator('+',70)
+        expressionContext.addOperator(';')
+        expressionContext.addInfixOperator('==', 20)
+        expressionContext.addBlockOperator('{', 0)
+
+        manager.addContext('FlowControl', flowControlContext)
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('if ( 2 == 3 ) { x = 2 * 3 ;\
+                                        y = 5 + 7 ; } ', context)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('if', token.id)
+        self.assertEqual('==', token.data[0].id)
+        self.assertEqual(2, token.data[0].data[0].data[0])
+        self.assertEqual(3, token.data[0].data[1].data[0])
+        self.assertEqual('{', token.data[1].id)
+        self.assertEqual('=', token.data[1].data[0].id)
+        self.assertEqual('x', token.data[1].data[0].data[0].data[0])
+        self.assertEqual('*', token.data[1].data[0].data[1].id)
+        self.assertEqual(2, token.data[1].data[0].data[1].data[0].data[0])
+        self.assertEqual(3, token.data[1].data[0].data[1].data[1].data[0])
+        self.assertEqual('=', token.data[1].data[1].id)
+        self.assertEqual('y', token.data[1].data[1].data[0].data[0])
+        self.assertEqual('+', token.data[1].data[1].data[1].id)
+        self.assertEqual(5, token.data[1].data[1].data[1].data[0].data[0])
+        self.assertEqual(7, token.data[1].data[1].data[1].data[1].data[0])
+
+    def test_parse_will_build_an_if_statement_without_the_brace(self):
+        """
+                if
+            /       \
+           ==       {
+          / \       |
+        2    3      =
+                  /   \
+                 x     *
+                     /   \
+                    2    3
+        :return:
+        """
+        manager = ContextManager()
+        context = Context(manager)
+        flowControlContext = FlowControlContext(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext, flowControlContext]
+
+        expressionContext.addBlockOperator('}',0)
+        expressionContext.addGroupOperator('(',0)
+        expressionContext.addGroupOperator(')',0)
+        flowControlContext.addIfControl('if', 0)
+        expressionContext.addInfixOperator('=',20)
+        expressionContext.addInfixOperator('*',100)
+        expressionContext.addOperator(';')
+        expressionContext.addInfixOperator('==', 20)
+        expressionContext.addBlockOperator('{', 0)
+
+        manager.addContext('FlowControl', flowControlContext)
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('if ( 2 == 3 ) x = 2 * 3 ; ', context)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+        token = parser.parse(0)
+        self.assertEqual('if', token.id)
+        self.assertEqual('==', token.data[0].id)
+        self.assertEqual(2, token.data[0].data[0].data[0])
+        self.assertEqual(3, token.data[0].data[1].data[0])
+        self.assertEqual('=', token.data[1].id)
+        self.assertEqual('x', token.data[1].data[0].data[0])
+        self.assertEqual('*', token.data[1].data[1].id)
+        self.assertEqual(2, token.data[1].data[1].data[0].data[0])
+        self.assertEqual(3, token.data[1].data[1].data[1].data[0])
+
+    def test_parse_throw_an_error_if_the_brace_does_not_close(self):
+        manager = ContextManager()
+        context = Context(manager)
+        flowControlContext = FlowControlContext(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext, flowControlContext]
+
+        expressionContext.addGroupOperator('(',0)
+        flowControlContext.addIfControl('if', 0)
+        expressionContext.addInfixOperator('==', 20)
+
+        manager.addContext('FlowControl', flowControlContext)
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('if ( 2 == 3  ', context)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+        self.assertRaises(SyntaxError, parser.parse, 0)
+
+    def test_parse_throw_an_error_if_the_if_is_being_in_the_condition_brace(self):
+        manager = ContextManager()
+        context = Context(manager)
+        flowControlContext = FlowControlContext(manager)
+        expressionContext = ExpressionContext(manager)
+        contexts = [expressionContext, flowControlContext]
+
+        expressionContext.addGroupOperator('(',0)
+        expressionContext.addGroupOperator(')',0)
+        flowControlContext.addIfControl('if', 0)
+        expressionContext.addInfixOperator('==', 20)
+
+        manager.addContext('FlowControl', flowControlContext)
+        manager.addContext('Expression', expressionContext)
+        manager.setContexts(contexts)
+
+        lexer = Lexer('if ( if ( x == 2 ) ) ', context)
+        parser = Parser(lexer, contexts)
+        manager.setParser(parser)
+        self.assertRaises(SyntaxError, parser.parse, 0)
 if __name__ == '__main__':
     unittest.main()
