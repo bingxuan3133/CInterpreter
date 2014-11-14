@@ -5,6 +5,7 @@ from Context import *
 from ExpressionContext import *
 
 class TestParseInfix(unittest.TestCase):
+
     def test_parse_2_plus_3(self):
         manager = ContextManager()
         context = Context(manager)

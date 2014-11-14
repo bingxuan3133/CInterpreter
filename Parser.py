@@ -2,8 +2,9 @@
 from Lexer import *
 from Context import *
 
+
 class Parser:
-    def __init__(self, lexer, contexts):
+    def __init__(self, lexer, context=None):
         self.lexer = lexer
         #self.lexer = Lexer(statement, contexts)
         #self.contexts = contexts
