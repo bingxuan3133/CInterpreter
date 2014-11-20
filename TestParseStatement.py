@@ -36,7 +36,7 @@ class MyTestCase(unittest.TestCase):
         """
         flowControlContext = FlowControlContext(self.manager)
         lexer = Lexer('{ } ', self.context)
-        parser = Parser(lexer, self.contexts)
+        parser = Parser(lexer)
         self.manager.setParser(parser)
         flowControlContext = FlowControlContext(self.manager)
         token = flowControlContext.parseStatement(0)
@@ -50,7 +50,7 @@ class MyTestCase(unittest.TestCase):
         """
         flowControlContext = FlowControlContext(self.manager)
         lexer = Lexer('{ ; } ', self.context)
-        parser = Parser(lexer, self.contexts)
+        parser = Parser(lexer)
         self.manager.setParser(parser)
 
         flowControlContext = FlowControlContext(self.manager)
@@ -69,7 +69,7 @@ class MyTestCase(unittest.TestCase):
         """
         flowControlContext = FlowControlContext(self.manager)
         lexer = Lexer('{ 2 + 3 ; } ', self.context)
-        parser = Parser(lexer, self.contexts)
+        parser = Parser(lexer)
         self.manager.setParser(parser)
 
         flowControlContext = FlowControlContext(self.manager)
@@ -93,7 +93,7 @@ class MyTestCase(unittest.TestCase):
                         3 * 4 ; \
                         5 / 9 ; \
                         } ', self.context)
-        parser = Parser(lexer, self.contexts)
+        parser = Parser(lexer)
         self.manager.setParser(parser)
 
         flowControlContext = FlowControlContext(self.manager)
@@ -124,7 +124,7 @@ class MyTestCase(unittest.TestCase):
         """
         flowControlContext = FlowControlContext(self.manager)
         lexer = Lexer(' { 2 + 3 * 8 / 9 ; } ', self.context)
-        parser = Parser(lexer, self.contexts)
+        parser = Parser(lexer)
         self.manager.setParser(parser)
 
         flowControlContext = FlowControlContext(self.manager)
@@ -139,14 +139,13 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(8, token.data[0].data[1].data[0].data[1].data[0])
         self.assertEqual(9, token.data[0].data[1].data[1].data[0])
 
-    def test_parseStatement_will_parse_a_statement_that_contain_no_statements_in_the_brace(self):
+    def xtest_parseStatement_will_parse_a_statement_that_contain_no_statements_in_the_brace(self):
         lexer = Lexer(' if ( x == 2 ) { } ', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)
         token = parser.parse(0)
         self.assertEqual('if', token.id)
         self.assertEqual('(', token.data[0].id)
-
 
 if __name__ == '__main__':
     unittest.main()

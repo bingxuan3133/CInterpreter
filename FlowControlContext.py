@@ -36,7 +36,7 @@ class FlowControlContext(Context):
         def nud(self):
             thisContext.contextManager.parser.lexer.advance('(')
             contexts = thisContext.contextManager.getCurrentContexts()
-            thisContext.contextManager.pushContexts(contexts)
+            thisContext.contextManager.pushContexts(contexts)  # save context
             default = thisContext.contextManager.getContext('Default')
             expression = thisContext.contextManager.getContext('Expression')
             thisContext.contextManager.setCurrentContexts([expression, default])
@@ -44,15 +44,15 @@ class FlowControlContext(Context):
             returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
             self.data.append(returnedToken)
             thisContext.contextManager.parser.lexer.peep(')')
-            contexts = thisContext.contextManager.popContexts()
+            contexts = thisContext.contextManager.popContexts()  # pop previously saved context
             thisContext.contextManager.setCurrentContexts(contexts)
             thisContext.contextManager.parser.lexer.advance()
-            returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
+            returnedToken = thisContext.contextManager.parser.parseStatements(self.bindingPower)
             self.data.append(returnedToken)
             return self
         def led(self):
             pass
-        symClass = self.symbol(id,bindingPower)
+        symClass = self.symbol(id, bindingPower)
         symClass.nud = nud
         symClass.led = led
         return symClass
@@ -91,11 +91,7 @@ class FlowControlContext(Context):
             self.data.append(returnedToken)
 
             """
-
-
             thisContext.contextManager.parser.lexer.advance()
-
-
             thisContext.contextManager.parser.lexer.peep(')')
             previousContext = thisContext.contextManager.popContexts()
             thisContext.contextManager.setContexts(previousContext)
@@ -117,12 +113,25 @@ class FlowControlContext(Context):
         symClass.led = led
         return symClass
 
-    def parseStatement(self,bindingPower):
+    def parseStatements(self, bindingPower):
         nextToken = None
         head = self.contextManager.parser.lexer.peep('{')
         self.contextManager.parser.lexer.advance()
         self.ignoreTheSemicolon()
+        nextToken = self.contextManager.parser.lexer.peep()
+        while nextToken.id is not '}':
+            returnedToken = self.contextManager.parser.parse(bindingPower)
+            head.data.append(returnedToken)
+            self.contextManager.parser.lexer.peep(';')
+            self.ignoreTheSemicolon()
+            nextToken = self.contextManager.parser.lexer.peep()
+        return head
 
+    def parseStatement(self, bindingPower):
+        nextToken = None
+        head = self.contextManager.parser.lexer.peep('{')
+        self.contextManager.parser.lexer.advance()
+        self.ignoreTheSemicolon()
         nextToken = self.contextManager.parser.lexer.peep()
         while nextToken.id is not '}':
             returnedToken = self.contextManager.parser.parse(bindingPower)
@@ -135,4 +144,3 @@ class FlowControlContext(Context):
     def ignoreTheSemicolon(self): #Helper function for parseStatement
         while self.contextManager.parser.lexer.peep().id is ';':
             self.contextManager.parser.lexer.advance()
-

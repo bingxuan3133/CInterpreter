@@ -3,6 +3,7 @@
 import unittest
 from Lexer import *
 from Context import *
+from ContextManager import *
 
 class TestLexer(unittest.TestCase):
 
