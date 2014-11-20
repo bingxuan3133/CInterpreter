@@ -69,7 +69,6 @@ class TestParseWhileFlowControl(unittest.TestCase):
         lexer = Lexer('while ( while ( 1 ) )', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)
-
         self.assertRaises(SyntaxError, parser.parse, 0)
 
     def test_parse_while_1_without_closing_bracket_should_raise_an_error(self):
