@@ -1,6 +1,6 @@
 import unittest
 
-import os,sys
+import os, sys
 lib_path = os.path.abspath('../src')
 sys.path.append(lib_path)
 
@@ -10,59 +10,123 @@ from ExpressionContext import *
 from FlowControlContext import *
 from Parser import *
 
-
-
-
-class MyTestCase(unittest.TestCase):
+class TestParseStatement(unittest.TestCase):
     def setUp(self):
         self.manager = ContextManager()
         self.context = Context(self.manager)
-        expressionContext = ExpressionContext(self.manager)
-        flowControlContext = FlowControlContext(self.manager)
-        self.contexts = [expressionContext, flowControlContext]
+        self.expressionContext = ExpressionContext(self.manager)
+        self.flowControlContext = FlowControlContext(self.manager)
+        self.contexts = [self.expressionContext, self.flowControlContext]
 
-        flowControlContext.addBlockOperator('{', 0)
-        expressionContext.addPrefixInfixOperator('+', 70)
-        expressionContext.addPrefixInfixOperator('-', 70)
-        expressionContext.addInfixOperator('*', 100)
-        expressionContext.addInfixOperator('/', 100)
-        expressionContext.addInfixOperator('==', 20)
-        expressionContext.addOperator(';')
-        flowControlContext.addBlockOperator('}', 0)
-        flowControlContext.addIfControl('if', 0)
-        expressionContext.addGroupOperator('(', 0)
-        expressionContext.addGroupOperator(')', 0)
+        self.flowControlContext.addBlockOperator('{', 0)
+        self.context.addOperator('}', 0)
+        #self.flowControlContext.addBlockOperator('}', 0)
+        self.expressionContext.addPrefixInfixOperator('+', 70)
+        self.expressionContext.addPrefixInfixOperator('-', 70)
+        self.expressionContext.addInfixOperator('*', 100)
+        self.expressionContext.addInfixOperator('/', 100)
+        self.expressionContext.addInfixOperator('==', 20)
+        self.expressionContext.addOperator(';')
+        self.flowControlContext.addIfControl('if', 0)
+        self.expressionContext.addGroupOperator('(', 0)
+        self.expressionContext.addGroupOperator(')', 0)
 
-        self.manager.addContext('Expression', expressionContext)
-        self.manager.addContext('FlowControl', flowControlContext)
+        self.manager.addContext('Expression', self.expressionContext)
+        self.manager.addContext('FlowControl', self.flowControlContext)
         self.manager.setCurrentContexts(self.contexts)
 
-    def test_parse_will_return_None_for_an_empty_brace(self):
+    def test_parseStatement_will_return_None_for_an_empty_statement(self):
+        """
+            ;
+        :return:
+        """
+        lexer = Lexer(';', self.context)
+        parser = Parser(lexer)
+        self.manager.setParser(parser)
+        token = self.flowControlContext.parseStatement(0)
+        self.assertEqual(None, token)
+
+    def test_parseStatement_should_return_2_plus_3_for_a_2_plus_3_statement(self):
+        """
+            2 + 3 ;
+        :return:
+        """
+        lexer = Lexer('2 + 3 ;', self.context)
+        parser = Parser(lexer)
+        self.manager.setParser(parser)
+        token = self.flowControlContext.parseStatement(0)
+        self.assertEqual('+', token.id)
+        self.assertEqual(2, token.data[0].data[0])
+        self.assertEqual(3, token.data[1].data[0])
+
+    def test_parseStatement_should_raise_SyntaxError_for_a_2_plus_3_statement_without_semicolon(self):
+        """
+            2 + 3
+        :return:
+        """
+        lexer = Lexer('2 + 3', self.context)
+        parser = Parser(lexer)
+        self.manager.setParser(parser)
+        self.assertRaises(SyntaxError, self.flowControlContext.parseStatement, 0)
+
+class TestParseStatementWithBraces(unittest.TestCase):
+    def setUp(self):
+        self.manager = ContextManager()
+        self.context = Context(self.manager)
+        self.expressionContext = ExpressionContext(self.manager)
+        self.flowControlContext = FlowControlContext(self.manager)
+        self.contexts = [self.expressionContext, self.flowControlContext]
+
+        self.flowControlContext.addBlockOperator('{', 0)
+        self.context.addOperator('}', 0)
+        #self.flowControlContext.addBlockOperator('}', 0)
+        self.expressionContext.addPrefixInfixOperator('+', 70)
+        self.expressionContext.addPrefixInfixOperator('-', 70)
+        self.expressionContext.addInfixOperator('*', 100)
+        self.expressionContext.addInfixOperator('/', 100)
+        self.expressionContext.addInfixOperator('==', 20)
+        self.expressionContext.addOperator(';')
+        self.flowControlContext.addIfControl('if', 0)
+        self.expressionContext.addGroupOperator('(', 0)
+        self.expressionContext.addGroupOperator(')', 0)
+
+        self.manager.addContext('Expression', self.expressionContext)
+        self.manager.addContext('FlowControl', self.flowControlContext)
+        self.manager.setCurrentContexts(self.contexts)
+
+    def test_parseStatement_should_return_open_brace_token_for_an_empty_brace(self):
         """
             {
         :return:
         """
-        flowControlContext = FlowControlContext(self.manager)
-        lexer = Lexer('{ } ', self.context)
+        lexer = Lexer('{ }', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)
-        flowControlContext = FlowControlContext(self.manager)
-        token = flowControlContext.parseStatement(0)
+        token = self.flowControlContext.parseStatement(0)
         self.assertEqual('{', token.id)
         self.assertEqual([], token.data)
 
-    def test_parse_will_ignore_the_semicolon_in_the_brace(self):
+    def test_parseStatement_should_return_open_brace_token_with_empty_data_for_an_empty_statement(self):
         """
-            {
+            { ; }
         :return:
         """
-        flowControlContext = FlowControlContext(self.manager)
-        lexer = Lexer('{ ; } ', self.context)
+        lexer = Lexer('{ ; }', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)
+        token = self.flowControlContext.parseStatement(0)
+        self.assertEqual('{', token.id)
+        self.assertEqual([], token.data)
 
-        flowControlContext = FlowControlContext(self.manager)
-        token = flowControlContext.parseStatement(0)
+    def test_parseStatement_should_return_open_brace_token_with_empty_data_for_3_empty_statements(self):
+        """
+            { ; ; ; }
+        :return:
+        """
+        lexer = Lexer('{ ; ; ; }', self.context)
+        parser = Parser(lexer)
+        self.manager.setParser(parser)
+        token = self.flowControlContext.parseStatement(0)
         self.assertEqual('{', token.id)
         self.assertEqual([], token.data)
 
@@ -75,37 +139,52 @@ class MyTestCase(unittest.TestCase):
          2     3
         :return:
         """
-        flowControlContext = FlowControlContext(self.manager)
-        lexer = Lexer('{ 2 + 3 ; } ', self.context)
+        lexer = Lexer('{ 2 + 3 ; }', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)
-
-        flowControlContext = FlowControlContext(self.manager)
-        token = flowControlContext.parseStatement(0)
+        token = self.flowControlContext.parseStatement(0)
         self.assertEqual('{', token.id)
         self.assertEqual('+', token.data[0].id)
         self.assertEqual(2, token.data[0].data[0].data[0])
         self.assertEqual(3, token.data[0].data[1].data[0])
 
-    def test_parse_will_build_an_ast_for_expressions_in_the_brace(self):
+    def test_parseStatement_should_build_ast_for_double_layers_of_braces(self):
         """
-                {           -   /
-            /       \        /     \
-            +       *       5       9
-          /   \    /    \
-         2     3  3     4
+            {
+            |
+            {
+            |
+            +
+          /   \
+         2     3
         :return:
         """
-        flowControlContext = FlowControlContext(self.manager)
+        lexer = Lexer('{ { 2 + 3 ; } }', self.context)
+        parser = Parser(lexer)
+        self.manager.setParser(parser)
+        token = self.flowControlContext.parseStatement(0)
+        self.assertEqual('{', token.id)
+        self.assertEqual('{', token.data[0].id)
+        self.assertEqual('+', token.data[0].data[0].id)
+        self.assertEqual(2, token.data[0].data[0].data[0].data[0])
+        self.assertEqual(3, token.data[0].data[0].data[1].data[0])
+
+    def test_parse_will_build_an_ast_for_expressions_in_the_brace(self):
+        """
+        {----------------------
+            |       |         |
+            +       *         /
+          /   \    /   \    /   \
+         2     3  3     4  5     9
+        :return:
+        """
         lexer = Lexer('{ 2 + 3 ; \
                         3 * 4 ; \
                         5 / 9 ; \
-                        } ', self.context)
+                        }', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)
-
-        flowControlContext = FlowControlContext(self.manager)
-        token = flowControlContext.parseStatement(0)
+        token = self.flowControlContext.parseStatement(0)
         self.assertEqual('{', token.id)
         self.assertEqual('+', token.data[0].id)
         self.assertEqual(2, token.data[0].data[0].data[0])
@@ -130,14 +209,10 @@ class MyTestCase(unittest.TestCase):
          3    8
         :return:
         """
-        flowControlContext = FlowControlContext(self.manager)
-        lexer = Lexer(' { 2 + 3 * 8 / 9 ; } ', self.context)
+        lexer = Lexer(' { 2 + 3 * 8 / 9 ; }', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)
-
-        flowControlContext = FlowControlContext(self.manager)
-        token = flowControlContext.parseStatement(0)
-
+        token = self.flowControlContext.parseStatement(0)
         self.assertEqual('{', token.id)
         self.assertEqual('+', token.data[0].id)
         self.assertEqual(2, token.data[0].data[0].data[0])
@@ -147,39 +222,19 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(8, token.data[0].data[1].data[0].data[1].data[0])
         self.assertEqual(9, token.data[0].data[1].data[1].data[0])
 
-    def test_parseStatement_will_throw_an_error_when_the_brace_is_not_closed(self):
-        flowControlContext = FlowControlContext(self.manager)
-        lexer = Lexer('{ 2 + 3 ; ', self.context)
+    def test_parseStatement_should_raise_SyntaxError_when_there_is_missing_closing_brace(self):
+        lexer = Lexer('{ 2 + 3 ;', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)
 
-        flowControlContext = FlowControlContext(self.manager)
-        self.assertRaises(SyntaxError, flowControlContext.parseStatement, 0)
+        self.assertRaises(SyntaxError, self.flowControlContext.parseStatement, 0)
 
-
-    def test_parseStatement_will_parse_a_statement_that_contain_no_statements_in_the_brace(self):
-        """
-                if
-            /       \
-           (        {
-           |
-           ==
-          / \
-        x    2
-        :return:
-        """
-
-        lexer = Lexer(' if ( x == 2 ) { } ', self.context)
+    def test_parseStatement_should_raise_SyntaxError_when_there_is_missing_one_closing_brace(self):
+        lexer = Lexer('{ 2 + 3 ; { }', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)
-        token = parser.parse(0)
-        self.assertEqual('if', token.id)
-        self.assertEqual('(', token.data[0].id)
-        self.assertEqual('==', token.data[0].data[0].id)
-        self.assertEqual('x', token.data[0].data[0].data[0].data[0])
-        self.assertEqual(2, token.data[0].data[0].data[1].data[0])
-        self.assertEqual('{', token.data[1].id)
 
+        self.assertRaises(SyntaxError, self.flowControlContext.parseStatement, 0)
 
 if __name__ == '__main__':
     unittest.main()

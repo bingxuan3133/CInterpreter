@@ -11,180 +11,6 @@ from FlowControlContext import *
 from Parser import *
 from ContextManager import *
 
-
-class TestParseBlockOperator(unittest.TestCase):
-    def xtest_parse_will_identify_the_braces(self):
-        """
-            {
-        :return:
-        """
-        manager = ContextManager()
-        context = Context(manager)
-        flowControlContext = FlowControlContext(manager)
-        contexts = [flowControlContext]
-
-        flowControlContext.addBlockOperator('{', 0)
-        flowControlContext.addBlockOperator('}', 0)
-
-        manager.addContext('Expression', flowControlContext)
-        manager.setCurrentContexts(contexts)
-
-        lexer = Lexer('{ } ', context)
-        parser = Parser(lexer, contexts)
-        manager.setParser(parser)
-        token = parser.parse(0)
-        self.assertEqual('{', token.id)
-        self.assertEqual([], token.data)
-
-    def xtest_parse_will_identify_the_semicolon_in_the_braces_and_point_to_the_next_location_after_finished_parse(self):
-        """
-            {
-        :return:
-        """
-        manager = ContextManager()
-        context = Context(manager)
-        expressionContext = ExpressionContext(manager)
-        flowControlContext = FlowControlContext(manager)
-        contexts = [expressionContext, flowControlContext]
-
-        flowControlContext.addBlockOperator('{', 0)
-        expressionContext.addOperator(';')
-        flowControlContext.addBlockOperator('}', 0)
-
-        manager.addContext('Expression', expressionContext)
-        manager.addContext('FlowControl', flowControlContext)
-        manager.setCurrentContexts(contexts)
-
-        lexer = Lexer('{ ; } ', context)
-        parser = Parser(lexer, contexts)
-        manager.setParser(parser)
-        token = parser.parse(0)
-        self.assertEqual('{', token.id)
-        self.assertEqual('(end)', parser.lexer.peep().data[0])
-
-    def xtest_parse_will_build_an_ast_for_expression_in_the_brace(self):
-        """
-            {
-            |
-            +
-          /   \
-         2     3
-        :return:
-        """
-        manager = ContextManager()
-        context = Context(manager)
-        expressionContext = ExpressionContext(manager)
-        flowControlContext = FlowControlContext(manager)
-        contexts = [expressionContext, flowControlContext]
-
-        flowControlContext.addBlockOperator('{', 0)
-        expressionContext.addInfixOperator('+', 70)
-        expressionContext.addOperator(';')
-        flowControlContext.addBlockOperator('}', 0)
-
-        manager.addContext('Expression', expressionContext)
-        manager.addContext('FlowControl', flowControlContext)
-        manager.setCurrentContexts(contexts)
-
-        lexer = Lexer('{ 2 + 3 ; } ', context)
-        parser = Parser(lexer, contexts)
-        manager.setParser(parser)
-        token = parser.parse(0)
-        self.assertEqual('{', token.id)
-        self.assertEqual('+', token.data[0].id)
-        self.assertEqual(2, token.data[0].data[0].data[0])
-        self.assertEqual(3, token.data[0].data[1].data[0])
-
-    def xtest_parse_will_build_an_ast_for_expressions_in_the_brace(self):
-        """
-                {           -   /
-            /       \        /     \
-            +       *       5       9
-          /   \    /    \
-         2     3  3     4
-        :return:
-        """
-        manager = ContextManager()
-        context = Context(manager)
-        expressionContext = ExpressionContext(manager)
-        flowControlContext = FlowControlContext(manager)
-        contexts = [expressionContext, flowControlContext]
-
-        flowControlContext.addBlockOperator('{', 0)
-        expressionContext.addInfixOperator('+', 70)
-        expressionContext.addInfixOperator('*', 100)
-        expressionContext.addInfixOperator('/', 100)
-        expressionContext.addOperator(';')
-        flowControlContext.addBlockOperator('}', 0)
-
-        manager.addContext('Expression', expressionContext)
-        manager.addContext('FlowControl', flowControlContext)
-        manager.setCurrentContexts(contexts)
-
-        lexer = Lexer('{ 2 + 3 ; \
-                        3 * 4 ; \
-                        5 / 9 ; \
-                        } ', context)
-        parser = Parser(lexer, contexts)
-        manager.setParser(parser)
-        token = parser.parse(0)
-
-        self.assertEqual('{', token.id)
-        self.assertEqual('+', token.data[0].id)
-        self.assertEqual(2, token.data[0].data[0].data[0])
-        self.assertEqual(3, token.data[0].data[1].data[0])
-        self.assertEqual('*', token.data[1].id)
-        self.assertEqual(3, token.data[1].data[0].data[0])
-        self.assertEqual(4, token.data[1].data[1].data[0])
-        self.assertEqual('/', token.data[2].id)
-        self.assertEqual(5, token.data[2].data[0].data[0])
-        self.assertEqual(9, token.data[2].data[1].data[0])
-
-    def xtest_parse_will_build_an_AST_for_longer_expression_in_the_brace(self):
-        """
-            {
-            |
-            +
-          /   \
-         2     /
-             /  \
-            *   9
-          /  \
-         3    8
-        :return:
-        """
-        manager = ContextManager()
-        context = Context(manager)
-        expressionContext = ExpressionContext(manager)
-        flowControlContext = FlowControlContext(manager)
-        contexts = [expressionContext, flowControlContext]
-
-        flowControlContext.addBlockOperator('{', 0)
-        expressionContext.addInfixOperator('+', 70)
-        expressionContext.addInfixOperator('*', 100)
-        expressionContext.addInfixOperator('/', 100)
-        expressionContext.addOperator(';')
-        flowControlContext.addBlockOperator('}', 0)
-
-        manager.addContext('Expression', expressionContext)
-        manager.addContext('FlowControl', flowControlContext)
-        manager.setCurrentContexts(contexts)
-
-        lexer = Lexer('{ 2 + 3 * 8 / 9 ; } ', context)
-        parser = Parser(lexer, contexts)
-        manager.setParser(parser)
-        token = parser.parse(0)
-
-        self.assertEqual('{', token.id)
-        self.assertEqual('+', token.data[0].id)
-        self.assertEqual(2, token.data[0].data[0].data[0])
-        self.assertEqual('/', token.data[0].data[1].id)
-        self.assertEqual('*', token.data[0].data[1].data[0].id)
-        self.assertEqual(3, token.data[0].data[1].data[0].data[0].data[0])
-        self.assertEqual(8, token.data[0].data[1].data[0].data[1].data[0])
-        self.assertEqual(9, token.data[0].data[1].data[1].data[0])
-
-
 class TestParseWhileFlowControl(unittest.TestCase):
     def setUp(self):
         self.manager = ContextManager()
@@ -195,6 +21,9 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.contexts = [self.expressionContext, self.flowControlContext, self.defaultContext]
 
         self.flowControlContext.addWhileControl('while', 0)
+        self.flowControlContext.addBlockOperator('{', 0)
+        self.flowControlContext.addBlockOperator('}', 0)
+        self.expressionContext.addGroupOperator(';', 0)
         self.expressionContext.addGroupOperator('(', 0)
         self.expressionContext.addGroupOperator(')', 0)
         self.expressionContext.addPostfixOperator('++', 150)
@@ -206,7 +35,7 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.manager.setCurrentContexts(self.contexts)
 
     def test_parse_while_1(self):
-        lexer = Lexer('while ( 1 )', self.context)
+        lexer = Lexer('while ( 1 ) ;', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)
 
@@ -217,7 +46,7 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.assertEqual(1, token.data[0].data[0])
 
     def test_parse_while_1_while_1(self):
-        lexer = Lexer('while ( 1 ) while ( 1 )', self.context)
+        lexer = Lexer('while ( 1 ) while ( 1 ) ;', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)
 
@@ -231,7 +60,7 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.assertEqual(1, token.data[1].data[0].data[0])
 
     def test_parse_while_1_do_something(self):
-        lexer = Lexer('while ( 1 ) i ++', self.context)
+        lexer = Lexer('while ( 1 ) i ++ ;', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)
 
@@ -245,7 +74,7 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.assertEqual('i', token.data[1].data[0].data[0])
 
     def test_parse_while_while_1_should_raise_an_error(self):
-        lexer = Lexer('while ( while ( 1 ) )', self.context)
+        lexer = Lexer('while ( while ( 1 ) ) ;', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)
         self.assertRaises(SyntaxError, parser.parse, 0)
@@ -258,13 +87,14 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.assertRaises(SyntaxError, parser.parse, 0)
 
     # while control with block statement
-    def xtest_parse_while_1_empty_block_statement(self):
+    def test_parse_while_1_empty_block_statement(self):
         """
             while
             /   \
            1     {
         :return:
         """
+        self.flowControlContext.addBlockOperator('{', 0)
         lexer = Lexer('while ( 1 ) { }', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)

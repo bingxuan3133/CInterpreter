@@ -7,33 +7,48 @@ from Context import *
 from ContextManager import *
 
 class FlowControlContext(Context):
+    def parseStatement(self, bindingPower):
+        firstToken = self.contextManager.parser.lexer.peep()
+        if firstToken.id == ';':
+            self.contextManager.parser.lexer.advance()
+            returnedToken = None
+        elif firstToken.id == '}':
+            self.contextManager.parser.lexer.advance()
+            returnedToken = None
+        elif firstToken.id == '{':
+            returnedToken = self.contextManager.parser.parse(bindingPower)
+
+        else:
+            returnedToken = self.contextManager.parser.parse(bindingPower)
+            self.contextManager.parser.lexer.peep(';')
+            self.contextManager.parser.lexer.advance()
+        return returnedToken
+
+    def parseStatements(self, bindingPower):
+        list = []
+        token = self.contextManager.parser.lexer.peep()
+        while token.id != '}' and token.id != '(systemToken)':
+            returnedToken = self.parseStatement(bindingPower)
+            if returnedToken is not None:
+                list.append(returnedToken)
+            token = self.contextManager.parser.lexer.peep()
+        return list
+
     def addBlockOperator(self, id, bindingPower = 0 ):
         thisContext = self
         symClass = self.symbol(id, bindingPower)
-        """
         def led(self):
             return self
-
         def nud(self):
-            returnedToken = None
-            nextToken = thisContext.contextManager.parser.lexer.advance()
-            if nextToken.id == ';':
-                nextToken = thisContext.contextManager.parser.lexer.advance()
-            while nextToken.id != '}':
-                returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
-                self.data.append(returnedToken)
-                if thisContext.contextManager.parser.lexer.peep().id is '}':
-                    break
-                nextToken = thisContext.contextManager.parser.lexer.advance()
-
+            thisContext.contextManager.parser.lexer.advance()
+            returnedList = thisContext.parseStatements(bindingPower)
+            self.data = returnedList
+            thisContext.contextManager.parser.lexer.peep('}')
             thisContext.contextManager.parser.lexer.advance()
             return self
-
-
+        symClass = self.addOperator(id, bindingPower)  # removed the nud and led
         symClass.nud = nud
         symClass.led = led
-        """
-        symClass = self.addOperator(id, bindingPower) #removed the nud and led.
         return symClass
 
     def addWhileControl(self, id, bindingPower):
@@ -41,23 +56,23 @@ class FlowControlContext(Context):
         def nud(self):
             thisContext.contextManager.parser.lexer.advance('(')
             contexts = thisContext.contextManager.getCurrentContexts()
-            thisContext.contextManager.pushContexts(contexts)
+            thisContext.contextManager.pushContexts(contexts)  # save context
             default = thisContext.contextManager.getContext('Default')
             expression = thisContext.contextManager.getContext('Expression')
             thisContext.contextManager.setCurrentContexts([expression, default])
             thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
             self.data.append(returnedToken)
-            thisContext.contextManager.parser.lexer.peep(')')
-            contexts = thisContext.contextManager.popContexts()
+            wadisthis = thisContext.contextManager.parser.lexer.peep(')')
+            contexts = thisContext.contextManager.popContexts()  # pop previously saved context
             thisContext.contextManager.setCurrentContexts(contexts)
-            thisContext.contextManager.parser.lexer.advance()
-            returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
+            wadisthis = thisContext.contextManager.parser.lexer.advance()
+            returnedToken = thisContext.parseStatement(self.bindingPower)
             self.data.append(returnedToken)
             return self
         def led(self):
             pass
-        symClass = self.symbol(id,bindingPower)
+        symClass = self.symbol(id, bindingPower)
         symClass.nud = nud
         symClass.led = led
         return symClass
@@ -99,37 +114,13 @@ class FlowControlContext(Context):
             thisContext.contextManager.parser.lexer.peep(')')
             tempContext =  thisContext.contextManager.popContexts()
             thisContext.contextManager.setCurrentContexts(tempContext)
-            nextToken = thisContext.contextManager.parser.lexer.advance('{')
+            nextToken = thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.parseStatement(bindingPower)
             self.data.append(returnedToken)
-
             return self
-
         def led(self, leftToken):
             return self
         symClass = self.symbol(id, bindingPower)
         symClass.nud = nud
         symClass.led = led
         return symClass
-
-    def parseStatement(self,bindingPower):
-        nextToken = None
-        head = self.contextManager.parser.lexer.peep('{')
-        self.contextManager.parser.lexer.advance()
-        self.ignoreTheSemicolon()
-
-        nextToken = self.contextManager.parser.lexer.peep()
-        while nextToken.id is not '}':
-            returnedToken = self.contextManager.parser.parse(bindingPower)
-            head.data.append(returnedToken)
-            self.contextManager.parser.lexer.peep(';')
-            self.ignoreTheSemicolon()
-            nextToken = self.contextManager.parser.lexer.peep()
-            if nextToken.data[0] is not None and nextToken.data[0] == '(end)':
-                raise SyntaxError('Expected a closing brace \'}\' ')
-        return head
-
-    def ignoreTheSemicolon(self): #Helper function for parseStatement
-        while self.contextManager.parser.lexer.peep().id is ';':
-            self.contextManager.parser.lexer.advance()
-

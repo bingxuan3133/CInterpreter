@@ -33,6 +33,7 @@ class Context:
             return self.symbolTable[id]
 
     def addOperator(self, id, bindingPower = 0, nud = None, led = None):
+
         symClass = self.symbol(id, bindingPower)
         symClass.nud = nud
         symClass.led = led
