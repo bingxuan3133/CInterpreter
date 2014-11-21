@@ -25,7 +25,6 @@ class TestParseInfix(unittest.TestCase):
         lexer = Lexer('2 + 3', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)
-
         token = parser.parse(0)
 
         self.assertEqual('+', token.id)
