@@ -2,6 +2,33 @@ from Context import *
 from ContextManager import *
 
 class FlowControlContext(Context):
+    def parseStatement(self, bindingPower):
+        firstToken = self.contextManager.parser.lexer.peep()
+        if firstToken.id == ';':
+            self.contextManager.parser.lexer.advance()
+            returnedToken = None
+        elif firstToken.id == '}':
+            self.contextManager.parser.lexer.advance()
+            returnedToken = None
+        elif firstToken.id == '{':
+            returnedToken = self.contextManager.parser.parse(bindingPower)
+
+        else:
+            returnedToken = self.contextManager.parser.parse(bindingPower)
+            self.contextManager.parser.lexer.peep(';')
+            self.contextManager.parser.lexer.advance()
+        return returnedToken
+
+    def parseStatements(self, bindingPower):
+        list = []
+        token = self.contextManager.parser.lexer.peep()
+        while token.id != '}' and token.id != '(systemToken)':
+            returnedToken = self.parseStatement(bindingPower)
+            if returnedToken is not None:
+                list.append(returnedToken)
+            token = self.contextManager.parser.lexer.peep()
+        return list
+
     def addBlockOperator(self, id, bindingPower = 0 ):
         thisContext = self
         symClass = self.symbol(id, bindingPower)
@@ -9,20 +36,14 @@ class FlowControlContext(Context):
             return self
         def nud(self):
             thisContext.contextManager.parser.lexer.advance()
-            returnedToken = thisContext.parseStatement(bindingPower)
-            nextToken = thisContext.contextManager.parser.lexer.peep(';')
-            nextToken = thisContext.contextManager.parser.lexer.advance()
-            self.data.append(returnedToken)
-            while thisContext.contextManager.parser.lexer.peep().id is not '}':
-                thisContext.contextManager.parser.lexer.advance()
-                returnedToken = thisContext.parseStatement(bindingPower)
-                nextToken = thisContext.contextManager.parser.lexer.peep(';')
-                nextToken = thisContext.contextManager.parser.lexer.advance()
-                self.data.append(returnedToken)
+            returnedList = thisContext.parseStatements(bindingPower)
+            self.data = returnedList
+            thisContext.contextManager.parser.lexer.peep('}')
+            thisContext.contextManager.parser.lexer.advance()
             return self
+        symClass = self.addOperator(id, bindingPower)  # removed the nud and led
         symClass.nud = nud
         symClass.led = led
-        symClass = self.addOperator(id, bindingPower) #removed the nud and led.
         return symClass
 
     def addWhileControl(self, id, bindingPower):
@@ -98,21 +119,3 @@ class FlowControlContext(Context):
         symClass.nud = nud
         symClass.led = led
         return symClass
-
-    def parseStatement(self, bindingPower):
-        if self.contextManager.parser.lexer.peep().id is ';':
-            self.contextManager.parser.lexer.advance()
-            return
-        returnedToken = self.contextManager.parser.parse(bindingPower)
-        if returnedToken is None:
-            return None
-        else:
-            if returnedToken.id is '{':
-                self.contextManager.parser.lexer.peep('}')
-            else:
-                self.contextManager.parser.lexer.peep(';')
-            return returnedToken
-
-    def ignoreTheSemicolon(self): #Helper function for parseStatement
-        while self.contextManager.parser.lexer.peep().id is ';':
-            self.contextManager.parser.lexer.advance()
