@@ -19,7 +19,7 @@ class TestParseStatement(unittest.TestCase):
         self.contexts = [self.expressionContext, self.flowControlContext]
 
         self.flowControlContext.addBlockOperator('{', 0)
-        self.context.addOperator('}', 0)
+        self.flowControlContext.addOperator('}', 0)
         #self.flowControlContext.addBlockOperator('}', 0)
         self.expressionContext.addPrefixInfixOperator('+', 70)
         self.expressionContext.addPrefixInfixOperator('-', 70)
@@ -78,7 +78,7 @@ class TestParseStatementWithBraces(unittest.TestCase):
         self.contexts = [self.expressionContext, self.flowControlContext]
 
         self.flowControlContext.addBlockOperator('{', 0)
-        self.context.addOperator('}', 0)
+        self.flowControlContext.addOperator('}', 0)
         #self.flowControlContext.addBlockOperator('}', 0)
         self.expressionContext.addPrefixInfixOperator('+', 70)
         self.expressionContext.addPrefixInfixOperator('-', 70)
