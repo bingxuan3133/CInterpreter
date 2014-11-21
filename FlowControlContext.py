@@ -5,29 +5,23 @@ class FlowControlContext(Context):
     def addBlockOperator(self, id, bindingPower = 0 ):
         thisContext = self
         symClass = self.symbol(id, bindingPower)
-        """
         def led(self):
             return self
-
         def nud(self):
-            returnedToken = None
-            nextToken = thisContext.contextManager.parser.lexer.advance()
-            if nextToken.id == ';':
-                nextToken = thisContext.contextManager.parser.lexer.advance()
-            while nextToken.id != '}':
-                returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
-                self.data.append(returnedToken)
-                if thisContext.contextManager.parser.lexer.peep().id is '}':
-                    break
-                nextToken = thisContext.contextManager.parser.lexer.advance()
-
             thisContext.contextManager.parser.lexer.advance()
+            returnedToken = thisContext.parseStatement(bindingPower)
+            nextToken = thisContext.contextManager.parser.lexer.peep(';')
+            nextToken = thisContext.contextManager.parser.lexer.advance()
+            self.data.append(returnedToken)
+            while thisContext.contextManager.parser.lexer.peep().id is not '}':
+                thisContext.contextManager.parser.lexer.advance()
+                returnedToken = thisContext.parseStatement(bindingPower)
+                nextToken = thisContext.contextManager.parser.lexer.peep(';')
+                nextToken = thisContext.contextManager.parser.lexer.advance()
+                self.data.append(returnedToken)
             return self
-
-
         symClass.nud = nud
         symClass.led = led
-        """
         symClass = self.addOperator(id, bindingPower) #removed the nud and led.
         return symClass
 
@@ -43,11 +37,11 @@ class FlowControlContext(Context):
             thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
             self.data.append(returnedToken)
-            thisContext.contextManager.parser.lexer.peep(')')
+            wadisthis = thisContext.contextManager.parser.lexer.peep(')')
             contexts = thisContext.contextManager.popContexts()  # pop previously saved context
             thisContext.contextManager.setCurrentContexts(contexts)
-            thisContext.contextManager.parser.lexer.advance()
-            returnedToken = thisContext.contextManager.parser.parseStatements(self.bindingPower)
+            wadisthis = thisContext.contextManager.parser.lexer.advance()
+            returnedToken = thisContext.parseStatement(self.bindingPower)
             self.data.append(returnedToken)
             return self
         def led(self):
@@ -94,7 +88,7 @@ class FlowControlContext(Context):
             thisContext.contextManager.parser.lexer.peep(')')
             tempContext =  thisContext.contextManager.popContexts()
             thisContext.contextManager.setCurrentContexts(tempContext)
-            nextToken = thisContext.contextManager.parser.lexer.advance('{')
+            nextToken = thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.parseStatement(bindingPower)
             self.data.append(returnedToken)
             return self
@@ -105,35 +99,19 @@ class FlowControlContext(Context):
         symClass.led = led
         return symClass
 
-    def parseStatements(self, bindingPower):
-        nextToken = None
-        head = self.contextManager.parser.lexer.peep('{')
-        self.contextManager.parser.lexer.advance()
-        self.ignoreTheSemicolon()
-        nextToken = self.contextManager.parser.lexer.peep()
-        while nextToken.id is not '}':
-            returnedToken = self.contextManager.parser.parse(bindingPower)
-            head.data.append(returnedToken)
-            self.contextManager.parser.lexer.peep(';')
-            self.ignoreTheSemicolon()
-            nextToken = self.contextManager.parser.lexer.peep()
-        return head
-
     def parseStatement(self, bindingPower):
-        nextToken = None
-        head = self.contextManager.parser.lexer.peep('{')
-        self.contextManager.parser.lexer.advance()
-        self.ignoreTheSemicolon()
-        nextToken = self.contextManager.parser.lexer.peep()
-        while nextToken.id is not '}':
-            returnedToken = self.contextManager.parser.parse(bindingPower)
-            head.data.append(returnedToken)
-            self.contextManager.parser.lexer.peep(';')
-            self.ignoreTheSemicolon()
-            nextToken = self.contextManager.parser.lexer.peep()
-            if nextToken.data[0] is not None and nextToken.data[0] == '(end)':
-                raise SyntaxError('Expected a closing brace \'}\' ')
-        return head
+        if self.contextManager.parser.lexer.peep().id is ';':
+            self.contextManager.parser.lexer.advance()
+            return
+        returnedToken = self.contextManager.parser.parse(bindingPower)
+        if returnedToken is None:
+            return None
+        else:
+            if returnedToken.id is '{':
+                self.contextManager.parser.lexer.peep('}')
+            else:
+                self.contextManager.parser.lexer.peep(';')
+            return returnedToken
 
     def ignoreTheSemicolon(self): #Helper function for parseStatement
         while self.contextManager.parser.lexer.peep().id is ';':

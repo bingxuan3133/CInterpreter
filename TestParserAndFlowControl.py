@@ -16,6 +16,9 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.contexts = [self.expressionContext, self.flowControlContext, self.defaultContext]
 
         self.flowControlContext.addWhileControl('while', 0)
+        self.flowControlContext.addBlockOperator('{', 0)
+        self.flowControlContext.addBlockOperator('}', 0)
+        self.expressionContext.addGroupOperator(';', 0)
         self.expressionContext.addGroupOperator('(', 0)
         self.expressionContext.addGroupOperator(')', 0)
         self.expressionContext.addPostfixOperator('++', 150)
@@ -27,7 +30,7 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.manager.setCurrentContexts(self.contexts)
 
     def test_parse_while_1(self):
-        lexer = Lexer('while ( 1 )', self.context)
+        lexer = Lexer('while ( 1 ) ;', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)
 
@@ -38,7 +41,7 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.assertEqual(1, token.data[0].data[0])
 
     def test_parse_while_1_while_1(self):
-        lexer = Lexer('while ( 1 ) while ( 1 )', self.context)
+        lexer = Lexer('while ( 1 ) while ( 1 ) ;', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)
 
@@ -52,7 +55,7 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.assertEqual(1, token.data[1].data[0].data[0])
 
     def test_parse_while_1_do_something(self):
-        lexer = Lexer('while ( 1 ) i ++', self.context)
+        lexer = Lexer('while ( 1 ) i ++ ;', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)
 
@@ -66,7 +69,7 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.assertEqual('i', token.data[1].data[0].data[0])
 
     def test_parse_while_while_1_should_raise_an_error(self):
-        lexer = Lexer('while ( while ( 1 ) )', self.context)
+        lexer = Lexer('while ( while ( 1 ) ) ;', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)
         self.assertRaises(SyntaxError, parser.parse, 0)
@@ -86,6 +89,7 @@ class TestParseWhileFlowControl(unittest.TestCase):
            1     {
         :return:
         """
+        self.flowControlContext.addBlockOperator('{', 0)
         lexer = Lexer('while ( 1 ) { }', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)
