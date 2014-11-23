@@ -22,11 +22,12 @@ class TestParseWhileFlowControl(unittest.TestCase):
 
         self.flowControlContext.addWhileControl('while', 0)
         self.flowControlContext.addBlockOperator('{', 0)
-        self.flowControlContext.addBlockOperator('}', 0)
-        self.expressionContext.addGroupOperator(';', 0)
+        self.flowControlContext.addOperator('}', 0)
+        self.expressionContext.addOperator(';', 0)
         self.expressionContext.addGroupOperator('(', 0)
-        self.expressionContext.addGroupOperator(')', 0)
+        self.expressionContext.addOperator(')', 0)
         self.expressionContext.addPostfixOperator('++', 150)
+        self.expressionContext.addPrefixInfixOperator('+', 70)
         self.defaultContext.addKeyword('while')
 
         self.manager.addContext('Default', self.defaultContext)
@@ -106,7 +107,7 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.assertEqual(1, token.data[0].data[0])
         self.assertEqual('{', token.data[1].id)
 
-    def xtest_parse_while_1_block_statement_with_while_1_with_block_statement(self):
+    def test_parse_while_1_block_statement_with_while_1_with_block_statement(self):
         """
             while
             /   \
@@ -116,25 +117,9 @@ class TestParseWhileFlowControl(unittest.TestCase):
                    1     {
         :return:
         """
-        manager = ContextManager()
-        context = Context(manager)
-        flowControlContext = FlowControlContext(manager)
-        expressionContext = ExpressionContext(manager)
-        contexts = [expressionContext, flowControlContext]
-
-        flowControlContext.addWhileControl('while', 0)
-        flowControlContext.addBlockOperator('{', 0)
-        flowControlContext.addBlockOperator('}', 0)
-        expressionContext.addGroupOperator('(', 0)
-        expressionContext.addGroupOperator(')', 0)
-
-        manager.addContext('FlowControl', flowControlContext)
-        manager.addContext('Expression', expressionContext)
-        manager.setCurrentContexts(contexts)
-
-        lexer = Lexer('while ( 1 ) { while ( 1 ) { } } ', context)
-        parser = Parser(lexer, contexts)
-        manager.setParser(parser)
+        lexer = Lexer('while ( 1 ) { while ( 1 ) { } } ', self.context)
+        parser = Parser(lexer)
+        self.manager.setParser(parser)
 
         token = parser.parse(0)
 
@@ -147,7 +132,7 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.assertEqual(1, token.data[1].data[0].data[0].data[0])
         self.assertEqual('{', token.data[1].data[0].data[1].id)
 
-    def xtest_parse_while_1_block_statement_with_while_1(self):
+    def test_parse_while_1_block_statement_with_while_1(self):
         """
             while
             /   \
@@ -157,25 +142,9 @@ class TestParseWhileFlowControl(unittest.TestCase):
                    1
         :return:
         """
-        manager = ContextManager()
-        context = Context(manager)
-        flowControlContext = FlowControlContext(manager)
-        expressionContext = ExpressionContext(manager)
-        contexts = [expressionContext, flowControlContext]
-
-        flowControlContext.addWhileControl('while', 0)
-        flowControlContext.addBlockOperator('{', 0)
-        flowControlContext.addBlockOperator('}', 0)
-        expressionContext.addGroupOperator('(', 0)
-        expressionContext.addGroupOperator(')', 0)
-
-        manager.addContext('FlowControl', flowControlContext)
-        manager.addContext('Expression', expressionContext)
-        manager.setCurrentContexts(contexts)
-
-        lexer = Lexer('while ( 1 ) { while ( 1 ) } ', context)
-        parser = Parser(lexer, contexts)
-        manager.setParser(parser)
+        lexer = Lexer('while ( 1 ) { while ( 1 ) ; } ', self.context)
+        parser = Parser(lexer)
+        self.manager.setParser(parser)
 
         token = parser.parse(0)
 
@@ -187,7 +156,7 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.assertEqual('(literal)', token.data[1].data[0].data[0].id)
         self.assertEqual(1, token.data[1].data[0].data[0].data[0])
 
-    def xtest_parse_while_1_do_few_statements(self):
+    def test_parse_while_1_do_few_statements(self):
         """
             while
             /   \
@@ -197,27 +166,9 @@ class TestParseWhileFlowControl(unittest.TestCase):
                  |- j
         :return:
         """
-        manager = ContextManager()
-        context = Context(manager)
-        flowControlContext = FlowControlContext(manager)
-        expressionContext = ExpressionContext(manager)
-        contexts = [expressionContext, flowControlContext]
-
-        flowControlContext.addWhileControl('while', 0)
-        flowControlContext.addBlockOperator('{', 0)
-        flowControlContext.addBlockOperator('}', 0)
-        expressionContext.addGroupOperator('(', 0)
-        expressionContext.addGroupOperator(')', 0)
-        expressionContext.addPrefixInfixOperator('+', 70)
-        expressionContext.addOperator(';', 0)
-
-        manager.addContext('FlowControl', flowControlContext)
-        manager.addContext('Expression', expressionContext)
-        manager.setCurrentContexts(contexts)
-
-        lexer = Lexer('while ( 1 ) { 2 + 3 ; i ; j ; }', context)
-        parser = Parser(lexer, contexts)
-        manager.setParser(parser)
+        lexer = Lexer('while ( 1 ) { 2 + 3 ; i ; j ; }', self.context)
+        parser = Parser(lexer)
+        self.manager.setParser(parser)
 
         token = parser.parse(0)
 
@@ -236,34 +187,41 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.assertEqual('j', token.data[1].data[2].data[0])
 
 class TestParseDoWhileFlowControl(unittest.TestCase):
-    def xtest_parse_do_while(self):
-        manager = ContextManager()
-        context = Context(manager)
-        flowControlContext = FlowControlContext(manager)
-        expressionContext = ExpressionContext(manager)
-        contexts = [expressionContext, flowControlContext]
+    def setUp(self):
+        self.manager = ContextManager()
+        self.context = Context(self.manager)
+        self.defaultContext = DefaultContext(self.manager)
+        self.flowControlContext = FlowControlContext(self.manager)
+        self.expressionContext = ExpressionContext(self.manager)
+        self.contexts = [self.expressionContext, self.flowControlContext, self.defaultContext]
 
-        flowControlContext.addDoWhileControl('do', 0)
-        flowControlContext.addWhileControl('while', 0)
-        flowControlContext.addBlockOperator('{', 0)
-        flowControlContext.addBlockOperator('}', 0)
-        expressionContext.addGroupOperator('(', 0)
-        expressionContext.addGroupOperator(')', 0)
-        expressionContext.addOperator(';', 0)
+        self.flowControlContext.addDoWhileControl('do', 0)
+        self.flowControlContext.addOperator('while', 0)
+        self.flowControlContext.addBlockOperator('{', 0)
+        self.flowControlContext.addOperator('}', 0)
+        self.expressionContext.addOperator(';', 0)
+        self.expressionContext.addGroupOperator('(', 0)
+        self.expressionContext.addOperator(')', 0)
+        self.expressionContext.addPostfixOperator('++', 150)
+        self.expressionContext.addPrefixInfixOperator('+', 70)
+        self.defaultContext.addKeyword('while')
 
-        manager.addContext('FlowControl', flowControlContext)
-        manager.addContext('Expression', expressionContext)
-        manager.setCurrentContexts(contexts)
+        self.manager.addContext('Default', self.defaultContext)
+        self.manager.addContext('FlowControl', self.flowControlContext)
+        self.manager.addContext('Expression', self.expressionContext)
+        self.manager.setCurrentContexts(self.contexts)
 
-        lexer = Lexer('do sorry while ( 1 )', context)
-        parser = Parser(lexer, contexts)
-        manager.setParser(parser)
+    def test_parse_do_while(self):
+        lexer = Lexer('do 2 + 3 ; while ( 1 ) ;', self.context)
+        parser = Parser(lexer)
+        self.manager.setParser(parser)
 
         token = parser.parse(0)
 
         self.assertEqual('do', token.id)
-        self.assertEqual('(identifier)', token.data[0].id)
-        self.assertEqual('sorry', token.data[0].data[0])
+        self.assertEqual('+', token.data[0].id)
+        self.assertEqual(2, token.data[0].data[0].data[0])
+        self.assertEqual(3, token.data[0].data[1].data[0])
         self.assertEqual('while', token.data[1].id)
         self.assertEqual('(literal)', token.data[1].data[0].id)
         self.assertEqual(1, token.data[1].data[0].data[0])
