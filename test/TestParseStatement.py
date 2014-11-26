@@ -96,7 +96,7 @@ class TestParseStatementWithBraces(unittest.TestCase):
 
     def test_parseStatement_should_return_open_brace_token_for_an_empty_brace(self):
         """
-            {
+            { }
         :return:
         """
         lexer = Lexer('{ }', self.context)
@@ -222,18 +222,26 @@ class TestParseStatementWithBraces(unittest.TestCase):
         self.assertEqual(8, token.data[0].data[1].data[0].data[1].data[0])
         self.assertEqual(9, token.data[0].data[1].data[1].data[0])
 
-    def test_parseStatement_should_raise_SyntaxError_when_there_is_missing_closing_brace(self):
+    def test_parseStatement_should_raise_SyntaxError_when_there_is_missing_close_brace(self):
         lexer = Lexer('{ 2 + 3 ;', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)
 
         self.assertRaises(SyntaxError, self.flowControlContext.parseStatement, 0)
 
-    def test_parseStatement_should_raise_SyntaxError_when_there_is_missing_one_closing_brace(self):
+    def test_parseStatement_should_raise_SyntaxError_when_there_is_missing_one_close_brace(self):
         lexer = Lexer('{ 2 + 3 ; { }', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)
 
+        self.assertRaises(SyntaxError, self.flowControlContext.parseStatement, 0)
+
+    def xtest_parseStatement_should_raise_SyntaxError_when_there_is_missing_open_brace(self):
+        lexer = Lexer('2 + 3 ; }', self.context)
+        parser = Parser(lexer)
+        self.manager.setParser(parser)
+
+        self.flowControlContext.parseStatement(0)
         self.assertRaises(SyntaxError, self.flowControlContext.parseStatement, 0)
 
 if __name__ == '__main__':

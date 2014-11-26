@@ -12,12 +12,10 @@ class FlowControlContext(Context):
         if firstToken.id == ';':
             self.contextManager.parser.lexer.advance()
             returnedToken = None
-        elif firstToken.id == '}':
-            self.contextManager.parser.lexer.advance()
-            returnedToken = None
         elif firstToken.id == '{':
             returnedToken = self.contextManager.parser.parse(bindingPower)
-
+        elif firstToken.id in self.symbolTable:  # avoid handling ';' for flow control operators
+            returnedToken = self.contextManager.parser.parse(bindingPower)
         else:
             returnedToken = self.contextManager.parser.parse(bindingPower)
             self.contextManager.parser.lexer.peep(';')
@@ -63,10 +61,10 @@ class FlowControlContext(Context):
             thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
             self.data.append(returnedToken)
-            wadisthis = thisContext.contextManager.parser.lexer.peep(')')
+            thisContext.contextManager.parser.lexer.peep(')')
             contexts = thisContext.contextManager.popContexts()  # pop previously saved context
             thisContext.contextManager.setCurrentContexts(contexts)
-            wadisthis = thisContext.contextManager.parser.lexer.advance()
+            thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.parseStatement(self.bindingPower)
             self.data.append(returnedToken)
             return self
@@ -81,17 +79,24 @@ class FlowControlContext(Context):
         thisContext = self
         def nud(self):
             thisContext.contextManager.parser.lexer.advance()
-            context = thisContext.contextManager.getContext('Expression')
-            thisContext.contextManager.setCurrentContexts([context])               # Will be implement as push into stack later
+            returnedToken = thisContext.parseStatement(self.bindingPower)
+            self.data.append(returnedToken)
+            whileToken = thisContext.contextManager.parser.lexer.peep('while')
+            thisContext.contextManager.parser.lexer.advance('(')
+            contexts = thisContext.contextManager.getCurrentContexts()
+            thisContext.contextManager.pushContexts(contexts)  # save context
+            default = thisContext.contextManager.getContext('Default')
+            expression = thisContext.contextManager.getContext('Expression')
+            thisContext.contextManager.setCurrentContexts([expression, default])
             thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
-            self.data.append(returnedToken)
-            thisContext.contextManager.parser.lexer.peep()
-            context2 = thisContext.contextManager.getContext('FlowControl')
-            thisContext.contextManager.setCurrentContexts([context, context2])     # Will be implement as pop from stack later
+            whileToken.data.append(returnedToken)
+            thisContext.contextManager.parser.lexer.peep(')')
+            contexts = thisContext.contextManager.popContexts()  # pop previously saved context
+            thisContext.contextManager.setCurrentContexts(contexts)
             thisContext.contextManager.parser.lexer.advance()
-            returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
-            self.data.append(returnedToken)
+            self.data.append(whileToken)
+
             return self
         def led(self):
             pass
