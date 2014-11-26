@@ -3,3 +3,5 @@ src/__pycache__/*
 test/__pycache__/*
 .idea/*
 .idea/workspace.xml
+src/__pycache__/*
+test/__pycache__/*
