@@ -11,9 +11,11 @@ class DeclarationContext(Context):
     def addIntDeclaration(self, id, bindingPower):
         thisContext = self
         def nud(self):
-            thisContext.contextManager.parser.lexer.advance()
-            nextToken = thisContext.contextManager.parser.lexer.peep()
-            if nextToken.id is ''
+            nameToken = thisContext.contextManager.parser.lexer.advance()
+            self.data.append(nameToken)
+            expressionToken = thisContext.contextManager.parser.parse(0)
+            if expressionToken.id != nameToken.id:
+                self.data.append(expressionToken)
             return self
         def led(self):
             pass
