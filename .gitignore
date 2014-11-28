@@ -3,5 +3,5 @@ src/__pycache__/*
 test/__pycache__/*
 .idea/*
 .idea/workspace.xml
-src/__pycache__/*
-test/__pycache__/*
+VM/build/*
+!VM/build/README.txt
