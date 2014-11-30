@@ -107,19 +107,28 @@ class FlowControlContext(Context):
         thisContext = self
         def nud(self):
             headToken = thisContext.contextManager.parser.lexer.advance('(')
+            #Change the context
             thisContext.contextManager.pushContexts(thisContext.contextManager.currentContexts)
             newContext = thisContext.contextManager.getContext('Expression')
             thisContext.contextManager.setCurrentContexts([newContext])
-            thisContext.contextManager.parser.lexer.advance()
+            nextToken = thisContext.contextManager.parser.lexer.advance()
+            if nextToken.id == ')':
+                raise SyntaxError('No expression found on the context.')
             returnedToken = thisContext.contextManager.parser.parse(bindingPower)
             headToken.data.append(returnedToken)
             self.data.append(headToken)
             thisContext.contextManager.parser.lexer.peep(')')
             tempContext =  thisContext.contextManager.popContexts()
             thisContext.contextManager.setCurrentContexts(tempContext)
-            nextToken = thisContext.contextManager.parser.lexer.advance()
+            thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.parseStatement(bindingPower)
             self.data.append(returnedToken)
+            nextToken = thisContext.contextManager.parser.lexer.peep()
+            if nextToken.id == 'else':
+                thisContext.contextManager.parser.lexer.advance()
+                returnedToken = thisContext.parseStatement(bindingPower)
+                nextToken.data.append(returnedToken)
+                self.data.append(nextToken)
             return self
         def led(self, leftToken):
             return self
