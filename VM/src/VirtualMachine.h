@@ -1,23 +1,8 @@
 #ifndef VirtualMachine_H
 #define VirtualMachine_H
 
-#define STACK_SIZE 10
+extern int reg[8];
 
-typedef struct Stack Stack;
-struct Stack {
-  int stack[STACK_SIZE];
-  int *topOfStack;
-};
-
-typedef enum {
-  STACK_UNDERFLOW,
-  STACK_OVERFLOW
-} Exception;
-
-extern Exception exception;
-
-extern Stack stack;
-
-void printStack();
+int getBits(int data, unsigned char start, unsigned char length);
 
 #endif // VirtualMachine_H

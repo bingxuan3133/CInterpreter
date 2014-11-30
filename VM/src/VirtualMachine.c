@@ -1,33 +1,55 @@
 #include "VirtualMachine.h"
-#include <stdio.h>
+#include "Stack.h"
 
-Stack stack;
-Exception exception;
+int reg[8];
 
-void initStack() {
-  stack.topOfStack = &(stack.stack)[0];
+int getBits(int data, unsigned char start, unsigned char length) {
+  int result;
+  result = data >> (start - length + 1);
+  result = result & (0xFFFFFFFF >> (32 - length));
+  return result;
 }
 
-void push(int data) {
-  if(stack.topOfStack >= &stack.stack[STACK_SIZE]) {
-    Throw(STACK_OVERFLOW);
-  } else {
-    *stack.topOfStack = data;
-    stack.topOfStack++;
-  }
+void loadRegisterLiteral(int operand) {
+  int regIndex = getBits(operand, 23, 3);
+  int value = getBits(operand, 20, 21);
+  if(getBits(value, 20, 1)) // value is - signed
+    value = 0xFFE00000 | value;
+  reg[regIndex] = value;
 }
 
-int pop() {
-  stack.topOfStack--;
-  if(stack.topOfStack < &stack.stack[0])
-    Throw(STACK_UNDERFLOW);
-  else
-    return *stack.topOfStack;
+void add() {
+  int result;
+  int value2 = pop();
+  int value1 = pop();
+  
+  result = value1 + value2;
+  push(result);
 }
 
-void printStack() {
-  int *stackPointer;
-  for(stackPointer = stack.topOfStack - 1; stackPointer >= &stack.stack[0]; stackPointer--) {
-    printf("%d\n", *stackPointer);
-  }
+void subtract() {
+  int result;
+  int value2 = pop();
+  int value1 = pop();
+  
+  result = value1 - value2;
+  push(result);
+}
+
+void multiply() {
+  int result;
+  int value2 = pop();
+  int value1 = pop();
+  
+  result = value1 * value2;
+  push(result);
+}
+
+void divide() {
+  int result;
+  int value2 = pop();
+  int value1 = pop();
+  
+  result = value1 / value2;
+  push(result);
 }
