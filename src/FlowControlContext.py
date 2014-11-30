@@ -79,9 +79,8 @@ class FlowControlContext(Context):
         thisContext = self
         def nud(self):
             thisContext.contextManager.parser.lexer.advance()
-            returnedToken = thisContext.parseStatement(self.bindingPower)
-            self.data.append(returnedToken)
-            whileToken = thisContext.contextManager.parser.lexer.peep('while')
+            body = thisContext.parseStatement(self.bindingPower)
+            thisContext.contextManager.parser.lexer.peep('while')
             thisContext.contextManager.parser.lexer.advance('(')
             contexts = thisContext.contextManager.getCurrentContexts()
             thisContext.contextManager.pushContexts(contexts)  # save context
@@ -89,14 +88,13 @@ class FlowControlContext(Context):
             expression = thisContext.contextManager.getContext('Expression')
             thisContext.contextManager.setCurrentContexts([expression, default])
             thisContext.contextManager.parser.lexer.advance()
-            returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
-            whileToken.data.append(returnedToken)
+            condition = thisContext.contextManager.parser.parse(self.bindingPower)
             thisContext.contextManager.parser.lexer.peep(')')
             contexts = thisContext.contextManager.popContexts()  # pop previously saved context
             thisContext.contextManager.setCurrentContexts(contexts)
             thisContext.contextManager.parser.lexer.advance()
-            self.data.append(whileToken)
-
+            self.data.append(condition)
+            self.data.append(body)
             return self
         def led(self):
             pass

@@ -196,7 +196,8 @@ class TestParseDoWhileFlowControl(unittest.TestCase):
         self.contexts = [self.expressionContext, self.flowControlContext, self.defaultContext]
 
         self.flowControlContext.addDoWhileControl('do', 0)
-        self.flowControlContext.addOperator('while', 0)
+        self.flowControlContext.addWhileControl('while', 0)
+        #self.flowControlContext.addOperator('while', 0)
         self.flowControlContext.addBlockOperator('{', 0)
         self.flowControlContext.addOperator('}', 0)
         self.expressionContext.addOperator(';', 0)
@@ -204,7 +205,10 @@ class TestParseDoWhileFlowControl(unittest.TestCase):
         self.expressionContext.addOperator(')', 0)
         self.expressionContext.addPostfixOperator('++', 150)
         self.expressionContext.addPrefixInfixOperator('+', 70)
-        self.defaultContext.addKeyword('while')
+        self.expressionContext.addPrefixInfixOperator('-', 70)
+        self.expressionContext.addPrefixInfixOperator('=', 20)
+        self.defaultContext.addKeyword('do')
+        #self.defaultContext.addKeyword('while')
 
         self.manager.addContext('Default', self.defaultContext)
         self.manager.addContext('FlowControl', self.flowControlContext)
@@ -212,6 +216,17 @@ class TestParseDoWhileFlowControl(unittest.TestCase):
         self.manager.setCurrentContexts(self.contexts)
 
     def test_parse_do_while(self):
+        lexer = Lexer('do ; while ( 1 ) ;', self.context)
+        parser = Parser(lexer)
+        self.manager.setParser(parser)
+
+        token = parser.parse(0)
+
+        self.assertEqual('do', token.id)
+        self.assertEqual(1, token.data[0].data[0])
+        self.assertEqual(None, token.data[1])
+
+    def test_parse_do_2_plus_3_while_1(self):
         lexer = Lexer('do 2 + 3 ; while ( 1 ) ;', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)
@@ -219,12 +234,100 @@ class TestParseDoWhileFlowControl(unittest.TestCase):
         token = parser.parse(0)
 
         self.assertEqual('do', token.id)
-        self.assertEqual('+', token.data[0].id)
-        self.assertEqual(2, token.data[0].data[0].data[0])
-        self.assertEqual(3, token.data[0].data[1].data[0])
-        self.assertEqual('while', token.data[1].id)
-        self.assertEqual('(literal)', token.data[1].data[0].id)
-        self.assertEqual(1, token.data[1].data[0].data[0])
+        self.assertEqual(1, token.data[0].data[0])
+        self.assertEqual('+', token.data[1].id)
+        self.assertEqual(2, token.data[1].data[0].data[0])
+        self.assertEqual(3, token.data[1].data[1].data[0])
+
+    def test_parse_should_not_raise_SyntaxError_when_missing_semicolon_at_while(self):
+        # it should be checked by the parseStatement who called parse
+        lexer = Lexer('do { ; } while ( 1 )', self.context)
+        parser = Parser(lexer)
+        self.manager.setParser(parser)
+
+        token = parser.parse(0)
+
+        self.assertEqual('do', token.id)
+        self.assertEqual(1, token.data[0].data[0])
+        self.assertEqual('{', token.data[1].id)
+        self.assertEqual([], token.data[1].data)
+
+    def test_parse_do_few_statements_while_1(self):
+        lexer = Lexer('do { x = 2 + 3 ; y = 4 + 5 ; z = 6 - 7 ; } while ( 1 ) ;', self.context)
+        parser = Parser(lexer)
+        self.manager.setParser(parser)
+
+        token = parser.parse(0)
+
+        self.assertEqual('do', token.id)
+        self.assertEqual(1, token.data[0].data[0])
+        self.assertEqual('{', token.data[1].id)
+        self.assertEqual('=', token.data[1].data[0].id)
+        self.assertEqual('x', token.data[1].data[0].data[0].data[0])
+        self.assertEqual('+', token.data[1].data[0].data[1].id)
+        self.assertEqual(2, token.data[1].data[0].data[1].data[0].data[0])
+        self.assertEqual(3, token.data[1].data[0].data[1].data[1].data[0])
+        self.assertEqual('=', token.data[1].data[1].id)
+        self.assertEqual('y', token.data[1].data[1].data[0].data[0])
+        self.assertEqual('+', token.data[1].data[1].data[1].id)
+        self.assertEqual(4, token.data[1].data[1].data[1].data[0].data[0])
+        self.assertEqual(5, token.data[1].data[1].data[1].data[1].data[0])
+        self.assertEqual('=', token.data[1].data[2].id)
+        self.assertEqual('z', token.data[1].data[2].data[0].data[0])
+        self.assertEqual('-', token.data[1].data[2].data[1].id)
+        self.assertEqual(6, token.data[1].data[2].data[1].data[0].data[0])
+        self.assertEqual(7, token.data[1].data[2].data[1].data[1].data[0])
+
+    def test_parse_nested_do_while_loop(self):
+        lexer = Lexer('do { x = 2 + 3 ; do y = 4 + 5 ; while ( 1 ) ; z = 6 - 7 ; } while ( 1 ) ;', self.context)
+        parser = Parser(lexer)
+        self.manager.setParser(parser)
+
+        token = parser.parse(0)
+
+        self.assertEqual('do', token.id)
+        self.assertEqual(1, token.data[0].data[0])
+        self.assertEqual('{', token.data[1].id)
+        self.assertEqual('=', token.data[1].data[0].id)
+        self.assertEqual('x', token.data[1].data[0].data[0].data[0])
+        self.assertEqual('+', token.data[1].data[0].data[1].id)
+        self.assertEqual(2, token.data[1].data[0].data[1].data[0].data[0])
+        self.assertEqual(3, token.data[1].data[0].data[1].data[1].data[0])
+
+        self.assertEqual('do', token.data[1].data[1].id)
+        self.assertEqual(1, token.data[1].data[1].data[0].data[0])
+        self.assertEqual('=', token.data[1].data[1].data[1].id)
+        self.assertEqual('y', token.data[1].data[1].data[1].data[0].data[0])
+        self.assertEqual('+', token.data[1].data[1].data[1].data[1].id)
+        self.assertEqual(4, token.data[1].data[1].data[1].data[1].data[0].data[0])
+        self.assertEqual(5, token.data[1].data[1].data[1].data[1].data[1].data[0])
+
+        self.assertEqual('=', token.data[1].data[2].id)
+        self.assertEqual('z', token.data[1].data[2].data[0].data[0])
+        self.assertEqual('-', token.data[1].data[2].data[1].id)
+        self.assertEqual(6, token.data[1].data[2].data[1].data[0].data[0])
+        self.assertEqual(7, token.data[1].data[2].data[1].data[1].data[0])
+
+    def test_parse_should_raise_SyntaxError_when(self):
+        lexer = Lexer('do 2 + 3 ; while ( do 2 + 3 ; while ( 1 ) ; ) ;', self.context)
+        parser = Parser(lexer)
+        self.manager.setParser(parser)
+
+        self.assertRaises(SyntaxError, parser.parse, 0)
+
+    def test_parse_should_raise_SyntaxError_when_missing_close_brace(self):
+        lexer = Lexer('do { ; while ( 1 ) ;', self.context)
+        parser = Parser(lexer)
+        self.manager.setParser(parser)
+
+        self.assertRaises(SyntaxError, parser.parse, 0)
+
+    def test_parse_should_raise_SyntaxError_when_missing_open_brace(self):
+        lexer = Lexer('do ; } while ( 1 ) ;', self.context)
+        parser = Parser(lexer)
+        self.manager.setParser(parser)
+
+        self.assertRaises(SyntaxError, parser.parse, 0)
 
 class TestParseIfFlowControl(unittest.TestCase):
     def setUp(self):
