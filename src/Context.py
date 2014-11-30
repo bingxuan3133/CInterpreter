@@ -6,6 +6,8 @@ class SymbolBase:
         raise SyntaxError('No led(.) function defined!')
     def nud(self):
         raise SyntaxError('No nud(.) function defined!')
+    def generateByteCode(self):
+        raise SyntaxError('No generate function defined!')
 
 class Context:
     PREFIX_UNARY = 1
@@ -44,6 +46,7 @@ class Context:
         def nud(self):
             token = thisContext.contextManager.parser.lexer.advance()
             return self
+
         sym = self.symbol('(literal)')
         sym.arity = None
         sym.__repr__ = revealSelf
