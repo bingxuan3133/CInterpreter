@@ -14,7 +14,7 @@ class DeclarationContext(Context):
             nameToken = thisContext.contextManager.parser.lexer.advance()
             self.data.append(nameToken)
             expressionToken = thisContext.contextManager.parser.parse(0)
-            if expressionToken.id != nameToken.id:
+            if expressionToken.id != nameToken.id:  #mean that the tree contain assignment statements
                 self.data.append(expressionToken)
             return self
         def led(self):

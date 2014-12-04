@@ -55,9 +55,9 @@ class TestParseStatement(unittest.TestCase):
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatement(0)
-        self.assertEqual('+', token.id)
-        self.assertEqual(2, token.data[0].data[0])
-        self.assertEqual(3, token.data[1].data[0])
+        self.assertEqual('+', token[0].id)
+        self.assertEqual(2, token[0].data[0].data[0])
+        self.assertEqual(3, token[0].data[1].data[0])
 
     def test_parseStatement_should_raise_SyntaxError_for_a_2_plus_3_statement_without_semicolon(self):
         """
@@ -104,8 +104,8 @@ class TestParseStatementWithBraces(unittest.TestCase):
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatement(0)
-        self.assertEqual('{', token.id)
-        self.assertEqual([], token.data)
+        self.assertEqual('{', token[0].id)
+        self.assertEqual([], token[0].data)
 
     def test_parseStatement_should_return_open_brace_token_with_empty_data_for_an_empty_statement(self):
         """
@@ -116,8 +116,8 @@ class TestParseStatementWithBraces(unittest.TestCase):
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatement(0)
-        self.assertEqual('{', token.id)
-        self.assertEqual([], token.data)
+        self.assertEqual('{', token[0].id)
+        self.assertEqual([], token[0].data)
 
     def test_parseStatement_should_return_open_brace_token_with_empty_data_for_3_empty_statements(self):
         """
@@ -128,8 +128,8 @@ class TestParseStatementWithBraces(unittest.TestCase):
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatement(0)
-        self.assertEqual('{', token.id)
-        self.assertEqual([], token.data)
+        self.assertEqual('{', token[0].id)
+        self.assertEqual([], token[0].data)
 
     def test_parse_will_build_an_ast_for_expression_in_the_brace(self):
         """
@@ -144,10 +144,10 @@ class TestParseStatementWithBraces(unittest.TestCase):
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatement(0)
-        self.assertEqual('{', token.id)
-        self.assertEqual('+', token.data[0].id)
-        self.assertEqual(2, token.data[0].data[0].data[0])
-        self.assertEqual(3, token.data[0].data[1].data[0])
+        self.assertEqual('{', token[0].id)
+        self.assertEqual('+', token[0].data[0].id)
+        self.assertEqual(2, token[0].data[0].data[0].data[0])
+        self.assertEqual(3, token[0].data[0].data[1].data[0])
 
     def test_parseStatement_should_build_ast_for_double_layers_of_braces(self):
         """
@@ -163,12 +163,12 @@ class TestParseStatementWithBraces(unittest.TestCase):
         lexer = Lexer('{ { 2 + 3 ; } }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-        token = parser.parseStatement(0)
-        self.assertEqual('{', token.id)
-        self.assertEqual('{', token.data[0].id)
-        self.assertEqual('+', token.data[0].data[0].id)
-        self.assertEqual(2, token.data[0].data[0].data[0].data[0])
-        self.assertEqual(3, token.data[0].data[0].data[1].data[0])
+        token = parser.parseStatements(0)
+        self.assertEqual('{', token[0].id)
+        self.assertEqual('{', token[0].data[0].id)
+        self.assertEqual('+', token[0].data[0].data[0].id)
+        self.assertEqual(2, token[0].data[0].data[0].data[0].data[0])
+        self.assertEqual(3, token[0].data[0].data[0].data[1].data[0])
 
     def test_parse_will_build_an_ast_for_expressions_in_the_brace(self):
         """
@@ -185,17 +185,17 @@ class TestParseStatementWithBraces(unittest.TestCase):
                         }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-        token = parser.parseStatement(0)
-        self.assertEqual('{', token.id)
-        self.assertEqual('+', token.data[0].id)
-        self.assertEqual(2, token.data[0].data[0].data[0])
-        self.assertEqual(3, token.data[0].data[1].data[0])
-        self.assertEqual('*', token.data[1].id)
-        self.assertEqual(3, token.data[1].data[0].data[0])
-        self.assertEqual(4, token.data[1].data[1].data[0])
-        self.assertEqual('/', token.data[2].id)
-        self.assertEqual(5, token.data[2].data[0].data[0])
-        self.assertEqual(9, token.data[2].data[1].data[0])
+        token = parser.parseStatements(0)
+        self.assertEqual('{', token[0].id)
+        self.assertEqual('+', token[0].data[0].id)
+        self.assertEqual(2, token[0].data[0].data[0].data[0])
+        self.assertEqual(3, token[0].data[0].data[1].data[0])
+        self.assertEqual('*', token[0].data[1].id)
+        self.assertEqual(3, token[0].data[1].data[0].data[0])
+        self.assertEqual(4, token[0].data[1].data[1].data[0])
+        self.assertEqual('/', token[0].data[2].id)
+        self.assertEqual(5, token[0].data[2].data[0].data[0])
+        self.assertEqual(9, token[0].data[2].data[1].data[0])
 
     def test_parse_will_build_an_AST_for_longer_expression_in_the_brace(self):
         """
@@ -213,15 +213,15 @@ class TestParseStatementWithBraces(unittest.TestCase):
         lexer = Lexer(' { 2 + 3 * 8 / 9 ; }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-        token = parser.parseStatement(0)
-        self.assertEqual('{', token.id)
-        self.assertEqual('+', token.data[0].id)
-        self.assertEqual(2, token.data[0].data[0].data[0])
-        self.assertEqual('/', token.data[0].data[1].id)
-        self.assertEqual('*', token.data[0].data[1].data[0].id)
-        self.assertEqual(3, token.data[0].data[1].data[0].data[0].data[0])
-        self.assertEqual(8, token.data[0].data[1].data[0].data[1].data[0])
-        self.assertEqual(9, token.data[0].data[1].data[1].data[0])
+        token = parser.parseStatements(0)
+        self.assertEqual('{', token[0].id)
+        self.assertEqual('+', token[0].data[0].id)
+        self.assertEqual(2, token[0].data[0].data[0].data[0])
+        self.assertEqual('/', token[0].data[0].data[1].id)
+        self.assertEqual('*', token[0].data[0].data[1].data[0].id)
+        self.assertEqual(3, token[0].data[0].data[1].data[0].data[0].data[0])
+        self.assertEqual(8, token[0].data[0].data[1].data[0].data[1].data[0])
+        self.assertEqual(9, token[0].data[0].data[1].data[1].data[0])
 
     def test_parseStatement_should_raise_SyntaxError_when_there_is_missing_close_brace(self):
         lexer = Lexer('{ 2 + 3 ;', self.context)

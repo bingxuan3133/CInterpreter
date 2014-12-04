@@ -60,7 +60,7 @@ class TestDeclarationContext(unittest.TestCase):
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
-        token = parser.parse(0)
+        token = parser.parseStatement(0)
         self.assertEqual('int', token[0].id)
         self.assertEqual('x', token[0].data[0].data[0])
         self.assertEqual('int', token[1].id)

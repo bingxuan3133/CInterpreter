@@ -19,6 +19,7 @@ class Parser:
         return token  # number token: come in first time, else operator token: after rolling in the while loop
 
     def parseStatement(self, bindingPower):
+        list = []
         firstToken = self.lexer.peep()
         if firstToken.id == ';':
             self.lexer.advance()
@@ -26,7 +27,8 @@ class Parser:
         for currentContext in self.contextManager.currentContexts:
             if firstToken.id in currentContext.symbolTable:
                 returnedToken = self.parse(bindingPower)
-                return returnedToken
+                list.append(returnedToken)
+                return list
 
         if firstToken.id == '{':
             returnedToken = self.parse(bindingPower)
@@ -34,7 +36,8 @@ class Parser:
             returnedToken = self.parse(bindingPower)
             self.lexer.peep(';')
             self.lexer.advance()
-        return returnedToken
+        list.append(returnedToken)
+        return list
 
     def parseStatements(self, bindingPower):
         list = []
@@ -42,6 +45,6 @@ class Parser:
         while token.id != '}' and token.id != '(systemToken)':
             returnedToken = self.parseStatement(bindingPower)
             if returnedToken is not None:
-                list.append(returnedToken)
+                list.extend(returnedToken)
             token = self.lexer.peep()
         return list
