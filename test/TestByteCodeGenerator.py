@@ -23,7 +23,8 @@ class TestByteCodeGenerator(unittest.TestCase):
 
         self.contexts = [self.expressionContext, self.defaultContext]
         self.expressionContext.addInfixOperator('=', 20)
-        self.expressionContext.addInfixOperator('+', 70)
+        self.expressionContext.addPrefixInfixOperator('+', 70)
+        self.expressionContext.addPrefixInfixOperator('-', 70)
         self.expressionContext.addInfixOperator('*', 100)
         self.expressionContext.addInfixOperator('/', 100)
 
@@ -62,23 +63,37 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual('0xff000002', dataList[3])
         self.assertEqual('0xfc010200', dataList[4])
 
-    def test_generateByteCode_will_return_the_byteCode_in_a_list_with_alonger_expression(self):
-        lexer = Lexer('3 * 4 + 6 / 2', self.context)
+    def test_generateByteCode_will_modify_the_byteCode_to_store_value_in_different_register(self):
+        lexer = Lexer('3 * 4 + 2 - 10', self.context)
         parser = Parser(lexer)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
-        self.byteCodeGeneration.initGenerator(token)
-        dataList = []
-        dataList = token.generateByteCode(dataList)
+        self.byteCodeGenerator.initGeneration(token)
+        dataList = token.generateByteCode()
+        self.assertEqual('0xff000003', dataList[0])
+        self.assertEqual('0xff010004', dataList[1])
+        self.assertEqual('0xfa020001', dataList[2])
+        self.assertEqual('0xff000002', dataList[3])
+        self.assertEqual('0xfc010200', dataList[4])
+        self.assertEqual('0xff02000a', dataList[5])
+        self.assertEqual('0xfb000102', dataList[6])
 
-        self.assertEqual('PUSH 3', dataList[0])
-        self.assertEqual('PUSH 4', dataList[1])
-        self.assertEqual('MUL', dataList[2])
-        self.assertEqual('PUSH 6', dataList[3])
-        self.assertEqual('PUSH 2', dataList[4])
-        self.assertEqual('DIV', dataList[5])
-        self.assertEqual('ADD', dataList[6])
+    def test_generateByteCode_will_return_the_byteCode_in_a_list_with_alonger_expression(self):
+        lexer = Lexer('3 * 4 + 2 - 10', self.context)
+        parser = Parser(lexer)
+        self.manager.setParser(parser)
+
+        token = parser.parse(0)
+        self.byteCodeGenerator.initGeneration(token)
+        dataList = token.generateByteCode()
+        self.assertEqual('0xff000003', dataList[0])
+        self.assertEqual('0xff010004', dataList[1])
+        self.assertEqual('0xfa020001', dataList[2])
+        self.assertEqual('0xff000002', dataList[3])
+        self.assertEqual('0xfc010200', dataList[4])
+        self.assertEqual('0xff02000a', dataList[5])
+        self.assertEqual('0xfb000102', dataList[6])
 
 
 

@@ -7,31 +7,6 @@ from Context import *
 from ContextManager import *
 
 class FlowControlContext(Context):
-    def parseStatement(self, bindingPower):
-        firstToken = self.contextManager.parser.lexer.peep()
-        if firstToken.id == ';':
-            self.contextManager.parser.lexer.advance()
-            returnedToken = None
-        elif firstToken.id == '{':
-            returnedToken = self.contextManager.parser.parse(bindingPower)
-        elif firstToken.id in self.symbolTable:  # avoid handling ';' for flow control operators
-            returnedToken = self.contextManager.parser.parse(bindingPower)
-        else:
-            returnedToken = self.contextManager.parser.parse(bindingPower)
-            self.contextManager.parser.lexer.peep(';')
-            self.contextManager.parser.lexer.advance()
-        return returnedToken
-
-    def parseStatements(self, bindingPower):
-        list = []
-        token = self.contextManager.parser.lexer.peep()
-        while token.id != '}' and token.id != '(systemToken)':
-            returnedToken = self.parseStatement(bindingPower)
-            if returnedToken is not None:
-                list.append(returnedToken)
-            token = self.contextManager.parser.lexer.peep()
-        return list
-
     def addBlockOperator(self, id, bindingPower = 0 ):
         thisContext = self
         symClass = self.symbol(id, bindingPower)
@@ -39,7 +14,7 @@ class FlowControlContext(Context):
             return self
         def nud(self):
             thisContext.contextManager.parser.lexer.advance()
-            returnedList = thisContext.parseStatements(bindingPower)
+            returnedList = thisContext.contextManager.parser.parseStatements(bindingPower)
             self.data = returnedList
             thisContext.contextManager.parser.lexer.peep('}')
             thisContext.contextManager.parser.lexer.advance()
