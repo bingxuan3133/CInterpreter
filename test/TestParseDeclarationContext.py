@@ -36,7 +36,7 @@ class TestDeclarationContext(unittest.TestCase):
 
     def test_int_x(self):
         lexer = Lexer('int x', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
@@ -45,7 +45,7 @@ class TestDeclarationContext(unittest.TestCase):
 
     def test_int_x_equal_to_2(self):
         lexer = Lexer('int x = 2', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
@@ -57,7 +57,7 @@ class TestDeclarationContext(unittest.TestCase):
 
     def test_int_x_y_and_z(self):
         lexer = Lexer('int x , y , z ', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)

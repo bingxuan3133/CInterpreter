@@ -38,7 +38,7 @@ class TestByteCodeGenerator(unittest.TestCase):
 
     def test_generateByteCode_will_return_the_byteCode_in_a_list(self):
         lexer = Lexer('2 + 3', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
@@ -51,7 +51,7 @@ class TestByteCodeGenerator(unittest.TestCase):
 
     def test_generateByteCode_will_return_the_byteCode_in_a_list_for_a_multiply_expression(self):
         lexer = Lexer('3 * 4 + 2 ', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
@@ -65,7 +65,7 @@ class TestByteCodeGenerator(unittest.TestCase):
 
     def test_generateByteCode_will_modify_the_byteCode_to_store_value_in_different_register(self):
         lexer = Lexer('3 * 4 + 2 - 10', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
@@ -81,7 +81,7 @@ class TestByteCodeGenerator(unittest.TestCase):
 
     def test_generateByteCode_will_return_the_byteCode_in_a_list_with_alonger_expression(self):
         lexer = Lexer('3 * 4 + 2 - 10', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
