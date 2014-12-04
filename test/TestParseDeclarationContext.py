@@ -24,6 +24,7 @@ class TestDeclarationContext(unittest.TestCase):
         self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext]
         self.expressionContext.addInfixOperator('=', 20)
         self.declarationContext.addIntDeclaration('int', 0)
+        self.expressionContext.addOperator(',', 0)
 
 
         self.manager.addContext('Default', self.defaultContext)
@@ -53,5 +54,18 @@ class TestDeclarationContext(unittest.TestCase):
         self.assertEqual('=', token.data[1].id)
         self.assertEqual('x', token.data[1].data[0].data[0])
         self.assertEqual(2, token.data[1].data[1].data[0])
+
+    def test_int_x_y_and_z(self):
+        lexer = Lexer('int x , y , z ', self.context)
+        parser = Parser(lexer)
+        self.manager.setParser(parser)
+
+        token = parser.parse(0)
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('x', token[0].data[0].data[0])
+        self.assertEqual('int', token[1].id)
+        self.assertEqual('y', token[1].data[0].data[0])
+        self.assertEqual('int', token[2].id)
+        self.assertEqual('z', token[2].data[0].data[0])
 if __name__ == '__main__':
     unittest.main()
