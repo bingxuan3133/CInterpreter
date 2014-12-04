@@ -1,7 +1,7 @@
 # Pratt's parser implementation
 from Lexer import *
 from ContextManager import *
-
+from copy import *
 
 class Parser:
 
@@ -21,9 +21,27 @@ class Parser:
     def parseStatement(self, bindingPower):
         list = []
         firstToken = self.lexer.peep()
+        secondToken = deepcopy(firstToken)
         if firstToken.id == ';':
             self.lexer.advance()
             return None
+        elif firstToken.id == 'int':
+            firstToken = deepcopy(secondToken)
+            identifierName = self.lexer.advance()
+            firstToken.data.append(identifierName)
+            list.append(firstToken)
+            self.lexer.advance()
+            while (self.lexer.peep().id == ','):
+                firstToken = deepcopy(secondToken)
+                identifierName = self.lexer.advance()
+                firstToken.data.append(identifierName)
+                list.append(firstToken)
+                self.lexer.advance()
+
+            returnedToken = self.parse(bindingPower)
+            list.append(returnedToken)
+            return list
+
         for currentContext in self.contextManager.currentContexts:
             if firstToken.id in currentContext.symbolTable:
                 returnedToken = self.parse(bindingPower)
