@@ -41,9 +41,9 @@ class TestParseStatement(unittest.TestCase):
         :return:
         """
         lexer = Lexer(';', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-        token = self.flowControlContext.parseStatement(0)
+        token = parser.parseStatement(0)
         self.assertEqual(None, token)
 
     def test_parseStatement_should_return_2_plus_3_for_a_2_plus_3_statement(self):
@@ -52,9 +52,9 @@ class TestParseStatement(unittest.TestCase):
         :return:
         """
         lexer = Lexer('2 + 3 ;', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-        token = self.flowControlContext.parseStatement(0)
+        token = parser.parseStatement(0)
         self.assertEqual('+', token.id)
         self.assertEqual(2, token.data[0].data[0])
         self.assertEqual(3, token.data[1].data[0])
@@ -65,9 +65,10 @@ class TestParseStatement(unittest.TestCase):
         :return:
         """
         lexer = Lexer('2 + 3', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-        self.assertRaises(SyntaxError, self.flowControlContext.parseStatement, 0)
+
+        self.assertRaises(SyntaxError, parser.parseStatement, 0)
 
 class TestParseStatementWithBraces(unittest.TestCase):
     def setUp(self):
@@ -100,9 +101,9 @@ class TestParseStatementWithBraces(unittest.TestCase):
         :return:
         """
         lexer = Lexer('{ }', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-        token = self.flowControlContext.parseStatement(0)
+        token = parser.parseStatement(0)
         self.assertEqual('{', token.id)
         self.assertEqual([], token.data)
 
@@ -112,9 +113,9 @@ class TestParseStatementWithBraces(unittest.TestCase):
         :return:
         """
         lexer = Lexer('{ ; }', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-        token = self.flowControlContext.parseStatement(0)
+        token = parser.parseStatement(0)
         self.assertEqual('{', token.id)
         self.assertEqual([], token.data)
 
@@ -124,9 +125,9 @@ class TestParseStatementWithBraces(unittest.TestCase):
         :return:
         """
         lexer = Lexer('{ ; ; ; }', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-        token = self.flowControlContext.parseStatement(0)
+        token = parser.parseStatement(0)
         self.assertEqual('{', token.id)
         self.assertEqual([], token.data)
 
@@ -140,9 +141,9 @@ class TestParseStatementWithBraces(unittest.TestCase):
         :return:
         """
         lexer = Lexer('{ 2 + 3 ; }', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-        token = self.flowControlContext.parseStatement(0)
+        token = parser.parseStatement(0)
         self.assertEqual('{', token.id)
         self.assertEqual('+', token.data[0].id)
         self.assertEqual(2, token.data[0].data[0].data[0])
@@ -160,9 +161,9 @@ class TestParseStatementWithBraces(unittest.TestCase):
         :return:
         """
         lexer = Lexer('{ { 2 + 3 ; } }', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-        token = self.flowControlContext.parseStatement(0)
+        token = parser.parseStatement(0)
         self.assertEqual('{', token.id)
         self.assertEqual('{', token.data[0].id)
         self.assertEqual('+', token.data[0].data[0].id)
@@ -182,9 +183,9 @@ class TestParseStatementWithBraces(unittest.TestCase):
                         3 * 4 ; \
                         5 / 9 ; \
                         }', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-        token = self.flowControlContext.parseStatement(0)
+        token = parser.parseStatement(0)
         self.assertEqual('{', token.id)
         self.assertEqual('+', token.data[0].id)
         self.assertEqual(2, token.data[0].data[0].data[0])
@@ -210,9 +211,9 @@ class TestParseStatementWithBraces(unittest.TestCase):
         :return:
         """
         lexer = Lexer(' { 2 + 3 * 8 / 9 ; }', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-        token = self.flowControlContext.parseStatement(0)
+        token = parser.parseStatement(0)
         self.assertEqual('{', token.id)
         self.assertEqual('+', token.data[0].id)
         self.assertEqual(2, token.data[0].data[0].data[0])
@@ -224,25 +225,24 @@ class TestParseStatementWithBraces(unittest.TestCase):
 
     def test_parseStatement_should_raise_SyntaxError_when_there_is_missing_close_brace(self):
         lexer = Lexer('{ 2 + 3 ;', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
-        self.assertRaises(SyntaxError, self.flowControlContext.parseStatement, 0)
+        self.assertRaises(SyntaxError, parser.parseStatement, 0)
 
     def test_parseStatement_should_raise_SyntaxError_when_there_is_missing_one_close_brace(self):
         lexer = Lexer('{ 2 + 3 ; { }', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
-        self.assertRaises(SyntaxError, self.flowControlContext.parseStatement, 0)
+        self.assertRaises(SyntaxError, parser.parseStatement, 0)
 
     def xtest_parseStatement_should_raise_SyntaxError_when_there_is_missing_open_brace(self):
         lexer = Lexer('2 + 3 ; }', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-
-        self.flowControlContext.parseStatement(0)
-        self.assertRaises(SyntaxError, self.flowControlContext.parseStatement, 0)
+        token = parser.parseStatement(0)
+        self.assertRaises(SyntaxError, parser.parseStatement, 0)
 
 if __name__ == '__main__':
     unittest.main()

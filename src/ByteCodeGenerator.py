@@ -44,18 +44,16 @@ class ByteCodeGenerator:
             for dataIndex in range(0, len(token.data)):
                 if not isinstance(token.data[dataIndex], int):
                     token.data[dataIndex].generateByteCode()
-            if self.registerStatus[self.workingRegisterCounter] == 0:
-                self.registerStatus[self.workingRegisterCounter] = 1
+
+            self.updateTheWorkingRegisterCounterAndStatus()
             suitableFunction = storeLocation[self.workingRegisterCounter]
             code = suitableFunction()
-            thisGenerator.byteCodeList.append(code)
+            self.workingRegisterCounter += 1
+            thisGenerator.byteCodeList.append(str(code))
             return thisGenerator.byteCodeList
         #define the sub-routine that generate byteCode(literal)
         def generateLiteralByteCode():
-            if self.workingRegisterCounter == 2:
-                self.workingRegisterCounter = 0
-            if self.registerStatus[self.workingRegisterCounter] == 0:
-                self.registerStatus[self.workingRegisterCounter] = 1
+            self.updateTheWorkingRegisterCounterAndStatus()
             code = hex(self.byteCodeDictionaty[token.id] << 24 | self.workingRegisterCounter << 16 | token.data[0])
             self.workingRegisterCounter += 1
             thisGenerator.byteCodeList.append(str(code))
@@ -76,4 +74,9 @@ class ByteCodeGenerator:
             if token.id != '(literal)':
                 self.initGeneration(token.data[dataIndex])
 
-        pass
+    #Helper function
+    def updateTheWorkingRegisterCounterAndStatus(self):
+        if self.workingRegisterCounter > 2:
+            self.workingRegisterCounter = 0
+        if self.registerStatus[self.workingRegisterCounter] == 0:
+            self.registerStatus[self.workingRegisterCounter] = 1
