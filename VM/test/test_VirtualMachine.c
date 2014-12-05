@@ -12,95 +12,99 @@ void tearDown(void)
 {
 }
 
+void test_explore_typecasting(void) {
+  char a = 0xaa;
+  unsigned char b = 0xaa;
+  printf("this test only\n", a);
+  printf("%d\n", a);
+  printf("%d\n", (int) a);
+  printf("%d\n", (unsigned int) a);
+  printf("%d\n", b);
+  printf("%d\n", (int) b);
+  printf("%d\n", (unsigned int) b);
+  printf("%d\n", 0xaa);
+  printf("%d\n", (int) 0xaa);
+  printf("%d\n", (unsigned int) 0xaa);
+}
+
+void test_explore_addressing(void) {
+  int value = 0x5A;   // 0x0028FE2C
+  int value2 = 0xA5;  // 0x0028FE28
+  int value3 = 0x12345678;  // 0x0028FE24
+  printf("value: %p, value2: %p, value3: %p\n", &value, &value2, &value3);
+  printf("0x0028FE2C: %x\n", *(int *)((char *)&value)); // 0000005A
+  printf("0x0028FE2B: %x\n", *(int *)((char *)&value-1)); // 00005A00
+  printf("0x0028FE2A: %x\n", *(int *)((char *)&value-2)); // 005A0000
+  printf("0x0028FE29: %x\n", *(int *)((char *)&value-3)); // 5A000000
+  printf("0x0028FE28: %x\n", *(int *)((char *)&value-4)); // A5
+  
+  printf("&value3+3: %x\n", *(int *)((char *)&value3+3)); // 12
+  printf("&value3+2: %x\n", *(int *)((char *)&value3+2)); // 34
+  printf("&value3+1: %x\n", *(int *)((char *)&value3+1)); // 56
+  printf("&value3+0: %x\n", *(int *)((char *)&value3)); // 78
+  
+  printf("&value3+3: %x\n", *(char *)((char *)&value3+3)); // 12
+  printf("&value3+2: %x\n", *(char *)((char *)&value3+2)); // 34
+  printf("&value3+1: %x\n", *(char *)((char *)&value3+1)); // 56
+  printf("&value3+0: %x\n", *(char *)((char *)&value3)); // 78
+}
+
 void test_getBits(void) {
   int result;
   
-  result = getBits(0x240002, 23, 3);
+  result = getBits(0x240002, 23, 3); // getBits from bit 23 to bit 21
   TEST_ASSERT_EQUAL(1, result);
-  result = getBits(0x240002, 20, 21);
+  result = getBits(0x240002, 20, 21); // getBits from bit 20 to bit 19
   TEST_ASSERT_EQUAL(0x40002, result);
 }
 
-void test_explore_loadRegisterLiteral(void) {
-  loadRegisterLiteral(0x000002);
+void test_loadRegisterWithLiteral(void) {
+  loadRegisterWithLiteral(0x000002); // ldr r0, #2
   TEST_ASSERT_EQUAL(2, reg[0]);
-  loadRegisterLiteral(0x200002);
+  loadRegisterWithLiteral(0x200002); // ldr r1, #2
   TEST_ASSERT_EQUAL(2, reg[1]);
-  loadRegisterLiteral(0x400002);
+  loadRegisterWithLiteral(0x400002); // ldr r2, #2
   TEST_ASSERT_EQUAL(2, reg[2]);
-  loadRegisterLiteral(0xE00002);
+  loadRegisterWithLiteral(0xE00002); // ldr r7, #2
   TEST_ASSERT_EQUAL(2, reg[7]);
 }
 
-void test_loadRegisterLiteral_should_keep_data_signed_value(void) {
-  loadRegisterLiteral(0x1FFFFF);
+void test_loadRegisterWithLiteral_should_keep_data_signed_value(void) {
+  loadRegisterWithLiteral(0x1FFFFF);
   TEST_ASSERT_EQUAL(-1, reg[0]);
 }
 
-void xtest_add_should_add_top_2_integer_in_stack_and_push_back_the_result_into_the_stack(void) {
-  int result;
+void test_loadRegisterWithReference_should_load_register_with_value_in_reference(void) {
+  int value = 0x5A;   // 0x0028FE2C
+  int value2 = 0xA5;  // 0x0028FE28
+  int value3 = 0x12345678;  // 0x0028FE24
   
-  initStack();
-  Try {
-    push(5);
-    push(0x0A);
-    add();
-    printf("Stack Size: %d\n", sizeof(stack.stack));
-    printStack();
-    
-    TEST_ASSERT_EQUAL(15, result = pop());
-    TEST_ASSERT_EQUAL(1, isInteger(result));
-  } Catch(exception) {
-    TEST_FAIL_MESSAGE("Should not throw exception");
-  }
-  
+  reg[0] = 0;
+  reg[1] = (int)&value3;
+  loadRegisterWithReference(0x040000); // ldr r0, [r1 + 0]
+  TEST_ASSERT_EQUAL_HEX(0x12345678, reg[0]);
+  loadRegisterWithReference(0x040004); // ldr r0, [r1 + 4]
+  TEST_ASSERT_EQUAL_HEX(0xA5, reg[0]);
+  loadRegisterWithReference(0x040008); // ldr r0, [r1 + 8]
+  TEST_ASSERT_EQUAL_HEX(0x5A, reg[0]);
 }
 
-void xtest_subtract_should_subtract_tos_integer_from_the_following_integer_and_push_back_the_result_into_stack(void) {
-  int result;
-
-  initStack();
-  Try {
-    push(5);
-    push(0x0A);
-    subtract();  
-    printf("Stack Size: %d\n", sizeof(stack.stack));
-    printStack();
+void test_storeRegisterIntoReference_should_store_register_into_reference(void) {
+  int value = 0;   // 4
+  int value2 = 0;  // 0
   
-    TEST_ASSERT_EQUAL(-5, *(stack.topOfStack-1));
-    TEST_ASSERT_EQUAL(-5, result = pop());
-    TEST_ASSERT_EQUAL(1, isInteger(result));
-  } Catch(exception) {
-    TEST_FAIL_MESSAGE("Should not throw exception");
-  }
+  reg[1] = (int)&value2;
+  reg[0] = 0xA5;
+  storeRegisterIntoReference(0x040000); // str r0, [r1 + 0]
+  TEST_ASSERT_EQUAL_HEX(0xA5, value2);
+  reg[0] = 0x5A;
+  storeRegisterIntoReference(0x040004); // str r0, [r1 + 4]
+  TEST_ASSERT_EQUAL_HEX(0x5A, value);
 }
 
-void xtest_multiply_should_multiply_top_2_integer_in_stack_and_push_the_result_into_the_stack(void) {
-  initStack();
-  Try {
-    push(5);
-    push(0x0A);
-    multiply();
-    TEST_ASSERT_EQUAL(50, *(stack.topOfStack-1));
-  } Catch(exception) {
-    TEST_FAIL_MESSAGE("Should not throw exception");
-  }
-  
-	printf("Stack Size: %d\n", sizeof(stack.stack));
-  printStack();
-}
-
-void xtest_divide_should_get_2nd_top_integer_to_divide_by_tos_integer_and_push_back_the_result_into_stack(void) {
-  initStack();
-  Try {
-    push(0x0A);
-    push(5);
-    divide();
-    TEST_ASSERT_EQUAL(2, *(stack.topOfStack-1));
-  } Catch(exception) {
-    TEST_FAIL_MESSAGE("Should not throw exception");
-  }
-  
-	printf("Stack Size: %d\n", sizeof(stack.stack));
-  printStack();
+void test_moveRegister_r0_r1_should_move_r1_to_r0(void) {
+  reg[0] = 0;
+  reg[1] = 0xA5;
+  moveRegister(0x040000); // r0, r1
+  TEST_ASSERT_EQUAL_HEX(0xA5, reg[0]);
 }
