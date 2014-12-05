@@ -9,7 +9,8 @@
 
 typedef struct Stack Stack;
 struct Stack {
-  int stack[STACK_SIZE];
+  int *stack;
+  int size;
   int *topOfStack;
 };
 
@@ -19,11 +20,10 @@ typedef enum {
 } Exception;
 
 extern Exception exception;
-extern Stack stack;
 
-void initStack();
-void push(int data);
-int pop();
-void printStack();
+Stack *createStack(int size);
+void push(Stack *stack, int data);
+int pop(Stack *stack);
+void printStack(Stack *stack);
 
 #endif // Stack_H
