@@ -30,16 +30,18 @@ class Parser:
             identifierName = self.lexer.advance()
             firstToken.data.append(identifierName)
             list.append(firstToken)
-            self.lexer.advance()
+            if self.lexer.peep().id != '(systemToken)':
+                returnedToken = self.parse(bindingPower)
+                list.append(returnedToken)
             while (self.lexer.peep().id == ','):
                 firstToken = deepcopy(secondToken)
                 identifierName = self.lexer.advance()
                 firstToken.data.append(identifierName)
                 list.append(firstToken)
-                self.lexer.advance()
+                if self.lexer.peep().id != '(systemToken)':
+                    returnedToken = self.parse(bindingPower)
+                    list.append(returnedToken)
 
-            returnedToken = self.parse(bindingPower)
-            list.append(returnedToken)
             return list
 
         for currentContext in self.contextManager.currentContexts:

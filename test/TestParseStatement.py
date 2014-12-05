@@ -103,7 +103,7 @@ class TestParseStatementWithBraces(unittest.TestCase):
         lexer = Lexer('{ }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-        token = parser.parseStatement(0)
+        token = parser.parseStatements(0)
         self.assertEqual('{', token[0].id)
         self.assertEqual([], token[0].data)
 
@@ -115,7 +115,7 @@ class TestParseStatementWithBraces(unittest.TestCase):
         lexer = Lexer('{ ; }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-        token = parser.parseStatement(0)
+        token = parser.parseStatements(0)
         self.assertEqual('{', token[0].id)
         self.assertEqual([], token[0].data)
 
@@ -127,7 +127,7 @@ class TestParseStatementWithBraces(unittest.TestCase):
         lexer = Lexer('{ ; ; ; }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-        token = parser.parseStatement(0)
+        token = parser.parseStatements(0)
         self.assertEqual('{', token[0].id)
         self.assertEqual([], token[0].data)
 
@@ -143,7 +143,7 @@ class TestParseStatementWithBraces(unittest.TestCase):
         lexer = Lexer('{ 2 + 3 ; }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-        token = parser.parseStatement(0)
+        token = parser.parseStatements(0)
         self.assertEqual('{', token[0].id)
         self.assertEqual('+', token[0].data[0].id)
         self.assertEqual(2, token[0].data[0].data[0].data[0])
