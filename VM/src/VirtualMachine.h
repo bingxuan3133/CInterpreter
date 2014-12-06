@@ -1,10 +1,6 @@
 #ifndef VirtualMachine_H
 #define VirtualMachine_H
 
-extern int reg[8];
-
-int getBits(int data, unsigned char start, unsigned char length);
-void loadRegisterWithLiteral(int operand);
-void loadRegisterWithReference(int operand);
+extern void (*instruction[256])(int);
 
 #endif // VirtualMachine_H
