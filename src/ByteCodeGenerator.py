@@ -8,16 +8,60 @@ class ByteCodeGenerator:
                                                 # 0 represent the location is free to be overwrite
     workingRegisterCounter = 0  # Start with the location 0, should not exceed 7
 
-    byteCodeDictionaty = {'(literal)': 0xFF, '+': 0xFC, '-': 0xFB, '*': 0xFA, '/': 0xF9}
-
-
+    byteRequired = {'int': 4}
     def __init__(self, context, contextManager):
         self.context = context
         self.contextManager = contextManager
         pass
 
-    def initGeneration(self, token):
 
+    def subRegister (self, registerNumber, valueToSubtract):
+        number = 0xfb | registerNumber << 8 | valueToSubtract << 11
+        #return format(number, '08x')
+        return number
+
+    def loadValue(self, registerNumber, relativeAddress, valueToAssign):
+        number = 0xf8 |registerNumber<<8 |relativeAddress<<12 |valueToAssign<<17
+        return number
+
+    def generateByteCode(self, token):
+        self.byteCodeList =[]
+        count =0
+        if (len(token)!=0):
+            for header in token:
+                if header.id in self.byteRequired:
+                    count += 1
+                else:
+                    pass
+
+            code = self.subRegister(7, self.byteRequired[token[0].id]*count)
+            self.byteCodeList.append(code)
+        count = 0 # reset and reuse it
+        for index in range(0,len(token)):
+            if token[index].id == 'int':
+                count +=1
+            if token[index].id == '=':
+                code = self.loadValue(7, self.byteRequired[token[0].id]*count, token[index].data[1].data[0])
+                self.byteCodeList.append(code)
+
+
+
+
+        return self.byteCodeList
+
+        pass
+
+    #Helper function
+    def updateTheWorkingRegisterCounterAndStatus(self):
+        if self.workingRegisterCounter > 2:
+            self.workingRegisterCounter = 0
+        if self.registerStatus[self.workingRegisterCounter] == 0:
+            self.registerStatus[self.workingRegisterCounter] = 1
+
+
+
+
+"""
         #Start to make a fake switch case.
         def storeIntoWorkingRegisterTwo():
             code = hex(self.byteCodeDictionaty[token.id] << 24 | self.workingRegisterCounter << 16 | self.workingRegisterCounter-2 << 8 | self.workingRegisterCounter-1)
@@ -73,10 +117,4 @@ class ByteCodeGenerator:
         for dataIndex in range(0, len(token.data)):
             if token.id != '(literal)':
                 self.initGeneration(token.data[dataIndex])
-
-    #Helper function
-    def updateTheWorkingRegisterCounterAndStatus(self):
-        if self.workingRegisterCounter > 2:
-            self.workingRegisterCounter = 0
-        if self.registerStatus[self.workingRegisterCounter] == 0:
-            self.registerStatus[self.workingRegisterCounter] = 1
+    """
