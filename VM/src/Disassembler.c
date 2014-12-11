@@ -1,5 +1,6 @@
 #include "Disassembler.h"
 #include "Instruction.h"
+#include "Exception.h"
 #include <stdio.h>
 
 void (*disassemble[256])(char*, int)  = { [LDR_IMM] = disassembleLdrImm,
@@ -7,7 +8,7 @@ void (*disassemble[256])(char*, int)  = { [LDR_IMM] = disassembleLdrImm,
                                           [STR_MEM] = disassembleStrMem,
                                           [MOV_REG] = disassembleMovReg
                                           };
-wer
+
 
 
 /**

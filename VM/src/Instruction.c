@@ -1,7 +1,9 @@
 #include "Instruction.h"
 #include <stdio.h>
+#include "Exception.h"
 
 Register reg[8];
+char buffer[100] = {0};
 
 /**
  *  This is a helper function to get a specific range of bits from a 32-bit data
@@ -19,48 +21,87 @@ int getBits(int data, unsigned char start, unsigned char length) {
 
 /**
  *  This function load register with a literal value
- *  Input:  operand
+ *  Input:  bytecode
  */
-void loadRegisterWithLiteral(int operand) {
-  int regIndex = getBits(operand, 2, 3);
-  int value = getBits(operand, 23, 21);
-  if(getBits(value, 23, 1)) // value is - signed
-    value = 0xFFE00000 | value;
-  reg[regIndex].data = value;
+void loadRegisterWithLiteral(int bytecode) {
+  int regIndex = getBits(bytecode, 10, 3);
+  reg[regIndex].data = bytecode >> 11;
 }
 
 /**
- *  This function load register with value in the reference
- *  Input:  operand
+ *  This function load register with value from memory
+ *  Input:  bytecode
  */
-void loadRegisterWithReference(int operand) {
+void loadRegisterFromMemory(int bytecode) {
   int *ref;
-  int registerToBeLoaded = getBits(operand, 2, 3);
-  int referenceRegister = getBits(operand, 5, 3);
-  int relativeAddress = getBits(operand, 23, 18);
+  int registerToBeLoaded = getBits(bytecode, 10, 3);
+  int referenceRegister = getBits(bytecode, 13, 3);
+  int relativeAddress = bytecode >> 14;
   ref = (int *)(reg[referenceRegister].data + relativeAddress);
   reg[registerToBeLoaded].data = *ref;
 }
 
 /**
- *  This function store register into a reference
- *  Input:  operand
+ *  This function store register into memory
+ *  Input:  bytecode
  */
-void storeRegisterIntoReference(int operand) {
+void storeRegisterIntoMemory(int bytecode) {
   int *ref;
-  int registerToBeStored = getBits(operand, 2, 3);
-  int referenceRegister = getBits(operand, 5, 3);
-  int relativeAddress = getBits(operand, 23, 18);
+  int registerToBeStored = getBits(bytecode, 10, 3);
+  int referenceRegister = getBits(bytecode, 13, 3);
+  int relativeAddress = bytecode >> 14;
   ref = (int *)(reg[referenceRegister].data + relativeAddress);
   *ref = reg[registerToBeStored].data;
 }
 
 /**
  *  This function move value of a register into another register
- *  Input:  operand
+ *  Input:  bytecode
  */
-void moveRegister(int operand) {
-  int destination = getBits(operand, 2, 3);
-  int source = getBits(operand, 5, 3);
+void moveRegister(int bytecode) {
+  int destination = getBits(bytecode, 10, 3);
+  int source = getBits(bytecode, 13, 3);
   reg[destination].data = reg[source].data;
+}
+
+/**
+ *  This function load register with value from memory
+ *  Input:  bytecode
+ */
+void loadRegisterFromMemorySafe(int bytecode) {
+  int *ref;
+  int registerToBeLoaded = getBits(bytecode, 10, 3);
+  int referenceRegister = getBits(bytecode, 13, 3);
+  int relativeAddress = bytecode >> 14;
+  ref = (int *)(reg[referenceRegister].data + relativeAddress);
+  int base = reg[referenceRegister].base;
+  int limit = reg[referenceRegister].limit;
+  if(base <= (int)ref && limit >= (int)ref) { // Safe area
+    reg[registerToBeLoaded].data = *ref;
+  } else {
+    sprintf(buffer, "r%d (.base = %p .limit = %p) has invalid access to address %p.", registerToBeLoaded, base, limit, ref);
+    exception = createException(buffer, INVALID_MEMORY_ACCESS);
+    Throw(exception);
+  }
+}
+
+/**
+ *  This function store register value into memory
+ *  Input:  bytecode
+ */
+void storeRegisterIntoMemorySafe(int bytecode) {
+  int *ref;
+  int registerToBeStored = getBits(bytecode, 10, 3);
+  int referenceRegister = getBits(bytecode, 13, 3);
+  int relativeAddress = bytecode >> 14;
+  ref = (int *)(reg[referenceRegister].data + relativeAddress);
+  int base = reg[referenceRegister].base;
+  int limit = reg[referenceRegister].limit;
+  if(base <= (int)ref && limit >= (int)ref) { // Safe area
+    *ref = reg[registerToBeStored].data;
+  } else {
+    sprintf(buffer, "r%d (.base = %p .limit = %p) has invalid access to address %p.", registerToBeStored, base, limit, ref);
+    exception = createException(buffer, INVALID_MEMORY_ACCESS);
+    Throw(exception);
+  }
 }

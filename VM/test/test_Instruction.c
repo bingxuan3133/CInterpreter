@@ -1,7 +1,7 @@
 #include "unity.h"
 #include "Instruction.h"
 #include <stdio.h>
-#include "CException.h"
+#include "Exception.h"
 
 void setUp(void)
 {
@@ -14,7 +14,6 @@ void tearDown(void)
 void test_explore_typecasting(void) {
   char a = 0xaa;
   unsigned char b = 0xaa;
-  printf("this test only\n", a);
   printf("%d\n", a);
   printf("%d\n", (int) a);
   printf("%d\n", (unsigned int) a);
@@ -58,52 +57,112 @@ void test_getBits(void) {
 }
 
 void test_loadRegisterWithLiteral(void) {
-  loadRegisterWithLiteral(0x000002); // ldr r0, #2
+  loadRegisterWithLiteral(ldrImm(0, 2)); // ldr r0, #2
   TEST_ASSERT_EQUAL(2, reg[0].data);
-  loadRegisterWithLiteral(0x200002); // ldr r1, #2
+  loadRegisterWithLiteral(ldrImm(1, 2)); // ldr r1, #2
   TEST_ASSERT_EQUAL(2, reg[1].data);
-  loadRegisterWithLiteral(0x400002); // ldr r2, #2
+  loadRegisterWithLiteral(ldrImm(2, 2)); // ldr r2, #2
   TEST_ASSERT_EQUAL(2, reg[2].data);
-  loadRegisterWithLiteral(0xE00002); // ldr r7, #2
+  loadRegisterWithLiteral(ldrImm(7, 2)); // ldr r7, #2
   TEST_ASSERT_EQUAL(2, reg[7].data);
 }
 
 void test_loadRegisterWithLiteral_should_keep_data_signed_value(void) {
-  loadRegisterWithLiteral(0x1FFFFF); // ldr r0, #-1
+  loadRegisterWithLiteral(ldrImm(0, -1)); // ldr r0, #-1
   TEST_ASSERT_EQUAL(-1, reg[0].data);
 }
 
-void test_loadRegisterWithReference_should_load_register_with_value_in_reference(void) {
+void test_loadRegisterFromMemory_should_load_register_with_value_in_reference(void) {
   int value = 0x5A;   // 0x0028FE2C
   int value2 = 0xA5;  // 0x0028FE28
   int value3 = 0x12345678;  // 0x0028FE24
 
   reg[0].data = 0;
   reg[1].data = (int)&value3;
-  loadRegisterWithReference(0x040000); // ldr r0, [r1 + 0]
+  loadRegisterFromMemory(ldrMem(0, 1, 0)); // ldr r0, [r1 + 0]
   TEST_ASSERT_EQUAL_HEX(0x12345678, reg[0].data);
-  loadRegisterWithReference(0x040004); // ldr r0, [r1 + 4]
+  loadRegisterFromMemory(ldrMem(0, 1, 4)); // ldr r0, [r1 + 4]
   TEST_ASSERT_EQUAL_HEX(0xA5, reg[0].data);
-  loadRegisterWithReference(0x040008); // ldr r0, [r1 + 8]
+  loadRegisterFromMemory(ldrMem(0, 1, 8)); // ldr r0, [r1 + 8]
   TEST_ASSERT_EQUAL_HEX(0x5A, reg[0].data);
 }
 
-void test_storeRegisterIntoReference_should_store_register_into_reference(void) {
+void test_storeRegisterIntoMemory_should_store_register_into_reference(void) {
   int value = 0;   // 4
   int value2 = 0;  // 0
 
   reg[1].data = (int)&value2;
   reg[0].data = 0xA5;
-  storeRegisterIntoReference(0x040000); // str r0, [r1 + 0]
+  storeRegisterIntoMemory(strMem(0, 1, 0)); // str r0, [r1 + 0]
   TEST_ASSERT_EQUAL_HEX(0xA5, value2);
   reg[0].data = 0x5A;
-  storeRegisterIntoReference(0x040004); // str r0, [r1 + 4]
+  storeRegisterIntoMemory(strMem(0, 1, 4)); // str r0, [r1 + 4]
   TEST_ASSERT_EQUAL_HEX(0x5A, value);
 }
 
 void test_moveRegister_r0_r1_should_move_r1_to_r0(void) {
   reg[0].data = 0;
   reg[1].data = 0xA5;
-  moveRegister(0x040000); // mov r0, r1
+  moveRegister(movReg(0, 1)); // mov r0, r1
   TEST_ASSERT_EQUAL_HEX(0xA5, reg[0].data);
+}
+
+void test_loadRegisterFromMemorySafe_should_not_throw_an_exception_if_access_to_valid_memory(void) {
+  int memory = 2;
+  reg[7].data = (int)&memory;
+  reg[7].base = (int)&memory;
+  reg[7].limit = (int)(&memory)+0;
+  Try {
+    loadRegisterFromMemorySafe(ldrMemSafe(0, 7, 0)); // ldrs r0, [r7 + 0]
+    TEST_ASSERT_EQUAL(2, reg[0].data);
+    freeException;
+  } Catch(exception) {
+    TEST_FAIL_MESSAGE("Should not throw exception\n");
+  }
+}
+
+void test_loadRegisterFromMemorySafe_should_throw_an_exception_if_access_to_invalid_memory(void) {
+  int memory = 2;
+  reg[7].data = (int)&memory;
+  reg[7].base = (int)&memory;
+  reg[7].limit = (int)(&memory)+0;
+  Try {
+    loadRegisterFromMemorySafe(ldrMemSafe(0, 7, 1)); // ldrs r0, [r7 + 1]
+    TEST_FAIL_MESSAGE("Should throw exception\n");
+  } Catch(exception) {
+    TEST_ASSERT_EQUAL(exception->errCode, INVALID_MEMORY_ACCESS);
+    dumpException(exception);
+    freeException;
+  }
+}
+
+void test_storeRegisterIntoMemorySafe_should_not_throw_an_exception_if_access_to_valid_memory(void) {
+  int memory = 0;
+  reg[7].data = (int)&memory;
+  reg[7].base = (int)&memory;
+  reg[7].limit = (int)(&memory)+0;
+  reg[0].data = 0x5A;
+  Try {
+    storeRegisterIntoMemorySafe(strMemSafe(0, 7, 0)); // strs r0, [r7 + 0]
+    TEST_ASSERT_EQUAL(0x5A, reg[0].data);
+    freeException;
+  } Catch(exception) {
+    TEST_FAIL_MESSAGE("Should not throw exception\n");
+  }
+}
+
+void test_storeRegisterIntoMemorySafe_should_throw_an_exception_if_access_to_invalid_memory(void) {
+  int memory = 0;
+  reg[7].data = (int)&memory;
+  reg[7].base = (int)&memory;
+  reg[7].limit = (int)(&memory)+0;
+  reg[0].data = 0x5A;
+  Try {
+    storeRegisterIntoMemorySafe(ldrMemSafe(0, 7, 1)); // ldrs r0, [r7 + 1]
+    TEST_FAIL_MESSAGE("Should throw exception\n");
+  } Catch(exception) {
+    TEST_ASSERT_EQUAL(exception->errCode, INVALID_MEMORY_ACCESS);
+    dumpException(exception);
+    freeException;
+  }
 }

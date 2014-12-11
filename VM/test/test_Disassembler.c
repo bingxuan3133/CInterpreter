@@ -1,6 +1,7 @@
 #include "unity.h"
 #include "Disassembler.h"
 #include "Instruction.h"
+#include "Exception.h"
 #include <stdio.h>
 
 void setUp(void)

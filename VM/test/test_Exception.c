@@ -9,7 +9,12 @@ void tearDown(void)
 {
 }
 
-void test_module_generator_needs_to_be_implemented(void)
-{
-	TEST_IGNORE_MESSAGE("Implement me!");
+void test_Exception(void) {
+  Try {
+    exception = createException("Error: this is a dummy exception", INVALID_MEMORY_ACCESS);
+    Throw(exception);
+  } Catch(exception) {
+    dumpException(exception);
+    freeException(exception);
+  }
 }
