@@ -15,6 +15,11 @@ class ByteCodeGenerator:
         self.contextManager = contextManager
         pass
 
+    def assignRegisters(self, register1, register2):
+        number = 0xfa | register1 << 8 | register2 << 11
+        self.byteCodeList.append(number)
+        return number
+
 
     def subRegister (self, registerNumber, valueToSubtract):
         number = 0xfb | registerNumber << 8 | valueToSubtract << 11
@@ -22,16 +27,21 @@ class ByteCodeGenerator:
         return number
 
     def loadValue(self, registerNumber, valueToAssign):
-        number = 0xf8 | registerNumber << 8 | valueToAssign << 11
+        number = 0xfc | registerNumber << 8 | valueToAssign << 11
         self.byteCodeList.append(number)
         return number
 
     def storeValue(self, targetRegister, framePointer, relativeAddress):
-        number = 0xfe | targetRegister << 8 | framePointer << 11 | relativeAddress << 14
+        number = 0xfd | targetRegister << 8 | framePointer << 11 | relativeAddress << 14
         self.byteCodeList.append(number)
         return number
 
     def loadRegister(self, targetRegisterNumber, registerNumber, relativeAddress):
+        number = 0xfe | targetRegisterNumber << 8 | registerNumber << 11 | relativeAddress << 17
+        self.byteCodeList.append(number)
+        return number
+
+    def storeRegister(self, targetRegisterNumber, registerNumber, relativeAddress):
         number = 0xff | targetRegisterNumber << 8 | registerNumber << 11 | relativeAddress << 17
         self.byteCodeList.append(number)
         return number
@@ -41,16 +51,25 @@ class ByteCodeGenerator:
         index = 0
         index = self.generateInitializationCode(token, index)
 
-        #for value in range(index, len(token)):
-        #   self.generateProcessCode(token, index)
+        for value in range(index, len(token[0].data)):
+           self.generateProcessCode(token, index)
         return self.byteCodeList
 
         pass
 
     #Helper function
-    #def generateProcessCode(self, token, index):
-     #   if token[index].id == '':
-      #  pass
+    def generateProcessCode(self, token, index):
+
+        for number in token[0].data[index].data:
+            if number.id == '(identifier)':
+                self.loadRegister(self.getAFreeWorkingRegister(), 7, 4)
+                pass
+            elif number.id == '(literal)':
+                self.loadValue(self.getAFreeWorkingRegister(), \
+                            number.data[0])
+                pass
+        self.assignRegisters(self.releaseAWorkingRegister(), self.releaseAWorkingRegister())
+
     def generateInitializationCode(self, token, IndexOfTheTree):
         variableCounter =0
         if token[0].id == '{':
@@ -78,7 +97,6 @@ class ByteCodeGenerator:
             else:
                 break
         return IndexOfTheTree
-
 
 
     def getAFreeWorkingRegister(self):

@@ -197,7 +197,7 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.loadValue(0, 15), dataList[3])
         self.assertEqual(self.byteCodeGenerator.storeValue(0, 7, 8), dataList[4])
         self.assertEqual(self.byteCodeGenerator.loadRegister(0, 7, 4), dataList[5])
-        self.assertEqual(self.byteCodeGenerator.assignValue(0, 5), dataList[6])
-        self.assertEqual(self.byteCodeGenerator.storeRegister(0, 7, 4), dataList[7])
+        self.assertEqual(self.byteCodeGenerator.loadValue(1, 5), dataList[6])
+        self.assertEqual(self.byteCodeGenerator.assignRegisters(1,0), dataList[7])
 if __name__ == '__main__':
     unittest.main()
