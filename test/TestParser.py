@@ -23,7 +23,7 @@ class TestParseInfix(unittest.TestCase):
 
     def test_parse_2_plus_3(self):
         lexer = Lexer('2 + 3', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parse(0)
 
@@ -43,7 +43,7 @@ class TestParseInfix(unittest.TestCase):
         :return:
         """
         lexer = Lexer('2 + 3 * 4', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
@@ -67,7 +67,7 @@ class TestParseInfix(unittest.TestCase):
         :return:
         """
         lexer = Lexer('2 * 3 + 4', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
@@ -93,7 +93,7 @@ class TestParseInfix(unittest.TestCase):
         :return:
         """
         lexer = Lexer('2 * 3 + 4 - 5', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
@@ -120,7 +120,7 @@ class TestParseInfix(unittest.TestCase):
         :return:
         """
         lexer = Lexer('2 * 3 + 4 * 5', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
@@ -149,7 +149,7 @@ class TestParseInfix(unittest.TestCase):
         :return:
         """
         lexer = Lexer('2 + 3 * 4 + 5', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
@@ -174,7 +174,7 @@ class TestParseInfix(unittest.TestCase):
         :return:
         """
         lexer = Lexer('i + j', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
@@ -207,7 +207,7 @@ class TestParsePrefix(unittest.TestCase):
         :return:
         """
         lexer = Lexer('- 2 + 3', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
@@ -229,7 +229,7 @@ class TestParsePrefix(unittest.TestCase):
         :return:
         """
         lexer = Lexer('- 2 + - 3', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
@@ -252,7 +252,7 @@ class TestParsePrefix(unittest.TestCase):
         :return:
         """
         lexer = Lexer('- 2 - - 3', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
@@ -275,7 +275,7 @@ class TestParsePrefix(unittest.TestCase):
         :return:
         """
         lexer = Lexer('! 2 - ! 3', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
@@ -311,7 +311,7 @@ class TestParsePostfix(unittest.TestCase):
         :return:
         """
         lexer = Lexer('i ++', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
@@ -323,7 +323,7 @@ class TestParsePostfix(unittest.TestCase):
 
     def test_parse_post_increment_i_plus_pre_decrement_j(self):
         lexer = Lexer('i ++ + -- j', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
@@ -363,7 +363,7 @@ class TestParsePrefixGroup(unittest.TestCase):
         """
 
         lexer = Lexer('( 2 + 3 ) * 4', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
@@ -390,7 +390,7 @@ class TestParsePrefixGroup(unittest.TestCase):
         :return:
         """
         lexer = Lexer('2 * ( 3 + 4 )', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
@@ -417,7 +417,7 @@ class TestParsePrefixGroup(unittest.TestCase):
         :return:
         """
         lexer = Lexer('- ( 3 + 4 )', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
@@ -436,7 +436,7 @@ class TestParsePrefixGroup(unittest.TestCase):
         :return:
         """
         lexer = Lexer('( )', self.context)
-        parser = Parser(lexer)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         self.assertRaises(SyntaxError, parser.parse, 0)
