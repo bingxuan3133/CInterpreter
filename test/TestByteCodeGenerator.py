@@ -13,29 +13,35 @@ from DefaultContext import *
 from ExpressionContext import *
 from ByteCodeGenerator import *
 from DeclarationContext import *
+from FlowControlContext import *
 
 class TestByteCodeGenerator(unittest.TestCase):
     def setUp(self):
         self.manager = ContextManager()
         self.context = Context(self.manager)
+        self.flowControlContext = FlowControlContext(self.manager)
         self.declarationContext = DeclarationContext(self.manager)
         self.defaultContext = DefaultContext(self.manager)
         self.defaultContext.addKeyword('int')
         self.expressionContext = ExpressionContext(self.manager)
         self.expressionContext.addOperator(',', 0)
 
-        self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext]
+        self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext, self.flowControlContext]
         self.expressionContext.addInfixOperator('=', 20)
         self.expressionContext.addPrefixInfixOperator('+', 70)
         self.expressionContext.addPrefixInfixOperator('-', 70)
         self.expressionContext.addInfixOperator('*', 100)
         self.expressionContext.addInfixOperator('/', 100)
         self.declarationContext.addIntDeclaration('int', 0)
+        self.expressionContext.addOperator(';', 0)
+        self.flowControlContext.addBlockOperator('{', 0)
+        self.flowControlContext.addOperator('}', 0)
 
 
         self.manager.addContext('Default', self.defaultContext)
         self.manager.addContext('Declaration', self.declarationContext)
         self.manager.addContext('Expression', self.expressionContext)
+        self.manager.addContext('FlowControl', self.flowControlContext)
         self.manager.setCurrentContexts(self.contexts)
         self.byteCodeGenerator = ByteCodeGenerator(self.context, self.manager)
 
@@ -127,9 +133,10 @@ class TestByteCodeGenerator(unittest.TestCase):
         token = parser.parseStatement(0)
         dataList = self.byteCodeGenerator.generateByteCode(token)
         self.assertEqual(self.byteCodeGenerator.subRegister(7, 4), dataList[0])
-        self.assertEqual(self.byteCodeGenerator.loadValue(7, 4, 2), dataList[1])
+        self.assertEqual(self.byteCodeGenerator.loadValue(0, 2), dataList[1])
+        self.assertEqual(self.byteCodeGenerator.storeValue(0, 7, 4), dataList[2])
 
-    def test_generateByteCode_willgenerate_code_for_multiple_initialization(self):
+    def test_generateByteCode_will_generate_code_for_multiple_initialization(self):
         lexer = Lexer('int x = 3 , y = 5 , z = 10', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
@@ -137,8 +144,60 @@ class TestByteCodeGenerator(unittest.TestCase):
         token = parser.parseStatement(0)
         dataList = self.byteCodeGenerator.generateByteCode(token)
         self.assertEqual(self.byteCodeGenerator.subRegister(7, 12), dataList[0])
-        self.assertEqual(self.byteCodeGenerator.loadValue(7, 4, 3), dataList[1])
-        self.assertEqual(self.byteCodeGenerator.loadValue(7, 8, 5), dataList[2])
-        self.assertEqual(self.byteCodeGenerator.loadValue(7, 12, 10), dataList[3])
+        self.assertEqual(self.byteCodeGenerator.loadValue(0, 3), dataList[1])
+        self.assertEqual(self.byteCodeGenerator.storeValue(0, 7, 4), dataList[2])
+        self.assertEqual(self.byteCodeGenerator.loadValue(0, 5), dataList[3])
+        self.assertEqual(self.byteCodeGenerator.storeValue(0, 7, 8), dataList[4])
+        self.assertEqual(self.byteCodeGenerator.loadValue(0, 10), dataList[5])
+        self.assertEqual(self.byteCodeGenerator.storeValue(0, 7, 12), dataList[6])
+
+
+    def test_generateByteCode_will_generate_code_initialization_and_assignment(self):
+        lexer = Lexer('{ int x = 3 ; \
+                      int y = 15 ; }', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        dataList = self.byteCodeGenerator.generateByteCode(token)
+        self.assertEqual(self.byteCodeGenerator.subRegister(7, 8), dataList[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue(0, 3), dataList[1])
+        self.assertEqual(self.byteCodeGenerator.storeValue(0, 7, 4), dataList[2])
+        self.assertEqual(self.byteCodeGenerator.loadValue(0, 15), dataList[3])
+        self.assertEqual(self.byteCodeGenerator.storeValue(0, 7, 8), dataList[4])
+
+    def xtest_generateByteCode_will_generate_for_expression_with_add_command(self):
+        lexer = Lexer('{ int x = 3 ;\
+                      int y = 15 ; \
+                      x = y ; }', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        dataList = self.byteCodeGenerator.generateByteCode(token)
+        self.assertEqual(self.byteCodeGenerator.subRegister(7, 8), dataList[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue(0, 3), dataList[1])
+        self.assertEqual(self.byteCodeGenerator.storeValue(0, 7, 4), dataList[2])
+        self.assertEqual(self.byteCodeGenerator.loadValue(0, 15), dataList[3])
+        self.assertEqual(self.byteCodeGenerator.storeValue(0, 7, 8), dataList[4])
+
+
+    def test_generateByteCode_will_generate_for_an_arithmetic_statements(self):
+        lexer = Lexer('{ int x = 3 ;\
+                      int y = 15 ; \
+                      x = 5 ; }', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        dataList = self.byteCodeGenerator.generateByteCode(token)
+        self.assertEqual(self.byteCodeGenerator.subRegister(7, 8), dataList[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue(0, 3), dataList[1])
+        self.assertEqual(self.byteCodeGenerator.storeValue(0, 7, 4), dataList[2])
+        self.assertEqual(self.byteCodeGenerator.loadValue(0, 15), dataList[3])
+        self.assertEqual(self.byteCodeGenerator.storeValue(0, 7, 8), dataList[4])
+        self.assertEqual(self.byteCodeGenerator.loadRegister(0, 7, 4), dataList[5])
+        self.assertEqual(self.byteCodeGenerator.assignValue(0, 5), dataList[6])
+        self.assertEqual(self.byteCodeGenerator.storeRegister(0, 7, 4), dataList[7])
 if __name__ == '__main__':
     unittest.main()

@@ -12,25 +12,31 @@ from ContextManager import *
 from DeclarationContext import *
 from DefaultContext import *
 from ExpressionContext import *
+from FlowControlContext import *
 
 class TestDeclarationContext(unittest.TestCase):
     def setUp(self):
         self.manager = ContextManager()
         self.context = Context(self.manager)
+        self.flowControlContext = FlowControlContext(self.manager)
         self.defaultContext = DefaultContext(self.manager)
         self.defaultContext.addKeyword('int')
         self.declarationContext = DeclarationContext(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
-        self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext]
+        self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext, self.flowControlContext]
         self.expressionContext.addInfixOperator('=', 20)
         self.expressionContext.addPrefixInfixOperator('+', 70)
         self.declarationContext.addIntDeclaration('int', 0)
         self.expressionContext.addOperator(',', 0)
+        self.expressionContext.addOperator(';', 0)
+        self.flowControlContext.addBlockOperator('{', 0)
+        self.flowControlContext.addOperator('}', 0)
 
 
         self.manager.addContext('Default', self.defaultContext)
         self.manager.addContext('Declaration', self.declarationContext)
         self.manager.addContext('Expression', self.expressionContext)
+        self.manager.addContext('FlowControl', self.flowControlContext)
         self.manager.setCurrentContexts(self.contexts)
 
 
@@ -94,5 +100,28 @@ class TestDeclarationContext(unittest.TestCase):
         self.assertEqual('+', token[5].data[1].id)
         self.assertEqual('y', token[5].data[1].data[0].data[0])
         self.assertEqual(3, token[5].data[1].data[1].data[0])
+
+
+
+    def test_expression_with_separate_initialization(self):
+        lexer = Lexer('{ int x = 3 ;\
+                      int y = 15 ; }', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        self.assertEqual('{', token[0].id)
+        self.assertEqual('int', token[0].data[0].id)
+        self.assertEqual('x', token[0].data[0].data[0].data[0])
+        self.assertEqual('=', token[0].data[1].id)
+        self.assertEqual('x', token[0].data[1].data[0].data[0])
+        self.assertEqual(3, token[0].data[1].data[1].data[0])
+        self.assertEqual('int', token[0].data[2].id)
+        self.assertEqual('y', token[0].data[2].data[0].data[0])
+        self.assertEqual('=', token[0].data[3].id)
+        self.assertEqual('y', token[0].data[3].data[0].data[0])
+        self.assertEqual(15, token[0].data[3].data[1].data[0])
+
+
 if __name__ == '__main__':
     unittest.main()
