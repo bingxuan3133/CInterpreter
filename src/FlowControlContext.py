@@ -40,7 +40,7 @@ class FlowControlContext(Context):
             contexts = thisContext.contextManager.popContexts()  # pop previously saved context
             thisContext.contextManager.setCurrentContexts(contexts)
             thisContext.contextManager.parser.lexer.advance()
-            returnedToken = thisContext.parseStatement(self.bindingPower)
+            returnedToken = thisContext.contextManager.parser.parseStatement(self.bindingPower)
             self.data.append(returnedToken)
             return self
         def led(self):
@@ -54,7 +54,7 @@ class FlowControlContext(Context):
         thisContext = self
         def nud(self):
             thisContext.contextManager.parser.lexer.advance()
-            body = thisContext.parseStatement(self.bindingPower)
+            body = thisContext.contextManager.parser.parseStatement(self.bindingPower)
             thisContext.contextManager.parser.lexer.peep('while')
             thisContext.contextManager.parser.lexer.advance('(')
             contexts = thisContext.contextManager.getCurrentContexts()
@@ -96,12 +96,12 @@ class FlowControlContext(Context):
             tempContext =  thisContext.contextManager.popContexts()
             thisContext.contextManager.setCurrentContexts(tempContext)
             thisContext.contextManager.parser.lexer.advance()
-            returnedToken = thisContext.parseStatement(bindingPower)
+            returnedToken = thisContext.contextManager.parser.parseStatement(bindingPower)
             self.data.append(returnedToken)
             nextToken = thisContext.contextManager.parser.lexer.peep()
             if nextToken.id == 'else':
                 thisContext.contextManager.parser.lexer.advance()
-                returnedToken = thisContext.parseStatement(bindingPower)
+                returnedToken = thisContext.contextManager.parser.parseStatement(bindingPower)
                 nextToken.data.append(returnedToken)
                 self.data.append(nextToken)
             return self
