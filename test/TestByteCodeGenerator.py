@@ -199,5 +199,80 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.loadRegister(0, 7, 4), dataList[5])
         self.assertEqual(self.byteCodeGenerator.loadValue(1, 5), dataList[6])
         self.assertEqual(self.byteCodeGenerator.assignRegisters(1,0), dataList[7])
+
+    def test_generateByteCode_will_generate_byteCodes_for_an_add_expression(self):
+        lexer = Lexer('{ int x = 3 ;\
+                      int y = 15 ; \
+                      x = y + 8 ; }', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        dataList = self.byteCodeGenerator.generateByteCode(token)
+        self.assertEqual(self.byteCodeGenerator.subRegister(7, 8), dataList[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue(0, 3), dataList[1])
+        self.assertEqual(self.byteCodeGenerator.storeValue(0, 7, 4), dataList[2])
+        self.assertEqual(self.byteCodeGenerator.loadValue(0, 15), dataList[3])
+        self.assertEqual(self.byteCodeGenerator.storeValue(0, 7, 8), dataList[4])
+        self.assertEqual(self.byteCodeGenerator.loadRegister(0, 7, 8), dataList[5])
+        self.assertEqual(self.byteCodeGenerator.loadValue(1, 8), dataList[6])
+        self.assertEqual(self.byteCodeGenerator.addRegisters(1, 0), dataList[7])
+        self.assertEqual(self.byteCodeGenerator.storeValue(0, 7, 4), dataList[8])
+
+
+
+class TestHelperFunction(unittest.TestCase):
+    def setUp(self):
+        self.manager = ContextManager()
+        self.context = Context(self.manager)
+        self.flowControlContext = FlowControlContext(self.manager)
+        self.declarationContext = DeclarationContext(self.manager)
+        self.defaultContext = DefaultContext(self.manager)
+        self.defaultContext.addKeyword('int')
+        self.expressionContext = ExpressionContext(self.manager)
+        self.expressionContext.addOperator(',', 0)
+
+        self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext, self.flowControlContext]
+        self.expressionContext.addInfixOperator('=', 20)
+        self.expressionContext.addPrefixInfixOperator('+', 70)
+        self.expressionContext.addPrefixInfixOperator('-', 70)
+        self.expressionContext.addInfixOperator('*', 100)
+        self.expressionContext.addInfixOperator('/', 100)
+        self.declarationContext.addIntDeclaration('int', 0)
+        self.expressionContext.addOperator(';', 0)
+        self.flowControlContext.addBlockOperator('{', 0)
+        self.flowControlContext.addOperator('}', 0)
+
+
+        self.manager.addContext('Default', self.defaultContext)
+        self.manager.addContext('Declaration', self.declarationContext)
+        self.manager.addContext('Expression', self.expressionContext)
+        self.manager.addContext('FlowControl', self.flowControlContext)
+        self.manager.setCurrentContexts(self.contexts)
+        self.byteCodeGenerator = ByteCodeGenerator(self.context, self.manager)
+
+    def test_injectLevel_will_give_respective_level_to_a_tree(self):
+        lexer = Lexer('{ x = y + 8 * 16 / 180 - 20 ; }', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        if token[0].id == '{':
+            token = token[0].data[0]
+        self.byteCodeGenerator.injectLevel(token)
+
+        self.assertEqual(0, token.data[0].level)
+        self.assertEqual(5, token.level)
+        self.assertEqual(-4, token.data[1].level)
+        self.assertEqual(0, token.data[1].data[1].level)
+        self.assertEqual(3, token.data[1].data[0].level)
+        self.assertEqual(0, token.data[1].data[0].data[0].level)
+        self.assertEqual(-2, token.data[1].data[0].data[1].level)
+        self.assertEqual(1, token.data[1].data[0].data[1].data[0].level)
+        self.assertEqual(0, token.data[1].data[0].data[1].data[1].level)
+        self.assertEqual(0, token.data[1].data[0].data[1].data[0].data[0].level)
+        self.assertEqual(0, token.data[1].data[0].data[1].data[0].data[1].level)
+
+
 if __name__ == '__main__':
     unittest.main()

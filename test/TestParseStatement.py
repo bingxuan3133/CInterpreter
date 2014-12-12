@@ -86,6 +86,7 @@ class TestParseStatementWithBraces(unittest.TestCase):
         self.expressionContext.addInfixOperator('*', 100)
         self.expressionContext.addInfixOperator('/', 100)
         self.expressionContext.addInfixOperator('==', 20)
+        self.expressionContext.addInfixOperator('=', 20)
         self.expressionContext.addOperator(';')
         self.flowControlContext.addIfControl('if', 0)
         self.expressionContext.addGroupOperator('(', 0)
@@ -223,6 +224,24 @@ class TestParseStatementWithBraces(unittest.TestCase):
         self.assertEqual(8, token[0].data[0].data[1].data[0].data[1].data[0])
         self.assertEqual(9, token[0].data[0].data[1].data[1].data[0])
 
+    def test_parseStatement_should_return_a_list_of_tree_if_the_expression_is_long_and_being_in_braces(self):
+        lexer = Lexer('{ x = y + 8 * 16 / 180 - 20 ; }', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        self.assertEqual('{', token[0].id)
+        self.assertEqual('=', token[0].data[0].id)
+        self.assertEqual('x', token[0].data[0].data[0].data[0])
+        self.assertEqual('-', token[0].data[0].data[1].id)
+        self.assertEqual(20, token[0].data[0].data[1].data[1].data[0])
+        self.assertEqual('+', token[0].data[0].data[1].data[0].id)
+        self.assertEqual('y', token[0].data[0].data[1].data[0].data[0].data[0])
+        self.assertEqual('/', token[0].data[0].data[1].data[0].data[1].id)
+        self.assertEqual(180, token[0].data[0].data[1].data[0].data[1].data[1].data[0])
+        self.assertEqual('*', token[0].data[0].data[1].data[0].data[1].data[0].id)
+        self.assertEqual(8, token[0].data[0].data[1].data[0].data[1].data[0].data[0].data[0])
+        self.assertEqual(16, token[0].data[0].data[1].data[0].data[1].data[0].data[1].data[0])
     def test_parseStatement_should_raise_SyntaxError_when_there_is_missing_close_brace(self):
         lexer = Lexer('{ 2 + 3 ;', self.context)
         parser = Parser(lexer, self.manager)

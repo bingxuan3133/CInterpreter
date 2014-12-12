@@ -10,6 +10,7 @@ class ByteCodeGenerator:
     MaxRegister = 5  # The maximum available register
 
     byteRequired = {'int': 4}
+    registersInThisAST ={}
     def __init__(self, context, contextManager):
         self.context = context
         self.contextManager = contextManager
@@ -47,33 +48,56 @@ class ByteCodeGenerator:
         return number
 
     def generateByteCode(self, token):
+        if token[0].id == '{':
+            token = token[0].data
+
         self.byteCodeList =[]
         index = 0
         index = self.generateInitializationCode(token, index)
 
         for value in range(index, len(token[0].data)):
-           self.generateProcessCode(token, index)
+            self.injectLevel(token)
+            self.generateProcessCode(token, index)
         return self.byteCodeList
 
         pass
 
     #Helper function
+    def injectLevel(self, token):
+        levels =[]
+        for element in token.data:
+            if element.id == '(identifier)' or element.id == '(literal)':
+                element.level = 0
+                tempLevel = 0
+            else:
+                tempLevel = self.injectLevel(element)
+
+            levels.append(tempLevel)
+        if abs(levels[0]) >= abs(levels[1]):
+            largest = -abs(levels[0])
+
+        else:
+            largest = abs(levels[1])
+        if largest >= 0:
+            largest += 1
+        else:
+            largest -= 1
+        token.level = largest
+        return largest
+
     def generateProcessCode(self, token, index):
 
         for number in token[0].data[index].data:
             if number.id == '(identifier)':
-                self.loadRegister(self.getAFreeWorkingRegister(), 7, 4)
+                self.loadRegister(self.getAFreeWorkingRegister(), 7, self.registersInThisAST[number.data[0]])
                 pass
             elif number.id == '(literal)':
-                self.loadValue(self.getAFreeWorkingRegister(), \
-                            number.data[0])
+                self.loadValue(self.getAFreeWorkingRegister(), number.data[0])
                 pass
         self.assignRegisters(self.releaseAWorkingRegister(), self.releaseAWorkingRegister())
 
     def generateInitializationCode(self, token, IndexOfTheTree):
         variableCounter =0
-        if token[0].id == '{':
-            token = token[0].data
         if (len(token)!=0):
             for header in token:
                 if header.id in self.byteRequired:
@@ -88,8 +112,8 @@ class ByteCodeGenerator:
                 count += 1
                 IndexOfTheTree+= 1
             elif token[index].id == '=' and count != 0:
-                self.loadValue(self.getAFreeWorkingRegister(), \
-                            token[index].data[1].data[0])
+                self.registersInThisAST[token[index].data[0].data[0]] = self.byteRequired[token[0].id]*variableCounter
+                self.loadValue(self.getAFreeWorkingRegister(), token[index].data[1].data[0])
                 self.storeValue(self.releaseAWorkingRegister(), 7, self.byteRequired[token[0].id]*variableCounter)
 
                 count -= 1
