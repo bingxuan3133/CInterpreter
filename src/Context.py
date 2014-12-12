@@ -6,8 +6,6 @@ class SymbolBase:
         raise SyntaxError('No led(.) function defined!')
     def nud(self):
         raise SyntaxError('No nud(.) function defined!')
-    def generateByteCode(self):
-        raise SyntaxError('No generate function defined!')
 
 class Context:
     PREFIX_UNARY = 1

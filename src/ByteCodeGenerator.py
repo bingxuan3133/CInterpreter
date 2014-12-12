@@ -10,17 +10,13 @@ class ByteCodeGenerator:
     MaxRegister = 5  # The maximum available register
 
     byteRequired = {'int': 4}
-    registersInThisAST ={}
+    registersInThisAST = {}
+
     def __init__(self, context, contextManager):
         self.context = context
         self.contextManager = contextManager
+        self.respectiveByteCodeFunction = {'(literal)': self.loadValue, '(identifier)': self.loadRegister, '=': self.storeValue, '+' : self.addRegister}
         pass
-
-    def assignRegisters(self, register1, register2):
-        number = 0xfa | register1 << 8 | register2 << 11
-        self.byteCodeList.append(number)
-        return number
-
 
     def subRegister (self, registerNumber, valueToSubtract):
         number = 0xfb | registerNumber << 8 | valueToSubtract << 11
@@ -55,46 +51,48 @@ class ByteCodeGenerator:
         index = 0
         index = self.generateInitializationCode(token, index)
 
-        for value in range(index, len(token[0].data)):
-            self.injectLevel(token)
-            self.generateProcessCode(token, index)
+        for value in range(index, len(token)):
+            self.injectRegisterRequired(token[value])
+            self.generateProcessCode(token, value)
         return self.byteCodeList
 
-        pass
 
     #Helper function
-    def injectLevel(self, token):
-        levels =[]
+    def injectRegisterRequired(self, token):
+        registerNumber =[]
         for element in token.data:
             if element.id == '(identifier)' or element.id == '(literal)':
-                element.level = 0
-                tempLevel = 0
+                element.registerRequired = 1
+                tempRegisterRequired = 1
             else:
-                tempLevel = self.injectLevel(element)
+                tempRegisterRequired = self.injectRegisterRequired(element)
 
-            levels.append(tempLevel)
-        if abs(levels[0]) >= abs(levels[1]):
-            largest = -abs(levels[0])
-
+            registerNumber.append(tempRegisterRequired)
+        if abs(registerNumber[0]) == abs(registerNumber[1]):
+            largest = -abs(registerNumber[0])-1
+        elif abs(registerNumber[0]) > abs(registerNumber[1]):
+            largest = -abs(registerNumber[0])
         else:
-            largest = abs(levels[1])
-        if largest >= 0:
-            largest += 1
-        else:
-            largest -= 1
-        token.level = largest
+            largest = abs(registerNumber[1])
+        token.registerRequired = largest
         return largest
 
-    def generateProcessCode(self, token, index):
+    def generateProcessCode(self, token, index): #Developing
+        if token[index].registerRequired > 0:
+            self.generateProcessCode(token[index].data, 1)
+            self.generateProcessCode(token[index].data, 0)
+        elif token[index].registerRequired < 0:
+            self.generateProcessCode(token[index].data, 1)
+            self.generateProcessCode(token[index].data, 0)
 
-        for number in token[0].data[index].data:
-            if number.id == '(identifier)':
-                self.loadRegister(self.getAFreeWorkingRegister(), 7, self.registersInThisAST[number.data[0]])
-                pass
-            elif number.id == '(literal)':
-                self.loadValue(self.getAFreeWorkingRegister(), number.data[0])
-                pass
-        self.assignRegisters(self.releaseAWorkingRegister(), self.releaseAWorkingRegister())
+
+
+        if token[index].id == '(identifier)' or token[index].id == '(literal)':
+            self.loadRegister(self.getAFreeWorkingRegister(), 7, self.registersInThisAST[token[index].data[0]])
+            pass
+        elif token[index].id == '(literal)':
+            self.loadValue(self.getAFreeWorkingRegister(), token[index].data[0])
+            pass
 
     def generateInitializationCode(self, token, IndexOfTheTree):
         variableCounter =0
@@ -134,10 +132,35 @@ class ByteCodeGenerator:
             self.workingRegisterCounter -= 1
         return self.workingRegisterCounter
 
+    #For the moment, these function is not been used
+    """
+    def injectLevel(self, token):
+        levels =[]
+        for element in token.data:
+            if element.id == '(identifier)' or element.id == '(literal)':
+                element.level = 0
+                tempLevel = 0
+            else:
+                tempLevel = self.injectLevel(element)
 
+            levels.append(tempLevel)
+        if abs(levels[0]) >= abs(levels[1]):
+            largest = -abs(levels[0])
 
+        else:
+            largest = abs(levels[1])
+        if largest >= 0:
+            largest += 1
+        else:
+            largest -= 1
+        token.level = largest
+        return largest
 
-"""
+    def assignRegisters(self, register1, register2):
+        number = 0xfa | register1 << 8 | register2 << 11
+        self.byteCodeList.append(number)
+        return number
+
         #Start to make a fake switch case.
         def storeIntoWorkingRegisterTwo():
             code = hex(self.byteCodeDictionaty[token.id] << 24 | self.workingRegisterCounter << 16 | self.workingRegisterCounter-2 << 8 | self.workingRegisterCounter-1)

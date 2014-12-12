@@ -31,16 +31,20 @@ class Parser:
             firstToken.data.append(identifierName)
             list.append(firstToken)
             if self.lexer.peep().id != '(systemToken)':
+                tempToken =self.lexer.peep()
                 returnedToken = self.parse(bindingPower)
-                list.append(returnedToken)
+                if returnedToken.id != tempToken.id:
+                    list.append(returnedToken)
             while (self.lexer.peep().id == ','):
                 firstToken = deepcopy(secondToken)
                 identifierName = self.lexer.advance()
                 firstToken.data.append(identifierName)
                 list.append(firstToken)
                 if self.lexer.peep().id != '(systemToken)':
+                    tempToken =self.lexer.peep()
                     returnedToken = self.parse(bindingPower)
-                    list.append(returnedToken)
+                    if returnedToken.id != tempToken.id:
+                        list.append(returnedToken)
 
             return list
 
