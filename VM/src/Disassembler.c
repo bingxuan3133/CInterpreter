@@ -6,10 +6,11 @@
 void (*disassemble[256])(char*, int)  = { [LDR_IMM] = disassembleLdrImm,
                                           [LDR_MEM] = disassembleLdrMem,
                                           [STR_MEM] = disassembleStrMem,
-                                          [MOV_REG] = disassembleMovReg
+                                          [MOV_REG] = disassembleMovReg,
+                                          [LDR_MEM_SAFE] = disassembleLdrMemSafe,
+                                          [STR_MEM_SAFE] = disassembleStrMemSafe
                                           };
-
-
+//
 
 /**
  *  This function disassemble multiple bytecodes into readable assembly code
@@ -17,12 +18,13 @@ void (*disassemble[256])(char*, int)  = { [LDR_IMM] = disassembleLdrImm,
  *            *bytecode     address of bytecode that is going to be disassembled into assembly code
  */
 int disassembleBytecodes(char *strBuffer, int *bytecode) {
-  int operand = (*bytecode)>>8 & 0x00FFFFFF;
+  int operand;
   while(*bytecode != 0xFFFFFFFF) {
-    while(*strBuffer != 0)  // Find \0 to write
+  operand = (*bytecode)>>8 & 0x00FFFFFF;
+    while(*strBuffer != '\0')  // Find \0 to write
       strBuffer++;
     disassemble[(char)*bytecode](strBuffer, operand);
-    while(*strBuffer != 0)  // Find \0 to write
+    while(*strBuffer != '\0')  // Find \0 to write
       strBuffer++;
     bytecode++;
     if(*bytecode != 0xFFFFFFFF)   // remove \n for last line
@@ -66,6 +68,41 @@ void disassembleStrMem(char *strBuffer, int operand) {
 
 void disassembleMovReg(char *strBuffer, int operand) {
   int destination = getBits(operand, 2, 3);
-  int source = getBits(operand, 5, 3);
-  sprintf(strBuffer, "mov r%d r%d", destination, source);
+  int attrib = getBits(operand, 4, 2);
+  int source = getBits(operand, 7, 3);
+  int shift = getBits(operand, 9, 2);
+  int imm = getBits(operand, 14, 5); // number of shift 0 ~ 3
+
+  char attribString[6];
+  char shiftString[15];
+  printf("%x\n", operand);
+  printf("%d %d %d %d %d\n", destination, attrib, source, shift, imm);
+  
+  if(imm == NOP) sprintf(shiftString, "NOP");
+  else if(shift == LSR) sprintf(shiftString, "LSR %d", imm);
+  else if(shift == LSL) sprintf(shiftString, "LSL %d", imm);
+  else if(shift == ASR) sprintf(shiftString, "ASR %d", imm);
+  else if(shift == RR) sprintf(shiftString, "RR %d", imm);
+  
+  if(attrib == DATA) sprintf(attribString, "");
+  else if(attrib == BASE) sprintf(attribString, ".base");
+  else if(attrib == LIMIT) sprintf(attribString, ".limit");
+  
+  sprintf(strBuffer, "mov r%d%s r%d %s", destination, attribString, source, shiftString);
+}
+
+void disassembleLdrMemSafe(char *strBuffer, int operand) {
+  int *ref;
+  int registerToBeLoaded = getBits(operand, 2, 3);
+  int referenceRegister = getBits(operand, 5, 3);
+  int relativeAddress = getBits(operand, 23, 18);
+  sprintf(strBuffer, "ldrs r%d [r%d + #%d]", registerToBeLoaded, referenceRegister, relativeAddress);
+}
+
+void disassembleStrMemSafe(char *strBuffer, int operand) {
+  int *ref;
+  int registerToBeStored = getBits(operand, 2, 3);
+  int referenceRegister = getBits(operand, 5, 3);
+  int relativeAddress = getBits(operand, 23, 18);
+  sprintf(strBuffer, "strs r%d [r%d + #%d]", registerToBeStored, referenceRegister, relativeAddress);
 }

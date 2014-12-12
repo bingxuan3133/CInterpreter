@@ -8,5 +8,7 @@ void disassembleLdrImm(char *strBuffer, int operand);
 void disassembleLdrMem(char *strBuffer, int operand);
 void disassembleStrMem(char *strBuffer, int operand);
 void disassembleMovReg(char *strBuffer, int operand);
+void disassembleLdrMemSafe(char *strBuffer, int operand);
+void disassembleStrMemSafe(char *strBuffer, int operand);
 
 #endif // Disassembler_H

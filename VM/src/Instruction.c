@@ -60,8 +60,36 @@ void storeRegisterIntoMemory(int bytecode) {
  */
 void moveRegister(int bytecode) {
   int destination = getBits(bytecode, 10, 3);
-  int source = getBits(bytecode, 13, 3);
-  reg[destination].data = reg[source].data;
+  int attrib = getBits(bytecode, 12, 2);
+  int source = getBits(bytecode, 15, 3);
+  int shift = getBits(bytecode, 17, 2);
+  int imm = getBits(bytecode, 22, 5); // number of shift 0 ~ 31
+  int data = reg[source].data;
+  // Shift / Rotate Operations
+  if(imm == NOP)
+    ;
+  if(shift == LSR) {
+    data = (unsigned int)data >> imm;
+  } else if(shift == LSL) {
+    data = (unsigned int)data << imm;
+  } else if(shift == ASR) {
+    data = (int)data >> imm;
+  } else if(shift == RR) {
+    printf("data%x\n", data);
+    data = (data & 0xFFFFFFFF >> (32 - imm)) << (32 - imm); // Get shifted out bits
+    printf("data%x\n", data);
+    data = (data) | ((unsigned int)(reg[source].data) >> imm); // Put shifted in bits
+    printf("data%x\n", data);
+  }
+  // Assign
+  if(attrib == DATA)
+    reg[destination].data = data;
+  else if(attrib == BASE)
+    reg[destination].base = data;
+  else if(attrib == LIMIT)
+    reg[destination].limit = data;
+  else // Treat as DATA
+    reg[destination].data = data;
 }
 
 /**
@@ -76,10 +104,10 @@ void loadRegisterFromMemorySafe(int bytecode) {
   ref = (int *)(reg[referenceRegister].data + relativeAddress);
   int base = reg[referenceRegister].base;
   int limit = reg[referenceRegister].limit;
-  if(base <= (int)ref && limit >= (int)ref) { // Safe area
+  if(base <= (int)ref &&  base + limit >= (int)ref + 4) { // Safe area
     reg[registerToBeLoaded].data = *ref;
   } else {
-    sprintf(buffer, "r%d (.base = %p .limit = %p) has invalid access to address %p.", registerToBeLoaded, base, limit, ref);
+    sprintf(buffer, "ERROR: r%d (base = %p, limit = %p) has invalid access to address %p.", registerToBeLoaded, base, base+limit, ref);
     exception = createException(buffer, INVALID_MEMORY_ACCESS);
     Throw(exception);
   }
@@ -97,10 +125,10 @@ void storeRegisterIntoMemorySafe(int bytecode) {
   ref = (int *)(reg[referenceRegister].data + relativeAddress);
   int base = reg[referenceRegister].base;
   int limit = reg[referenceRegister].limit;
-  if(base <= (int)ref && limit >= (int)ref) { // Safe area
+  if(base <= (int)ref && base + limit >= (int)ref + 4) { // Safe area
     *ref = reg[registerToBeStored].data;
   } else {
-    sprintf(buffer, "r%d (.base = %p .limit = %p) has invalid access to address %p.", registerToBeStored, base, limit, ref);
+    sprintf(buffer, "ERROR: r%d (base = %p, limit = %p) has invalid access to address %p.", registerToBeStored, base, base+limit, ref);
     exception = createException(buffer, INVALID_MEMORY_ACCESS);
     Throw(exception);
   }

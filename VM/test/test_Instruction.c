@@ -57,13 +57,13 @@ void test_getBits(void) {
 }
 
 void test_loadRegisterWithLiteral(void) {
-  loadRegisterWithLiteral(ldrImm(0, 2)); // ldr r0, #2
+  loadRegisterWithLiteral(ldrImm(R0, 2)); // ldr r0, #2
   TEST_ASSERT_EQUAL(2, reg[0].data);
-  loadRegisterWithLiteral(ldrImm(1, 2)); // ldr r1, #2
+  loadRegisterWithLiteral(ldrImm(R1, 2)); // ldr r1, #2
   TEST_ASSERT_EQUAL(2, reg[1].data);
-  loadRegisterWithLiteral(ldrImm(2, 2)); // ldr r2, #2
+  loadRegisterWithLiteral(ldrImm(R2, 2)); // ldr r2, #2
   TEST_ASSERT_EQUAL(2, reg[2].data);
-  loadRegisterWithLiteral(ldrImm(7, 2)); // ldr r7, #2
+  loadRegisterWithLiteral(ldrImm(R7, 2)); // ldr r7, #2
   TEST_ASSERT_EQUAL(2, reg[7].data);
 }
 
@@ -73,79 +73,124 @@ void test_loadRegisterWithLiteral_should_keep_data_signed_value(void) {
 }
 
 void test_loadRegisterFromMemory_should_load_register_with_value_in_reference(void) {
-  int value = 0x5A;   // 0x0028FE2C
-  int value2 = 0xA5;  // 0x0028FE28
-  int value3 = 0x12345678;  // 0x0028FE24
-
+  int heap[10] = {0};
+  heap[0] = 0x12345678;
+  heap[1] = 0x87654321;
+  heap[2] = 0x12121212;
+  heap[3] = 0x55665566;
+  
   reg[0].data = 0;
-  reg[1].data = (int)&value3;
-  loadRegisterFromMemory(ldrMem(0, 1, 0)); // ldr r0, [r1 + 0]
+  reg[1].data = (int)&heap[0];
+  reg[2].data = (int)&heap[3];
+
+  loadRegisterFromMemory(ldrMem(R0, R1, 0)); // ldr r0, [r1 + 0]
   TEST_ASSERT_EQUAL_HEX(0x12345678, reg[0].data);
-  loadRegisterFromMemory(ldrMem(0, 1, 4)); // ldr r0, [r1 + 4]
-  TEST_ASSERT_EQUAL_HEX(0xA5, reg[0].data);
-  loadRegisterFromMemory(ldrMem(0, 1, 8)); // ldr r0, [r1 + 8]
-  TEST_ASSERT_EQUAL_HEX(0x5A, reg[0].data);
+  loadRegisterFromMemory(ldrMem(R0, R1, 4)); // ldr r0, [r1 + 4]
+  TEST_ASSERT_EQUAL_HEX(0x87654321, reg[0].data);
+  loadRegisterFromMemory(ldrMem(R0, R1, 8)); // ldr r0, [r1 + 8]
+  TEST_ASSERT_EQUAL_HEX(0x12121212, reg[0].data);
+  loadRegisterFromMemory(ldrMem(R0, R2, 0)); // ldr r0, [r2 + 0]
+  TEST_ASSERT_EQUAL_HEX(0x55665566, reg[0].data);
+  loadRegisterFromMemory(ldrMem(R0, R2, -4)); // ldr r0, [r2 + -4]
+  TEST_ASSERT_EQUAL_HEX(0x12121212, reg[0].data);
+  loadRegisterFromMemory(ldrMem(R0, R2, -8)); // ldr r0, [r2 + -8]
+  TEST_ASSERT_EQUAL_HEX(0x87654321, reg[0].data);
 }
 
 void test_storeRegisterIntoMemory_should_store_register_into_reference(void) {
-  int value = 0;   // 4
-  int value2 = 0;  // 0
+  int heap[10] = {0};
 
-  reg[1].data = (int)&value2;
+  reg[1].data = (int)&heap[0];
+  reg[2].data = (int)&heap[1];
   reg[0].data = 0xA5;
-  storeRegisterIntoMemory(strMem(0, 1, 0)); // str r0, [r1 + 0]
-  TEST_ASSERT_EQUAL_HEX(0xA5, value2);
-  reg[0].data = 0x5A;
-  storeRegisterIntoMemory(strMem(0, 1, 4)); // str r0, [r1 + 4]
-  TEST_ASSERT_EQUAL_HEX(0x5A, value);
+  storeRegisterIntoMemory(strMem(R0, R1, 0)); // str r0, [r1 + 0]
+  TEST_ASSERT_EQUAL_HEX(0xA5, heap[0]);
+  reg[0].data = 0x20;
+  storeRegisterIntoMemory(strMem(R0, R1, 4)); // str r0, [r1 + 4]
+  TEST_ASSERT_EQUAL_HEX(0x20, heap[1]);
+  storeRegisterIntoMemory(strMem(R0, R2, -4)); // str r0, [r2 + #-4]
+  TEST_ASSERT_EQUAL_HEX(0x20, heap[0]);
 }
 
 void test_moveRegister_r0_r1_should_move_r1_to_r0(void) {
   reg[0].data = 0;
   reg[1].data = 0xA5;
-  moveRegister(movReg(0, 1)); // mov r0, r1
+  moveRegister(movReg(R0, DATA, R1, NOP, NOP)); // mov r0.data, r1, NOP, #0
   TEST_ASSERT_EQUAL_HEX(0xA5, reg[0].data);
 }
 
+void test_moveRegister_r7_data_or_base_or_limit_r0_should_move_r0_to_r7_data_or_base_or_limit_correctly(void) {
+  reg[0].data = 0x01020304;
+  moveRegister(movReg(R7, DATA, R0, NOP, NOP)); // mov r7.data, r0, NOP, #0
+  TEST_ASSERT_EQUAL_HEX(0x01020304, reg[7].data);
+  moveRegister(movReg(R7, BASE, R0, NOP, NOP)); // mov r7.base, r0, NOP, #0
+  TEST_ASSERT_EQUAL_HEX(0x01020304, reg[7].data);
+  moveRegister(movReg(R7, LIMIT, R0, NOP, NOP)); // mov r7.limit, r0, NOP, #0
+  TEST_ASSERT_EQUAL_HEX(0x01020304, reg[7].data);
+}
+
+void test_moveRegister_r0_given_0xFF07FF07_should_return_correct_values_for_each_shift_rotate_operations(void) {
+  reg[0].data = 0;
+  reg[1].data = 0xFF07FF07;
+  moveRegister(movReg(R0, DATA, R1, NOP, NOP)); // mov r0.data, r1, NOP, #0
+  TEST_ASSERT_EQUAL_HEX(0xFF07FF07, reg[0].data);
+  moveRegister(movReg(R0, DATA, R1, LSL, 8)); // mov r0.data, r1, LSL, #8
+  TEST_ASSERT_EQUAL_HEX(0x07FF0700, reg[0].data);
+  moveRegister(movReg(R0, DATA, R1, LSR, 8)); // mov r0.data, r1, LSR, #8
+  TEST_ASSERT_EQUAL_HEX(0x00FF07FF, reg[0].data);
+  moveRegister(movReg(R0, DATA, R1, ASR, 8)); // mov r0.data, r1, ASR, #8
+  TEST_ASSERT_EQUAL_HEX(0xFFFF07FF, reg[0].data);
+  moveRegister(movReg(R0, DATA, R1, RR, 8));  // mov r0.data, r1, RR, #8
+  TEST_ASSERT_EQUAL_HEX(0x07FF07FF, reg[0].data);
+}
+
 void test_loadRegisterFromMemorySafe_should_not_throw_an_exception_if_access_to_valid_memory(void) {
-  int memory = 2;
-  reg[7].data = (int)&memory;
-  reg[7].base = (int)&memory;
-  reg[7].limit = (int)(&memory)+0;
+  int heap[10] = {0};
+  
+  heap[9] = 2;
+
+  reg[7].data = (int)&heap[0];
+  reg[7].base = (int)&heap[0];
+  reg[7].limit = 40;
   Try {
-    loadRegisterFromMemorySafe(ldrMemSafe(0, 7, 0)); // ldrs r0, [r7 + 0]
+    loadRegisterFromMemorySafe(ldrMemSafe(R0, R7, 36)); // ldrs r0, [r7 + 36]
     TEST_ASSERT_EQUAL(2, reg[0].data);
-    freeException;
+    freeException(exception);
   } Catch(exception) {
     TEST_FAIL_MESSAGE("Should not throw exception\n");
   }
 }
 
 void test_loadRegisterFromMemorySafe_should_throw_an_exception_if_access_to_invalid_memory(void) {
-  int memory = 2;
-  reg[7].data = (int)&memory;
-  reg[7].base = (int)&memory;
-  reg[7].limit = (int)(&memory)+0;
+  int heap[10] = {0};
+  
+  heap[0] = 2;
+  heap[1] = 4;
+  heap[2] = 6;
+  reg[7].data = (int)&heap[0];  // 0
+  reg[7].base = (int)&heap[0];  
+  reg[7].limit = 40;
   Try {
-    loadRegisterFromMemorySafe(ldrMemSafe(0, 7, 1)); // ldrs r0, [r7 + 1]
+    loadRegisterFromMemorySafe(ldrMemSafe(R0, R7, 37)); // ldrs r0, [r7 + 37]
     TEST_FAIL_MESSAGE("Should throw exception\n");
   } Catch(exception) {
     TEST_ASSERT_EQUAL(exception->errCode, INVALID_MEMORY_ACCESS);
     dumpException(exception);
-    freeException;
+    freeException(exception);
   }
 }
 
 void test_storeRegisterIntoMemorySafe_should_not_throw_an_exception_if_access_to_valid_memory(void) {
-  int memory = 0;
-  reg[7].data = (int)&memory;
-  reg[7].base = (int)&memory;
-  reg[7].limit = (int)(&memory)+0;
+  int heap[10] = {0};
+  
+  reg[7].data = (int)&heap[0];
+  reg[7].base = (int)&heap[0];  
+  reg[7].limit = 40;
   reg[0].data = 0x5A;
   Try {
-    storeRegisterIntoMemorySafe(strMemSafe(0, 7, 0)); // strs r0, [r7 + 0]
-    TEST_ASSERT_EQUAL(0x5A, reg[0].data);
-    freeException;
+    storeRegisterIntoMemorySafe(strMemSafe(R0, R7, 0)); // strs r0, [r7 + 0]
+    TEST_ASSERT_EQUAL(0x5A, heap[0]);
+    freeException(exception);
   } Catch(exception) {
     TEST_FAIL_MESSAGE("Should not throw exception\n");
   }
@@ -155,14 +200,14 @@ void test_storeRegisterIntoMemorySafe_should_throw_an_exception_if_access_to_inv
   int memory = 0;
   reg[7].data = (int)&memory;
   reg[7].base = (int)&memory;
-  reg[7].limit = (int)(&memory)+0;
+  reg[7].limit = 40;
   reg[0].data = 0x5A;
   Try {
-    storeRegisterIntoMemorySafe(ldrMemSafe(0, 7, 1)); // ldrs r0, [r7 + 1]
+    storeRegisterIntoMemorySafe(ldrMemSafe(R0, R7, 37)); // strs r0, [r7 + 37]
     TEST_FAIL_MESSAGE("Should throw exception\n");
   } Catch(exception) {
     TEST_ASSERT_EQUAL(exception->errCode, INVALID_MEMORY_ACCESS);
     dumpException(exception);
-    freeException;
+    freeException(exception);
   }
 }
