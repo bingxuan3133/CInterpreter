@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "Exception.h"
 
-Register reg[8];
+Register reg[MAX_REG];
 char buffer[100] = {0};
 
 /**
@@ -29,7 +29,7 @@ void loadRegisterWithLiteral(int bytecode) {
 }
 
 /**
- *  This function load register with value from memory
+ *  This function load register with data from memory
  *  Input:  bytecode
  */
 void loadRegisterFromMemory(int bytecode) {
@@ -42,7 +42,7 @@ void loadRegisterFromMemory(int bytecode) {
 }
 
 /**
- *  This function store register into memory
+ *  This function store register data into memory
  *  Input:  bytecode
  */
 void storeRegisterIntoMemory(int bytecode) {
@@ -55,7 +55,7 @@ void storeRegisterIntoMemory(int bytecode) {
 }
 
 /**
- *  This function move value of a register into another register
+ *  This function move of register data into another register (data, base, or limit)
  *  Input:  bytecode
  */
 void moveRegister(int bytecode) {
@@ -93,7 +93,7 @@ void moveRegister(int bytecode) {
 }
 
 /**
- *  This function load register with value from memory
+ *  This function load register with data from safe memory
  *  Input:  bytecode
  */
 void loadRegisterFromMemorySafe(int bytecode) {
@@ -114,7 +114,7 @@ void loadRegisterFromMemorySafe(int bytecode) {
 }
 
 /**
- *  This function store register value into memory
+ *  This function store register data into safe memory
  *  Input:  bytecode
  */
 void storeRegisterIntoMemorySafe(int bytecode) {
@@ -132,4 +132,54 @@ void storeRegisterIntoMemorySafe(int bytecode) {
     exception = createException(buffer, INVALID_MEMORY_ACCESS);
     Throw(exception);
   }
+}
+
+/**
+ *  This function load multiple registers with data from memory
+ *  Input:  bytecode
+ */
+void loadMultipleRegistersFromMemory(int bytecode) {
+  int referenceRegister = getBits(bytecode, 10, 3);
+  int registersToBeLoaded = getBits(bytecode, 18, 8);
+  int direction = getBits(bytecode, 19, 1);
+  int update = getBits(bytecode, 20, 1);
+  int *ref = (int *)reg[referenceRegister].data;
+  int i;
+  for(i = 0; i < MAX_REG; i++) {
+    if(0x01 & (registersToBeLoaded >> i)) {
+      reg[i].data = *ref;
+      if(direction == INC) {
+        ref++;
+      } else { // direction == DEC
+        ref--;
+      }
+    }
+  }
+  if(update == UPDATE)
+    reg[referenceRegister].data = (int)ref;
+}
+
+/**
+ *  This function store multiple registers into memory
+ *  Input:  bytecode
+ */
+void storeMultipleRegistersIntoMemory(int bytecode) {
+  int referenceRegister = getBits(bytecode, 10, 3);
+  int registersToBeStored = getBits(bytecode, 18, 8);
+  int direction = getBits(bytecode, 19, 1);
+  int update = getBits(bytecode, 20, 1);
+  int *ref = (int *)reg[referenceRegister].data;
+  int i;
+  for(i = 0; i < MAX_REG; i++) {
+    if(0x01 & (registersToBeStored >> i)) {
+      *ref = reg[i].data;
+      if(direction == INC) {
+        ref++;
+      } else { // direction == DEC
+        ref--;
+      }
+    }
+  }
+  if(update == UPDATE)
+    reg[referenceRegister].data = (int)ref;
 }

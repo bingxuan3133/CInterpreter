@@ -57,13 +57,13 @@ void test_getBits(void) {
 }
 
 void test_loadRegisterWithLiteral(void) {
-  loadRegisterWithLiteral(ldrImm(R0, 2)); // ldr r0, #2
+  loadRegisterWithLiteral(ldrImm(REG_0, 2)); // ldr r0, #2
   TEST_ASSERT_EQUAL(2, reg[0].data);
-  loadRegisterWithLiteral(ldrImm(R1, 2)); // ldr r1, #2
+  loadRegisterWithLiteral(ldrImm(REG_1, 2)); // ldr REG_1, #2
   TEST_ASSERT_EQUAL(2, reg[1].data);
-  loadRegisterWithLiteral(ldrImm(R2, 2)); // ldr r2, #2
+  loadRegisterWithLiteral(ldrImm(REG_2, 2)); // ldr r2, #2
   TEST_ASSERT_EQUAL(2, reg[2].data);
-  loadRegisterWithLiteral(ldrImm(R7, 2)); // ldr r7, #2
+  loadRegisterWithLiteral(ldrImm(REG_7, 2)); // ldr r7, #2
   TEST_ASSERT_EQUAL(2, reg[7].data);
 }
 
@@ -83,17 +83,17 @@ void test_loadRegisterFromMemory_should_load_register_with_value_in_reference(vo
   reg[1].data = (int)&heap[0];
   reg[2].data = (int)&heap[3];
 
-  loadRegisterFromMemory(ldrMem(R0, R1, 0)); // ldr r0, [r1 + 0]
+  loadRegisterFromMemory(ldrMem(REG_0, REG_1, 0)); // ldr r0, [r1 + 0]
   TEST_ASSERT_EQUAL_HEX(0x12345678, reg[0].data);
-  loadRegisterFromMemory(ldrMem(R0, R1, 4)); // ldr r0, [r1 + 4]
+  loadRegisterFromMemory(ldrMem(REG_0, REG_1, 4)); // ldr r0, [r1 + 4]
   TEST_ASSERT_EQUAL_HEX(0x87654321, reg[0].data);
-  loadRegisterFromMemory(ldrMem(R0, R1, 8)); // ldr r0, [r1 + 8]
+  loadRegisterFromMemory(ldrMem(REG_0, REG_1, 8)); // ldr r0, [r1 + 8]
   TEST_ASSERT_EQUAL_HEX(0x12121212, reg[0].data);
-  loadRegisterFromMemory(ldrMem(R0, R2, 0)); // ldr r0, [r2 + 0]
+  loadRegisterFromMemory(ldrMem(REG_0, REG_2, 0)); // ldr r0, [r2 + 0]
   TEST_ASSERT_EQUAL_HEX(0x55665566, reg[0].data);
-  loadRegisterFromMemory(ldrMem(R0, R2, -4)); // ldr r0, [r2 + -4]
+  loadRegisterFromMemory(ldrMem(REG_0, REG_2, -4)); // ldr r0, [r2 + -4]
   TEST_ASSERT_EQUAL_HEX(0x12121212, reg[0].data);
-  loadRegisterFromMemory(ldrMem(R0, R2, -8)); // ldr r0, [r2 + -8]
+  loadRegisterFromMemory(ldrMem(REG_0, REG_2, -8)); // ldr r0, [r2 + -8]
   TEST_ASSERT_EQUAL_HEX(0x87654321, reg[0].data);
 }
 
@@ -103,44 +103,44 @@ void test_storeRegisterIntoMemory_should_store_register_into_reference(void) {
   reg[1].data = (int)&heap[0];
   reg[2].data = (int)&heap[1];
   reg[0].data = 0xA5;
-  storeRegisterIntoMemory(strMem(R0, R1, 0)); // str r0, [r1 + 0]
+  storeRegisterIntoMemory(strMem(REG_0, REG_1, 0)); // str r0, [r1 + 0]
   TEST_ASSERT_EQUAL_HEX(0xA5, heap[0]);
   reg[0].data = 0x20;
-  storeRegisterIntoMemory(strMem(R0, R1, 4)); // str r0, [r1 + 4]
+  storeRegisterIntoMemory(strMem(REG_0, REG_1, 4)); // str r0, [r1 + 4]
   TEST_ASSERT_EQUAL_HEX(0x20, heap[1]);
-  storeRegisterIntoMemory(strMem(R0, R2, -4)); // str r0, [r2 + #-4]
+  storeRegisterIntoMemory(strMem(REG_0, REG_2, -4)); // str r0, [r2 + #-4]
   TEST_ASSERT_EQUAL_HEX(0x20, heap[0]);
 }
 
-void test_moveRegister_r0_r1_should_move_r1_to_r0(void) {
+void test_moveRegister_r0_REG_1_should_move_REG_1_to_r0(void) {
   reg[0].data = 0;
   reg[1].data = 0xA5;
-  moveRegister(movReg(R0, DATA, R1, NOP, NOP)); // mov r0.data, r1, NOP, #0
+  moveRegister(movReg(REG_0, DATA, REG_1, NOP, NOP)); // mov r0.data, r1, NOP, #0
   TEST_ASSERT_EQUAL_HEX(0xA5, reg[0].data);
 }
 
 void test_moveRegister_r7_data_or_base_or_limit_r0_should_move_r0_to_r7_data_or_base_or_limit_correctly(void) {
   reg[0].data = 0x01020304;
-  moveRegister(movReg(R7, DATA, R0, NOP, NOP)); // mov r7.data, r0, NOP, #0
+  moveRegister(movReg(REG_7, DATA, REG_0, NOP, NOP)); // mov r7.data, r0, NOP, #0
   TEST_ASSERT_EQUAL_HEX(0x01020304, reg[7].data);
-  moveRegister(movReg(R7, BASE, R0, NOP, NOP)); // mov r7.base, r0, NOP, #0
+  moveRegister(movReg(REG_7, BASE, REG_0, NOP, NOP)); // mov r7.base, r0, NOP, #0
   TEST_ASSERT_EQUAL_HEX(0x01020304, reg[7].data);
-  moveRegister(movReg(R7, LIMIT, R0, NOP, NOP)); // mov r7.limit, r0, NOP, #0
+  moveRegister(movReg(REG_7, LIMIT, REG_0, NOP, NOP)); // mov r7.limit, r0, NOP, #0
   TEST_ASSERT_EQUAL_HEX(0x01020304, reg[7].data);
 }
 
 void test_moveRegister_r0_given_0xFF07FF07_should_return_correct_values_for_each_shift_rotate_operations(void) {
   reg[0].data = 0;
   reg[1].data = 0xFF07FF07;
-  moveRegister(movReg(R0, DATA, R1, NOP, NOP)); // mov r0.data, r1, NOP, #0
+  moveRegister(movReg(REG_0, DATA, REG_1, NOP, NOP)); // mov r0.data, r1, NOP, #0
   TEST_ASSERT_EQUAL_HEX(0xFF07FF07, reg[0].data);
-  moveRegister(movReg(R0, DATA, R1, LSL, 8)); // mov r0.data, r1, LSL, #8
+  moveRegister(movReg(REG_0, DATA, REG_1, LSL, 8)); // mov r0.data, r1, LSL, #8
   TEST_ASSERT_EQUAL_HEX(0x07FF0700, reg[0].data);
-  moveRegister(movReg(R0, DATA, R1, LSR, 8)); // mov r0.data, r1, LSR, #8
+  moveRegister(movReg(REG_0, DATA, REG_1, LSR, 8)); // mov r0.data, r1, LSR, #8
   TEST_ASSERT_EQUAL_HEX(0x00FF07FF, reg[0].data);
-  moveRegister(movReg(R0, DATA, R1, ASR, 8)); // mov r0.data, r1, ASR, #8
+  moveRegister(movReg(REG_0, DATA, REG_1, ASR, 8)); // mov r0.data, r1, ASR, #8
   TEST_ASSERT_EQUAL_HEX(0xFFFF07FF, reg[0].data);
-  moveRegister(movReg(R0, DATA, R1, RR, 8));  // mov r0.data, r1, RR, #8
+  moveRegister(movReg(REG_0, DATA, REG_1, RR, 8));  // mov r0.data, r1, RR, #8
   TEST_ASSERT_EQUAL_HEX(0x07FF07FF, reg[0].data);
 }
 
@@ -153,7 +153,7 @@ void test_loadRegisterFromMemorySafe_should_not_throw_an_exception_if_access_to_
   reg[7].base = (int)&heap[0];
   reg[7].limit = 40;
   Try {
-    loadRegisterFromMemorySafe(ldrMemSafe(R0, R7, 36)); // ldrs r0, [r7 + 36]
+    loadRegisterFromMemorySafe(ldrMemSafe(REG_0, REG_7, 36)); // ldrs r0, [r7 + 36]
     TEST_ASSERT_EQUAL(2, reg[0].data);
     freeException(exception);
   } Catch(exception) {
@@ -171,7 +171,7 @@ void test_loadRegisterFromMemorySafe_should_throw_an_exception_if_access_to_inva
   reg[7].base = (int)&heap[0];  
   reg[7].limit = 40;
   Try {
-    loadRegisterFromMemorySafe(ldrMemSafe(R0, R7, 37)); // ldrs r0, [r7 + 37]
+    loadRegisterFromMemorySafe(ldrMemSafe(REG_0, REG_7, 37)); // ldrs r0, [r7 + 37]
     TEST_FAIL_MESSAGE("Should throw exception\n");
   } Catch(exception) {
     TEST_ASSERT_EQUAL(exception->errCode, INVALID_MEMORY_ACCESS);
@@ -188,7 +188,7 @@ void test_storeRegisterIntoMemorySafe_should_not_throw_an_exception_if_access_to
   reg[7].limit = 40;
   reg[0].data = 0x5A;
   Try {
-    storeRegisterIntoMemorySafe(strMemSafe(R0, R7, 0)); // strs r0, [r7 + 0]
+    storeRegisterIntoMemorySafe(strMemSafe(REG_0, REG_7, 0)); // strs r0, [r7 + 0]
     TEST_ASSERT_EQUAL(0x5A, heap[0]);
     freeException(exception);
   } Catch(exception) {
@@ -203,11 +203,131 @@ void test_storeRegisterIntoMemorySafe_should_throw_an_exception_if_access_to_inv
   reg[7].limit = 40;
   reg[0].data = 0x5A;
   Try {
-    storeRegisterIntoMemorySafe(ldrMemSafe(R0, R7, 37)); // strs r0, [r7 + 37]
+    storeRegisterIntoMemorySafe(ldrMemSafe(REG_0, REG_7, 37)); // strs r0, [r7 + 37]
     TEST_FAIL_MESSAGE("Should throw exception\n");
   } Catch(exception) {
     TEST_ASSERT_EQUAL(exception->errCode, INVALID_MEMORY_ACCESS);
     dumpException(exception);
     freeException(exception);
   }
+}
+
+void test_loadMultipleRegistersFromMemory_should_load_register_with_data_in_memory(void) {
+  int heap[10] = {10, 50, 100, -10, -20, -100, -50, -30, 20, 70};
+  
+  reg[7].data = (int)&heap[5];
+  reg[0].data = 0;
+  reg[1].data = 0;
+  reg[2].data = 0;
+  reg[3].data = 0;
+  reg[4].data = 0;
+  reg[5].data = 0;
+  reg[6].data = 0;
+
+  loadMultipleRegistersFromMemory(ldm(REG_7, R1|R2|R3, INC, NO_UPDATE)); // ldmi r7, [r1, r2, r3]
+  TEST_ASSERT_EQUAL(-100, reg[1].data);
+  TEST_ASSERT_EQUAL(-50, reg[2].data);
+  TEST_ASSERT_EQUAL(-30, reg[3].data);
+  TEST_ASSERT_EQUAL_HEX((int)&heap[5], reg[7].data);
+  
+  loadMultipleRegistersFromMemory(ldm(REG_7, R4|R5|R6, DEC, NO_UPDATE)); // ldmd r7, [r4, r5, r6]
+  TEST_ASSERT_EQUAL(-100, reg[4].data);
+  TEST_ASSERT_EQUAL(-20, reg[5].data);
+  TEST_ASSERT_EQUAL(-10, reg[6].data);
+  TEST_ASSERT_EQUAL_HEX((int)&heap[5], reg[7].data);
+  
+  loadMultipleRegistersFromMemory(ldm(REG_7, R4|R5|R6, INC, UPDATE)); // ldmi r7!, [r4, r5, r6]  r7->heap[8]
+  TEST_ASSERT_EQUAL(-100, reg[4].data);
+  TEST_ASSERT_EQUAL(-50, reg[5].data);
+  TEST_ASSERT_EQUAL(-30, reg[6].data);
+  TEST_ASSERT_EQUAL_HEX((int)&heap[8], reg[7].data);
+  
+  loadMultipleRegistersFromMemory(ldm(REG_7, R0|R1|R2|R3|R4|R5|R6, DEC, UPDATE)); // ldmd r7!, [r1 - r6]
+  TEST_ASSERT_EQUAL(20, reg[0].data);
+  TEST_ASSERT_EQUAL(-30, reg[1].data);
+  TEST_ASSERT_EQUAL(-50, reg[2].data);
+  TEST_ASSERT_EQUAL(-100, reg[3].data);
+  TEST_ASSERT_EQUAL(-20, reg[4].data);
+  TEST_ASSERT_EQUAL(-10, reg[5].data);
+  TEST_ASSERT_EQUAL(100, reg[6].data);
+  TEST_ASSERT_EQUAL_HEX((int)&heap[1], reg[7].data);
+}
+
+void test_loadMultipleRegistersFromMemory_load_stack_pointer_address(void) {
+  int heap[10] = {10, 50, 100, -10, -20, -100, -50, -30, 20, 70};
+  
+  reg[7].data = (int)&heap[5];
+  reg[0].data = 0;
+  reg[1].data = 0;
+  reg[2].data = 0;
+  reg[3].data = 0;
+  reg[4].data = 0;
+  reg[5].data = 0;
+  reg[6].data = 0;
+  
+  loadMultipleRegistersFromMemory(ldm(REG_7, R7, INC, UPDATE)); // ldmi r7!, [r7]  r7->heap[6]
+  TEST_ASSERT_EQUAL_HEX((int)&heap[6], reg[7].data);
+  
+  loadMultipleRegistersFromMemory(ldm(REG_7, R7, INC, NO_UPDATE)); // ldmi r7, [r7]
+  TEST_ASSERT_EQUAL(-50, reg[7].data);                             // Will have serious problem when used as stack pointer next time
+}
+
+void test_storeMultipleRegistersIntoMemory_should_load_register_with_data_in_memory(void) {
+  int heap[10] = {0};
+  
+  reg[7].data = (int)&heap[5];
+  reg[0].data = 10;
+  reg[1].data = -20;
+  reg[2].data = 30;
+  reg[3].data = -40;
+  reg[4].data = 50;
+  reg[5].data = -60;
+  reg[6].data = 70;
+  
+  storeMultipleRegistersIntoMemory(stm(REG_7, R0|R1|R2, INC, NO_UPDATE)); // stmi r7, [r0, r1, r2]
+  TEST_ASSERT_EQUAL(10, heap[5]);
+  TEST_ASSERT_EQUAL(-20, heap[6]);
+  TEST_ASSERT_EQUAL(30, heap[7]);
+  TEST_ASSERT_EQUAL_HEX((int)&heap[5], reg[7].data);
+  
+  storeMultipleRegistersIntoMemory(stm(REG_7, R3|R4|R5|R6, DEC, NO_UPDATE)); // stmd r7, [r3, r4, r5, r6]
+  TEST_ASSERT_EQUAL(-40, heap[5]);
+  TEST_ASSERT_EQUAL(50, heap[4]);
+  TEST_ASSERT_EQUAL(-60, heap[3]);
+  TEST_ASSERT_EQUAL(70, heap[2]);
+  TEST_ASSERT_EQUAL_HEX((int)&heap[5], reg[7].data);
+  
+    
+  storeMultipleRegistersIntoMemory(stm(REG_7, R0|R1|R2, INC, UPDATE)); // stmi r7!, [r0, r1, r2]
+  TEST_ASSERT_EQUAL(10, heap[5]);
+  TEST_ASSERT_EQUAL(-20, heap[6]);
+  TEST_ASSERT_EQUAL(30, heap[7]);
+  TEST_ASSERT_EQUAL_HEX((int)&heap[8], reg[7].data);
+  
+  storeMultipleRegistersIntoMemory(stm(REG_7, R3|R4|R5|R6, DEC, UPDATE)); // stmd r7!, [r3, r4, r5, r6]
+  TEST_ASSERT_EQUAL(-40, heap[8]);
+  TEST_ASSERT_EQUAL(50, heap[7]);
+  TEST_ASSERT_EQUAL(-60, heap[6]);
+  TEST_ASSERT_EQUAL(70, heap[5]);
+  TEST_ASSERT_EQUAL_HEX((int)&heap[4], reg[7].data);
+}
+
+void test_storeMultipleRegistersIntoMemory_store_stack_pointer_address(void) {
+  int heap[10] = {0};
+  
+  reg[7].data = (int)&heap[5];
+  reg[0].data = 10;
+  reg[1].data = -20;
+  reg[2].data = 30;
+  reg[3].data = -40;
+  reg[4].data = 50;
+  reg[5].data = -60;
+  reg[6].data = 70;
+  
+  storeMultipleRegistersIntoMemory(stm(REG_7, R7, INC, UPDATE)); // stmi r7!, [r7]  r7->heap[6]
+  TEST_ASSERT_EQUAL_HEX((int)&heap[6], reg[7].data);
+  TEST_ASSERT_EQUAL_HEX((int)&heap[5], heap[5]);
+  
+  storeMultipleRegistersIntoMemory(stm(REG_7, R7, INC, NO_UPDATE)); // stmi r7, [r7]
+  TEST_ASSERT_EQUAL_HEX((int)&heap[6], reg[7].data);
 }
