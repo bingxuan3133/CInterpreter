@@ -1,24 +1,38 @@
 __author__ = 'JingWen'
 
+from Oracle import *
+from Context import *
+from ContextManager import *
+
+
+
 
 
 class ByteCodeGenerator:
     byteCodeList = []
-    registerStatus = [0, 0, 0, 0, 0, 0, 0, 0]   # 1 represent the location of the register is in use
-                                                # 0 represent the location is free to be overwrite
-    workingRegisterCounter = 0  # Start with the location 0
-    MaxRegister = 5  # The maximum available register
-
     byteRequired = {'int': 4}
     registersInThisAST = {}
 
     def __init__(self, context, contextManager):
         self.context = context
         self.contextManager = contextManager
-        self.respectiveByteCodeFunction = {'(literal)': self.loadValue, '(identifier)': self.loadRegister, '=': self.storeValue, '+' : self.addRegister}
-        pass
+        self.oracle = Oracle()
 
-    def subRegister (self, registerNumber, valueToSubtract):
+    def assignRegister(self, targetRegister, registerToBeAssigned):
+        number = 0xfa | targetRegister << 8 | registerToBeAssigned << 11
+        self.byteCodeList.append(number)
+        return number
+
+    def storeMultiple(self, targetRegister, registerToPush):
+        number = 0xfb | targetRegister << 8 | registerToPush << 11
+        self.byteCodeList.append(number)
+        return number
+    def addRegister(self, registerNumber, valueToAdd):
+        number = 0xfc | registerNumber << 8 | valueToAdd << 11
+        self.byteCodeList.append(number)
+        return number
+
+    def subRegister(self, registerNumber, valueToSubtract):
         number = 0xfb | registerNumber << 8 | valueToSubtract << 11
         self.byteCodeList.append(number)
         return number
@@ -43,21 +57,74 @@ class ByteCodeGenerator:
         self.byteCodeList.append(number)
         return number
 
-    def generateByteCode(self, token):
-        if token[0].id == '{':
-            token = token[0].data
+    def initGeneration(self):
+        thisGenerator = self
+        def subtract(self):
+            pass
+        def divide(self):
+            pass
+        def multiply(self):
+            pass
+        def nothing(self):
+            pass
+        def storeValueToRegister(self):
+            if thisGenerator.oracle.registerLeft < abs(self.registerRequired) or \
+                thisGenerator.oracle.registerLeft < self.leftValue + self.rightValue:
+                number = 0b000000 | 0b1 << (6-1-thisGenerator.oracle.releaseAWorkingRegister())
+                thisGenerator.storeMultiple(7, number)
 
-        self.byteCodeList =[]
-        index = 0
-        index = self.generateInitializationCode(token, index)
 
-        for value in range(index, len(token)):
-            self.injectRegisterRequired(token[value])
-            self.generateProcessCode(token, value)
-        return self.byteCodeList
+            if self.registerRequired > 0:
+                for index in range(len(self.data), 0, -1):
+                    if self.data[index].id == '(identifier)':
+                        thisGenerator.loadRegister(thisGenerator.oracle.getAFreeWorkingRegister(), 7, thisGenerator.registersInThisAST[self.data[index].data[0]])
+                    elif self.data[index].id == '(literal)':
+                        thisGenerator.loadValue(thisGenerator.oracle.getAFreeWorkingRegister(),self.data[index].data[0])
+                    else:
+                        self.data[index].generateByteCode()
+            else:
+                for index in range(0, len(self.data)):
+                    if self.data[index].id == '(identifier)':
+                        thisGenerator.loadRegister(thisGenerator.oracle.getAFreeWorkingRegister(), 7, thisGenerator.registersInThisAST[self.data[index].data[0]])
+                    elif self.data[index].id == '(literal)':
+                        thisGenerator.loadValue(thisGenerator.oracle.getAFreeWorkingRegister(),self.data[index].data[0])
+                    else:
+                        self.data[index].generateByteCode()
+
+            secondRegister = thisGenerator.oracle.releaseAWorkingRegister()
+            firstRegister = thisGenerator.oracle.releaseAWorkingRegister()
+            thisGenerator.assignRegister(firstRegister, secondRegister)
+            return thisGenerator.byteCodeList
+
+        def addRegisterValueAndPlaceIntoARegister(self):
+            pass
+        def loadIdentifierIntoRegister(self):
+            pass
+        def loadLiteralIntoRegister(self):
+            pass
+        def initialization(self):
+            variableCounter = 0
+            for token in self:
+                if token.id in thisGenerator.byteRequired:
+                    variableCounter += 1
+
+                thisGenerator.subRegister(7, thisGenerator.byteRequired[self.id]*variableCounter)
+                return thisGenerator.byteCodeList
+
+        respectiveByteCodeFunction = {'(literal)': loadLiteralIntoRegister, '(identifier)': loadIdentifierIntoRegister, \
+                                            'int': initialization, '=': storeValueToRegister, '+': addRegisterValueAndPlaceIntoARegister, \
+                                            '-': subtract, '*': multiply, '/': divide, \
+                                            '(systemToken)': nothing, ';': nothing, ',': nothing, '}': nothing, '{': nothing}
+        #Start the initialization
+        self.byteCodeList = []
+        for context in self.contextManager.currentContexts:
+            for token in context.symbolTable:
+                context.symbolTable[token].generateByteCode = respectiveByteCodeFunction[token]
+
 
 
     #Helper function
+
     def injectRegisterRequired(self, token):
         registerNumber =[]
         for element in token.data:
@@ -77,63 +144,60 @@ class ByteCodeGenerator:
         token.registerRequired = largest
         return largest
 
-    def generateProcessCode(self, token, index): #Developing
-        if token[index].registerRequired > 0:
-            self.generateProcessCode(token[index].data, 1)
-            self.generateProcessCode(token[index].data, 0)
-        elif token[index].registerRequired < 0:
-            self.generateProcessCode(token[index].data, 1)
-            self.generateProcessCode(token[index].data, 0)
-
-
-
-        if token[index].id == '(identifier)' or token[index].id == '(literal)':
-            self.loadRegister(self.getAFreeWorkingRegister(), 7, self.registersInThisAST[token[index].data[0]])
+    def generateProcessCode(self, token): #Developing
+        if token.registerRequired == 1:
             pass
-        elif token[index].id == '(literal)':
-            self.loadValue(self.getAFreeWorkingRegister(), token[index].data[0])
-            pass
-
-    def generateInitializationCode(self, token, IndexOfTheTree):
-        variableCounter =0
-        if (len(token)!=0):
-            for header in token:
-                if header.id in self.byteRequired:
-                    variableCounter += 1
-            self.subRegister(7, self.byteRequired[token[0].id]*variableCounter)
-
-        variableCounter = 0  # reset and reuse it
-        count =0
-        for index in range(0, len(token)):
-            if token[index].id == 'int':
-                variableCounter += 1
-                count += 1
-                IndexOfTheTree+= 1
-            elif token[index].id == '=' and count != 0:
-                self.registersInThisAST[token[index].data[0].data[0]] = self.byteRequired[token[0].id]*variableCounter
-                self.loadValue(self.getAFreeWorkingRegister(), token[index].data[1].data[0])
-                self.storeValue(self.releaseAWorkingRegister(), 7, self.byteRequired[token[0].id]*variableCounter)
-
-                count -= 1
-                IndexOfTheTree += 1
-            else:
-                break
-        return IndexOfTheTree
+        elif token.registerRequired > 0:
+            self.generateProcessCode(token.data[1])
+            self.generateProcessCode(token.data[0])
+        elif token.registerRequired < 0:
+            self.generateProcessCode(token.data[0])
+            self.generateProcessCode(token.data[1])
+        if token.id == '(identifier)' or token.id == '=':
+            function = self.respectiveByteCodeFunction[token.id]
+            function(self.getAFreeWorkingRegister(), 7, self.registersInThisAST[token.data[0]])
+        else:
+            function = self.respectiveByteCodeFunction[token.id]
+            function(self.getAFreeWorkingRegister(), token.data[0])
 
 
-    def getAFreeWorkingRegister(self):
-        temp = self.workingRegisterCounter
-        if self.workingRegisterCounter < self.MaxRegister:
-            self.workingRegisterCounter += 1
-        return temp
 
-    def releaseAWorkingRegister(self):
-        if self.workingRegisterCounter > 0:
-            self.workingRegisterCounter -= 1
-        return self.workingRegisterCounter
+
+
 
     #For the moment, these function is not been used
     """
+
+        def generateByteCode(self, token):
+        if token[0].id == '{':
+            token = token[0].data
+
+        self.byteCodeList =[]
+        index = 0
+        index = self.generateInitializationCode(token, index)
+
+        for value in range(index, len(token)):
+            self.injectRegisterRequired(token[value])
+            self.generateProcessCode(token[value])
+
+
+    #define the sub-routine that generate byteCode(Infix)
+        def generateInfixByteCode():
+            for dataIndex in range(0, len(token.data)):
+                if not isinstance(token.data[dataIndex], int):
+                    token.data[dataIndex].generateByteCode()
+            suitableFunction = self.respectiveByteCodeFunction[self.getAFreeWorkingRegister()]
+            code = suitableFunction()
+            self.workingRegisterCounter += 1
+            thisGenerator.byteCodeList.append(str(code))
+            return thisGenerator.byteCodeList
+        #define the sub-routine that generate byteCode(literal)
+        def generateLiteralByteCode():
+            self.updateTheWorkingRegisterCounterAndStatus()
+            code = hex(self.byteCodeDictionaty[token.id] << 24 | self.workingRegisterCounter << 16 | token.data[0])
+            self.workingRegisterCounter += 1
+            thisGenerator.byteCodeList.append(str(code))
+            return thisGenerator.byteCodeList
     def injectLevel(self, token):
         levels =[]
         for element in token.data:

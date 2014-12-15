@@ -113,7 +113,8 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.manager.setParser(parser)
 
         token = parser.parseStatement(0)
-        dataList = self.byteCodeGenerator.generateByteCode(token)
+        self.byteCodeGenerator.initGeneration()
+        dataList = token[0].generateByteCode()
         self.assertEqual(self.byteCodeGenerator.subRegister(7, 4), dataList[0])
 
     def test_generateByteCode_will_generate_multiple_byteCode_for_a_multiple_declaration(self):
@@ -122,7 +123,8 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.manager.setParser(parser)
 
         token = parser.parseStatement(0)
-        dataList = self.byteCodeGenerator.generateByteCode(token)
+        self.byteCodeGenerator.initGeneration()
+        dataList = token.generateByteCode()
         self.assertEqual(self.byteCodeGenerator.subRegister(7, 12), dataList[0])
 
     def test_generateByteCode_will_generate_code_to_initialize_the_(self):
@@ -219,6 +221,27 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.addRegisters(1, 0), dataList[7])
         self.assertEqual(self.byteCodeGenerator.storeValue(0, 7, 4), dataList[8])
 
+    def test_generateByteCode_will_generate_code_for_push_the_working_register_into_the_stack(self):
+        lexer = Lexer(' x = 5 ', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parse(0)
+        token.leftValue = 1
+        token.rightValue = 1
+        self.byteCodeGenerator.injectRegisterRequired(token)
+        self.byteCodeGenerator.oracle.workingRegisterCounter = 5
+        self.byteCodeGenerator.oracle.registerLeft = 1
+        self.byteCodeGenerator.registersInThisAST['x'] =4
+
+        self.byteCodeGenerator.initGeneration()
+        dataList = token.generateByteCode()
+        self.assertEqual(self.byteCodeGenerator.storeMultiple(7, 0b000010), dataList[0])
+        self.assertEqual(self.byteCodeGenerator.loadRegister(4, 7, 4), dataList[1])
+        self.assertEqual(self.byteCodeGenerator.loadValue(5, 5), dataList[2])
+        self.assertEqual(self.byteCodeGenerator.assignRegister(4, 5), dataList[3])
+
+       # self.assertEqual()
 
 
 class TestHelperFunction(unittest.TestCase):
