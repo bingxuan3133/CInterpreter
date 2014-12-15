@@ -12,7 +12,7 @@ struct Register {
 extern Register reg[8];
 
 typedef enum {
-  LDR_IMM, LDR_MEM, STR_MEM, MOV_REG, LDR_MEM_SAFE, STR_MEM_SAFE, LDM, STM
+  LDR_IMM, LDR_MEM, STR_MEM, MOV_REG, LDR_MEM_SAFE, STR_MEM_SAFE, LDM, STM, LDMS, STMS
 } Instruction;
 
 #define MAX_REG 8
@@ -74,6 +74,10 @@ typedef enum {
                 LDM | (refReg)<<8 | (registers)<<11 | (direction)<<19 | (update)<<20
 #define stm(refReg, registers, direction, update) \
                 STM | (refReg)<<8 | (registers)<<11 | (direction)<<19 | (update)<<20
+#define ldms(refReg, registers, direction, update) \
+                LDMS | (refReg)<<8 | (registers)<<11 | (direction)<<19 | (update)<<20
+#define stms(refReg, registers, direction, update) \
+                STMS | (refReg)<<8 | (registers)<<11 | (direction)<<19 | (update)<<20
                 
 void loadRegisterWithLiteral(int bytecode);
 void loadRegisterFromMemory(int bytecode);
@@ -83,6 +87,8 @@ void loadRegisterFromMemorySafe(int bytecode);
 void storeRegisterIntoMemorySafe(int bytecode);
 void loadMultipleRegistersFromMemory(int bytecode);
 void storeMultipleRegistersIntoMemory(int bytecode);
+void loadMultipleRegistersFromMemorySafe(int bytecode);
+void storeMultipleRegistersIntoMemorySafe(int bytecode);
 
 int getBits(int data, unsigned char start, unsigned char length);
 

@@ -331,3 +331,179 @@ void test_storeMultipleRegistersIntoMemory_store_stack_pointer_address(void) {
   storeMultipleRegistersIntoMemory(stm(REG_7, R7, INC, NO_UPDATE)); // stmi r7, [r7]
   TEST_ASSERT_EQUAL_HEX((int)&heap[6], reg[7].data);
 }
+
+void test_loadMultipleRegistersFromMemorySafe_should_not_throw_exception_when_memory_is_valid(void) {
+  int heap[10] = {10, 50, 100, -10, -20, -100, -50, -30, 20, 70};
+  
+  reg[7].data = (int)&heap[5];
+  reg[7].base = (int)&heap[0];
+  reg[7].limit = 40;
+  reg[0].data = 0;
+  reg[1].data = 0;
+  reg[2].data = 0;
+  reg[3].data = 0;
+  reg[4].data = 0;
+  reg[5].data = 0;
+  reg[6].data = 0;
+  
+  Try {
+    loadMultipleRegistersFromMemorySafe(ldms(REG_7, R1|R2|R3, INC, NO_UPDATE));
+    TEST_ASSERT_EQUAL(-100, reg[1].data);
+    TEST_ASSERT_EQUAL(-50, reg[2].data);
+    TEST_ASSERT_EQUAL(-30, reg[3].data);
+    TEST_ASSERT_EQUAL_HEX((int)&heap[5], reg[7].data);
+  } Catch(exception) {
+    TEST_FAIL_MESSAGE("Should not throw exception\n");
+  }
+}
+
+void test_loadMultipleRegistersFromMemorySafe_should_throw_exception_when_stack_pointer_increases_and_exceed_limit_of_valid_memory(void) {
+  int heap[10] = {10, 50, 100, -10, -20, -100, -50, -30, 20, 70};
+  
+  reg[7].data = (int)&heap[5];
+  reg[7].base = (int)&heap[0];
+  reg[7].limit = 40;
+  reg[0].data = 0;
+  reg[1].data = 0;
+  reg[2].data = 0;
+  reg[3].data = 0;
+  reg[4].data = 0;
+  reg[5].data = 0;
+  reg[6].data = 0;
+  
+  Try {
+    loadMultipleRegistersFromMemorySafe(ldms(REG_7, R0|R1|R2|R3|R4|R5|R6, INC, NO_UPDATE));
+    TEST_FAIL_MESSAGE("Should throw exception\n");
+  } Catch(exception) {
+    TEST_ASSERT_EQUAL(-100, reg[0].data);
+    TEST_ASSERT_EQUAL(-50, reg[1].data);
+    TEST_ASSERT_EQUAL(-30, reg[2].data);
+    TEST_ASSERT_EQUAL(20, reg[3].data);
+    TEST_ASSERT_EQUAL(70, reg[4].data);
+    TEST_ASSERT_EQUAL_HEX((int)&heap[5], reg[7].data);
+    
+    TEST_ASSERT_EQUAL(exception->errCode, INVALID_MEMORY_ACCESS);
+    dumpException(exception);
+    freeException(exception);
+  }
+}
+
+void test_loadMultipleRegistersFromMemorySafe_should_throw_exception_when_stack_pointer_decreases_and_exceed_base_of_valid_memory(void) {
+  int heap[10] = {10, 50, 100, -10, -20, -100, -50, -30, 20, 70};
+  
+  reg[7].data = (int)&heap[5];
+  reg[7].base = (int)&heap[0];
+  reg[7].limit = 40;
+  reg[0].data = 0;
+  reg[1].data = 0;
+  reg[2].data = 0;
+  reg[3].data = 0;
+  reg[4].data = 0;
+  reg[5].data = 0;
+  reg[6].data = 0;
+  
+  Try {
+    loadMultipleRegistersFromMemorySafe(ldms(REG_7, R0|R1|R2|R3|R4|R5|R6, DEC, NO_UPDATE));
+    TEST_FAIL_MESSAGE("Should throw exception\n");
+  } Catch(exception) {
+    TEST_ASSERT_EQUAL(-100, reg[0].data);
+    TEST_ASSERT_EQUAL(-20, reg[1].data);
+    TEST_ASSERT_EQUAL(-10, reg[2].data);
+    TEST_ASSERT_EQUAL(100, reg[3].data);
+    TEST_ASSERT_EQUAL(50, reg[4].data);
+    TEST_ASSERT_EQUAL(10, reg[5].data);
+    TEST_ASSERT_EQUAL_HEX((int)&heap[5], reg[7].data);
+    
+    TEST_ASSERT_EQUAL(exception->errCode, INVALID_MEMORY_ACCESS);
+    dumpException(exception);
+    freeException(exception);
+  }
+}
+
+void test_storeMultipleRegistersIntoMemorySafe_should_not_throw_exception_when_memory_is_valid(void) {
+  int heap[10] = {0};
+  
+  reg[7].data = (int)&heap[5];
+  reg[7].base = (int)&heap[0];
+  reg[7].limit = 40;
+  reg[0].data = 10;
+  reg[1].data = -20;
+  reg[2].data = 30;
+  reg[3].data = -40;
+  reg[4].data = 50;
+  reg[5].data = -60;
+  reg[6].data = 70;
+  
+  Try {
+    storeMultipleRegistersIntoMemorySafe(stms(REG_7, R1|R2|R3, INC, NO_UPDATE));
+    TEST_ASSERT_EQUAL(-20, heap[5]);
+    TEST_ASSERT_EQUAL(30, heap[6]);
+    TEST_ASSERT_EQUAL(-40, heap[7]);
+    TEST_ASSERT_EQUAL_HEX((int)&heap[5], reg[7].data);
+  } Catch(exception) {
+    TEST_FAIL_MESSAGE("Should not throw exception\n");
+  }
+}
+
+void test_storeMultipleRegistersIntoMemorySafe_should_throw_exception_when_stack_pointer_increases_and_exceed_limit_of_valid_memory(void) {
+  int heap[10] = {0};
+  
+  reg[7].data = (int)&heap[5];
+  reg[7].base = (int)&heap[0];
+  reg[7].limit = 40;
+  reg[0].data = 10;
+  reg[1].data = -20;
+  reg[2].data = 30;
+  reg[3].data = -40;
+  reg[4].data = 50;
+  reg[5].data = -60;
+  reg[6].data = 70;
+  
+  Try {
+    storeMultipleRegistersIntoMemorySafe(stms(REG_7, R0|R1|R2|R3|R4|R5|R6, INC, NO_UPDATE));
+    TEST_FAIL_MESSAGE("Should throw exception\n");
+  } Catch(exception) {
+    TEST_ASSERT_EQUAL(10, heap[5]);
+    TEST_ASSERT_EQUAL(-20, heap[6]);
+    TEST_ASSERT_EQUAL(30, heap[7]);
+    TEST_ASSERT_EQUAL(-40, heap[8]);
+    TEST_ASSERT_EQUAL(50, heap[9]);
+    TEST_ASSERT_EQUAL_HEX((int)&heap[5], reg[7].data);
+    
+    TEST_ASSERT_EQUAL(exception->errCode, INVALID_MEMORY_ACCESS);
+    dumpException(exception);
+    freeException(exception);
+  }
+}
+
+void test_storeMultipleRegistersIntoMemorySafe_should_throw_exception_when_stack_pointer_decreases_and_exceed_base_of_valid_memory(void) {
+  int heap[10] = {0};
+  
+  reg[7].data = (int)&heap[5];
+  reg[7].base = (int)&heap[0];
+  reg[7].limit = 40;
+  reg[0].data = 10;
+  reg[1].data = -20;
+  reg[2].data = 30;
+  reg[3].data = -40;
+  reg[4].data = 50;
+  reg[5].data = -60;
+  reg[6].data = 70;
+  
+  Try {
+    storeMultipleRegistersIntoMemorySafe(stms(REG_7, R0|R1|R2|R3|R4|R5|R6, DEC, NO_UPDATE));
+    TEST_FAIL_MESSAGE("Should throw exception\n");
+  } Catch(exception) {
+    TEST_ASSERT_EQUAL(10, heap[5]);
+    TEST_ASSERT_EQUAL(-20, heap[4]);
+    TEST_ASSERT_EQUAL(30, heap[3]);
+    TEST_ASSERT_EQUAL(-40, heap[2]);
+    TEST_ASSERT_EQUAL(50, heap[1]);
+    TEST_ASSERT_EQUAL(-60, heap[0]);
+    TEST_ASSERT_EQUAL_HEX((int)&heap[5], reg[7].data);
+    
+    TEST_ASSERT_EQUAL(exception->errCode, INVALID_MEMORY_ACCESS);
+    dumpException(exception);
+    freeException(exception);
+  }
+}

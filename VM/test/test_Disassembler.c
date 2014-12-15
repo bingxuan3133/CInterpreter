@@ -29,7 +29,7 @@ void test_dissembleBytecode(void) {
 }
 
 void test_disassembleBytecodes_should_disassemble_an_array_of_bytecode(void) {
-  char buffer[300] = {0};
+  char buffer[500] = {0};
   int bytecode[20] = {0};
   bytecode[0] = ldrImm(REG_4, -128);
   bytecode[1] = ldrMem(REG_0, REG_1, 8);
@@ -45,7 +45,9 @@ void test_disassembleBytecodes_should_disassemble_an_array_of_bytecode(void) {
   bytecode[11] = ldm(REG_7, R0|R5|R6, DEC, NO_UPDATE);
   bytecode[12] = stm(REG_7, R1|R2|R5|R6, DEC, UPDATE);
   bytecode[13] = stm(REG_7, R3|R4|R5|R6, INC, NO_UPDATE);
-  bytecode[14] = 0xFFFFFFFF; // Indicates end of bytecodes
+  bytecode[14] = ldms(REG_7, R3|R4|R5|R6, INC, NO_UPDATE);
+  bytecode[15] = stms(REG_7, R0|R1|R2|R3|R4|R5|R6, DEC, NO_UPDATE);
+  bytecode[16] = 0xFFFFFFFF; // Indicates end of bytecodes
 
   disassembleBytecodes(&buffer[0], &bytecode[0]);
   printf("%s\n", &buffer[0]);

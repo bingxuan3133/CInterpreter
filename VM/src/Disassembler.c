@@ -11,7 +11,9 @@ void (*disassemble[256])(char*, int)  = { [LDR_IMM] = disassembleLdrImm,
                                           [LDR_MEM_SAFE] = disassembleLdrMemSafe,
                                           [STR_MEM_SAFE] = disassembleStrMemSafe,
                                           [LDM] = disassembleLdm,
-                                          [STM] = disassembleStm
+                                          [STM] = disassembleStm,
+                                          [LDMS] = disassembleLdms,
+                                          [STMS] = disassembleStms
                                           };
 //
 
@@ -154,4 +156,57 @@ void disassembleStm(char *strBuffer, int bytecode) {
   if(update == UPDATE) updateChar = '!';
   else updateChar = ' ';
   sprintf(strBuffer, "stm%c r%d%c [%s]", directionChar, referenceRegister, updateChar, regList);
+}
+
+void disassembleLdms(char *strBuffer, int bytecode) {
+  int referenceRegister = getBits(bytecode, 10, 3);
+  int registersToBeLoaded = getBits(bytecode, 18, 8);
+  int direction = getBits(bytecode, 19, 1);
+  int update = getBits(bytecode, 20, 1);
+  
+  char regList[32] = {0};
+  char directionChar;
+  char updateChar;
+  
+  int i;
+  
+  for(i = 0; i < MAX_REG; i++) {
+    if(0x01 & (registersToBeLoaded >> i)) {
+      sprintf(regList, "%sr%d ", regList, i); // Keep append register at behind
+    }
+  }
+  
+  if(direction == INC) directionChar = 'i';
+  else directionChar = 'd';
+  
+  if(update == UPDATE) updateChar = '!';
+  else updateChar = ' ';
+
+  sprintf(strBuffer, "ldms%c r%d%c [%s]", directionChar, referenceRegister, updateChar, regList);
+}
+
+void disassembleStms(char *strBuffer, int bytecode) {
+  int referenceRegister = getBits(bytecode, 10, 3);
+  int registersToBeStored = getBits(bytecode, 18, 8);
+  int direction = getBits(bytecode, 19, 1);
+  int update = getBits(bytecode, 20, 1);
+  
+  char regList[32] = {0};
+  char directionChar;
+  char updateChar;
+  
+  int i;
+  
+  for(i = 0; i < MAX_REG; i++) {
+    if(0x01 & (registersToBeStored >> i)) {
+      sprintf(regList, "%sr%d ", regList, i); // Keep append register at behind
+    }
+  }
+  
+  if(direction == INC) directionChar = 'i';
+  else directionChar = 'd';
+  
+  if(update == UPDATE) updateChar = '!';
+  else updateChar = ' ';
+  sprintf(strBuffer, "stms%c r%d%c [%s]", directionChar, referenceRegister, updateChar, regList);
 }

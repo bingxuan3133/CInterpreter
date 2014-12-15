@@ -3,7 +3,7 @@
 #include "Exception.h"
 
 Register reg[MAX_REG];
-char buffer[100] = {0};
+char errBuffer[100] = {0};
 
 /**
  *  This is a helper function to get a specific range of bits from a 32-bit data
@@ -107,8 +107,8 @@ void loadRegisterFromMemorySafe(int bytecode) {
   if(base <= (int)ref &&  base + limit >= (int)ref + 4) { // Safe area
     reg[registerToBeLoaded].data = *ref;
   } else {
-    sprintf(buffer, "ERROR: r%d (base = %p, limit = %p) has invalid access to address %p.", registerToBeLoaded, base, base+limit, ref);
-    exception = createException(buffer, INVALID_MEMORY_ACCESS);
+    sprintf(errBuffer, "ERROR: r%d (%p - %p) has invalid access to address %p.", registerToBeLoaded, base, base+limit-1, ref);
+    exception = createException(errBuffer, INVALID_MEMORY_ACCESS);
     Throw(exception);
   }
 }
@@ -128,8 +128,8 @@ void storeRegisterIntoMemorySafe(int bytecode) {
   if(base <= (int)ref && base + limit >= (int)ref + 4) { // Safe area
     *ref = reg[registerToBeStored].data;
   } else {
-    sprintf(buffer, "ERROR: r%d (base = %p, limit = %p) has invalid access to address %p.", registerToBeStored, base, base+limit, ref);
-    exception = createException(buffer, INVALID_MEMORY_ACCESS);
+    sprintf(errBuffer, "ERROR: r%d (%p - %p) has invalid access to address %p.", registerToBeStored, base, base+limit-1, ref);
+    exception = createException(errBuffer, INVALID_MEMORY_ACCESS);
     Throw(exception);
   }
 }
@@ -173,6 +173,72 @@ void storeMultipleRegistersIntoMemory(int bytecode) {
   for(i = 0; i < MAX_REG; i++) {
     if(0x01 & (registersToBeStored >> i)) {
       *ref = reg[i].data;
+      if(direction == INC) {
+        ref++;
+      } else { // direction == DEC
+        ref--;
+      }
+    }
+  }
+  if(update == UPDATE)
+    reg[referenceRegister].data = (int)ref;
+}
+
+/**
+ *  This function load multiple registers with data from safe memory
+ *  Input:  bytecode
+ */
+void loadMultipleRegistersFromMemorySafe(int bytecode) {
+  int referenceRegister = getBits(bytecode, 10, 3);
+  int registersToBeLoaded = getBits(bytecode, 18, 8);
+  int direction = getBits(bytecode, 19, 1);
+  int update = getBits(bytecode, 20, 1);
+  int *ref = (int *)reg[referenceRegister].data;
+  int base = reg[referenceRegister].base;
+  int limit = reg[referenceRegister].limit;
+  int i;
+  for(i = 0; i < MAX_REG; i++) {
+    if(0x01 & (registersToBeLoaded >> i)) {
+      if(base <= (int)ref &&  base + limit >= (int)ref + 4) { // Safe area
+        reg[i].data = *ref;
+      } else {
+        sprintf(errBuffer, "ERROR: r%d (%p - %p) has invalid access when loading r%d from address %p.", referenceRegister, base, base+limit-1, i, ref);
+        exception = createException(errBuffer, INVALID_MEMORY_ACCESS);
+        Throw(exception);
+      }
+      if(direction == INC) {
+        ref++;
+      } else { // direction == DEC
+        ref--;
+      }
+    }
+  }
+  if(update == UPDATE)
+    reg[referenceRegister].data = (int)ref;
+}
+
+/**
+ *  This function store multiple registers into safe memory
+ *  Input:  bytecode
+ */
+void storeMultipleRegistersIntoMemorySafe(int bytecode) {
+  int referenceRegister = getBits(bytecode, 10, 3);
+  int registersToBeStored = getBits(bytecode, 18, 8);
+  int direction = getBits(bytecode, 19, 1);
+  int update = getBits(bytecode, 20, 1);
+  int *ref = (int *)reg[referenceRegister].data;
+  int base = reg[referenceRegister].base;
+  int limit = reg[referenceRegister].limit;
+  int i;
+  for(i = 0; i < MAX_REG; i++) {
+    if(0x01 & (registersToBeStored >> i)) {
+        if(base <= (int)ref && base + limit >= (int)ref + 4) { // Safe area
+          *ref = reg[i].data;
+        } else {
+          sprintf(errBuffer, "ERROR: r%d (%p - %p) has invalid access when storing r%d into address %p.", referenceRegister, base, base+limit-1, i, ref);
+          exception = createException(errBuffer, INVALID_MEMORY_ACCESS);
+          Throw(exception);
+        }
       if(direction == INC) {
         ref++;
       } else { // direction == DEC
