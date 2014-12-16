@@ -18,6 +18,10 @@ class ByteCodeGenerator:
         self.contextManager = contextManager
         self.oracle = Oracle()
 
+    def loadMultiple(self, sourceRegister, destinationRegister):
+        number = 0xf9 | sourceRegister << 8 | destinationRegister << 11
+        self.byteCodeList.append(number)
+        return number
     def assignRegister(self, targetRegister, registerToBeAssigned):
         number = 0xfa | targetRegister << 8 | registerToBeAssigned << 11
         self.byteCodeList.append(number)
@@ -57,6 +61,42 @@ class ByteCodeGenerator:
         self.byteCodeList.append(number)
         return number
 
+    def generateRightCodeFirst(self, token):
+        for index in range(len(token.data)-1, 0, -1):
+            if token.data[index].id == '(identifier)':
+                self.loadRegister(self.oracle.getAFreeWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]])
+            elif token.data[index].id == '(literal)':
+                self.loadValue(self.oracle.getAFreeWorkingRegister(),token.data[index].data[0])
+            else:
+                token.data[index].generateByteCode()
+
+    def generateLeftCodeFirst(self, token):
+        for index in range(0, len(token.data)):
+            if token.data[index].id == '(identifier)':
+                self.loadRegister(self.oracle.getAFreeWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]])
+            elif token.data[index].id == '(literal)':
+                self.loadValue(self.oracle.getAFreeWorkingRegister(),token.data[index].data[0])
+            else:
+                token.data[index].generateByteCode()
+
+    def findOutAndGenerateCorrectSideCode(self, token):
+        if token.registerRequired > 0:
+            self.generateRightCodeFirst(token)
+        else:
+            self.generateLeftCodeFirst(token)
+
+    def decideWhetherToPush(self, token):
+        if self.oracle.registerLeft < abs(token.registerRequired) or \
+            self.oracle.registerLeft < token.leftValue + token.rightValue:
+            number = 0b000000 | 0b1 << (6-1-self.oracle.releaseAWorkingRegister())
+            self.storeMultiple(7, number)
+            return number
+        return 0
+
+    def decideWhetherToPop(self, number):
+        if number != 0:
+                self.loadMultiple(7, number)
+
     def initGeneration(self):
         thisGenerator = self
         def subtract(self):
@@ -68,32 +108,10 @@ class ByteCodeGenerator:
         def nothing(self):
             pass
         def storeValueToRegister(self):
-            if thisGenerator.oracle.registerLeft < abs(self.registerRequired) or \
-                thisGenerator.oracle.registerLeft < self.leftValue + self.rightValue:
-                number = 0b000000 | 0b1 << (6-1-thisGenerator.oracle.releaseAWorkingRegister())
-                thisGenerator.storeMultiple(7, number)
-
-
-            if self.registerRequired > 0:
-                for index in range(len(self.data), 0, -1):
-                    if self.data[index].id == '(identifier)':
-                        thisGenerator.loadRegister(thisGenerator.oracle.getAFreeWorkingRegister(), 7, thisGenerator.registersInThisAST[self.data[index].data[0]])
-                    elif self.data[index].id == '(literal)':
-                        thisGenerator.loadValue(thisGenerator.oracle.getAFreeWorkingRegister(),self.data[index].data[0])
-                    else:
-                        self.data[index].generateByteCode()
-            else:
-                for index in range(0, len(self.data)):
-                    if self.data[index].id == '(identifier)':
-                        thisGenerator.loadRegister(thisGenerator.oracle.getAFreeWorkingRegister(), 7, thisGenerator.registersInThisAST[self.data[index].data[0]])
-                    elif self.data[index].id == '(literal)':
-                        thisGenerator.loadValue(thisGenerator.oracle.getAFreeWorkingRegister(),self.data[index].data[0])
-                    else:
-                        self.data[index].generateByteCode()
-
-            secondRegister = thisGenerator.oracle.releaseAWorkingRegister()
-            firstRegister = thisGenerator.oracle.releaseAWorkingRegister()
-            thisGenerator.assignRegister(firstRegister, secondRegister)
+            pushed = thisGenerator.decideWhetherToPush(self)
+            thisGenerator.findOutAndGenerateCorrectSideCode(self)
+            thisGenerator.assignRegister(thisGenerator.oracle.releaseAWorkingRegister(), thisGenerator.oracle.releaseAWorkingRegister())
+            thisGenerator.decideWhetherToPop(pushed)
             return thisGenerator.byteCodeList
 
         def addRegisterValueAndPlaceIntoARegister(self):
