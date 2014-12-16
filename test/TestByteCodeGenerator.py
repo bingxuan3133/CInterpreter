@@ -56,6 +56,7 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.byteCodeGenerator.injectRegisterRequired(token)
         self.byteCodeGenerator.oracle.workingRegisterCounter = 5
         self.byteCodeGenerator.oracle.registerLeft = 1
+        self.byteCodeGenerator.oracle.registerStatus = [1, 1, 1, 1, 1, 0]
         self.byteCodeGenerator.registersInThisAST['x'] =4
 
         self.byteCodeGenerator.initGeneration()
@@ -81,6 +82,7 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.byteCodeGenerator.injectRegisterRequired(token)
         self.byteCodeGenerator.oracle.workingRegisterCounter = 4
         self.byteCodeGenerator.oracle.registerLeft = 2
+        self.byteCodeGenerator.oracle.registerStatus = [1, 1, 1, 1, 0, 0]
         self.byteCodeGenerator.registersInThisAST['x'] =4
 
         self.byteCodeGenerator.initGeneration()

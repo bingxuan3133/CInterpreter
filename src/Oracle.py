@@ -22,12 +22,13 @@ class Oracle:
         return temp
 
     def releaseAWorkingRegister(self):
-        if self.workingRegisterCounter > 0:
-            self.workingRegisterCounter -= 1
-            self.registerStatus[self.workingRegisterCounter] = 0
-            self.registerLeft += 1
-        return self.workingRegisterCounter
-
+        temp = self.MaxRegister - 1
+        while self.registerStatus[temp] != 1:
+            temp -= 1
+        self.registerStatus[temp] = 0
+        self.workingRegisterCounter = temp - 1
+        self.registerLeft += 1
+        return temp
     def getSpecificWorkingRegister(self, numberOfRegister):
         if self.registerStatus[numberOfRegister] == 0:
             self.registerStatus[numberOfRegister] = 1
