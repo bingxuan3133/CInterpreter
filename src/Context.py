@@ -7,8 +7,7 @@ class SymbolBase:
     def nud(self):
         raise SyntaxError('No nud(.) function defined!')
     def generateByteCode(self):
-        raise SyntaxError('No generate function defined!')
-
+        raise SyntaxError('No generation function defined!')
 class Context:
     PREFIX_UNARY = 1
     POSTFIX_UNARY = 2
@@ -44,7 +43,7 @@ class Context:
     def createLiteral(self, value):
         thisContext = self
         def nud(self):
-            token = thisContext.contextManager.parser.lexer.advance()
+            thisContext.contextManager.parser.lexer.advance()
             return self
 
         sym = self.symbol('(literal)')

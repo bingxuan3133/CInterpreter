@@ -9,7 +9,6 @@ from ContextManager import *
 class FlowControlContext(Context):
     def addBlockOperator(self, id, bindingPower = 0 ):
         thisContext = self
-        symClass = self.symbol(id, bindingPower)
         def led(self):
             return self
         def nud(self):
