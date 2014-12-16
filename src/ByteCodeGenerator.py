@@ -97,6 +97,16 @@ class ByteCodeGenerator:
         if number != 0:
                 self.loadMultiple(7, number)
 
+    def decideWhetherToSaveSlotForPopValue(self, status, generateByteCode):
+        firstRegister = self.oracle.releaseAWorkingRegister()
+        secondRegister = self.oracle.releaseAWorkingRegister()
+        if status != 0:
+            generateByteCode(firstRegister, secondRegister)
+            self.oracle.getSpecificWorkingRegister(firstRegister)
+        else:
+            generateByteCode(secondRegister, firstRegister)
+            self.oracle.getSpecificWorkingRegister(secondRegister)
+
     def initGeneration(self):
         thisGenerator = self
         def subtract(self):
@@ -107,14 +117,23 @@ class ByteCodeGenerator:
             pass
         def nothing(self):
             pass
+
         def storeValueToRegister(self):
             pushed = thisGenerator.decideWhetherToPush(self)
             thisGenerator.findOutAndGenerateCorrectSideCode(self)
-            thisGenerator.assignRegister(thisGenerator.oracle.releaseAWorkingRegister(), thisGenerator.oracle.releaseAWorkingRegister())
+
+            thisGenerator.decideWhetherToSaveSlotForPopValue(pushed, thisGenerator.assignRegister)
+
             thisGenerator.decideWhetherToPop(pushed)
             return thisGenerator.byteCodeList
 
         def addRegisterValueAndPlaceIntoARegister(self):
+            pushed = thisGenerator.decideWhetherToPush(self)
+            thisGenerator.findOutAndGenerateCorrectSideCode(self)
+
+            thisGenerator.decideWhetherToSaveSlotForPopValue(pushed, thisGenerator.addRegister)
+
+            thisGenerator.decideWhetherToPop(pushed)
             pass
         def loadIdentifierIntoRegister(self):
             pass

@@ -8,14 +8,27 @@ class Oracle:
     registerLeft = 5
 
     def getAFreeWorkingRegister(self):
-        temp = self.workingRegisterCounter
+        temp = 100
         if self.workingRegisterCounter < self.MaxRegister:
-            self.workingRegisterCounter += 1
+            if self.registerStatus[self.workingRegisterCounter] == 0:
+                temp = self.workingRegisterCounter
+                self.workingRegisterCounter += 1
+            else:
+                while self.registerStatus[self.workingRegisterCounter] == 1:
+                    self.workingRegisterCounter += 1
+                temp = self.workingRegisterCounter
             self.registerLeft -= 1
+            self.registerStatus[temp] = 1
         return temp
 
     def releaseAWorkingRegister(self):
         if self.workingRegisterCounter > 0:
             self.workingRegisterCounter -= 1
+            self.registerStatus[self.workingRegisterCounter] = 0
             self.registerLeft += 1
         return self.workingRegisterCounter
+
+    def getSpecificWorkingRegister(self, numberOfRegister):
+        if self.registerStatus[numberOfRegister] == 0:
+            self.registerStatus[numberOfRegister] = 1
+            self.registerLeft -= 1
