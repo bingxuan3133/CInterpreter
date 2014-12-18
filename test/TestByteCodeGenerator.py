@@ -94,6 +94,8 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.loadValue(4, 20), dataList[4])
         self.assertEqual(self.byteCodeGenerator.addRegister(4, 3), dataList[5])
         self.assertEqual(self.byteCodeGenerator.loadMultiple(7, 0b000100), dataList[6])
+        self.assertEqual(self.byteCodeGenerator.loadRegister(5, 7, 4), dataList[7])
+        self.assertEqual(self.byteCodeGenerator.assignRegister(4, 5), dataList[8])
 
 
 

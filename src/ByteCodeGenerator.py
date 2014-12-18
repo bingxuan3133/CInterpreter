@@ -62,7 +62,7 @@ class ByteCodeGenerator:
         return number
 
     def generateRightCodeFirst(self, token):
-        for index in range(len(token.data)-1, 0, -1):
+        for index in range(len(token.data)-1, -1, -1):
             if token.data[index].id == '(identifier)':
                 self.loadRegister(self.oracle.getAFreeWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]])
             elif token.data[index].id == '(literal)':
@@ -95,7 +95,8 @@ class ByteCodeGenerator:
 
     def decideWhetherToPop(self, number):
         if number != 0:
-                self.loadMultiple(7, number)
+            self.loadMultiple(7, number)
+            self.oracle.getAFreeWorkingRegister()
 
     def decideWhetherToSaveSlotForPopValue(self, status, generateByteCode):
         firstRegister = self.oracle.releaseAWorkingRegister()
