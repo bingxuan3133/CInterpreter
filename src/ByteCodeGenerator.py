@@ -18,6 +18,11 @@ class ByteCodeGenerator:
         self.contextManager = contextManager
         self.oracle = Oracle()
 
+    def multiplyRegister(self, firstRegister, secondRegister):
+        number = 0xf8 | firstRegister << 8 | secondRegister << 11
+        self.byteCodeList.append(number)
+        return number
+
     def loadMultiple(self, sourceRegister, destinationRegister):
         number = 0xf9 | sourceRegister << 8 | destinationRegister << 11
         self.byteCodeList.append(number)
@@ -31,8 +36,8 @@ class ByteCodeGenerator:
         number = 0xfb | targetRegister << 8 | registerToPush << 11
         self.byteCodeList.append(number)
         return number
-    def addRegister(self, registerNumber, valueToAdd):
-        number = 0xfc | registerNumber << 8 | valueToAdd << 11
+    def addRegister(self, firstRegister, secondRegister):
+        number = 0xfc | firstRegister << 8 | secondRegister << 11
         self.byteCodeList.append(number)
         return number
 
@@ -103,12 +108,19 @@ class ByteCodeGenerator:
 
     def decideWhetherToPush(self, token):
         number = 0b000000
-        if self.oracle.registerLeft < abs(token.registerRequiredAtThatLevel) or \
+        registerToPush =0
+        if self.oracle.registerLeft < token.maxRequiredRegister or \
             self.oracle.registerLeft < token.minRequiredRegister:
-            returnedWorkingRegister = self.oracle.releaseAWorkingRegister()
+            registerToPush = token.maxRequiredRegister - self.oracle.registerLeft
+            returnedWorkingRegister = self.oracle.releaseALargestWorkingRegister()
+
             while returnedWorkingRegister != 'Finish':
+                registerToPush -= 1
                 number = number | 0b1 << (6-1-returnedWorkingRegister)
+                if registerToPush == 0:
+                    break
                 returnedWorkingRegister = self.oracle.releaseALargestWorkingRegister()
+
             self.storeMultiple(7, number)
 
         return number
@@ -126,7 +138,7 @@ class ByteCodeGenerator:
 
     def decideWhetherToSaveSlotForPopValue(self, status, generateByteCode):
         firstRegister = self.oracle.releaseALargestWorkingRegister()
-        secondRegister = self.oracle.releaseAWorkingRegister()
+        secondRegister = self.oracle.releaseALargestWorkingRegister()
         if status != 0:
             generateByteCode(firstRegister, secondRegister)
             self.oracle.getSpecificWorkingRegister(firstRegister)
@@ -143,6 +155,13 @@ class ByteCodeGenerator:
         def divide(self):
             pass
         def multiply(self):
+            pushed = thisGenerator.decideWhetherToPush(self)
+            thisGenerator.findOutAndGenerateCorrectSideCode(self)
+
+            thisGenerator.decideWhetherToSaveSlotForPopValue(pushed, thisGenerator.multiplyRegister)
+
+            thisGenerator.decideWhetherToPop(pushed)
+            return thisGenerator.byteCodeList
             pass
         def nothing(self):
             pass

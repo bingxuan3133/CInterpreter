@@ -14,6 +14,7 @@ class Oracle:
                 return 'Finish'
             temp += 1
         self.registerStatus[temp] = 1
+        self.workingRegisterCounter = temp + 1
         return temp
     def getALargestWorkingRegister(self):
         temp = self.MaxRegister -1
@@ -22,6 +23,7 @@ class Oracle:
                 return 'Finish'
             temp -= 1
         self.registerStatus[temp] = 1
+        self.workingRegisterCounter = temp - 1
         return temp
     def releaseALargestWorkingRegister(self):
         temp = self.MaxRegister - 1
@@ -30,7 +32,7 @@ class Oracle:
                 return 'Finish'
             temp -= 1
         self.registerStatus[temp] = 0
-        self.workingRegisterCounter = temp - 1
+        self.workingRegisterCounter = temp
         self.registerLeft += 1
         return temp
 
@@ -41,7 +43,7 @@ class Oracle:
                 return 'Finish'
             temp += 1
         self.registerStatus[temp] = 0
-        self.workingRegisterCounter = temp - 1
+        self.workingRegisterCounter = temp
         self.registerLeft += 1
         return temp
 
