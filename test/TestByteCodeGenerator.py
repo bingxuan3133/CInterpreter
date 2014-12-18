@@ -61,11 +61,11 @@ class TestByteCodeGenerator(unittest.TestCase):
 
         self.byteCodeGenerator.initGeneration()
         dataList = token.generateByteCode()
-        self.assertEqual(self.byteCodeGenerator.storeMultiple(7, 0b000010), dataList[0])
-        self.assertEqual(self.byteCodeGenerator.loadRegister(4, 7, 4), dataList[1])
+        self.assertEqual(self.byteCodeGenerator.storeMultiple(7, 0b111110), dataList[0])
+        self.assertEqual(self.byteCodeGenerator.loadRegister(0, 7, 4), dataList[1])
         self.assertEqual(self.byteCodeGenerator.loadValue(5, 5), dataList[2])
-        self.assertEqual(self.byteCodeGenerator.assignRegister(5, 4), dataList[3])
-        self.assertEqual(self.byteCodeGenerator.loadMultiple(7, 0b000010), dataList[4])
+        self.assertEqual(self.byteCodeGenerator.assignRegister(5, 0), dataList[3])
+        self.assertEqual(self.byteCodeGenerator.loadMultiple(7, 0b111110), dataList[4])
 
     def test_generateByteCode_will_push_the_register_at_the_second_token(self):
         lexer = Lexer(' x = 5 + 10 + 20', self.context)
@@ -73,13 +73,8 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.manager.setParser(parser)
 
         token = parser.parse(0)
-        token.leftValue = 1
-        token.rightValue = 1
-        token.data[1].leftValue = 2
-        token.data[1].rightValue = 1
-        token.data[1].data[0].rightValue = 1
-        token.data[1].data[0].leftValue = 1
         self.byteCodeGenerator.injectRegisterRequired(token)
+        token.data[1].minRequiredRegister = 3 # hard code this to make sure the program will push the working register
         self.byteCodeGenerator.oracle.workingRegisterCounter = 4
         self.byteCodeGenerator.oracle.registerLeft = 2
         self.byteCodeGenerator.oracle.registerStatus = [1, 1, 1, 1, 0, 0]
@@ -87,44 +82,39 @@ class TestByteCodeGenerator(unittest.TestCase):
 
         self.byteCodeGenerator.initGeneration()
         dataList = token.generateByteCode()
-        self.assertEqual(self.byteCodeGenerator.storeMultiple(7, 0b000100), dataList[0])
-        self.assertEqual(self.byteCodeGenerator.loadValue(3, 5), dataList[1])
-        self.assertEqual(self.byteCodeGenerator.loadValue(4, 10), dataList[2])
-        self.assertEqual(self.byteCodeGenerator.addRegister(3, 4), dataList[3])
-        self.assertEqual(self.byteCodeGenerator.loadValue(4, 20), dataList[4])
-        self.assertEqual(self.byteCodeGenerator.addRegister(4, 3), dataList[5])
-        self.assertEqual(self.byteCodeGenerator.loadMultiple(7, 0b000100), dataList[6])
-        self.assertEqual(self.byteCodeGenerator.loadRegister(5, 7, 4), dataList[7])
+        self.assertEqual(self.byteCodeGenerator.storeMultiple(7, 0b111100), dataList[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue(0, 5), dataList[1])
+        self.assertEqual(self.byteCodeGenerator.loadValue(5, 10), dataList[2])
+        self.assertEqual(self.byteCodeGenerator.addRegister(0, 5), dataList[3])
+        self.assertEqual(self.byteCodeGenerator.loadValue(5, 20), dataList[4])
+        self.assertEqual(self.byteCodeGenerator.addRegister(5, 0), dataList[5])
+        self.assertEqual(self.byteCodeGenerator.loadMultiple(7, 0b111100), dataList[6])
+        self.assertEqual(self.byteCodeGenerator.loadRegister(4, 7, 4), dataList[7])
         self.assertEqual(self.byteCodeGenerator.assignRegister(4, 5), dataList[8])
 
-    def xtest_generateByteCode_will_push_and_pop_two_registers_at_the_first_token(self):
+    def test_generateByteCode_will_push_the_register_at_the_beginning_and_the_second_token(self):
         lexer = Lexer(' x = 5 + 10 + 20', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
-        token.leftValue = 2
-        token.rightValue = 2
-        token.data[1].leftValue = 1
-        token.data[1].rightValue = 1
-        token.data[1].data[0].rightValue = 1
-        token.data[1].data[0].leftValue = 1
         self.byteCodeGenerator.injectRegisterRequired(token)
+        token.data[1].minRequiredRegister = 3 # hard code this to make sure the program will push the working register
         self.byteCodeGenerator.oracle.workingRegisterCounter = 4
         self.byteCodeGenerator.oracle.registerLeft = 2
         self.byteCodeGenerator.oracle.registerStatus = [1, 1, 1, 1, 0, 0]
-        self.byteCodeGenerator.registersInThisAST['x'] = 4
+        self.byteCodeGenerator.registersInThisAST['x'] =4
 
         self.byteCodeGenerator.initGeneration()
         dataList = token.generateByteCode()
-        self.assertEqual(self.byteCodeGenerator.storeMultiple(7, 0b001100), dataList[0])
-        self.assertEqual(self.byteCodeGenerator.loadValue(2, 5), dataList[1])
-        self.assertEqual(self.byteCodeGenerator.loadValue(3, 10), dataList[2])
-        self.assertEqual(self.byteCodeGenerator.addRegister(2, 3), dataList[3])
-        self.assertEqual(self.byteCodeGenerator.loadValue(3, 20), dataList[4])
-        self.assertEqual(self.byteCodeGenerator.addRegister(2, 3), dataList[5])
-        self.assertEqual(self.byteCodeGenerator.loadMultiple(7, 0b000100), dataList[6])
-        self.assertEqual(self.byteCodeGenerator.loadRegister(5, 7, 4), dataList[7])
+        self.assertEqual(self.byteCodeGenerator.storeMultiple(7, 0b111100), dataList[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue(0, 5), dataList[1])
+        self.assertEqual(self.byteCodeGenerator.loadValue(5, 10), dataList[2])
+        self.assertEqual(self.byteCodeGenerator.addRegister(0, 5), dataList[3])
+        self.assertEqual(self.byteCodeGenerator.loadValue(5, 20), dataList[4])
+        self.assertEqual(self.byteCodeGenerator.addRegister(5, 0), dataList[5])
+        self.assertEqual(self.byteCodeGenerator.loadMultiple(7, 0b111100), dataList[6])
+        self.assertEqual(self.byteCodeGenerator.loadRegister(4, 7, 4), dataList[7])
         self.assertEqual(self.byteCodeGenerator.assignRegister(4, 5), dataList[8])
 
 class TestHelperFunction(unittest.TestCase):
