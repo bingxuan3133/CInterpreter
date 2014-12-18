@@ -507,3 +507,54 @@ void test_storeMultipleRegistersIntoMemorySafe_should_throw_exception_when_stack
     freeException(exception);
   }
 }
+
+void test_addRegisters_should_add_2_registers() {
+  reg[0].data = 10;
+  reg[1].data = -20;
+  addRegisters(add(REG_0, REG_0, REG_1));
+  TEST_ASSERT_EQUAL(-10, reg[0].data);
+}
+
+void test_subtractRegisters_should_subtract_reg1_from_reg0() {
+  reg[0].data = -10;
+  reg[1].data = 20;
+  subtractRegisters(sub(REG_0, REG_0, REG_1));
+  TEST_ASSERT_EQUAL(-30, reg[0].data);
+}
+
+// multiply function has not completed
+void test_multiplyRegisters_should_multiply_2_registers() {
+  reg[0].data = 10;
+  reg[1].data = -20;
+  multiplyRegisters(mul(REG_0, REG_0, REG_1));
+  TEST_ASSERT_EQUAL(-200, reg[0].data);
+}
+
+void test_divideRegisters_should_divide_reg1_from_reg0() {
+  reg[0].data = 20;
+  reg[1].data = -10;
+  divideRegisters(div(REG_0, REG_0, REG_1));
+  TEST_ASSERT_EQUAL(-2, reg[0].data);
+}
+
+void test_andRegisters_should_bitwise_and_2_registers() {
+  reg[0].data = 0x00ff00ff;
+  reg[1].data = 0x0ff00ff0;
+  andRegisters(and(REG_0, REG_0, REG_1));
+  TEST_ASSERT_EQUAL_HEX(0x00f000f0, reg[0].data);
+}
+
+void test_orRegisters_should_bitwise_or_2_registers() {
+  reg[0].data = 0x00ff00ff;
+  reg[1].data = 0x0ff00ff0;
+  orRegisters(or(REG_0, REG_0, REG_1));
+  TEST_ASSERT_EQUAL_HEX(0x0fff0fff, reg[0].data);
+}
+
+void test_xorRegisters_should_bitwise_xor_2_registers() {
+  reg[0].data = 0x00ff00ff;
+  reg[1].data = 0x0ff00ff0;
+  xorRegisters(xor(REG_0, REG_0, REG_1));
+  TEST_ASSERT_EQUAL_HEX(0x0f0f0f0f, reg[0].data);
+}
+

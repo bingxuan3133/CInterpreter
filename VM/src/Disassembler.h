@@ -15,4 +15,12 @@ void disassembleStm(char *strBuffer, int bytecode);
 void disassembleLdms(char *strBuffer, int bytecode);
 void disassembleStms(char *strBuffer, int bytecode);
 
+void disassembleAdd(char *strBuffer, int bytecode);
+void disassembleSub(char *strBuffer, int bytecode);
+void disassembleMul(char *strBuffer, int bytecode);
+void disassembleDiv(char *strBuffer, int bytecode);
+void disassembleAnd(char *strBuffer, int bytecode);
+void disassembleOr(char *strBuffer, int bytecode);
+void disassembleXor(char *strBuffer, int bytecode);
+
 #endif // Disassembler_H

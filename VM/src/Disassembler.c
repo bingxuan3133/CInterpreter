@@ -13,7 +13,14 @@ void (*disassemble[256])(char*, int)  = { [LDR_IMM] = disassembleLdrImm,
                                           [LDM] = disassembleLdm,
                                           [STM] = disassembleStm,
                                           [LDMS] = disassembleLdms,
-                                          [STMS] = disassembleStms
+                                          [STMS] = disassembleStms,
+                                          [ADD] = disassembleAdd,
+                                          [SUB] = disassembleSub,
+                                          [MUL] = disassembleMul,
+                                          [DIV] = disassembleDiv,
+                                          [AND] = disassembleAnd,
+                                          [OR] = disassembleOr,
+                                          [XOR] = disassembleXor
                                           };
 //
 
@@ -209,4 +216,48 @@ void disassembleStms(char *strBuffer, int bytecode) {
   if(update == UPDATE) updateChar = '!';
   else updateChar = ' ';
   sprintf(strBuffer, "stms%c r%d%c [%s]", directionChar, referenceRegister, updateChar, regList);
+}
+
+void disassembleAdd(char *strBuffer, int bytecode) {
+  int resultReg = getBits(bytecode, 10, 3);
+  int reg1 = getBits(bytecode, 13, 3);
+  int reg2 = getBits(bytecode, 16, 3);
+  sprintf(strBuffer, "add r%d r%d r%d", resultReg, reg1, reg2);
+}
+
+void disassembleSub(char *strBuffer, int bytecode) {
+  int resultReg = getBits(bytecode, 10, 3);
+  int reg1 = getBits(bytecode, 13, 3);
+  int reg2 = getBits(bytecode, 16, 3);
+  sprintf(strBuffer, "sub r%d r%d r%d", resultReg, reg1, reg2);
+}
+void disassembleMul(char *strBuffer, int bytecode) {
+  int resultReg = getBits(bytecode, 10, 3);
+  int reg1 = getBits(bytecode, 13, 3);
+  int reg2 = getBits(bytecode, 16, 3);
+  sprintf(strBuffer, "mul r%d r%d r%d", resultReg, reg1, reg2);
+}
+void disassembleDiv(char *strBuffer, int bytecode) {
+  int resultReg = getBits(bytecode, 10, 3);
+  int reg1 = getBits(bytecode, 13, 3);
+  int reg2 = getBits(bytecode, 16, 3);
+  sprintf(strBuffer, "div r%d r%d r%d", resultReg, reg1, reg2);
+}
+void disassembleAnd(char *strBuffer, int bytecode) {
+  int resultReg = getBits(bytecode, 10, 3);
+  int reg1 = getBits(bytecode, 13, 3);
+  int reg2 = getBits(bytecode, 16, 3);
+  sprintf(strBuffer, "and r%d r%d r%d", resultReg, reg1, reg2);
+}
+void disassembleOr(char *strBuffer, int bytecode) {
+  int resultReg = getBits(bytecode, 10, 3);
+  int reg1 = getBits(bytecode, 13, 3);
+  int reg2 = getBits(bytecode, 16, 3);
+  sprintf(strBuffer, "or r%d r%d r%d", resultReg, reg1, reg2);
+}
+void disassembleXor(char *strBuffer, int bytecode) {
+  int resultReg = getBits(bytecode, 10, 3);
+  int reg1 = getBits(bytecode, 13, 3);
+  int reg2 = getBits(bytecode, 16, 3);
+  sprintf(strBuffer, "xor r%d r%d r%d", resultReg, reg1, reg2);
 }

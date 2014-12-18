@@ -12,7 +12,8 @@ struct Register {
 extern Register reg[8];
 
 typedef enum {
-  LDR_IMM, LDR_MEM, STR_MEM, MOV_REG, LDR_MEM_SAFE, STR_MEM_SAFE, LDM, STM, LDMS, STMS
+  LDR_IMM, LDR_MEM, STR_MEM, MOV_REG, LDR_MEM_SAFE, STR_MEM_SAFE, LDM, STM, LDMS, STMS,
+  ADD, SUB, MUL, DIV, AND, OR, XOR
 } Instruction;
 
 #define MAX_REG 8
@@ -78,7 +79,21 @@ typedef enum {
                 LDMS | (refReg)<<8 | (registers)<<11 | (direction)<<19 | (update)<<20
 #define stms(refReg, registers, direction, update) \
                 STMS | (refReg)<<8 | (registers)<<11 | (direction)<<19 | (update)<<20
-                
+#define add(resultReg, reg1, reg2) \
+                ADD | (resultReg)<<8 | (reg1)<<11 | (reg2)<<14
+#define sub(resultReg, reg1, reg2) \
+                SUB | (resultReg)<<8 | (reg1)<<11 | (reg2)<<14
+#define mul(resultReg, reg1, reg2) \
+                MUL | (resultReg)<<8 | (reg1)<<11 | (reg2)<<14
+#define div(resultReg, reg1, reg2) \
+                DIV | (resultReg)<<8 | (reg1)<<11 | (reg2)<<14
+#define and(resultReg, reg1, reg2) \
+                AND | (resultReg)<<8 | (reg1)<<11 | (reg2)<<14
+#define or(resultReg, reg1, reg2) \
+                OR | (resultReg)<<8 | (reg1)<<11 | (reg2)<<14
+#define xor(resultReg, reg1, reg2) \
+                XOR | (resultReg)<<8 | (reg1)<<11 | (reg2)<<14
+// load store
 void loadRegisterWithLiteral(int bytecode);
 void loadRegisterFromMemory(int bytecode);
 void storeRegisterIntoMemory(int bytecode);
@@ -89,6 +104,14 @@ void loadMultipleRegistersFromMemory(int bytecode);
 void storeMultipleRegistersIntoMemory(int bytecode);
 void loadMultipleRegistersFromMemorySafe(int bytecode);
 void storeMultipleRegistersIntoMemorySafe(int bytecode);
+// arithmetic
+void addRegisters(int bytecode);
+void subtractRegisters(int bytecode);
+void multiplyRegisters(int bytecode);
+void divideRegisters(int bytecode);
+void andRegisters(int bytecode);
+void orRegisters(int bytecode);
+void xorRegisters(int bytecode);
 
 int getBits(int data, unsigned char start, unsigned char length);
 
