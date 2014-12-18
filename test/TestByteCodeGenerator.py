@@ -97,7 +97,35 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.loadRegister(5, 7, 4), dataList[7])
         self.assertEqual(self.byteCodeGenerator.assignRegister(4, 5), dataList[8])
 
+    def xtest_generateByteCode_will_push_and_pop_two_registers_at_the_first_token(self):
+        lexer = Lexer(' x = 5 + 10 + 20', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
 
+        token = parser.parse(0)
+        token.leftValue = 2
+        token.rightValue = 2
+        token.data[1].leftValue = 1
+        token.data[1].rightValue = 1
+        token.data[1].data[0].rightValue = 1
+        token.data[1].data[0].leftValue = 1
+        self.byteCodeGenerator.injectRegisterRequired(token)
+        self.byteCodeGenerator.oracle.workingRegisterCounter = 4
+        self.byteCodeGenerator.oracle.registerLeft = 2
+        self.byteCodeGenerator.oracle.registerStatus = [1, 1, 1, 1, 0, 0]
+        self.byteCodeGenerator.registersInThisAST['x'] = 4
+
+        self.byteCodeGenerator.initGeneration()
+        dataList = token.generateByteCode()
+        self.assertEqual(self.byteCodeGenerator.storeMultiple(7, 0b001100), dataList[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue(2, 5), dataList[1])
+        self.assertEqual(self.byteCodeGenerator.loadValue(3, 10), dataList[2])
+        self.assertEqual(self.byteCodeGenerator.addRegister(2, 3), dataList[3])
+        self.assertEqual(self.byteCodeGenerator.loadValue(3, 20), dataList[4])
+        self.assertEqual(self.byteCodeGenerator.addRegister(2, 3), dataList[5])
+        self.assertEqual(self.byteCodeGenerator.loadMultiple(7, 0b000100), dataList[6])
+        self.assertEqual(self.byteCodeGenerator.loadRegister(5, 7, 4), dataList[7])
+        self.assertEqual(self.byteCodeGenerator.assignRegister(4, 5), dataList[8])
 
 class TestHelperFunction(unittest.TestCase):
     def setUp(self):
@@ -129,7 +157,7 @@ class TestHelperFunction(unittest.TestCase):
         self.manager.setCurrentContexts(self.contexts)
         self.byteCodeGenerator = ByteCodeGenerator(self.context, self.manager)
 
-    def test_injectRegisterRequired_will_give_respective_level_to_a_tree(self):
+    def test_injectRegisterRequired_will_give_registerRequiredAtThatLevel_to_a_tree(self):
         lexer = Lexer('{ x = y + 8 * 16 / 180 - 20 ; }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
@@ -139,18 +167,50 @@ class TestHelperFunction(unittest.TestCase):
             token = token[0].data[0]
         self.byteCodeGenerator.injectRegisterRequired(token)
 
-        self.assertEqual(1, token.data[0].registerRequired)
-        self.assertEqual(2, token.registerRequired)
-        self.assertEqual(-2, token.data[1].registerRequired)
-        self.assertEqual(1, token.data[1].data[1].registerRequired)
-        self.assertEqual(2, token.data[1].data[0].registerRequired)
-        self.assertEqual(1, token.data[1].data[0].data[0].registerRequired)
-        self.assertEqual(-2, token.data[1].data[0].data[1].registerRequired)
-        self.assertEqual(-2, token.data[1].data[0].data[1].data[0].registerRequired)
-        self.assertEqual(1, token.data[1].data[0].data[1].data[1].registerRequired)
-        self.assertEqual(1, token.data[1].data[0].data[1].data[0].data[0].registerRequired)
-        self.assertEqual(1, token.data[1].data[0].data[1].data[0].data[1].registerRequired)
+        self.assertEqual(1, token.data[0].registerRequiredAtThatLevel)
+        self.assertEqual(2, token.registerRequiredAtThatLevel)
+        self.assertEqual(-2, token.data[1].registerRequiredAtThatLevel)
+        self.assertEqual(1, token.data[1].data[1].registerRequiredAtThatLevel)
+        self.assertEqual(2, token.data[1].data[0].registerRequiredAtThatLevel)
+        self.assertEqual(1, token.data[1].data[0].data[0].registerRequiredAtThatLevel)
+        self.assertEqual(-2, token.data[1].data[0].data[1].registerRequiredAtThatLevel)
+        self.assertEqual(-2, token.data[1].data[0].data[1].data[0].registerRequiredAtThatLevel)
+        self.assertEqual(1, token.data[1].data[0].data[1].data[1].registerRequiredAtThatLevel)
+        self.assertEqual(1, token.data[1].data[0].data[1].data[0].data[0].registerRequiredAtThatLevel)
+        self.assertEqual(1, token.data[1].data[0].data[1].data[0].data[1].registerRequiredAtThatLevel)
 
+    def test_injectRegisterRequired_will_give_min_and_max_register_to_each_of_the_token(self):
+        lexer = Lexer('{ x = y + 8 * 16 / 180 - 20 ; }', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        if token[0].id == '{':
+            token = token[0].data[0]
+        self.byteCodeGenerator.injectRegisterRequired(token)
+
+        self.assertEqual(1, token.data[0].maxRequiredRegister)
+        self.assertEqual(1, token.data[0].minRequiredRegister)
+        self.assertEqual(6, token.maxRequiredRegister)
+        self.assertEqual(2, token.minRequiredRegister)
+        self.assertEqual(5, token.data[1].maxRequiredRegister)
+        self.assertEqual(2, token.data[1].minRequiredRegister)
+        self.assertEqual(1, token.data[1].data[1].maxRequiredRegister)
+        self.assertEqual(1, token.data[1].data[1].minRequiredRegister)
+        self.assertEqual(4, token.data[1].data[0].maxRequiredRegister)
+        self.assertEqual(2, token.data[1].data[0].minRequiredRegister)
+        self.assertEqual(1, token.data[1].data[0].data[0].maxRequiredRegister)
+        self.assertEqual(1, token.data[1].data[0].data[0].minRequiredRegister)
+        self.assertEqual(3, token.data[1].data[0].data[1].maxRequiredRegister)
+        self.assertEqual(2, token.data[1].data[0].data[1].minRequiredRegister)
+        self.assertEqual(2, token.data[1].data[0].data[1].data[0].maxRequiredRegister)
+        self.assertEqual(2, token.data[1].data[0].data[1].data[0].minRequiredRegister)
+        self.assertEqual(1, token.data[1].data[0].data[1].data[1].maxRequiredRegister)
+        self.assertEqual(1, token.data[1].data[0].data[1].data[1].minRequiredRegister)
+        self.assertEqual(1, token.data[1].data[0].data[1].data[0].data[0].maxRequiredRegister)
+        self.assertEqual(1, token.data[1].data[0].data[1].data[0].data[0].minRequiredRegister)
+        self.assertEqual(1, token.data[1].data[0].data[1].data[0].data[1].maxRequiredRegister)
+        self.assertEqual(1, token.data[1].data[0].data[1].data[0].data[1].minRequiredRegister)
 
 if __name__ == '__main__':
     unittest.main()
