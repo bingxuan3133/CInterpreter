@@ -52,3 +52,19 @@ void test_disassembleBytecodes_should_disassemble_an_array_of_bytecode(void) {
   disassembleBytecodes(&buffer[0], &bytecode[0]);
   printf("%s\n", &buffer[0]);
 }
+
+void test_disassemble_arithmetic(void) {
+  char buffer[500] = {0};
+  int bytecode[20] = {0};
+  bytecode[0] = add(REG_0, REG_0, REG_1);
+  bytecode[1] = sub(REG_0, REG_0, REG_1);
+  bytecode[2] = mul(REG_0, REG_0, REG_1);
+  bytecode[3] = div(REG_0, REG_0, REG_1);
+  bytecode[4] = and(REG_0, REG_0, REG_1);
+  bytecode[5] = or(REG_0, REG_0, REG_1);
+  bytecode[6] = xor(REG_0, REG_0, REG_1);
+  bytecode[7] = 0xFFFFFFFF;
+
+  disassembleBytecodes(&buffer[0], &bytecode[0]);
+  printf("%s\n", &buffer[0]);
+}

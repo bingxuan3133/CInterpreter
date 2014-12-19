@@ -249,3 +249,52 @@ void storeMultipleRegistersIntoMemorySafe(int bytecode) {
   if(update == UPDATE)
     reg[referenceRegister].data = (int)ref;
 }
+
+void addRegisters(int bytecode) {
+  int resultReg = getBits(bytecode, 10, 3);
+  int reg1 = getBits(bytecode, 13, 3);
+  int reg2 = getBits(bytecode, 16, 3);
+  reg[resultReg].data = reg[reg1].data + reg[reg2].data;
+}
+
+void subtractRegisters(int bytecode) {
+  int resultReg = getBits(bytecode, 10, 3);
+  int reg1 = getBits(bytecode, 13, 3);
+  int reg2 = getBits(bytecode, 16, 3);
+  reg[resultReg].data = reg[reg1].data - reg[reg2].data;
+}
+
+void multiplyRegisters(int bytecode) {
+  int resultReg = getBits(bytecode, 10, 3);
+  int reg1 = getBits(bytecode, 13, 3);
+  int reg2 = getBits(bytecode, 16, 3);
+  reg[resultReg].data = reg[reg1].data * reg[reg2].data;
+}
+
+void divideRegisters(int bytecode) {
+  int resultReg = getBits(bytecode, 10, 3);
+  int reg1 = getBits(bytecode, 13, 3);
+  int reg2 = getBits(bytecode, 16, 3);
+  reg[resultReg].data = reg[reg1].data / reg[reg2].data;
+}
+
+void andRegisters(int bytecode) {
+  int resultReg = getBits(bytecode, 10, 3);
+  int reg1 = getBits(bytecode, 13, 3);
+  int reg2 = getBits(bytecode, 16, 3);
+  reg[resultReg].data = reg[reg1].data & reg[reg2].data;
+}
+
+void orRegisters(int bytecode) {
+  int resultReg = getBits(bytecode, 10, 3);
+  int reg1 = getBits(bytecode, 13, 3);
+  int reg2 = getBits(bytecode, 16, 3);
+  reg[resultReg].data = reg[reg1].data | reg[reg2].data;
+}
+
+void xorRegisters(int bytecode) {
+  int resultReg = getBits(bytecode, 10, 3);
+  int reg1 = getBits(bytecode, 13, 3);
+  int reg2 = getBits(bytecode, 16, 3);
+  reg[resultReg].data = reg[reg1].data ^ reg[reg2].data;
+}
