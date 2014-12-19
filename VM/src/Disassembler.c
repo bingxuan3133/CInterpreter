@@ -33,7 +33,7 @@ int disassembleBytecodes(char *strBuffer, int *bytecode) {
   while(*bytecode != 0xFFFFFFFF) {
     while(*strBuffer != '\0')  // Find \0 to write
       strBuffer++;
-    disassemble[(char)*bytecode](strBuffer, *bytecode);
+    disassemble[(unsigned char)(*bytecode)](strBuffer, *bytecode);
     while(*strBuffer != '\0')  // Find \0 to write
       strBuffer++;
     bytecode++;
@@ -48,7 +48,7 @@ int disassembleBytecodes(char *strBuffer, int *bytecode) {
  *            *bytecode     address of bytecode that is going to be disassembled into assembly code
  */
 int disassembleBytecode(char *strBuffer, int *bytecode) {
-  disassemble[(char)*bytecode](strBuffer, *bytecode);
+  disassemble[(unsigned char)*bytecode](strBuffer, *bytecode);
 }
 
 void disassembleLdrImm(char *strBuffer, int bytecode) {

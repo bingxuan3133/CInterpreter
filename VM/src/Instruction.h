@@ -12,8 +12,23 @@ struct Register {
 extern Register reg[8];
 
 typedef enum {
-  LDR_IMM, LDR_MEM, STR_MEM, MOV_REG, LDR_MEM_SAFE, STR_MEM_SAFE, LDM, STM, LDMS, STMS,
-  ADD, SUB, MUL, DIV, AND, OR, XOR
+  MOV_REG,
+  LDR_MEM_SAFE,
+  STR_MEM_SAFE,
+  LDMS,
+  STMS,
+  MUL,
+  DIV,
+  AND,
+  OR,
+  XOR,
+  LDM = 0xf7,
+  STM = 0xf9,
+  ADD = 0xfa,
+  SUB = 0xfb,
+  LDR_IMM = 0xfc,
+  LDR_MEM = 0xfe, 
+  STR_MEM = 0xff,
 } Instruction;
 
 #define MAX_REG 8
