@@ -109,8 +109,7 @@ class ByteCodeGenerator:
     def decideWhetherToPush(self, token):
         number = 0b000000
         registerToPush =0
-        if self.oracle.registerLeft < token.maxRequiredRegister or \
-            self.oracle.registerLeft < token.minRequiredRegister:
+        if self.oracle.registerLeft < token.minRequiredRegister:
             registerToPush = token.maxRequiredRegister - self.oracle.registerLeft
             returnedWorkingRegister = self.oracle.releaseALargestWorkingRegister()
 

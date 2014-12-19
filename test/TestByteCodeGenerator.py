@@ -93,13 +93,14 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.loadRegister(4, 7, 4), dataList[7])
         self.assertEqual(self.byteCodeGenerator.assignRegister(4, 5), dataList[8])
 
-    def test_generateByteCode_will_push_the_register_when_the_registers_available_is_not_enough_for_maxRequiredRegister(self):
+    def test_generateByteCode_will_push_the_register_when_the_registers_available_is_not_enough_at_the_begining(self):
         lexer = Lexer(' x = 8 * 9 * 10', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
         self.byteCodeGenerator.injectRegisterRequired(token)
+        token.minRequiredRegister = 4
         self.byteCodeGenerator.oracle.workingRegisterCounter = 4
         self.byteCodeGenerator.oracle.registerLeft = 2
         self.byteCodeGenerator.oracle.registerStatus = [1, 1, 1, 1, 0, 0]
