@@ -18,6 +18,11 @@ class ByteCodeGenerator:
         self.contextManager = contextManager
         self.oracle = Oracle()
 
+    def multiplyRegister(self, firstRegister, secondRegister):
+        number = 0xf8 | firstRegister << 8 | secondRegister << 11
+        self.byteCodeList.append(number)
+        return number
+
     def loadMultiple(self, sourceRegister, destinationRegister):
         number = 0xf9 | sourceRegister << 8 | destinationRegister << 11
         self.byteCodeList.append(number)
@@ -31,8 +36,8 @@ class ByteCodeGenerator:
         number = 0xfb | targetRegister << 8 | registerToPush << 11
         self.byteCodeList.append(number)
         return number
-    def addRegister(self, registerNumber, valueToAdd):
-        number = 0xfc | registerNumber << 8 | valueToAdd << 11
+    def addRegister(self, firstRegister, secondRegister):
+        number = 0xfc | firstRegister << 8 | secondRegister << 11
         self.byteCodeList.append(number)
         return number
 
@@ -62,50 +67,86 @@ class ByteCodeGenerator:
         return number
 
     def generateRightCodeFirst(self, token):
-        for index in range(len(token.data)-1, 0, -1):
+        secondTime = 0
+        for index in range(len(token.data)-1, -1, -1):
             if token.data[index].id == '(identifier)':
-                self.loadRegister(self.oracle.getAFreeWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]])
+                if secondTime == 0:
+                    self.loadRegister(self.oracle.getAFreeWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]])
+                else:
+                    self.loadRegister(self.oracle.getALargestWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]])
             elif token.data[index].id == '(literal)':
-                self.loadValue(self.oracle.getAFreeWorkingRegister(),token.data[index].data[0])
+                if secondTime == 0:
+                    self.loadValue(self.oracle.getAFreeWorkingRegister(),token.data[index].data[0])
+                else:
+                    self.loadValue(self.oracle.getALargestWorkingRegister(),token.data[index].data[0])
             else:
                 token.data[index].generateByteCode()
+            secondTime += 1
 
     def generateLeftCodeFirst(self, token):
+        secondTime = 0
         for index in range(0, len(token.data)):
             if token.data[index].id == '(identifier)':
-                self.loadRegister(self.oracle.getAFreeWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]])
+                if secondTime == 0:
+                    self.loadRegister(self.oracle.getAFreeWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]])
+                else:
+                    self.loadRegister(self.oracle.getALargestWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]])
             elif token.data[index].id == '(literal)':
-                self.loadValue(self.oracle.getAFreeWorkingRegister(),token.data[index].data[0])
+                if secondTime == 0:
+                    self.loadValue(self.oracle.getAFreeWorkingRegister(),token.data[index].data[0])
+                else:
+                    self.loadValue(self.oracle.getALargestWorkingRegister(),token.data[index].data[0])
             else:
                 token.data[index].generateByteCode()
+            secondTime += 1
 
     def findOutAndGenerateCorrectSideCode(self, token):
-        if token.registerRequired > 0:
+        if token.registerRequiredAtThatLevel > 0:
             self.generateRightCodeFirst(token)
         else:
             self.generateLeftCodeFirst(token)
 
     def decideWhetherToPush(self, token):
-        if self.oracle.registerLeft < abs(token.registerRequired) or \
-            self.oracle.registerLeft < token.leftValue + token.rightValue:
-            number = 0b000000 | 0b1 << (6-1-self.oracle.releaseAWorkingRegister())
+        number = 0b000000
+        registerToPush =0
+        if self.oracle.registerLeft < token.maxRequiredRegister or \
+            self.oracle.registerLeft < token.minRequiredRegister:
+            registerToPush = token.maxRequiredRegister - self.oracle.registerLeft
+            returnedWorkingRegister = self.oracle.releaseALargestWorkingRegister()
+
+            while returnedWorkingRegister != 'Finish':
+                registerToPush -= 1
+                number = number | 0b1 << (6-1-returnedWorkingRegister)
+                if registerToPush == 0:
+                    break
+                returnedWorkingRegister = self.oracle.releaseALargestWorkingRegister()
+
             self.storeMultiple(7, number)
-            return number
-        return 0
+
+        return number
 
     def decideWhetherToPop(self, number):
+        count =0
         if number != 0:
-                self.loadMultiple(7, number)
+            self.loadMultiple(7, number)
+            while number != 0:
+                bit = number | 0b000001
+                number = number >> 1
+                if bit == 1:
+                    self.oracle.getSpecificWorkingRegister(count)
+                count += 1
 
     def decideWhetherToSaveSlotForPopValue(self, status, generateByteCode):
-        firstRegister = self.oracle.releaseAWorkingRegister()
-        secondRegister = self.oracle.releaseAWorkingRegister()
+        firstRegister = self.oracle.releaseALargestWorkingRegister()
+        secondRegister = self.oracle.releaseALargestWorkingRegister()
         if status != 0:
             generateByteCode(firstRegister, secondRegister)
             self.oracle.getSpecificWorkingRegister(firstRegister)
+            self.oracle.releaseSpecificWorkingRegister(secondRegister)
         else:
             generateByteCode(secondRegister, firstRegister)
             self.oracle.getSpecificWorkingRegister(secondRegister)
+            self.oracle.releaseSpecificWorkingRegister(firstRegister)
 
     def initGeneration(self):
         thisGenerator = self
@@ -114,6 +155,13 @@ class ByteCodeGenerator:
         def divide(self):
             pass
         def multiply(self):
+            pushed = thisGenerator.decideWhetherToPush(self)
+            thisGenerator.findOutAndGenerateCorrectSideCode(self)
+
+            thisGenerator.decideWhetherToSaveSlotForPopValue(pushed, thisGenerator.multiplyRegister)
+
+            thisGenerator.decideWhetherToPop(pushed)
+            return thisGenerator.byteCodeList
             pass
         def nothing(self):
             pass
@@ -166,28 +214,40 @@ class ByteCodeGenerator:
         registerNumber =[]
         for element in token.data:
             if element.id == '(identifier)' or element.id == '(literal)':
-                element.registerRequired = 1
-                tempRegisterRequired = 1
-            else:
-                tempRegisterRequired = self.injectRegisterRequired(element)
+                element.registerRequiredAtThatLevel = 1
+                element.maxRequiredRegister = 1
+                element.minRequiredRegister = 1
+                tempRegisterRequiredAtThatLevel = 1
 
-            registerNumber.append(tempRegisterRequired)
+            else:
+                tempRegisterRequiredAtThatLevel = self.injectRegisterRequired(element)
+
+            registerNumber.append(tempRegisterRequiredAtThatLevel)
         if abs(registerNumber[0]) == abs(registerNumber[1]):
             largest = -abs(registerNumber[0])-1
         elif abs(registerNumber[0]) > abs(registerNumber[1]):
             largest = -abs(registerNumber[0])
         else:
             largest = abs(registerNumber[1])
-        token.registerRequired = largest
+        token.registerRequiredAtThatLevel = largest
+
+        if token.id != '(identifier)' and token.id != '(literal':
+            token.maxRequiredRegister = token.data[0].maxRequiredRegister+token.data[1].maxRequiredRegister
+            if token.data[0].minRequiredRegister > token.data[1].minRequiredRegister:
+                token.minRequiredRegister = token.data[0].minRequiredRegister
+            elif token.data[0].minRequiredRegister < token.data[1].minRequiredRegister:
+                token.minRequiredRegister = token.data[1].minRequiredRegister
+            elif token.data[0].minRequiredRegister == token.data[1].minRequiredRegister:
+                token.minRequiredRegister = token.data[0].minRequiredRegister + token.data[1].minRequiredRegister
         return largest
 
     def generateProcessCode(self, token): #Developing
-        if token.registerRequired == 1:
+        if token.registerRequiredAtThatLevel == 1:
             pass
-        elif token.registerRequired > 0:
+        elif token.registerRequiredAtThatLevel > 0:
             self.generateProcessCode(token.data[1])
             self.generateProcessCode(token.data[0])
-        elif token.registerRequired < 0:
+        elif token.registerRequiredAtThatLevel < 0:
             self.generateProcessCode(token.data[0])
             self.generateProcessCode(token.data[1])
         if token.id == '(identifier)' or token.id == '=':
@@ -214,7 +274,7 @@ class ByteCodeGenerator:
         index = self.generateInitializationCode(token, index)
 
         for value in range(index, len(token)):
-            self.injectRegisterRequired(token[value])
+            self.injectregisterRequiredAtThatLevel(token[value])
             self.generateProcessCode(token[value])
 
 
