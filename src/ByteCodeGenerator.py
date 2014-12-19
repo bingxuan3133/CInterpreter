@@ -19,25 +19,25 @@ class ByteCodeGenerator:
         self.oracle = Oracle()
 
     def multiplyRegister(self, firstRegister, secondRegister):
-        number = 0xf8 | firstRegister << 8 | secondRegister << 11
+        number = 0xf6 | firstRegister << 8 | secondRegister << 11
         self.byteCodeList.append(number)
         return number
 
     def loadMultiple(self, sourceRegister, destinationRegister):
-        number = 0xf9 | sourceRegister << 8 | destinationRegister << 11
+        number = 0xf7 | sourceRegister << 8 | destinationRegister << 11
         self.byteCodeList.append(number)
         return number
     def assignRegister(self, targetRegister, registerToBeAssigned):
-        number = 0xfa | targetRegister << 8 | registerToBeAssigned << 11
+        number = 0xf8 | targetRegister << 8 | registerToBeAssigned << 11
         self.byteCodeList.append(number)
         return number
 
     def storeMultiple(self, targetRegister, registerToPush):
-        number = 0xfb | targetRegister << 8 | registerToPush << 11
+        number = 0xf9 | targetRegister << 8 | registerToPush << 11
         self.byteCodeList.append(number)
         return number
     def addRegister(self, firstRegister, secondRegister):
-        number = 0xfc | firstRegister << 8 | secondRegister << 11
+        number = 0xfa | firstRegister << 8 | secondRegister << 11
         self.byteCodeList.append(number)
         return number
 
@@ -108,19 +108,19 @@ class ByteCodeGenerator:
 
     def decideWhetherToPush(self, token):
         number = 0b000000
-        registerToPush =0
         if self.oracle.registerLeft < token.minRequiredRegister:
             registerToPush = token.maxRequiredRegister - self.oracle.registerLeft
             returnedWorkingRegister = self.oracle.releaseALargestWorkingRegister()
 
             while returnedWorkingRegister != 'Finish':
                 registerToPush -= 1
-                number = number | 0b1 << (6-1-returnedWorkingRegister)
+                number = number | 0b1 << (returnedWorkingRegister)
                 if registerToPush == 0:
                     break
                 returnedWorkingRegister = self.oracle.releaseALargestWorkingRegister()
 
             self.storeMultiple(7, number)
+
 
         return number
 
@@ -181,7 +181,7 @@ class ByteCodeGenerator:
             thisGenerator.decideWhetherToSaveSlotForPopValue(pushed, thisGenerator.addRegister)
 
             thisGenerator.decideWhetherToPop(pushed)
-            pass
+            return thisGenerator.byteCodeList
         def loadIdentifierIntoRegister(self):
             pass
         def loadLiteralIntoRegister(self):
