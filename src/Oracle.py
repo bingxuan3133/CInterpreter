@@ -8,28 +8,52 @@ class Oracle:
     registerLeft = 5
 
     def getAFreeWorkingRegister(self):
-        temp = 100
-        if self.workingRegisterCounter < self.MaxRegister:
-            if self.registerStatus[self.workingRegisterCounter] == 0:
-                temp = self.workingRegisterCounter
-                self.workingRegisterCounter += 1
-            else:
-                while self.registerStatus[self.workingRegisterCounter] == 1:
-                    self.workingRegisterCounter += 1
-                temp = self.workingRegisterCounter
-            self.registerLeft -= 1
-            self.registerStatus[temp] = 1
+        temp = 0
+        while self.registerStatus[temp] != 0:
+            if temp > self.MaxRegister-1: #Error chance remark
+                return 'Finish'
+            temp += 1
+        self.registerStatus[temp] = 1
+        self.workingRegisterCounter = temp + 1
+        return temp
+    def getALargestWorkingRegister(self):
+        temp = self.MaxRegister -1
+        while self.registerStatus[temp] != 0:
+            if temp < 0:
+                return 'Finish'
+            temp -= 1
+        self.registerStatus[temp] = 1
+        self.workingRegisterCounter = temp - 1
+        return temp
+    def releaseALargestWorkingRegister(self):
+        temp = self.MaxRegister - 1
+        while self.registerStatus[temp] != 1:
+            if temp == -1:
+                return 'Finish'
+            temp -= 1
+        self.registerStatus[temp] = 0
+        self.workingRegisterCounter = temp
+        self.registerLeft += 1
         return temp
 
     def releaseAWorkingRegister(self):
-        temp = self.MaxRegister - 1
+        temp = 0
         while self.registerStatus[temp] != 1:
-            temp -= 1
+            if temp > self.MaxRegister-1:
+                return 'Finish'
+            temp += 1
         self.registerStatus[temp] = 0
-        self.workingRegisterCounter = temp - 1
+        self.workingRegisterCounter = temp
         self.registerLeft += 1
         return temp
+
+
     def getSpecificWorkingRegister(self, numberOfRegister):
         if self.registerStatus[numberOfRegister] == 0:
             self.registerStatus[numberOfRegister] = 1
             self.registerLeft -= 1
+
+    def releaseSpecificWorkingRegister(self, numberOfRegister):
+        if self.registerStatus[numberOfRegister] == 1:
+            self.registerStatus[numberOfRegister] = 0
+            self.registerLeft += 1
