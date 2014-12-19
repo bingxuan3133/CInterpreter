@@ -12,7 +12,7 @@ from ByteCodeGenerator import *
 from DeclarationContext import *
 from FlowControlContext import *
 from writeToFile import *
-
+from InformationInjector import *
 
 class MyTestCase(unittest.TestCase):
     def setUp(self):
@@ -44,6 +44,7 @@ class MyTestCase(unittest.TestCase):
         self.manager.setCurrentContexts(self.contexts)
         self.byteCodeGenerator = ByteCodeGenerator(self.context, self.manager)
         self.writeFile = writeToFile(self.byteCodeGenerator)
+        self.informationInjector = InformationInjector()
     def test_generateByteCode_will_generate_code_for_push_the_working_register_into_the_stack(self):
 
         """
@@ -59,7 +60,7 @@ class MyTestCase(unittest.TestCase):
         token = parser.parse(0)
         token.leftValue = 1
         token.rightValue = 1
-        self.byteCodeGenerator.injectRegisterRequired(token)
+        self.informationInjector.injectRegisterRequired(token)
         self.byteCodeGenerator.oracle.workingRegisterCounter = 5
         self.byteCodeGenerator.oracle.registerLeft = 1
         self.byteCodeGenerator.oracle.registerStatus = [1, 1, 1, 1, 1, 0]
