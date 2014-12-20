@@ -58,8 +58,8 @@ void test_disassemble_arithmetic(void) {
   int bytecode[20] = {0};
   bytecode[0] = add(REG_0, REG_0, REG_1);
   bytecode[1] = sub(REG_0, REG_0, REG_1);
-  bytecode[2] = mul(REG_0, REG_0, REG_1);
-  bytecode[3] = div(REG_0, REG_0, REG_1);
+  bytecode[2] = mul(REG_1, REG_0, REG_0, REG_1);
+  bytecode[3] = div(REG_0, REG_1, REG_0, REG_1);
   bytecode[4] = and(REG_0, REG_0, REG_1);
   bytecode[5] = or(REG_0, REG_0, REG_1);
   bytecode[6] = xor(REG_0, REG_0, REG_1);

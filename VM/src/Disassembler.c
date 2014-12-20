@@ -231,16 +231,18 @@ void disassembleSub(char *strBuffer, int bytecode) {
   sprintf(strBuffer, "sub r%d r%d r%d", resultReg, reg1, reg2);
 }
 void disassembleMul(char *strBuffer, int bytecode) {
-  int resultReg = getRd(bytecode);
-  int reg1 = getR1(bytecode);
-  int reg2 = getR2(bytecode);
-  sprintf(strBuffer, "mul r%d r%d r%d", resultReg, reg1, reg2);
+  int resultHighReg = getRd(bytecode);
+  int resultLowReg = getR1(bytecode);
+  int reg1 = getR2(bytecode);
+  int reg2 = getR3(bytecode);
+  sprintf(strBuffer, "mul r%d:r%d r%d r%d", resultHighReg, resultLowReg, reg1, reg2);
 }
 void disassembleDiv(char *strBuffer, int bytecode) {
-  int resultReg = getRd(bytecode);
-  int reg1 = getR1(bytecode);
-  int reg2 = getR2(bytecode);
-  sprintf(strBuffer, "div r%d r%d r%d", resultReg, reg1, reg2);
+  int resultQuotientReg = getRd(bytecode);
+  int resultRemainderReg = getR1(bytecode);
+  int reg1 = getR2(bytecode);
+  int reg2 = getR3(bytecode);
+  sprintf(strBuffer, "div r%d:r%d r%d r%d", resultQuotientReg, resultRemainderReg, reg1, reg2);
 }
 void disassembleAnd(char *strBuffer, int bytecode) {
   int resultReg = getRd(bytecode);
