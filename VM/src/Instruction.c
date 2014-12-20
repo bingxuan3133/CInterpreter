@@ -5,6 +5,10 @@
 Register reg[MAX_REG];
 char errBuffer[100] = {0};
 
+//========================
+//    Helper Functions
+//========================
+
 /**
  *  This is a helper function to get a specific range of bits from a 32-bit data
  *  Input:  data    original 32-bit data
@@ -19,13 +23,66 @@ int getBits(int data, unsigned char start, unsigned char length) {
   return result;
 }
 
+//-----------------------
+//    Bytecode Format
+//-----------------------
+
+//  COMMAND | Rd | R1 | imm
+//  ldr Rd, [R1 + imm]
+
+//  COMMAND | Rd | R1 | R2
+//  add Rd, R1, R2
+
+//  COMMAND | Rd | R1 | Rd.attribute
+//  mov Rd, R1, R2
+
+//  COMMAND | Rd | Rlist
+//  ldm Rd, [Rlist]
+
+/**
+ *  This is a helper function to get the destination register
+ *  Input:  
+ */
+int getRd(int bytecode) {
+  return getBits(bytecode, 7 + MAX_REG_BIT, MAX_REG_BIT);
+}
+
+/**
+ *  This is a helper function to get the destination register
+ *  Input:  
+ */
+int getR1(int bytecode) {
+  return getBits(bytecode, 7 + (2 * MAX_REG_BIT), MAX_REG_BIT);
+}
+
+/**
+ *  This is a helper function to get the destination register
+ *  Input:  
+ */
+int getR2(int bytecode) {
+  return getBits(bytecode, 7 + (3 * MAX_REG_BIT), MAX_REG_BIT);
+}
+
+/**
+ *  This is a helper function to get the register list (used in ldm and stm)
+ *  Input:  
+ */
+int getRlist(int bytecode) {
+  return getBits(bytecode, 7 + MAX_REG_BIT + MAX_REG, MAX_REG);
+}
+
+
+//======================
+//    Main Functions
+//======================
+
 /**
  *  This function load register with a literal value
  *  Input:  bytecode
  */
 void loadRegisterWithLiteral(int bytecode) {
-  int regIndex = getBits(bytecode, 10, 3);
-  reg[regIndex].data = bytecode >> 11;
+  int regIndex = getRd(bytecode);
+  reg[regIndex].data = bytecode >> (8 + MAX_REG_BIT);
 }
 
 /**
@@ -34,9 +91,9 @@ void loadRegisterWithLiteral(int bytecode) {
  */
 void loadRegisterFromMemory(int bytecode) {
   int *ref;
-  int registerToBeLoaded = getBits(bytecode, 10, 3);
-  int referenceRegister = getBits(bytecode, 13, 3);
-  int relativeAddress = bytecode >> 14;
+  int registerToBeLoaded = getRd(bytecode);
+  int referenceRegister = getR1(bytecode);
+  int relativeAddress = bytecode >> (8 + 2 * MAX_REG_BIT);
   ref = (int *)(reg[referenceRegister].data + relativeAddress);
   reg[registerToBeLoaded].data = *ref;
 }
@@ -47,9 +104,9 @@ void loadRegisterFromMemory(int bytecode) {
  */
 void storeRegisterIntoMemory(int bytecode) {
   int *ref;
-  int registerToBeStored = getBits(bytecode, 10, 3);
-  int referenceRegister = getBits(bytecode, 13, 3);
-  int relativeAddress = bytecode >> 14;
+  int registerToBeStored = getRd(bytecode);
+  int referenceRegister = getR1(bytecode);
+  int relativeAddress = bytecode >> (8 + 2 * MAX_REG_BIT);
   ref = (int *)(reg[referenceRegister].data + relativeAddress);
   *ref = reg[registerToBeStored].data;
 }
@@ -59,12 +116,14 @@ void storeRegisterIntoMemory(int bytecode) {
  *  Input:  bytecode
  */
 void moveRegister(int bytecode) {
-  int destination = getBits(bytecode, 10, 3);
-  int attrib = getBits(bytecode, 12, 2);
-  int source = getBits(bytecode, 15, 3);
-  int shift = getBits(bytecode, 17, 2);
-  int imm = getBits(bytecode, 22, 5); // number of shift 0 ~ 31
+  int destination = getRd(bytecode);
+  int source = getR1(bytecode);
+  int destAttrib = getBits(bytecode, (9 + 2 * MAX_REG_BIT), 2);
+  int shift = getBits(bytecode, (11 + 2 * MAX_REG_BIT), 2);
+  int imm = getBits(bytecode, (16 + 2 * MAX_REG_BIT), 5); // number of shift 0 ~ 31
   int data = reg[source].data;
+  printf("destination%d\nsource%d\ndestAttrib%d\nshift%d\nimm%d\n", destination, source, destAttrib, shift, imm);
+  
   // Shift / Rotate Operations
   if(imm == NOP)
     ;
@@ -82,11 +141,11 @@ void moveRegister(int bytecode) {
     printf("data%x\n", data);
   }
   // Assign
-  if(attrib == DATA)
+  if(destAttrib == DATA)
     reg[destination].data = data;
-  else if(attrib == BASE)
+  else if(destAttrib == BASE)
     reg[destination].base = data;
-  else if(attrib == LIMIT)
+  else if(destAttrib == LIMIT)
     reg[destination].limit = data;
   else // Treat as DATA
     reg[destination].data = data;
@@ -98,9 +157,9 @@ void moveRegister(int bytecode) {
  */
 void loadRegisterFromMemorySafe(int bytecode) {
   int *ref;
-  int registerToBeLoaded = getBits(bytecode, 10, 3);
-  int referenceRegister = getBits(bytecode, 13, 3);
-  int relativeAddress = bytecode >> 14;
+  int registerToBeLoaded = getRd(bytecode);
+  int referenceRegister = getR1(bytecode);
+  int relativeAddress = bytecode >> (8 + 2 * MAX_REG_BIT);
   ref = (int *)(reg[referenceRegister].data + relativeAddress);
   int base = reg[referenceRegister].base;
   int limit = reg[referenceRegister].limit;
@@ -119,9 +178,9 @@ void loadRegisterFromMemorySafe(int bytecode) {
  */
 void storeRegisterIntoMemorySafe(int bytecode) {
   int *ref;
-  int registerToBeStored = getBits(bytecode, 10, 3);
-  int referenceRegister = getBits(bytecode, 13, 3);
-  int relativeAddress = bytecode >> 14;
+  int registerToBeStored = getRd(bytecode);
+  int referenceRegister = getR1(bytecode);
+  int relativeAddress = bytecode >> (8 + 2 * MAX_REG_BIT);
   ref = (int *)(reg[referenceRegister].data + relativeAddress);
   int base = reg[referenceRegister].base;
   int limit = reg[referenceRegister].limit;
@@ -139,10 +198,10 @@ void storeRegisterIntoMemorySafe(int bytecode) {
  *  Input:  bytecode
  */
 void loadMultipleRegistersFromMemory(int bytecode) {
-  int referenceRegister = getBits(bytecode, 10, 3);
-  int registersToBeLoaded = getBits(bytecode, 18, 8);
-  int direction = getBits(bytecode, 19, 1);
-  int update = getBits(bytecode, 20, 1);
+  int referenceRegister = getRd(bytecode);
+  int registersToBeLoaded = getRlist(bytecode);
+  int direction = getBits(bytecode, 8 + MAX_REG + MAX_REG_BIT, 1);
+  int update = getBits(bytecode, 9 + MAX_REG + MAX_REG_BIT, 1);
   int *ref = (int *)reg[referenceRegister].data;
   int i;
   for(i = 0; i < MAX_REG; i++) {
@@ -164,10 +223,10 @@ void loadMultipleRegistersFromMemory(int bytecode) {
  *  Input:  bytecode
  */
 void storeMultipleRegistersIntoMemory(int bytecode) {
-  int referenceRegister = getBits(bytecode, 10, 3);
-  int registersToBeStored = getBits(bytecode, 18, 8);
-  int direction = getBits(bytecode, 19, 1);
-  int update = getBits(bytecode, 20, 1);
+  int referenceRegister = getRd(bytecode);
+  int registersToBeStored = getRlist(bytecode);
+  int direction = getBits(bytecode, 8 + MAX_REG + MAX_REG_BIT, 1);
+  int update = getBits(bytecode, 9 + MAX_REG + MAX_REG_BIT, 1);
   int *ref = (int *)reg[referenceRegister].data;
   int i;
   for(i = 0; i < MAX_REG; i++) {
@@ -189,10 +248,10 @@ void storeMultipleRegistersIntoMemory(int bytecode) {
  *  Input:  bytecode
  */
 void loadMultipleRegistersFromMemorySafe(int bytecode) {
-  int referenceRegister = getBits(bytecode, 10, 3);
-  int registersToBeLoaded = getBits(bytecode, 18, 8);
-  int direction = getBits(bytecode, 19, 1);
-  int update = getBits(bytecode, 20, 1);
+  int referenceRegister = getRd(bytecode);
+  int registersToBeLoaded = getRlist(bytecode);
+  int direction = getBits(bytecode, 8 + MAX_REG + MAX_REG_BIT, 1);
+  int update = getBits(bytecode, 9 + MAX_REG + MAX_REG_BIT, 1);
   int *ref = (int *)reg[referenceRegister].data;
   int base = reg[referenceRegister].base;
   int limit = reg[referenceRegister].limit;
@@ -222,10 +281,10 @@ void loadMultipleRegistersFromMemorySafe(int bytecode) {
  *  Input:  bytecode
  */
 void storeMultipleRegistersIntoMemorySafe(int bytecode) {
-  int referenceRegister = getBits(bytecode, 10, 3);
-  int registersToBeStored = getBits(bytecode, 18, 8);
-  int direction = getBits(bytecode, 19, 1);
-  int update = getBits(bytecode, 20, 1);
+  int referenceRegister = getRd(bytecode);
+  int registersToBeStored = getRlist(bytecode);
+  int direction = getBits(bytecode, 8 + MAX_REG + MAX_REG_BIT, 1);
+  int update = getBits(bytecode, 9 + MAX_REG + MAX_REG_BIT, 1);
   int *ref = (int *)reg[referenceRegister].data;
   int base = reg[referenceRegister].base;
   int limit = reg[referenceRegister].limit;
@@ -251,50 +310,50 @@ void storeMultipleRegistersIntoMemorySafe(int bytecode) {
 }
 
 void addRegisters(int bytecode) {
-  int resultReg = getBits(bytecode, 10, 3);
-  int reg1 = getBits(bytecode, 13, 3);
-  int reg2 = getBits(bytecode, 16, 3);
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
   reg[resultReg].data = reg[reg1].data + reg[reg2].data;
 }
 
 void subtractRegisters(int bytecode) {
-  int resultReg = getBits(bytecode, 10, 3);
-  int reg1 = getBits(bytecode, 13, 3);
-  int reg2 = getBits(bytecode, 16, 3);
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
   reg[resultReg].data = reg[reg1].data - reg[reg2].data;
 }
 
 void multiplyRegisters(int bytecode) {
-  int resultReg = getBits(bytecode, 10, 3);
-  int reg1 = getBits(bytecode, 13, 3);
-  int reg2 = getBits(bytecode, 16, 3);
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
   reg[resultReg].data = reg[reg1].data * reg[reg2].data;
 }
 
 void divideRegisters(int bytecode) {
-  int resultReg = getBits(bytecode, 10, 3);
-  int reg1 = getBits(bytecode, 13, 3);
-  int reg2 = getBits(bytecode, 16, 3);
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
   reg[resultReg].data = reg[reg1].data / reg[reg2].data;
 }
 
 void andRegisters(int bytecode) {
-  int resultReg = getBits(bytecode, 10, 3);
-  int reg1 = getBits(bytecode, 13, 3);
-  int reg2 = getBits(bytecode, 16, 3);
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
   reg[resultReg].data = reg[reg1].data & reg[reg2].data;
 }
 
 void orRegisters(int bytecode) {
-  int resultReg = getBits(bytecode, 10, 3);
-  int reg1 = getBits(bytecode, 13, 3);
-  int reg2 = getBits(bytecode, 16, 3);
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
   reg[resultReg].data = reg[reg1].data | reg[reg2].data;
 }
 
 void xorRegisters(int bytecode) {
-  int resultReg = getBits(bytecode, 10, 3);
-  int reg1 = getBits(bytecode, 13, 3);
-  int reg2 = getBits(bytecode, 16, 3);
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
   reg[resultReg].data = reg[reg1].data ^ reg[reg2].data;
 }

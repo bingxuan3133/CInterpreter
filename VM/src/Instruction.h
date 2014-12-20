@@ -1,37 +1,9 @@
 #ifndef Instruction_H
 #define Instruction_H
 
-typedef struct Register Register;
-
-struct Register {
-  int data;
-  int base;
-  int limit;
-};
-
-extern Register reg[8];
-
-typedef enum {
-  MOV_REG,
-  LDR_MEM_SAFE,
-  STR_MEM_SAFE,
-  LDMS,
-  STMS,
-  MUL,
-  DIV,
-  AND,
-  OR,
-  XOR,
-  LDM = 0xf7,
-  STM = 0xf9,
-  ADD = 0xfa,
-  SUB = 0xfb,
-  LDR_IMM = 0xfc,
-  LDR_MEM = 0xfe, 
-  STR_MEM = 0xff,
-} Instruction;
-
-#define MAX_REG 8
+// Register Mode
+#define MAX_REG 16      // 2 to 16
+#define MAX_REG_BIT 4   // 1 to 4
 
 // Registers
 #define REG_0  0
@@ -75,39 +47,70 @@ typedef enum {
 
 // Bytecode Macros
 #define ldrImm(reg, imm) \
-                LDR_IMM | (reg)<<8 | (imm)<<11
+                LDR_IMM | (reg)<<8 | (imm)<<(8+MAX_REG_BIT)
 #define ldrMem(reg, refReg, imm) \
-                LDR_MEM | (reg)<<8 | (refReg)<<11 | (imm)<<14
+                LDR_MEM | (reg)<<8 | (refReg)<<(8+MAX_REG_BIT) | (imm)<<(8+2*MAX_REG_BIT)
 #define strMem(reg, refReg, imm) \
-                STR_MEM | (reg)<<8 | (refReg)<<11 | (imm)<<14
+                STR_MEM | (reg)<<8 | (refReg)<<(8+MAX_REG_BIT) | (imm)<<(8+2*MAX_REG_BIT)
 #define movReg(dest, destAttrib, sour, shift, imm) \
-                MOV_REG | (dest)<<8 | (destAttrib)<<11 | (sour)<<13 | (shift)<<16 | (imm)<<18
+                MOV_REG | (dest)<<8 | (sour)<<(8+MAX_REG_BIT) | (destAttrib)<<(8+2*MAX_REG_BIT) | (shift)<<(10+2*MAX_REG_BIT) | (imm)<<(12+2*MAX_REG_BIT)
 #define ldrMemSafe(reg, refReg, imm) \
-                LDR_MEM_SAFE | (reg)<<8 | (refReg)<<11 | (imm)<<14
+                LDR_MEM_SAFE | (reg)<<8 | (refReg)<<(8+MAX_REG_BIT) | (imm)<<(8+2*MAX_REG_BIT)
 #define strMemSafe(reg, refReg, imm) \
-                STR_MEM_SAFE | (reg)<<8 | (refReg)<<11 | (imm)<<14
+                STR_MEM_SAFE | (reg)<<8 | (refReg)<<(8+MAX_REG_BIT) | (imm)<<(8+2*MAX_REG_BIT)
 #define ldm(refReg, registers, direction, update) \
-                LDM | (refReg)<<8 | (registers)<<11 | (direction)<<19 | (update)<<20
+                LDM | (refReg)<<8 | (registers)<<(8+MAX_REG_BIT) | (direction)<<(8+MAX_REG_BIT+MAX_REG) | (update)<<(9+MAX_REG_BIT+MAX_REG)
 #define stm(refReg, registers, direction, update) \
-                STM | (refReg)<<8 | (registers)<<11 | (direction)<<19 | (update)<<20
+                STM | (refReg)<<8 | (registers)<<(8+MAX_REG_BIT) | (direction)<<(8+MAX_REG_BIT+MAX_REG) | (update)<<(9+MAX_REG_BIT+MAX_REG)
 #define ldms(refReg, registers, direction, update) \
-                LDMS | (refReg)<<8 | (registers)<<11 | (direction)<<19 | (update)<<20
+                LDMS | (refReg)<<8 | (registers)<<(8+MAX_REG_BIT) | (direction)<<(8+MAX_REG_BIT+MAX_REG) | (update)<<(9+MAX_REG_BIT+MAX_REG)
 #define stms(refReg, registers, direction, update) \
-                STMS | (refReg)<<8 | (registers)<<11 | (direction)<<19 | (update)<<20
+                STMS | (refReg)<<8 | (registers)<<(8+MAX_REG_BIT) | (direction)<<(8+MAX_REG_BIT+MAX_REG) | (update)<<(9+MAX_REG_BIT+MAX_REG)
 #define add(resultReg, reg1, reg2) \
-                ADD | (resultReg)<<8 | (reg1)<<11 | (reg2)<<14
+                ADD | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
 #define sub(resultReg, reg1, reg2) \
-                SUB | (resultReg)<<8 | (reg1)<<11 | (reg2)<<14
+                SUB | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
 #define mul(resultReg, reg1, reg2) \
-                MUL | (resultReg)<<8 | (reg1)<<11 | (reg2)<<14
+                MUL | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
 #define div(resultReg, reg1, reg2) \
-                DIV | (resultReg)<<8 | (reg1)<<11 | (reg2)<<14
+                DIV | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
 #define and(resultReg, reg1, reg2) \
-                AND | (resultReg)<<8 | (reg1)<<11 | (reg2)<<14
+                AND | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
 #define or(resultReg, reg1, reg2) \
-                OR | (resultReg)<<8 | (reg1)<<11 | (reg2)<<14
+                OR | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
 #define xor(resultReg, reg1, reg2) \
-                XOR | (resultReg)<<8 | (reg1)<<11 | (reg2)<<14
+                XOR | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
+
+typedef struct Register Register;
+
+struct Register {
+  int data;
+  int base;
+  int limit;
+};
+
+extern Register reg[MAX_REG];
+
+typedef enum {
+  MOV_REG,
+  LDR_MEM_SAFE,
+  STR_MEM_SAFE,
+  LDMS,
+  STMS,
+  MUL,
+  DIV,
+  AND,
+  OR,
+  XOR,
+  LDM = 0xf7,
+  STM = 0xf9,
+  ADD = 0xfa,
+  SUB = 0xfb,
+  LDR_IMM = 0xfc,
+  LDR_MEM = 0xfe, 
+  STR_MEM = 0xff,
+} Instruction;
+
 // load store
 void loadRegisterWithLiteral(int bytecode);
 void loadRegisterFromMemory(int bytecode);
@@ -119,6 +122,7 @@ void loadMultipleRegistersFromMemory(int bytecode);
 void storeMultipleRegistersIntoMemory(int bytecode);
 void loadMultipleRegistersFromMemorySafe(int bytecode);
 void storeMultipleRegistersIntoMemorySafe(int bytecode);
+
 // arithmetic
 void addRegisters(int bytecode);
 void subtractRegisters(int bytecode);
@@ -128,6 +132,11 @@ void andRegisters(int bytecode);
 void orRegisters(int bytecode);
 void xorRegisters(int bytecode);
 
+// helper functions
+int getRd(int bytecode);
 int getBits(int data, unsigned char start, unsigned char length);
+int getR1(int bytecode);
+int getR2(int bytecode);
+int getRlist(int bytecode);
 
 #endif // Instruction_H

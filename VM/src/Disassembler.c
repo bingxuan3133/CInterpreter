@@ -52,34 +52,33 @@ int disassembleBytecode(char *strBuffer, int *bytecode) {
 }
 
 void disassembleLdrImm(char *strBuffer, int bytecode) {
-  int regIndex = getBits(bytecode, 10, 3);
-  int value = bytecode>>11;
+  int regIndex = getRd(bytecode);
+  int value = bytecode>>(8 + MAX_REG_BIT);
   sprintf(strBuffer, "ldr r%d #%d", regIndex, value);
 }
 
 void disassembleLdrMem(char *strBuffer, int bytecode) {
   int *ref;
-  int registerToBeLoaded = getBits(bytecode, 10, 3);
-  int referenceRegister = getBits(bytecode, 13, 3);
-  int relativeAddress = getBits(bytecode, 31, 18);
+  int registerToBeLoaded = getRd(bytecode);
+  int referenceRegister = getR1(bytecode);
+  int relativeAddress = bytecode >> (8 + 2 * MAX_REG_BIT);
   sprintf(strBuffer, "ldr r%d [r%d + #%d]", registerToBeLoaded, referenceRegister, relativeAddress);
 }
 
 void disassembleStrMem(char *strBuffer, int bytecode) {
   int *ref;
-  int registerToBeStored = getBits(bytecode, 10, 3);
-  int referenceRegister = getBits(bytecode, 13, 3);
-  int relativeAddress = getBits(bytecode, 31, 18);
+  int registerToBeStored = getRd(bytecode);
+  int referenceRegister = getR1(bytecode);
+  int relativeAddress = bytecode >> (8 + 2 * MAX_REG_BIT);
   sprintf(strBuffer, "str r%d [r%d + #%d]", registerToBeStored, referenceRegister, relativeAddress);
 }
 
 void disassembleMovReg(char *strBuffer, int bytecode) {
-  int destination = getBits(bytecode, 10, 3);
-  int attrib = getBits(bytecode, 12, 2);
-  int source = getBits(bytecode, 15, 3);
-  int shift = getBits(bytecode, 17, 2);
-  int imm = getBits(bytecode, 22, 5); // number of shift 0 ~ 3
-
+  int destination = getRd(bytecode);
+  int source = getR1(bytecode);
+  int destAttrib = getBits(bytecode, (9 + 2 * MAX_REG_BIT), 2);
+  int shift = getBits(bytecode, (11 + 2 * MAX_REG_BIT), 2);
+  int imm = getBits(bytecode, (16 + 2 * MAX_REG_BIT), 5); // number of shift 0 ~ 31
   char attribString[6];
   char shiftString[15];
 
@@ -89,34 +88,34 @@ void disassembleMovReg(char *strBuffer, int bytecode) {
   else if(shift == ASR) sprintf(shiftString, "ASR %d", imm);
   else if(shift == RR) sprintf(shiftString, "RR %d", imm);
   
-  if(attrib == DATA) sprintf(attribString, "");
-  else if(attrib == BASE) sprintf(attribString, ".base");
-  else if(attrib == LIMIT) sprintf(attribString, ".limit");
+  if(destAttrib == DATA) sprintf(attribString, "");
+  else if(destAttrib == BASE) sprintf(attribString, ".base");
+  else if(destAttrib == LIMIT) sprintf(attribString, ".limit");
   
   sprintf(strBuffer, "mov r%d%s r%d %s", destination, attribString, source, shiftString);
 }
 
 void disassembleLdrMemSafe(char *strBuffer, int bytecode) {
   int *ref;
-  int registerToBeLoaded = getBits(bytecode, 10, 3);
-  int referenceRegister = getBits(bytecode, 13, 3);
-  int relativeAddress = getBits(bytecode, 31, 18);
+  int registerToBeLoaded = getRd(bytecode);
+  int referenceRegister = getR1(bytecode);
+  int relativeAddress = bytecode >> (8 + 2 * MAX_REG_BIT);
   sprintf(strBuffer, "ldrs r%d [r%d + #%d]", registerToBeLoaded, referenceRegister, relativeAddress);
 }
 
 void disassembleStrMemSafe(char *strBuffer, int bytecode) {
   int *ref;
-  int registerToBeStored = getBits(bytecode, 10, 3);
-  int referenceRegister = getBits(bytecode, 13, 3);
-  int relativeAddress = getBits(bytecode, 31, 18);
+  int registerToBeStored = getRd(bytecode);
+  int referenceRegister = getR1(bytecode);
+  int relativeAddress = bytecode >> (8 + 2 * MAX_REG_BIT);
   sprintf(strBuffer, "strs r%d [r%d + #%d]", registerToBeStored, referenceRegister, relativeAddress);
 }
 
 void disassembleLdm(char *strBuffer, int bytecode) {
-  int referenceRegister = getBits(bytecode, 10, 3);
-  int registersToBeLoaded = getBits(bytecode, 18, 8);
-  int direction = getBits(bytecode, 19, 1);
-  int update = getBits(bytecode, 20, 1);
+  int referenceRegister = getRd(bytecode);
+  int registersToBeLoaded = getRlist(bytecode);
+  int direction = getBits(bytecode, 8 + MAX_REG + MAX_REG_BIT, 1);
+  int update = getBits(bytecode, 9 + MAX_REG + MAX_REG_BIT, 1);
   
   char regList[32] = {0};
   char directionChar;
@@ -140,10 +139,10 @@ void disassembleLdm(char *strBuffer, int bytecode) {
 }
 
 void disassembleStm(char *strBuffer, int bytecode) {
-  int referenceRegister = getBits(bytecode, 10, 3);
-  int registersToBeStored = getBits(bytecode, 18, 8);
-  int direction = getBits(bytecode, 19, 1);
-  int update = getBits(bytecode, 20, 1);
+  int referenceRegister = getRd(bytecode);
+  int registersToBeStored = getRlist(bytecode);
+  int direction = getBits(bytecode, 8 + MAX_REG + MAX_REG_BIT, 1);
+  int update = getBits(bytecode, 9 + MAX_REG + MAX_REG_BIT, 1);
   
   char regList[32] = {0};
   char directionChar;
@@ -166,10 +165,10 @@ void disassembleStm(char *strBuffer, int bytecode) {
 }
 
 void disassembleLdms(char *strBuffer, int bytecode) {
-  int referenceRegister = getBits(bytecode, 10, 3);
-  int registersToBeLoaded = getBits(bytecode, 18, 8);
-  int direction = getBits(bytecode, 19, 1);
-  int update = getBits(bytecode, 20, 1);
+  int referenceRegister = getRd(bytecode);
+  int registersToBeLoaded = getRlist(bytecode);
+  int direction = getBits(bytecode, 8 + MAX_REG + MAX_REG_BIT, 1);
+  int update = getBits(bytecode, 9 + MAX_REG + MAX_REG_BIT, 1);
   
   char regList[32] = {0};
   char directionChar;
@@ -193,10 +192,10 @@ void disassembleLdms(char *strBuffer, int bytecode) {
 }
 
 void disassembleStms(char *strBuffer, int bytecode) {
-  int referenceRegister = getBits(bytecode, 10, 3);
-  int registersToBeStored = getBits(bytecode, 18, 8);
-  int direction = getBits(bytecode, 19, 1);
-  int update = getBits(bytecode, 20, 1);
+  int referenceRegister = getRd(bytecode);
+  int registersToBeStored = getRlist(bytecode);
+  int direction = getBits(bytecode, 8 + MAX_REG + MAX_REG_BIT, 1);
+  int update = getBits(bytecode, 9 + MAX_REG + MAX_REG_BIT, 1);
   
   char regList[32] = {0};
   char directionChar;
@@ -219,45 +218,45 @@ void disassembleStms(char *strBuffer, int bytecode) {
 }
 
 void disassembleAdd(char *strBuffer, int bytecode) {
-  int resultReg = getBits(bytecode, 10, 3);
-  int reg1 = getBits(bytecode, 13, 3);
-  int reg2 = getBits(bytecode, 16, 3);
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
   sprintf(strBuffer, "add r%d r%d r%d", resultReg, reg1, reg2);
 }
 
 void disassembleSub(char *strBuffer, int bytecode) {
-  int resultReg = getBits(bytecode, 10, 3);
-  int reg1 = getBits(bytecode, 13, 3);
-  int reg2 = getBits(bytecode, 16, 3);
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
   sprintf(strBuffer, "sub r%d r%d r%d", resultReg, reg1, reg2);
 }
 void disassembleMul(char *strBuffer, int bytecode) {
-  int resultReg = getBits(bytecode, 10, 3);
-  int reg1 = getBits(bytecode, 13, 3);
-  int reg2 = getBits(bytecode, 16, 3);
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
   sprintf(strBuffer, "mul r%d r%d r%d", resultReg, reg1, reg2);
 }
 void disassembleDiv(char *strBuffer, int bytecode) {
-  int resultReg = getBits(bytecode, 10, 3);
-  int reg1 = getBits(bytecode, 13, 3);
-  int reg2 = getBits(bytecode, 16, 3);
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
   sprintf(strBuffer, "div r%d r%d r%d", resultReg, reg1, reg2);
 }
 void disassembleAnd(char *strBuffer, int bytecode) {
-  int resultReg = getBits(bytecode, 10, 3);
-  int reg1 = getBits(bytecode, 13, 3);
-  int reg2 = getBits(bytecode, 16, 3);
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
   sprintf(strBuffer, "and r%d r%d r%d", resultReg, reg1, reg2);
 }
 void disassembleOr(char *strBuffer, int bytecode) {
-  int resultReg = getBits(bytecode, 10, 3);
-  int reg1 = getBits(bytecode, 13, 3);
-  int reg2 = getBits(bytecode, 16, 3);
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
   sprintf(strBuffer, "or r%d r%d r%d", resultReg, reg1, reg2);
 }
 void disassembleXor(char *strBuffer, int bytecode) {
-  int resultReg = getBits(bytecode, 10, 3);
-  int reg1 = getBits(bytecode, 13, 3);
-  int reg2 = getBits(bytecode, 16, 3);
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
   sprintf(strBuffer, "xor r%d r%d r%d", resultReg, reg1, reg2);
 }

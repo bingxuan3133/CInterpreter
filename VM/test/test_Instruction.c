@@ -11,42 +11,6 @@ void tearDown(void)
 {
 }
 
-void test_explore_typecasting(void) {
-  char a = 0xaa;
-  unsigned char b = 0xaa;
-  printf("%d\n", a);
-  printf("%d\n", (int) a);
-  printf("%d\n", (unsigned int) a);
-  printf("%d\n", b);
-  printf("%d\n", (int) b);
-  printf("%d\n", (unsigned int) b);
-  printf("%d\n", 0xaa);
-  printf("%d\n", (int) 0xaa);
-  printf("%d\n", (unsigned int) 0xaa);
-}
-
-void test_explore_addressing(void) {
-  int value = 0x5A;   // 0x0028FE2C
-  int value2 = 0xA5;  // 0x0028FE28
-  int value3 = 0x12345678;  // 0x0028FE24
-  printf("value: %p, value2: %p, value3: %p\n", &value, &value2, &value3);
-  printf("0x0028FE2C: %x\n", *(int *)((char *)&value)); // 0000005A
-  printf("0x0028FE2B: %x\n", *(int *)((char *)&value-1)); // 00005A00
-  printf("0x0028FE2A: %x\n", *(int *)((char *)&value-2)); // 005A0000
-  printf("0x0028FE29: %x\n", *(int *)((char *)&value-3)); // 5A000000
-  printf("0x0028FE28: %x\n", *(int *)((char *)&value-4)); // A5
-
-  printf("&value3+3: %x\n", *(int *)((char *)&value3+3)); // 12
-  printf("&value3+2: %x\n", *(int *)((char *)&value3+2)); // 34
-  printf("&value3+1: %x\n", *(int *)((char *)&value3+1)); // 56
-  printf("&value3+0: %x\n", *(int *)((char *)&value3)); // 78
-
-  printf("&value3+3: %x\n", *(char *)((char *)&value3+3)); // 12
-  printf("&value3+2: %x\n", *(char *)((char *)&value3+2)); // 34
-  printf("&value3+1: %x\n", *(char *)((char *)&value3+1)); // 56
-  printf("&value3+0: %x\n", *(char *)((char *)&value3)); // 78
-}
-
 void test_getBits(void) {
   int result;
 

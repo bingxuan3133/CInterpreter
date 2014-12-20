@@ -29,4 +29,15 @@ void test_read_binary_file(void) {
   
   disassembleBytecodes(&strBuffer[0], &bytecodes[0]);
   printf("%s\n", strBuffer);
+  printf("%x\n", fgetc(myfile));
+  printf("%x\n", fgetc(myfile));
+  printf("%x\n", fgetc(myfile));
+  printf("%x\n", fgetc(myfile));
+  printf("%x\n", fgetc(myfile));
+  printf("%x\n", fgetc(myfile));
+  printf("%x\n", fgetc(myfile));
+  printf("%x\n", fgetc(myfile));
+  printf("%x\n", fgetc(myfile));
+  printf("%x\n", fgetc(myfile));
+  printf("%x\n", fgetc(myfile));
 }
