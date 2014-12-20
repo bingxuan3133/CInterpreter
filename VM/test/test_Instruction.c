@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include "Exception.h"
 
+#define merge2Registers(regHigh, regLow) (unsigned long long)reg[regHigh].data << 32 | (unsigned)reg[regLow].data
+
 void setUp(void)
 {
 }
@@ -486,19 +488,30 @@ void test_subtractRegisters_should_subtract_reg1_from_reg0(void) {
   TEST_ASSERT_EQUAL(-30, reg[0].data);
 }
 
-// multiply function has not completed
 void test_multiplyRegisters_should_multiply_2_registers(void) {
   reg[0].data = 10;
   reg[1].data = -20;
-  multiplyRegisters(mul(REG_0, REG_0, REG_1));
-  TEST_ASSERT_EQUAL(-200, reg[0].data);
+  multiplyRegisters(mul(REG_1, REG_0, REG_0, REG_1));
+  unsigned long long result = merge2Registers(REG_1, REG_0);
+  
+  TEST_ASSERT_EQUAL(-200, result);
 }
 
-void test_divideRegisters_should_divide_reg1_from_reg0(void) {
+void test_multiplyRegisters_should_multiply_2_registers_without_overflow_issue(void) {
+  reg[0].data = 100000;
+  reg[1].data = -100000;
+  multiplyRegisters(mul(REG_1, REG_0, REG_0, REG_1));
+  unsigned long long result = merge2Registers(REG_1, REG_0);
+
+  TEST_ASSERT_EQUAL_INT64(-10000000000, result);
+}
+
+void test_divideRegisters_should_divide_reg1_from_reg0_to_get_quotient_and_remainder(void) {
   reg[0].data = 20;
   reg[1].data = -10;
-  divideRegisters(div(REG_0, REG_0, REG_1));
-  TEST_ASSERT_EQUAL(-2, reg[0].data);
+  divideRegisters(div(REG_0, REG_1, REG_0, REG_1));
+  TEST_ASSERT_EQUAL(-2, reg[0].data); // quotient
+  TEST_ASSERT_EQUAL(0, reg[1].data);  // remainder
 }
 
 void test_andRegisters_should_bitwise_and_2_registers(void) {

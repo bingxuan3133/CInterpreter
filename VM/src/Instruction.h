@@ -70,10 +70,10 @@
                 ADD | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
 #define sub(resultReg, reg1, reg2) \
                 SUB | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
-#define mul(resultReg, reg1, reg2) \
-                MUL | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
-#define div(resultReg, reg1, reg2) \
-                DIV | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
+#define mul(resultRegH, resultRegL, reg1, reg2) \
+                MUL | (resultRegH)<<8 | (resultRegL)<<(8+MAX_REG_BIT) | (reg1)<<(8+2*MAX_REG_BIT) | (reg2)<<(8+3*MAX_REG_BIT)
+#define div(resultRegQ, resultRegR, reg1, reg2) \
+                DIV | (resultRegQ)<<8 | (resultRegR)<<(8+MAX_REG_BIT) | (reg1)<<(8+2*MAX_REG_BIT) | (reg2)<<(8+3*MAX_REG_BIT)
 #define and(resultReg, reg1, reg2) \
                 AND | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
 #define or(resultReg, reg1, reg2) \

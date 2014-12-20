@@ -33,6 +33,9 @@ int getBits(int data, unsigned char start, unsigned char length) {
 //  COMMAND | Rd | R1 | R2
 //  add Rd, R1, R2
 
+//  COMMAND | Rd | R1 | R2 | R3
+//  mul Rhigh, Rlow, R1, R2
+
 //  COMMAND | Rd | R1 | Rd.attribute
 //  mov Rd, R1, R2
 
@@ -61,6 +64,14 @@ int getR1(int bytecode) {
  */
 int getR2(int bytecode) {
   return getBits(bytecode, 7 + (3 * MAX_REG_BIT), MAX_REG_BIT);
+}
+
+/**
+ *  This is a helper function to get the destination register
+ *  Input:  
+ */
+int getR3(int bytecode) {
+  return getBits(bytecode, 7 + (4 * MAX_REG_BIT), MAX_REG_BIT);
 }
 
 /**
@@ -122,7 +133,6 @@ void moveRegister(int bytecode) {
   int shift = getBits(bytecode, (11 + 2 * MAX_REG_BIT), 2);
   int imm = getBits(bytecode, (16 + 2 * MAX_REG_BIT), 5); // number of shift 0 ~ 31
   int data = reg[source].data;
-  printf("destination%d\nsource%d\ndestAttrib%d\nshift%d\nimm%d\n", destination, source, destAttrib, shift, imm);
   
   // Shift / Rotate Operations
   if(imm == NOP)
@@ -134,11 +144,8 @@ void moveRegister(int bytecode) {
   } else if(shift == ASR) {
     data = (int)data >> imm;
   } else if(shift == RR) {
-    printf("data%x\n", data);
     data = (data & 0xFFFFFFFF >> (32 - imm)) << (32 - imm); // Get shifted out bits
-    printf("data%x\n", data);
     data = (data) | ((unsigned int)(reg[source].data) >> imm); // Put shifted in bits
-    printf("data%x\n", data);
   }
   // Assign
   if(destAttrib == DATA)
@@ -324,17 +331,25 @@ void subtractRegisters(int bytecode) {
 }
 
 void multiplyRegisters(int bytecode) {
-  int resultReg = getRd(bytecode);
-  int reg1 = getR1(bytecode);
-  int reg2 = getR2(bytecode);
-  reg[resultReg].data = reg[reg1].data * reg[reg2].data;
+  unsigned long long result;
+  int resultHighReg = getRd(bytecode);
+  int resultLowReg = getR1(bytecode);
+  int reg1 = getR2(bytecode);
+  int reg2 = getR3(bytecode);
+  result = (unsigned long long)reg[reg1].data * reg[reg2].data;
+  reg[resultHighReg].data = result>>32;
+  reg[resultLowReg].data = result;
 }
 
 void divideRegisters(int bytecode) {
-  int resultReg = getRd(bytecode);
-  int reg1 = getR1(bytecode);
-  int reg2 = getR2(bytecode);
-  reg[resultReg].data = reg[reg1].data / reg[reg2].data;
+  int resultQuotientReg = getRd(bytecode);
+  int resultRemainderReg = getR1(bytecode);
+  int reg1 = getR2(bytecode);
+  int reg2 = getR3(bytecode);
+  int quotient = reg[reg1].data / reg[reg2].data;
+  int remainder = reg[reg1].data % reg[reg2].data;
+  reg[resultQuotientReg].data = quotient;
+  reg[resultRemainderReg].data = remainder;
 }
 
 void andRegisters(int bytecode) {
