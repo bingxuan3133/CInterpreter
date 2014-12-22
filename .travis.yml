@@ -6,7 +6,7 @@ python:
   - "3.3"
   - "3.4"
 
- env:
+env:
   - import os,sys
   - lib_path = os.path.abspath('../src')
   - sys.path.append(lib_path)
