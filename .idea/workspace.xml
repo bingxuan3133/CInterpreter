@@ -2,16 +2,34 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1b3221dc-759a-458b-aca3-058121f41b64" name="Default" comment="">
-      <change type="DELETED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\.idea\.name" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.gitignore" afterPath="$PROJECT_DIR$/.gitignore" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/ByteCodeGenerator.py" afterPath="$PROJECT_DIR$/src/ByteCodeGenerator.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/CInterpreter.iml" afterPath="$PROJECT_DIR$/.idea/CInterpreter.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Oracle.py" afterPath="$PROJECT_DIR$/src/Oracle.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/RegisterAllocator.py" afterPath="$PROJECT_DIR$/src/RegisterAllocator.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/TestByteCodeGenerator.py" afterPath="$PROJECT_DIR$/test/TestByteCodeGenerator.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/vcs.xml" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="DELETED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\test\myFirstByteCode" afterPath="" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\src\ByteCodeGenerator.py" afterPath="$PROJECT_DIR$/ByteCodeGenerator.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\src\Context.py" afterPath="$PROJECT_DIR$/Context.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\src\ContextManager.py" afterPath="$PROJECT_DIR$/ContextManager.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\src\DeclarationContext.py" afterPath="$PROJECT_DIR$/DeclarationContext.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\src\DefaultContext.py" afterPath="$PROJECT_DIR$/DefaultContext.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\src\ExpressionContext.py" afterPath="$PROJECT_DIR$/ExpressionContext.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\src\FlowControlContext.py" afterPath="$PROJECT_DIR$/FlowControlContext.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\src\InformationInjector.py" afterPath="$PROJECT_DIR$/InformationInjector.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\src\Lexer.py" afterPath="$PROJECT_DIR$/Lexer.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\src\Oracle.py" afterPath="$PROJECT_DIR$/Oracle.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\src\Parser.py" afterPath="$PROJECT_DIR$/Parser.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\src\RegisterAllocator.py" afterPath="$PROJECT_DIR$/RegisterAllocator.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\src\SymmetricChecker.py" afterPath="$PROJECT_DIR$/SymmetricChecker.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\src\writeToFile.py" afterPath="$PROJECT_DIR$/writeToFile.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\test\TestByteCodeGenerator.py" afterPath="$PROJECT_DIR$/TestByteCodeGenerator.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\test\TestContext.py" afterPath="$PROJECT_DIR$/TestContext.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\test\TestContextManager.py" afterPath="$PROJECT_DIR$/TestContextManager.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\test\TestDefaultContext.py" afterPath="$PROJECT_DIR$/TestDefaultContext.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\test\TestInformationInjector.py" afterPath="$PROJECT_DIR$/TestInformationInjector.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\test\TestLexer.py" afterPath="$PROJECT_DIR$/TestLexer.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\test\TestParseDeclarationContext.py" afterPath="$PROJECT_DIR$/TestParseDeclarationContext.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\test\TestParseStatement.py" afterPath="$PROJECT_DIR$/TestParseStatement.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\test\TestParser.py" afterPath="$PROJECT_DIR$/TestParser.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\test\TestParserAndFlowControl.py" afterPath="$PROJECT_DIR$/TestParserAndFlowControl.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\test\TestSymmetricChecker.py" afterPath="$PROJECT_DIR$/TestSymmetricChecker.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\test\TestWriteToFile.py" afterPath="$PROJECT_DIR$/TestWriteToFile.py" />
+      <change type="MOVED" beforePath="C:\Users\JingWen\Desktop\FYP\Lexer(PyCharm)\CInterpreter\test\testSymbolAndLexerIT.py" afterPath="$PROJECT_DIR$/TestSymbolAndLexerIT.py" />
     </list>
     <ignored path="CInterpreter.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -24,7 +42,7 @@
   <component name="ChangesViewManager" flattened_view="true" show_ignored="false" />
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/CInterpreter$Unittests_in_test.coverage" NAME="Unittests in test Coverage Results" MODIFIED="1419097010100" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
-    <SUITE FILE_PATH="coverage/CInterpreter$TestAllInFiles.coverage" NAME="TestAllInFiles Coverage Results" MODIFIED="1419108824672" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/CInterpreter$TestAllInFiles.coverage" NAME="TestAllInFiles Coverage Results" MODIFIED="1419230394535" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
     <SUITE FILE_PATH="coverage/CInterpreter$Unittest_TestByteCodeGenerator_test_generateByteCode_will_generate_code_for_push_the_working_register_into_the_stack.coverage" NAME="Unittest TestByteCodeGenerator.test_generateByteCode_will_generate_code_for_push_the_working_register_into_the_stack Coverage Results" MODIFIED="1419108862588" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
     <SUITE FILE_PATH="coverage/CInterpreter$Unittest_TestByteCodeGenerator_test_generateByteCode_will_push_the_register_at_the_second_token.coverage" NAME="Unittest TestByteCodeGenerator.test_generateByteCode_will_push_the_register_at_the_second_token Coverage Results" MODIFIED="1419137693110" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/test" />
   </component>
@@ -41,40 +59,10 @@
   <component name="FileEditorManager">
     <leaf>
       <file leaf-file-name="TestByteCodeGenerator.py" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/test/TestByteCodeGenerator.py">
+        <entry file="file://$PROJECT_DIR$/TestByteCodeGenerator.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.7207977" vertical-offset="1549" max-vertical-offset="6273">
-              <caret line="108" column="56" selection-start-line="108" selection-start-column="56" selection-end-line="108" selection-end-column="56" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ByteCodeGenerator.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/ByteCodeGenerator.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="1775" max-vertical-offset="4590">
-              <caret line="114" column="0" selection-start-line="114" selection-start-column="0" selection-end-line="114" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="RegisterAllocator.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/RegisterAllocator.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="329" max-vertical-offset="680">
-              <caret line="32" column="0" selection-start-line="32" selection-start-column="0" selection-end-line="32" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Oracle.py" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/Oracle.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="359" max-vertical-offset="799">
-              <caret line="28" column="0" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="2448" max-vertical-offset="6273">
+              <caret line="146" column="8" selection-start-line="146" selection-start-column="8" selection-end-line="146" selection-end-column="8" />
               <folding />
             </state>
           </provider>
@@ -152,34 +140,6 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="CInterpreter" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="CInterpreter" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="test" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="CInterpreter" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="CInterpreter" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
         </subPane>
       </pane>
     </panes>
@@ -203,7 +163,7 @@
     <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth3" value="839" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_treeOrder3" value="3" />
     <property name="recentsLimit" value="5" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/test" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="restartRequiresConfirmation" value="true" />
     <property name="FullScreen" value="false" />
   </component>
@@ -212,7 +172,7 @@
       <console-settings />
     </option>
   </component>
-  <component name="RunManager" selected="Python tests.Unittest TestByteCodeGenerator.test_generateByteCode_will_push_the_register_at_the_second_token">
+  <component name="RunManager" selected="Python tests.TestAllInFiles">
     <configuration default="false" name="Unittests in test" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -380,9 +340,6 @@
       <option name="PARAMETERS" value="" />
       <method />
     </configuration>
-    <configuration default="true" type="JavascriptDebugType" factoryName="JavaScript Debug">
-      <method />
-    </configuration>
     <configuration default="true" type="tests" factoryName="Unittests">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -404,6 +361,9 @@
       <option name="PUREUNITTEST" value="true" />
       <option name="PARAMS" value="" />
       <option name="USE_PARAM" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="JavascriptDebugType" factoryName="JavaScript Debug">
       <method />
     </configuration>
     <configuration default="true" type="tests" factoryName="Doctests">
@@ -460,7 +420,7 @@
       <option name="SCRIPT_NAME" value="" />
       <option name="CLASS_NAME" value="" />
       <option name="METHOD_NAME" value="" />
-      <option name="FOLDER_NAME" value="$PROJECT_DIR$/test" />
+      <option name="FOLDER_NAME" value="$PROJECT_DIR$" />
       <option name="TEST_TYPE" value="TEST_FOLDER" />
       <option name="PATTERN" value="Test" />
       <option name="USE_PATTERN" value="true" />
@@ -500,8 +460,8 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="1" width="1377" height="737" extended-state="1" />
-    <editor active="true" />
+    <frame x="-8" y="1" width="1377" height="737" extended-state="0" />
+    <editor active="false" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -509,18 +469,18 @@
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.25202057" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.39968154" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39968154" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32961783" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32961783" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -542,11 +502,6 @@
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/test/TestByteCodeGenerator.py</url>
-          <line>100</line>
-          <option name="timeStamp" value="14" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" type="python-line">
           <url>file://$PROJECT_DIR$/src/ByteCodeGenerator.py</url>
           <line>91</line>
@@ -578,106 +533,18 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/test/TestByteCodeGenerator.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="6307">
-          <caret line="109" column="57" selection-start-line="109" selection-start-column="57" selection-end-line="109" selection-end-column="57" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/ByteCodeGenerator.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="1692" max-vertical-offset="4590">
-          <caret line="117" column="13" selection-start-line="117" selection-start-column="13" selection-end-line="117" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/RegisterAllocator.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="329" max-vertical-offset="680">
-          <caret line="32" column="0" selection-start-line="32" selection-start-column="0" selection-end-line="32" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Oracle.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="189" max-vertical-offset="799">
-          <caret line="18" column="0" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/TestByteCodeGenerator.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="1039" max-vertical-offset="6290">
-          <caret line="70" column="0" selection-start-line="70" selection-start-column="0" selection-end-line="70" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/ByteCodeGenerator.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="1581" max-vertical-offset="4641">
-          <caret line="93" column="0" selection-start-line="93" selection-start-column="0" selection-end-line="93" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/RegisterAllocator.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="240" max-vertical-offset="680">
-          <caret line="21" column="0" selection-start-line="21" selection-start-column="0" selection-end-line="21" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Oracle.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="56" max-vertical-offset="799">
-          <caret line="11" column="0" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/CInterpreter.psproj">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.33887044" vertical-offset="0" max-vertical-offset="1241">
-          <caret line="12" column="26" selection-start-line="12" selection-start-column="26" selection-end-line="12" selection-end-column="26" />
+        <state vertical-scroll-proportion="0.50830567" vertical-offset="0" max-vertical-offset="1241">
+          <caret line="18" column="0" selection-start-line="12" selection-start-column="26" selection-end-line="24" selection-end-column="26" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/RegisterAllocator.py">
+    <entry file="file://$PROJECT_DIR$/TestByteCodeGenerator.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="329" max-vertical-offset="680">
-          <caret line="32" column="0" selection-start-line="32" selection-start-column="0" selection-end-line="32" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Oracle.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="359" max-vertical-offset="799">
-          <caret line="28" column="0" selection-start-line="28" selection-start-column="0" selection-end-line="28" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/ByteCodeGenerator.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="1775" max-vertical-offset="4590">
-          <caret line="114" column="0" selection-start-line="114" selection-start-column="0" selection-end-line="114" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/TestByteCodeGenerator.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.7207977" vertical-offset="1549" max-vertical-offset="6273">
-          <caret line="108" column="56" selection-start-line="108" selection-start-column="56" selection-end-line="108" selection-end-column="56" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="2448" max-vertical-offset="6273">
+          <caret line="146" column="8" selection-start-line="146" selection-start-column="8" selection-end-line="146" selection-end-column="8" />
           <folding />
         </state>
       </provider>
