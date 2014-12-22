@@ -7,6 +7,4 @@ python:
   - "3.4"
 # command to run tests
 script:
-  - python -m unittest -v test_module
-  - python -m unittest -h
-  - python -m unittest discover -p 'Test*.py'
+  - python -m unittest discover -s -p 'Test*.py'
