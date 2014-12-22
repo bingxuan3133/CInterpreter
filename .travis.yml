@@ -5,6 +5,11 @@ python:
   - "3.2"
   - "3.3"
   - "3.4"
-# command to run tests
+
+ env:
+  - import os,sys
+  - lib_path = os.path.abspath('../src')
+  - sys.path.append(lib_path)
 script:
-  - python -m unittest discover -s -p 'Test*.py'
+  - python -m unittest discover -s test/ -p 'Test*.py'
+  
