@@ -8,14 +8,13 @@ class RegisterAllocator:
         number = 0b000000
         if self.generator.oracle.registerLeft < token.minRequiredRegister:
             registerToPush = token.maxRequiredRegister - self.generator.oracle.registerLeft
-            returnedWorkingRegister = self.generator.oracle.releaseALargestWorkingRegister()
-
+            returnedWorkingRegister = self.generator.oracle.releaseAWorkingRegister()
             while returnedWorkingRegister != 'Finish':
                 registerToPush -= 1
                 number = number | 0b1 << (returnedWorkingRegister)
                 if registerToPush == 0:
                     break
-                returnedWorkingRegister = self.generator.oracle.releaseALargestWorkingRegister()
+                returnedWorkingRegister = self.generator.oracle.releaseAWorkingRegister()
 
             self.generator.storeMultiple(7, number)
 
@@ -30,5 +29,6 @@ class RegisterAllocator:
                 bit = number | 0b000001
                 number = number >> 1
                 if bit == 1:
-                    self.generator.oracle.getSpecificWorkingRegister(count)
-                count += 1
+                    count += 1
+            for loop in range(0,count):
+                self.generator.oracle.getAFreeWorkingRegister()

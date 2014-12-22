@@ -109,22 +109,19 @@ class ByteCodeGenerator:
         else:
             self.generateLeftCodeFirst(token)
 
-
-
     def decideWhetherToSaveSlotForPopValue(self, status, generateByteCode):
         firstRegister = self.oracle.releaseALargestWorkingRegister()
-        secondRegister = self.oracle.releaseALargestWorkingRegister()
+        secondRegister = self.oracle.releaseAWorkingRegister()
         if status != 0:
             generateByteCode(firstRegister, secondRegister)
-            self.oracle.getSpecificWorkingRegister(firstRegister)
-            self.oracle.releaseSpecificWorkingRegister(secondRegister)
+            self.oracle.getALargestWorkingRegister()
         else:
             generateByteCode(secondRegister, firstRegister)
-            self.oracle.getSpecificWorkingRegister(secondRegister)
-            self.oracle.releaseSpecificWorkingRegister(firstRegister)
+            self.oracle.getAFreeWorkingRegister()
 
     def initGeneration(self):
         thisGenerator = self
+
         def initialization(self):
             variableCounter = 0
             for token in self:
@@ -142,7 +139,7 @@ class ByteCodeGenerator:
             pushed = thisGenerator.registerAllocator.decideWhetherToPush(self)
             thisGenerator.findOutAndGenerateCorrectSideCode(self)
 
-            thisGenerator.decideWhetherToSaveSlotForPopValue(pushed,respectiveByteCodeFunction[self.id])
+            thisGenerator.decideWhetherToSaveSlotForPopValue(pushed, respectiveByteCodeFunction[self.id])
 
             thisGenerator.registerAllocator.decideWhetherToPop(pushed)
             return thisGenerator.byteCodeList

@@ -63,9 +63,8 @@ class TestByteCodeGenerator(unittest.TestCase):
         token.leftValue = 1
         token.rightValue = 1
         self.informationInjector.injectRegisterRequired(token)
-        self.byteCodeGenerator.oracle.workingRegisterCounter = 5
+        self.byteCodeGenerator.oracle.registerFromLeft = 5
         self.byteCodeGenerator.oracle.registerLeft = 1
-        self.byteCodeGenerator.oracle.registerStatus = [1, 1, 1, 1, 1, 0]
         self.byteCodeGenerator.registersInThisAST['x'] =4
 
         self.byteCodeGenerator.initGeneration()
@@ -94,9 +93,8 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.informationInjector.injectRegisterRequired(token)
         token.maxRequiredRegister = 2
         token.data[1].minRequiredRegister = 3 # hard code this to make sure the program will push the working register
-        self.byteCodeGenerator.oracle.workingRegisterCounter = 4
+        self.byteCodeGenerator.oracle.registerFromLeft = 4
         self.byteCodeGenerator.oracle.registerLeft = 2
-        self.byteCodeGenerator.oracle.registerStatus = [1, 1, 1, 1, 0, 0]
         self.byteCodeGenerator.registersInThisAST['x'] =4
 
         self.byteCodeGenerator.initGeneration()
