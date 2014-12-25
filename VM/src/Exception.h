@@ -17,7 +17,7 @@ extern Exception *exception;
 
 #define CEXCEPTION_T    ExceptionPtr
 #define CEXCEPTION_NONE   (ExceptionPtr)(0x5A5A5A5A)
-#include "CException.h"
+#include "../vendor/ceedling/vendor/c_exception/lib/CException.h"
 
 Exception *createException(char *errorMessage, int errorCode);
 void freeException(Exception *e);

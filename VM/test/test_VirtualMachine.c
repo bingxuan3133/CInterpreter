@@ -4,8 +4,13 @@
 #include "Disassembler.h"
 #include "Exception.h"
 
-void setUp(void)
-{
+void setUp(void) {
+  int i;
+  for(i = 0; i < MAX_REG; i ++) {
+    reg[i].data = 0;
+    reg[i].base = 0;
+    reg[i].limit = 0;
+  }
 }
 
 void tearDown(void)
@@ -43,18 +48,18 @@ void test_read_binary_file(void) {
 }
 
 void test_run_VirtualMachine(void) {
-  int bytecodes[20] = {0};
+  int bytecodes[10] = {0};
   char strBuffer[300] = {0};
   bytecodes[0] = dumpr(REG_0);
   bytecodes[1] = dumpr(REG_1);
-  bytecodes[3] = ldrImm(REG_0, 50);
-  bytecodes[4] = ldrImm(REG_1, 100);
-  bytecodes[5] = dumpr(REG_0);
-  bytecodes[6] = dumpr(REG_1);
-  bytecodes[7] = add(REG_0, REG_1, REG_0);
-  bytecodes[8] = dumpr(REG_0);
-  bytecodes[9] = dumpr(REG_1);
-  bytecodes[10] = 0xffffffff;
+  bytecodes[2] = ldrImm(REG_0, 50);
+  bytecodes[3] = ldrImm(REG_1, 100);
+  bytecodes[4] = dumpr(REG_0);
+  bytecodes[5] = dumpr(REG_1);
+  bytecodes[6] = add(REG_0, REG_1, REG_0);
+  bytecodes[7] = dumpr(REG_0);
+  bytecodes[8] = dumpr(REG_1);
+  bytecodes[9] = 0xffffffff;
   
-  runVM(&bytecodes);
+  runVM(bytecodes);
 }

@@ -35,9 +35,18 @@ int getBytecode(FILE *file) {
   return bytecode;
 }
 
-void runVM(int *bytecode) {
+void __declspec(dllexport) runVM(int *bytecode) {
   while(*bytecode != 0xFFFFFFFF) {
     instruction[(unsigned char)*bytecode](*bytecode);
     bytecode++;
   }
 }
+
+void __declspec(dllexport) runVMFromStream(FILE *file) {
+  unsigned int bytecode = getBytecode(file);
+  while(bytecode != 0xFFFFFFFF) {
+    instruction[(unsigned char)bytecode](bytecode);
+    bytecode = getBytecode(file);
+  }
+}
+
