@@ -28,12 +28,14 @@ void (*disassemble[256])(char*, int)  = { [LDR_IMM] = disassembleLdrImm,
  *  This function disassemble multiple bytecodes into readable assembly code
  *  Input:    *strBuffer    address of string buffer that is provided by user to store assembly code into
  *            *bytecode     address of bytecode that is going to be disassembled into assembly code
+ *  Return:   1   bytecode can be disassembled
+ *            0   bytecode cannot be disassembled
  */
 int disassembleBytecodes(char *strBuffer, int *bytecode) {
   while(*bytecode != 0xFFFFFFFF) {
     while(*strBuffer != '\0')  // Find \0 to write
       strBuffer++;
-    disassemble[(unsigned char)(*bytecode)](strBuffer, *bytecode);
+    disassembleBytecode(strBuffer, *bytecode);
     while(*strBuffer != '\0')  // Find \0 to write
       strBuffer++;
     bytecode++;
@@ -45,10 +47,12 @@ int disassembleBytecodes(char *strBuffer, int *bytecode) {
 /**
  *  This function disassemble bytecode into readable assembly code
  *  Input:    *strBuffer    address of string buffer that is provided by user to store assembly code into
- *            *bytecode     address of bytecode that is going to be disassembled into assembly code
+ *            bytecode      bytecode that is going to be disassembled into assembly code
+ *  Return:   1   bytecode can be disassembled
+ *            0   bytecode cannot be disassembled
  */
-int disassembleBytecode(char *strBuffer, int *bytecode) {
-  disassemble[(unsigned char)*bytecode](strBuffer, *bytecode);
+int disassembleBytecode(char *strBuffer, int bytecode) {
+  disassemble[(unsigned char)bytecode](strBuffer, bytecode);
 }
 
 void disassembleLdrImm(char *strBuffer, int bytecode) {

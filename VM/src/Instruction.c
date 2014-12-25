@@ -87,6 +87,16 @@ int getRlist(int bytecode) {
 //    Main Functions
 //======================
 
+void dumpRegister(int bytecode) {
+  int regIndex = getRd(bytecode);
+  printf("r%d: %d\n", regIndex, reg[regIndex].data);
+}
+
+void dumpRegisterHex(int bytecode) {
+  int regIndex = getRd(bytecode);
+  printf("r%d: 0x%x\n", regIndex, reg[regIndex].data);
+}
+
 /**
  *  This function load register with a literal value
  *  Input:  bytecode

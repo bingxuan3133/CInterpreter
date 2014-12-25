@@ -5,8 +5,13 @@
 
 #define merge2Registers(regHigh, regLow) (unsigned long long)reg[regHigh].data << 32 | (unsigned)reg[regLow].data
 
-void setUp(void)
-{
+void setUp(void) {
+  int i;
+  for(i = 0; i < MAX_REG; i ++) {
+    reg[i].data = 0;
+    reg[i].base = 0;
+    reg[i].limit = 0;
+  }
 }
 
 void tearDown(void)
@@ -20,6 +25,11 @@ void test_getBits(void) {
   TEST_ASSERT_EQUAL(1, result);
   result = getBits(0x240002, 20, 21); // getBits from bit 20 to bit 19
   TEST_ASSERT_EQUAL(0x40002, result);
+}
+
+void test_dumpRegister(void)  {
+  reg[1].data = 0x5A;
+  dumpRegister(dumpr(REG_1));
 }
 
 void test_loadRegisterWithLiteral(void) {

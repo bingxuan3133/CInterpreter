@@ -46,6 +46,10 @@
 #define UPDATE    1
 
 // Bytecode Macros
+#define dumpr(reg) \
+                DUMPR | (reg)<<8
+#define dumprHex(reg) \
+                DUMPR_HEX | (reg)<<8
 #define ldrImm(reg, imm) \
                 LDR_IMM | (reg)<<8 | (imm)<<(8+MAX_REG_BIT)
 #define ldrMem(reg, refReg, imm) \
@@ -92,6 +96,8 @@ struct Register {
 extern Register reg[MAX_REG];
 
 typedef enum {
+  DUMPR,
+  DUMPR_HEX,
   MOV_REG,
   LDR_MEM_SAFE,
   STR_MEM_SAFE,
@@ -110,6 +116,10 @@ typedef enum {
   LDR_MEM = 0xfe, 
   STR_MEM = 0xff,
 } Instruction;
+
+// debug helper
+void dumpRegister(int bytecode);
+void dumpRegisterHex(int bytecode);
 
 // load store
 void loadRegisterWithLiteral(int bytecode);

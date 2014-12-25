@@ -20,11 +20,11 @@ void test_dissembleBytecode(void) {
   bytecode[2] = strMem(0, 1, 8);
   bytecode[3] = 0xFFFFFFFF;
 
-	disassembleBytecode(&buffer[0], &bytecode[0]);
+	disassembleBytecode(&buffer[0], bytecode[0]);
   printf("%s\n", buffer);
-	disassembleBytecode(&buffer[20], &bytecode[1]);
+	disassembleBytecode(&buffer[20], bytecode[1]);
   printf("%s\n", &buffer[20]);
-	disassembleBytecode(&buffer[40], &bytecode[2]);
+	disassembleBytecode(&buffer[40], bytecode[2]);
   printf("%s\n", &buffer[40]);
 }
 
