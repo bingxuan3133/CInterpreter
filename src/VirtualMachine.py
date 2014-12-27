@@ -20,13 +20,15 @@ bytecodeArray[7] = 0x0
 bytecodeArray[8] = 0x100
 bytecodeArray[9] = 0xffffffff
 
+fileBytecodeArray = bytecodeArray_t()
+
 
 bytecodesPtr = c_char_p()
 bytecodesPtr.value = addressof(bytecodeArray)
 
 #vmdll = WinDLL('VirtualMachine')
-vmdll = cdll.LoadLibrary('../VirtualMachine.dll')
-vmdll.runVM(bytecodesPtr)
+vmdll = cdll.LoadLibrary('../VM/build/release/out/c/VirtualMachine.dll')
 
-f = open('myFirstByteCode', 'rb')
-#vmdll.runVMFromStream('myFirstByteCode.txt')
+vmdll.VMLoad('../myFirstByteCode.txt', fileBytecodeArray)
+vmdll.VMRun(fileBytecodeArray)  # run from file
+vmdll.VMRun(bytecodeArray)      # run from bytecodeArray

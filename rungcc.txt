@@ -1,1 +1,0 @@
-gcc -shared -o VirtualMachine.dll VM/src/VirtualMachine.c VM/src/Instruction.c VM/src/Exception.c VM/vendor/ceedling/vendor/c_exception/lib/CException.c

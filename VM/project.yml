@@ -10,12 +10,12 @@
   :use_test_preprocessor: TRUE
   :use_auxiliary_dependencies: TRUE
   :build_root: build
-#  :release_build: TRUE
+  :release_build: TRUE
   :test_file_prefix: test_
 
-#:release_build:
-#  :output: MyApp.out
-#  :use_assembly: FALSE
+:release_build:
+  :output: VirtualMachine.dll
+  :use_assembly: FALSE
 
 :environment:
 
@@ -42,6 +42,22 @@
   :test_preprocess:
     - *common_defines
     - TEST=
+
+:tools:
+  :release_compiler:
+     :executable: gcc
+     :arguments:
+        - -c src/VirtualMachine.c
+        - -c src/Exception.c
+        - -c src/Instruction.c
+        - -c vendor/ceedling/vendor/c_exception/lib/CException.c
+
+  :release_linker:
+     :executable: gcc
+     :arguments:
+        - -shared
+        - -o build/release/out/c/VirtualMachine.dll
+        - VirtualMachine.o Exception.o Instruction.o CException.o
 
 :cmock:
   :mock_prefix: mock_

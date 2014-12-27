@@ -14,6 +14,14 @@
 #define REG_5  5
 #define REG_6  6
 #define REG_7  7
+#define REG_8  8
+#define REG_9  9
+#define REG_10  10
+#define REG_11  11
+#define REG_12  12
+#define REG_13  13
+#define REG_14  14
+#define REG_15  15
 
 // Registers in bit
 #define R0  1
@@ -109,12 +117,12 @@ typedef enum {
   OR,
   XOR,
   LDM = 0xf7,
+  STR_MEM = 0xf8,
   STM = 0xf9,
   ADD = 0xfa,
   SUB = 0xfb,
   LDR_IMM = 0xfc,
   LDR_MEM = 0xfe, 
-  STR_MEM = 0xff,
 } Instruction;
 
 // debug helper

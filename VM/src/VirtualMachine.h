@@ -6,5 +6,5 @@ extern void (*instruction[256])(int);
 #endif // VirtualMachine_H
 
 int getBytecode(FILE *file);
-void __declspec(dllexport) runVM(int *bytecode);
-void __declspec(dllexport) runVMFromStream(FILE *file);
+void __declspec(dllexport) VMLoad(char* filepath, int *bytecode);
+void __declspec(dllexport) VMRun(int *bytecode);

@@ -24,6 +24,8 @@ void (*disassemble[256])(char*, int)  = { [LDR_IMM] = disassembleLdrImm,
                                           };
 //
 
+
+
 /**
  *  This function disassemble multiple bytecodes into readable assembly code
  *  Input:    *strBuffer    address of string buffer that is provided by user to store assembly code into
@@ -52,7 +54,11 @@ int disassembleBytecodes(char *strBuffer, int *bytecode) {
  *            0   bytecode cannot be disassembled
  */
 int disassembleBytecode(char *strBuffer, int bytecode) {
-  disassemble[(unsigned char)bytecode](strBuffer, bytecode);
+  unsigned char command = bytecode;
+  if(command < 256 && command >= 0)
+    disassemble[command](strBuffer, bytecode);
+  else
+    printf("Invalid bytecode");
 }
 
 void disassembleLdrImm(char *strBuffer, int bytecode) {

@@ -24,27 +24,27 @@ void test_explore_function_pointer_array(void) {
 
 void test_read_binary_file(void) {
   FILE *myfile;
-  myfile = fopen("myFirstByteCode", "r+");
+  myfile = fopen("../myFirstByteCode", "r+");
   int bytecodes[10] = {0};
-  char strBuffer[200] = {0};
+  char strBuffer[300] = {0};
   bytecodes[0] = getBytecode(myfile);
   bytecodes[1] = getBytecode(myfile);
   bytecodes[2] = getBytecode(myfile);
-  bytecodes[3] = 0xffffffff;
+  bytecodes[3] = getBytecode(myfile);
+  bytecodes[4] = getBytecode(myfile);
+  bytecodes[5] = 0xffffffff;
+  
+  // printf("%x\n", bytecodes[0]);
+  // printf("%x\n", bytecodes[1]);
+  // printf("%x\n", bytecodes[2]);
+  // printf("%x\n", bytecodes[3]);
+  // printf("%x\n", bytecodes[4]);
+  // printf("%x\n", getBytecode(myfile));
+  // printf("%x\n", getBytecode(myfile));
+  // printf("%x\n", getBytecode(myfile));
   
   disassembleBytecodes(&strBuffer[0], &bytecodes[0]);
   printf("%s\n", strBuffer);
-  printf("%x\n", fgetc(myfile));
-  printf("%x\n", fgetc(myfile));
-  printf("%x\n", fgetc(myfile));
-  printf("%x\n", fgetc(myfile));
-  printf("%x\n", fgetc(myfile));
-  printf("%x\n", fgetc(myfile));
-  printf("%x\n", fgetc(myfile));
-  printf("%x\n", fgetc(myfile));
-  printf("%x\n", fgetc(myfile));
-  printf("%x\n", fgetc(myfile));
-  printf("%x\n", fgetc(myfile));
 }
 
 void test_run_VirtualMachine(void) {
@@ -61,5 +61,14 @@ void test_run_VirtualMachine(void) {
   bytecodes[8] = dumpr(REG_1);
   bytecodes[9] = 0xffffffff;
   
-  runVM(bytecodes);
+  VMRun(bytecodes);
+}
+
+void test_VMLoad(void) {
+  int bytecodes[10] = {0};
+  VMLoad("../myFirstByteCode", bytecodes);
+  
+  TEST_ASSERT_EQUAL_HEX(bytecodes[0], stm(REG_7, R3, DEC, NO_UPDATE));
+  TEST_ASSERT_EQUAL_HEX(bytecodes[1], ldrMem(REG_12, REG_3, 8));
+  TEST_ASSERT_EQUAL_HEX(bytecodes[2], ldrImm(REG_13, 2));
 }
