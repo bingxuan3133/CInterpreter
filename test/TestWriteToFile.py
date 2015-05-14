@@ -45,7 +45,7 @@ class MyTestCase(unittest.TestCase):
         self.byteCodeGenerator = ByteCodeGenerator(self.context, self.manager)
         self.writeFile = writeToFile(self.byteCodeGenerator)
         self.informationInjector = InformationInjector()
-    def test_generateByteCode_will_generate_code_for_push_the_working_register_into_the_stack(self):
+    def xtest_generateByteCode_will_generate_code_for_push_the_working_register_into_the_stack(self):
 
         """
                     =(max=2,min=2)
