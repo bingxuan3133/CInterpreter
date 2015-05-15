@@ -21,8 +21,8 @@ class ByteCodeGenerator:
         pass
     def divideRegister(self):
         pass
-    def multiplyRegister(self, firstRegister, secondRegister):
-        number = 0xf6 | firstRegister << 8 | secondRegister << 11
+    def multiplyRegister(self, targetRegister, firstRegister, secondRegister):
+        number = 0xf6 | targetRegister << 8 | firstRegister << 11 | secondRegister << 14
         self.byteCodeList.append(number)
         return number
 
@@ -30,8 +30,9 @@ class ByteCodeGenerator:
         number = 0xf7 | sourceRegister << 8 | destinationRegister << 11
         self.byteCodeList.append(number)
         return number
-    def assignRegister(self, targetRegister, registerToBeAssigned):
-        number = 0xf8 | targetRegister << 8 | registerToBeAssigned << 11
+    def assignRegister(self, sourceRegister, destinationRegister, secondRegister=0):
+    #Assign FirstRegister into Second Register and store into targetRegister
+        number = 0xf8 | sourceRegister << 8 | destinationRegister << 11
         self.byteCodeList.append(number)
         return number
 
@@ -39,13 +40,14 @@ class ByteCodeGenerator:
         number = 0xf9 | targetRegister << 8 | registerToPush << 11
         self.byteCodeList.append(number)
         return number
-    def addRegister(self, firstRegister, secondRegister):
-        number = 0xfa | firstRegister << 8 | secondRegister << 11
+
+    def addRegister(self,targetRegister, firstRegister, secondRegister):
+        number = 0xfa | targetRegister << 8 | firstRegister << 11 | secondRegister << 14
         self.byteCodeList.append(number)
         return number
 
-    def subRegister(self, registerNumber, valueToSubtract):
-        number = 0xfb | registerNumber << 8 | valueToSubtract << 11
+    def subRegister(self,targetRegister, registerNumber, valueToSubtract):
+        number = 0xfb | targetRegister << 8 | registerNumber << 11 | valueToSubtract << 14
         self.byteCodeList.append(number)
         return number
 
@@ -109,22 +111,19 @@ class ByteCodeGenerator:
         else:
             self.generateLeftCodeFirst(token)
 
-
-
     def decideWhetherToSaveSlotForPopValue(self, status, generateByteCode):
         firstRegister = self.oracle.releaseALargestWorkingRegister()
-        secondRegister = self.oracle.releaseALargestWorkingRegister()
+        secondRegister = self.oracle.releaseAWorkingRegister()
         if status != 0:
-            generateByteCode(firstRegister, secondRegister)
-            self.oracle.getSpecificWorkingRegister(firstRegister)
-            self.oracle.releaseSpecificWorkingRegister(secondRegister)
+            generateByteCode(firstRegister, secondRegister, firstRegister)
+            self.oracle.getALargestWorkingRegister()
         else:
-            generateByteCode(secondRegister, firstRegister)
-            self.oracle.getSpecificWorkingRegister(secondRegister)
-            self.oracle.releaseSpecificWorkingRegister(firstRegister)
+            generateByteCode(secondRegister, secondRegister, firstRegister)
+            self.oracle.getAFreeWorkingRegister()
 
     def initGeneration(self):
         thisGenerator = self
+
         def initialization(self):
             variableCounter = 0
             for token in self:
@@ -142,7 +141,7 @@ class ByteCodeGenerator:
             pushed = thisGenerator.registerAllocator.decideWhetherToPush(self)
             thisGenerator.findOutAndGenerateCorrectSideCode(self)
 
-            thisGenerator.decideWhetherToSaveSlotForPopValue(pushed,respectiveByteCodeFunction[self.id])
+            thisGenerator.decideWhetherToSaveSlotForPopValue(pushed, respectiveByteCodeFunction[self.id])
 
             thisGenerator.registerAllocator.decideWhetherToPop(pushed)
             return thisGenerator.byteCodeList

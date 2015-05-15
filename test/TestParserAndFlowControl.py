@@ -56,9 +56,9 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.assertEqual('while', token.id)
         self.assertEqual('(literal)', token.data[0].id)
         self.assertEqual(1, token.data[0].data[0])
-        self.assertEqual('while', token.data[1].id)
-        self.assertEqual('(literal)', token.data[1].data[0].id)
-        self.assertEqual(1, token.data[1].data[0].data[0])
+        self.assertEqual('while', token.data[1][0].id)
+        self.assertEqual('(literal)', token.data[1][0].data[0].id)
+        self.assertEqual(1, token.data[1][0].data[0].data[0])
 
     def test_parse_while_1_do_something(self):
         lexer = Lexer('while ( 1 ) i ++ ;', self.context)
@@ -70,9 +70,9 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.assertEqual('while', token.id)
         self.assertEqual('(literal)', token.data[0].id)
         self.assertEqual(1, token.data[0].data[0])
-        self.assertEqual('++', token.data[1].id)
-        self.assertEqual('(identifier)', token.data[1].data[0].id)
-        self.assertEqual('i', token.data[1].data[0].data[0])
+        self.assertEqual('++', token.data[1][0].id)
+        self.assertEqual('(identifier)', token.data[1][0].data[0].id)
+        self.assertEqual('i', token.data[1][0].data[0].data[0])
 
     def test_parse_while_while_1_should_raise_an_error(self):
         lexer = Lexer('while ( while ( 1 ) ) ;', self.context)
@@ -105,7 +105,7 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.assertEqual('while', token.id)
         self.assertEqual('(literal)', token.data[0].id)
         self.assertEqual(1, token.data[0].data[0])
-        self.assertEqual('{', token.data[1].id)
+        self.assertEqual('{', token.data[1][0].id)
 
     def test_parse_while_1_block_statement_with_while_1_with_block_statement(self):
         """
@@ -126,11 +126,11 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.assertEqual('while', token.id)
         self.assertEqual('(literal)', token.data[0].id)
         self.assertEqual(1, token.data[0].data[0])
-        self.assertEqual('{', token.data[1].id)
-        self.assertEqual('while', token.data[1].data[0].id)
-        self.assertEqual('(literal)', token.data[1].data[0].data[0].id)
-        self.assertEqual(1, token.data[1].data[0].data[0].data[0])
-        self.assertEqual('{', token.data[1].data[0].data[1].id)
+        self.assertEqual('{', token.data[1][0].id)
+        self.assertEqual('while', token.data[1][0].data[0].id)
+        self.assertEqual('(literal)', token.data[1][0].data[0].data[0].id)
+        self.assertEqual(1, token.data[1][0].data[0].data[0].data[0])
+        self.assertEqual('{', token.data[1][0].data[0].data[1][0].id)
 
     def test_parse_while_1_block_statement_with_while_1(self):
         """
@@ -151,10 +151,10 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.assertEqual('while', token.id)
         self.assertEqual('(literal)', token.data[0].id)
         self.assertEqual(1, token.data[0].data[0])
-        self.assertEqual('{', token.data[1].id)
-        self.assertEqual('while', token.data[1].data[0].id)
-        self.assertEqual('(literal)', token.data[1].data[0].data[0].id)
-        self.assertEqual(1, token.data[1].data[0].data[0].data[0])
+        self.assertEqual('{', token.data[1][0].id)
+        self.assertEqual('while', token.data[1][0].data[0].id)
+        self.assertEqual('(literal)', token.data[1][0].data[0].data[0].id)
+        self.assertEqual(1, token.data[1][0].data[0].data[0].data[0])
 
     def test_parse_while_1_do_few_statements(self):
         """
@@ -175,16 +175,16 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.assertEqual('while', token.id)
         self.assertEqual('(literal)', token.data[0].id)
         self.assertEqual(1, token.data[0].data[0])
-        self.assertEqual('{', token.data[1].id)
-        self.assertEqual('+', token.data[1].data[0].id)
-        self.assertEqual('(literal)', token.data[1].data[0].data[0].id)
-        self.assertEqual(2, token.data[1].data[0].data[0].data[0])
-        self.assertEqual('(literal)', token.data[1].data[0].data[1].id)
-        self.assertEqual(3, token.data[1].data[0].data[1].data[0])
-        self.assertEqual('(identifier)', token.data[1].data[1].id)
-        self.assertEqual('i', token.data[1].data[1].data[0])
-        self.assertEqual('(identifier)', token.data[1].data[2].id)
-        self.assertEqual('j', token.data[1].data[2].data[0])
+        self.assertEqual('{', token.data[1][0].id)
+        self.assertEqual('+', token.data[1][0].data[0].id)
+        self.assertEqual('(literal)', token.data[1][0].data[0].data[0].id)
+        self.assertEqual(2, token.data[1][0].data[0].data[0].data[0])
+        self.assertEqual('(literal)', token.data[1][0].data[0].data[1].id)
+        self.assertEqual(3, token.data[1][0].data[0].data[1].data[0])
+        self.assertEqual('(identifier)', token.data[1][0].data[1].id)
+        self.assertEqual('i', token.data[1][0].data[1].data[0])
+        self.assertEqual('(identifier)', token.data[1][0].data[2].id)
+        self.assertEqual('j', token.data[1][0].data[2].data[0])
 
 class TestParseDoWhileFlowControl(unittest.TestCase):
     def setUp(self):
@@ -235,9 +235,9 @@ class TestParseDoWhileFlowControl(unittest.TestCase):
 
         self.assertEqual('do', token.id)
         self.assertEqual(1, token.data[0].data[0])
-        self.assertEqual('+', token.data[1].id)
-        self.assertEqual(2, token.data[1].data[0].data[0])
-        self.assertEqual(3, token.data[1].data[1].data[0])
+        self.assertEqual('+', token.data[1][0].id)
+        self.assertEqual(2, token.data[1][0].data[0].data[0])
+        self.assertEqual(3, token.data[1][0].data[1].data[0])
 
     def test_parse_should_not_raise_SyntaxError_when_missing_semicolon_at_while(self):
         # it should be checked by the parseStatement who called parse
@@ -249,8 +249,8 @@ class TestParseDoWhileFlowControl(unittest.TestCase):
 
         self.assertEqual('do', token.id)
         self.assertEqual(1, token.data[0].data[0])
-        self.assertEqual('{', token.data[1].id)
-        self.assertEqual([], token.data[1].data)
+        self.assertEqual('{', token.data[1][0].id)
+        self.assertEqual([], token.data[1][0].data)
 
     def test_parse_do_few_statements_while_1(self):
         lexer = Lexer('do { x = 2 + 3 ; y = 4 + 5 ; z = 6 - 7 ; } while ( 1 ) ;', self.context)
@@ -261,22 +261,22 @@ class TestParseDoWhileFlowControl(unittest.TestCase):
 
         self.assertEqual('do', token.id)
         self.assertEqual(1, token.data[0].data[0])
-        self.assertEqual('{', token.data[1].id)
-        self.assertEqual('=', token.data[1].data[0].id)
-        self.assertEqual('x', token.data[1].data[0].data[0].data[0])
-        self.assertEqual('+', token.data[1].data[0].data[1].id)
-        self.assertEqual(2, token.data[1].data[0].data[1].data[0].data[0])
-        self.assertEqual(3, token.data[1].data[0].data[1].data[1].data[0])
-        self.assertEqual('=', token.data[1].data[1].id)
-        self.assertEqual('y', token.data[1].data[1].data[0].data[0])
-        self.assertEqual('+', token.data[1].data[1].data[1].id)
-        self.assertEqual(4, token.data[1].data[1].data[1].data[0].data[0])
-        self.assertEqual(5, token.data[1].data[1].data[1].data[1].data[0])
-        self.assertEqual('=', token.data[1].data[2].id)
-        self.assertEqual('z', token.data[1].data[2].data[0].data[0])
-        self.assertEqual('-', token.data[1].data[2].data[1].id)
-        self.assertEqual(6, token.data[1].data[2].data[1].data[0].data[0])
-        self.assertEqual(7, token.data[1].data[2].data[1].data[1].data[0])
+        self.assertEqual('{', token.data[1][0].id)
+        self.assertEqual('=', token.data[1][0].data[0].id)
+        self.assertEqual('x', token.data[1][0].data[0].data[0].data[0])
+        self.assertEqual('+', token.data[1][0].data[0].data[1].id)
+        self.assertEqual(2, token.data[1][0].data[0].data[1].data[0].data[0])
+        self.assertEqual(3, token.data[1][0].data[0].data[1].data[1].data[0])
+        self.assertEqual('=', token.data[1][0].data[1].id)
+        self.assertEqual('y', token.data[1][0].data[1].data[0].data[0])
+        self.assertEqual('+', token.data[1][0].data[1].data[1].id)
+        self.assertEqual(4, token.data[1][0].data[1].data[1].data[0].data[0])
+        self.assertEqual(5, token.data[1][0].data[1].data[1].data[1].data[0])
+        self.assertEqual('=', token.data[1][0].data[2].id)
+        self.assertEqual('z', token.data[1][0].data[2].data[0].data[0])
+        self.assertEqual('-', token.data[1][0].data[2].data[1].id)
+        self.assertEqual(6, token.data[1][0].data[2].data[1].data[0].data[0])
+        self.assertEqual(7, token.data[1][0].data[2].data[1].data[1].data[0])
 
     def test_parse_nested_do_while_loop(self):
         lexer = Lexer('do { x = 2 + 3 ; do y = 4 + 5 ; while ( 1 ) ; z = 6 - 7 ; } while ( 1 ) ;', self.context)
@@ -287,26 +287,26 @@ class TestParseDoWhileFlowControl(unittest.TestCase):
 
         self.assertEqual('do', token.id)
         self.assertEqual(1, token.data[0].data[0])
-        self.assertEqual('{', token.data[1].id)
-        self.assertEqual('=', token.data[1].data[0].id)
-        self.assertEqual('x', token.data[1].data[0].data[0].data[0])
-        self.assertEqual('+', token.data[1].data[0].data[1].id)
-        self.assertEqual(2, token.data[1].data[0].data[1].data[0].data[0])
-        self.assertEqual(3, token.data[1].data[0].data[1].data[1].data[0])
+        self.assertEqual('{', token.data[1][0].id)
+        self.assertEqual('=', token.data[1][0].data[0].id)
+        self.assertEqual('x', token.data[1][0].data[0].data[0].data[0])
+        self.assertEqual('+', token.data[1][0].data[0].data[1].id)
+        self.assertEqual(2, token.data[1][0].data[0].data[1].data[0].data[0])
+        self.assertEqual(3, token.data[1][0].data[0].data[1].data[1].data[0])
 
-        self.assertEqual('do', token.data[1].data[1].id)
-        self.assertEqual(1, token.data[1].data[1].data[0].data[0])
-        self.assertEqual('=', token.data[1].data[1].data[1].id)
-        self.assertEqual('y', token.data[1].data[1].data[1].data[0].data[0])
-        self.assertEqual('+', token.data[1].data[1].data[1].data[1].id)
-        self.assertEqual(4, token.data[1].data[1].data[1].data[1].data[0].data[0])
-        self.assertEqual(5, token.data[1].data[1].data[1].data[1].data[1].data[0])
+        self.assertEqual('do', token.data[1][0].data[1].id)
+        self.assertEqual(1, token.data[1][0].data[1].data[0].data[0])
+        self.assertEqual('=', token.data[1][0].data[1].data[1][0].id)
+        self.assertEqual('y', token.data[1][0].data[1].data[1][0].data[0].data[0])
+        self.assertEqual('+', token.data[1][0].data[1].data[1][0].data[1].id)
+        self.assertEqual(4, token.data[1][0].data[1].data[1][0].data[1].data[0].data[0])
+        self.assertEqual(5, token.data[1][0].data[1].data[1][0].data[1].data[1].data[0])
 
-        self.assertEqual('=', token.data[1].data[2].id)
-        self.assertEqual('z', token.data[1].data[2].data[0].data[0])
-        self.assertEqual('-', token.data[1].data[2].data[1].id)
-        self.assertEqual(6, token.data[1].data[2].data[1].data[0].data[0])
-        self.assertEqual(7, token.data[1].data[2].data[1].data[1].data[0])
+        self.assertEqual('=', token.data[1][0].data[2].id)
+        self.assertEqual('z', token.data[1][0].data[2].data[0].data[0])
+        self.assertEqual('-', token.data[1][0].data[2].data[1].id)
+        self.assertEqual(6, token.data[1][0].data[2].data[1].data[0].data[0])
+        self.assertEqual(7, token.data[1][0].data[2].data[1].data[1].data[0])
 
     def test_parse_should_raise_SyntaxError_when(self):
         lexer = Lexer('do 2 + 3 ; while ( do 2 + 3 ; while ( 1 ) ; ) ;', self.context)
@@ -385,7 +385,7 @@ class TestParseIfFlowControl(unittest.TestCase):
         self.assertEqual('==', token.data[0].data[0].id)
         self.assertEqual(2, token.data[0].data[0].data[0].data[0])
         self.assertEqual(3, token.data[0].data[0].data[1].data[0])
-        self.assertEqual('{', token.data[1].id)
+        self.assertEqual('{', token.data[1][0].id)
 
     def test_parse_will_build_an_if_AST_that_contain_expression(self):
         """
@@ -409,10 +409,10 @@ class TestParseIfFlowControl(unittest.TestCase):
         self.assertEqual('==', token.data[0].data[0].id)
         self.assertEqual(2, token.data[0].data[0].data[0].data[0])
         self.assertEqual(3, token.data[0].data[0].data[1].data[0])
-        self.assertEqual('{', token.data[1].id)
-        self.assertEqual('*', token.data[1].data[0].id)
-        self.assertEqual(5, token.data[1].data[0].data[0].data[0])
-        self.assertEqual(6, token.data[1].data[0].data[1].data[0])
+        self.assertEqual('{', token.data[1][0].id)
+        self.assertEqual('*', token.data[1][0].data[0].id)
+        self.assertEqual(5, token.data[1][0].data[0].data[0].data[0])
+        self.assertEqual(6, token.data[1][0].data[0].data[1].data[0])
 
     def test_parse_will_build_an_if_else_AST(self):
         """
@@ -438,9 +438,9 @@ class TestParseIfFlowControl(unittest.TestCase):
         self.assertEqual('==', token.data[0].data[0].id)
         self.assertEqual(2, token.data[0].data[0].data[0].data[0])
         self.assertEqual(3, token.data[0].data[0].data[1].data[0])
-        self.assertEqual('{', token.data[1].id)
+        self.assertEqual('{', token.data[1][0].id)
         self.assertEqual('else', token.data[2].id)
-        self.assertEqual('{', token.data[2].data[0].id)
+        self.assertEqual('{', token.data[2].data[0][0].id)
 
     def test_parse_will_raise_error_if_the_if_statement_contain_no_condition(self):
 
@@ -474,12 +474,12 @@ class TestParseIfFlowControl(unittest.TestCase):
         self.assertEqual('==', token.data[0].data[0].id)
         self.assertEqual(2, token.data[0].data[0].data[0].data[0])
         self.assertEqual(3, token.data[0].data[0].data[1].data[0])
-        self.assertEqual('{', token.data[1].id)
-        self.assertEqual('=', token.data[1].data[0].id)
-        self.assertEqual('x', token.data[1].data[0].data[0].data[0])
-        self.assertEqual('*', token.data[1].data[0].data[1].id)
-        self.assertEqual(2, token.data[1].data[0].data[1].data[0].data[0])
-        self.assertEqual(3, token.data[1].data[0].data[1].data[1].data[0])
+        self.assertEqual('{', token.data[1][0].id)
+        self.assertEqual('=', token.data[1][0].data[0].id)
+        self.assertEqual('x', token.data[1][0].data[0].data[0].data[0])
+        self.assertEqual('*', token.data[1][0].data[0].data[1].id)
+        self.assertEqual(2, token.data[1][0].data[0].data[1].data[0].data[0])
+        self.assertEqual(3, token.data[1][0].data[0].data[1].data[1].data[0])
 
     def test_parse_will_build_an_if_statement_with_multiple_expression_inside(self):
         """
@@ -507,17 +507,17 @@ class TestParseIfFlowControl(unittest.TestCase):
         self.assertEqual('==', token.data[0].data[0].id)
         self.assertEqual(2, token.data[0].data[0].data[0].data[0])
         self.assertEqual(3, token.data[0].data[0].data[1].data[0])
-        self.assertEqual('{', token.data[1].id)
-        self.assertEqual('=', token.data[1].data[0].id)
-        self.assertEqual('x', token.data[1].data[0].data[0].data[0])
-        self.assertEqual('*', token.data[1].data[0].data[1].id)
-        self.assertEqual(2, token.data[1].data[0].data[1].data[0].data[0])
-        self.assertEqual(3, token.data[1].data[0].data[1].data[1].data[0])
-        self.assertEqual('=', token.data[1].data[1].id)
-        self.assertEqual('y', token.data[1].data[1].data[0].data[0])
-        self.assertEqual('+', token.data[1].data[1].data[1].id)
-        self.assertEqual(5, token.data[1].data[1].data[1].data[0].data[0])
-        self.assertEqual(7, token.data[1].data[1].data[1].data[1].data[0])
+        self.assertEqual('{', token.data[1][0].id)
+        self.assertEqual('=', token.data[1][0].data[0].id)
+        self.assertEqual('x', token.data[1][0].data[0].data[0].data[0])
+        self.assertEqual('*', token.data[1][0].data[0].data[1].id)
+        self.assertEqual(2, token.data[1][0].data[0].data[1].data[0].data[0])
+        self.assertEqual(3, token.data[1][0].data[0].data[1].data[1].data[0])
+        self.assertEqual('=', token.data[1][0].data[1].id)
+        self.assertEqual('y', token.data[1][0].data[1].data[0].data[0])
+        self.assertEqual('+', token.data[1][0].data[1].data[1].id)
+        self.assertEqual(5, token.data[1][0].data[1].data[1].data[0].data[0])
+        self.assertEqual(7, token.data[1][0].data[1].data[1].data[1].data[0])
 
     def test_parse_will_build_an_if_statement_without_the_brace(self):
         """
@@ -543,11 +543,11 @@ class TestParseIfFlowControl(unittest.TestCase):
         self.assertEqual('==', token.data[0].data[0].id)
         self.assertEqual(2, token.data[0].data[0].data[0].data[0])
         self.assertEqual(3, token.data[0].data[0].data[1].data[0])
-        self.assertEqual('=', token.data[1].id)
-        self.assertEqual('x', token.data[1].data[0].data[0])
-        self.assertEqual('*', token.data[1].data[1].id)
-        self.assertEqual(2, token.data[1].data[1].data[0].data[0])
-        self.assertEqual(3, token.data[1].data[1].data[1].data[0])
+        self.assertEqual('=', token.data[1][0].id)
+        self.assertEqual('x', token.data[1][0].data[0].data[0])
+        self.assertEqual('*', token.data[1][0].data[1].id)
+        self.assertEqual(2, token.data[1][0].data[1].data[0].data[0])
+        self.assertEqual(3, token.data[1][0].data[1].data[1].data[0])
 
     def test_parse_throw_an_error_if_the_brace_does_not_close(self):
 
