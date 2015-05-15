@@ -67,11 +67,11 @@ class TestByteCodeGenerator(unittest.TestCase):
 
         self.byteCodeGenerator.initGeneration()
         byteCodes = token.generateByteCode()
-        self.assertEqual(self.byteCodeGenerator.storeMultiple(7, 0b010000), byteCodes[0])
-        self.assertEqual(self.byteCodeGenerator.loadRegister(4, 7, 4), byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.loadValue(5, 5), byteCodes[2])
-        self.assertEqual(self.byteCodeGenerator.assignRegister(5, 5, 4), byteCodes[3])
-        self.assertEqual(self.byteCodeGenerator.loadMultiple(7, 0b010000), byteCodes[4])
+        self.assertEqual(self.byteCodeGenerator.storeMultiple([7, 0b010000]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue([4, 5]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.assignRegister([4, 5]), byteCodes[3])
+        self.assertEqual(self.byteCodeGenerator.loadMultiple([7, 0b010000]), byteCodes[4])
 
     def test_generateByteCode_will_push_the_register_at_the_second_token(self):
         """
@@ -95,15 +95,15 @@ class TestByteCodeGenerator(unittest.TestCase):
 
         self.byteCodeGenerator.initGeneration()
         byteCodes = token.generateByteCode()
-        self.assertEqual(self.byteCodeGenerator.storeMultiple(7, 0b011100), byteCodes[0])
-        self.assertEqual(self.byteCodeGenerator.loadValue(2, 5), byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.loadValue(5, 10), byteCodes[2])
-        self.assertEqual(self.byteCodeGenerator.addRegister(2, 2, 5), byteCodes[3])
-        self.assertEqual(self.byteCodeGenerator.loadValue(5, 20), byteCodes[4])
-        self.assertEqual(self.byteCodeGenerator.addRegister(2, 2, 5), byteCodes[5])
-        self.assertEqual(self.byteCodeGenerator.loadRegister(5, 7, 4), byteCodes[6])
-        self.assertEqual(self.byteCodeGenerator.assignRegister(5, 2, 5), byteCodes[7])
-        self.assertEqual(self.byteCodeGenerator.loadMultiple(7, 0b011100), byteCodes[8])
+        self.assertEqual(self.byteCodeGenerator.storeMultiple([7, 0b011100]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue([2, 5]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 10]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.addRegister([2, 2, 5]), byteCodes[3])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 20]), byteCodes[4])
+        self.assertEqual(self.byteCodeGenerator.addRegister([2, 2, 5]), byteCodes[5])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[6])
+        self.assertEqual(self.byteCodeGenerator.assignRegister([2, 5]), byteCodes[7])
+        self.assertEqual(self.byteCodeGenerator.loadMultiple([7, 0b011100]), byteCodes[8])
 
     def test_generateByteCode_will_push_the_register_when_the_registers_available_is_not_enough_at_the_begining(self):
         """

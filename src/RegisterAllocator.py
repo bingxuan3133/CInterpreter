@@ -15,8 +15,8 @@ class RegisterAllocator:
                 if registerToPush == 0:
                     break
                 returnedWorkingRegister = self.generator.oracle.releaseAWorkingRegister()
-
-            self.generator.storeMultiple(7, number)
+            tempList = [7,number]
+            self.generator.storeMultiple(tempList)
 
 
         return number
@@ -24,7 +24,8 @@ class RegisterAllocator:
     def decideWhetherToPop(self, number):
         count =0
         if number != 0:
-            self.generator.loadMultiple(7, number)
+            tempList = [7,number]
+            self.generator.loadMultiple(tempList)
             while number != 0:
                 bit = number | 0b000001
                 number = number >> 1

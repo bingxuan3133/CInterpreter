@@ -69,6 +69,43 @@ class TestInformationInjector(unittest.TestCase):
         self.assertEqual(1, token.data[1].data[0].data[1].data[0].data[0].registerRequiredAtThatLevel)
         self.assertEqual(1, token.data[1].data[0].data[1].data[0].data[1].registerRequiredAtThatLevel)
 
+    def test_injectRegisterRequired_will_give_a_zero_for_equal_weight_side(self):
+        lexer = Lexer('{ x = 2 ; }', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        if token[0].id == '{':
+            token = token[0].data[0]
+        self.informationInjector.injectRegisterRequired(token)
+
+        self.assertEqual(1, token.weight[0])
+        self.assertEqual(0, token.weight[1])
+        self.assertEqual(0, token.weight[2])
+        self.assertEqual(0, token.data[0].weight[0])
+        self.assertEqual(0, token.data[1].weight[0])
+
+    def test_injectRegisterRequired_will_show_the_weight_in_with_an_imbalance_tree(self):
+        lexer = Lexer('{ x = 2 + 3 ; }', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        if token[0].id == '{':
+            token = token[0].data[0]
+        self.informationInjector.injectRegisterRequired(token)
+
+        self.assertEqual(2, token.weight[0])
+        self.assertEqual(0, token.weight[1])
+        self.assertEqual(1, token.weight[2])
+        self.assertEqual(0, token.data[0].weight[0])
+        self.assertEqual(1, token.data[1].weight[0])
+        self.assertEqual(0, token.data[1].weight[1])
+        self.assertEqual(0, token.data[1].weight[2])
+        self.assertEqual(0, token.data[1].data[0].weight[0])
+        self.assertEqual(0, token.data[1].data[1].weight[0])
+
+
     def test_injectRegisterRequired_will_give_min_and_max_register_to_each_of_the_token(self):
         lexer = Lexer('{ x = y + 8 * 16 / 180 - 20 ; }', self.context)
         parser = Parser(lexer, self.manager)

@@ -21,53 +21,53 @@ class ByteCodeGenerator:
         pass
     def divideRegister(self):
         pass
-    def multiplyRegister(self, targetRegister, firstRegister, secondRegister):
-        number = 0xf6 | targetRegister << 8 | firstRegister << 11 | secondRegister << 14
+    def multiplyRegister(self, GPR=[]):
+        number = 0xf6 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         self.byteCodeList.append(number)
         return number
 
-    def loadMultiple(self, sourceRegister, destinationRegister):
-        number = 0xf7 | sourceRegister << 8 | destinationRegister << 11
+    def loadMultiple(self, GPR=[]):
+        number = 0xf7 | GPR[0] << 8 | GPR[1] << 11
         self.byteCodeList.append(number)
         return number
-    def assignRegister(self, sourceRegister, destinationRegister, secondRegister=0):
+    def assignRegister(self, GPR=[]):
     #Assign FirstRegister into Second Register and store into targetRegister
-        number = 0xf8 | sourceRegister << 8 | destinationRegister << 11
+        number = 0xf8 | GPR[0] << 8 | GPR[1] << 11
         self.byteCodeList.append(number)
         return number
 
-    def storeMultiple(self, targetRegister, registerToPush):
-        number = 0xf9 | targetRegister << 8 | registerToPush << 11
+    def storeMultiple(self, GPR=[]):
+        number = 0xf9 | GPR[0] << 8 | GPR[1] << 11
         self.byteCodeList.append(number)
         return number
 
-    def addRegister(self,targetRegister, firstRegister, secondRegister):
-        number = 0xfa | targetRegister << 8 | firstRegister << 11 | secondRegister << 14
+    def addRegister(self,GPR =[]):
+        number = 0xfa | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         self.byteCodeList.append(number)
         return number
 
-    def subRegister(self,targetRegister, registerNumber, valueToSubtract):
-        number = 0xfb | targetRegister << 8 | registerNumber << 11 | valueToSubtract << 14
+    def subRegister(self,GPR=[]):
+        number = 0xfb | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         self.byteCodeList.append(number)
         return number
 
-    def loadValue(self, registerNumber, valueToAssign):
-        number = 0xfc | registerNumber << 8 | valueToAssign << 11
+    def loadValue(self, GPR=[]):
+        number = 0xfc | GPR[0] << 8 | GPR[1] << 11
         self.byteCodeList.append(number)
         return number
 
-    def storeValue(self, targetRegister, framePointer, relativeAddress):
-        number = 0xfd | targetRegister << 8 | framePointer << 11 | relativeAddress << 14
+    def storeValue(self, GPR=[]):
+        number = 0xfd | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         self.byteCodeList.append(number)
         return number
 
-    def loadRegister(self, targetRegisterNumber, registerNumber, relativeAddress):
-        number = 0xfe | targetRegisterNumber << 8 | registerNumber << 11 | relativeAddress << 17
+    def loadRegister(self, GPR=[]):
+        number = 0xfe | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 17
         self.byteCodeList.append(number)
         return number
 
-    def storeRegister(self, targetRegisterNumber, registerNumber, relativeAddress):
-        number = 0xff | targetRegisterNumber << 8 | registerNumber << 11 | relativeAddress << 17
+    def storeRegister(self, GPR=[]):
+        number = 0xff | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 17
         self.byteCodeList.append(number)
         return number
 
@@ -76,14 +76,14 @@ class ByteCodeGenerator:
         for index in range(len(token.data)-1, -1, -1):
             if token.data[index].id == '(identifier)':
                 if secondTime == 0:
-                    self.loadRegister(self.oracle.getAFreeWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]])
+                    self.loadRegister([self.oracle.getAFreeWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]]])
                 else:
-                    self.loadRegister(self.oracle.getALargestWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]])
+                    self.loadRegister([self.oracle.getALargestWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]]])
             elif token.data[index].id == '(literal)':
                 if secondTime == 0:
-                    self.loadValue(self.oracle.getAFreeWorkingRegister(), token.data[index].data[0])
+                    self.loadValue([self.oracle.getAFreeWorkingRegister(), token.data[index].data[0]])
                 else:
-                    self.loadValue(self.oracle.getALargestWorkingRegister(), token.data[index].data[0])
+                    self.loadValue([self.oracle.getALargestWorkingRegister(), token.data[index].data[0]])
             else:
                 token.data[index].generateByteCode()
             secondTime += 1
@@ -93,32 +93,43 @@ class ByteCodeGenerator:
         for index in range(0, len(token.data)):
             if token.data[index].id == '(identifier)':
                 if secondTime == 0:
-                    self.loadRegister(self.oracle.getAFreeWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]])
+                    self.loadRegister([self.oracle.getAFreeWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]]])
                 else:
-                    self.loadRegister(self.oracle.getALargestWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]])
+                    self.loadRegister([self.oracle.getALargestWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]]])
             elif token.data[index].id == '(literal)':
                 if secondTime == 0:
-                    self.loadValue(self.oracle.getAFreeWorkingRegister(), token.data[index].data[0])
+                    self.loadValue([self.oracle.getAFreeWorkingRegister(), token.data[index].data[0]])
                 else:
-                    self.loadValue(self.oracle.getALargestWorkingRegister(), token.data[index].data[0])
+                    self.loadValue([self.oracle.getALargestWorkingRegister(), token.data[index].data[0]])
             else:
                 token.data[index].generateByteCode()
             secondTime += 1
 
     def findOutAndGenerateCorrectSideCode(self, token):
-        if token.registerRequiredAtThatLevel > 0:
+        if token.registerRequiredAtThatLevel < 0:
             self.generateRightCodeFirst(token)
         else:
             self.generateLeftCodeFirst(token)
 
     def decideWhetherToSaveSlotForPopValue(self, status, generateByteCode):
+        GPR=[]
         firstRegister = self.oracle.releaseALargestWorkingRegister()
         secondRegister = self.oracle.releaseAWorkingRegister()
         if status != 0:
-            generateByteCode(firstRegister, secondRegister, firstRegister)
+            GPR.insert(0,firstRegister)
+            GPR.insert(1,secondRegister)
+            GPR.insert(2,firstRegister)
+            if(generateByteCode==self.assignRegister):
+                GPR.insert(0,secondRegister)
+                GPR.insert(1,firstRegister)
+
+            generateByteCode(GPR)
             self.oracle.getALargestWorkingRegister()
         else:
-            generateByteCode(secondRegister, secondRegister, firstRegister)
+            GPR.insert(0,secondRegister)
+            GPR.insert(1,secondRegister)
+            GPR.insert(2,firstRegister)
+            generateByteCode(GPR)
             self.oracle.getAFreeWorkingRegister()
 
     def initGeneration(self):
@@ -130,7 +141,7 @@ class ByteCodeGenerator:
                 if token.id in thisGenerator.byteRequired:
                     variableCounter += 1
 
-                thisGenerator.subRegister(7, thisGenerator.byteRequired[self.id]*variableCounter)
+                thisGenerator.subRegister([7, thisGenerator.byteRequired[self.id]*variableCounter])
                 return thisGenerator.byteCodeList
 
         respectiveByteCodeFunction = {'int': initialization, '=': self.assignRegister, '+': self.addRegister, \
