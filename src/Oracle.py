@@ -5,7 +5,10 @@ class Oracle:
     MaxRegister = 6  # The maximum available register, the sixth number is to enable the counter move ahead always.
     registerFromLeft = 0  # Start with the location 0
     registerFromRight = MaxRegister - 1
-    registerLeft = 5
+    registerLeft = MaxRegister - 1
+    framePointerRegister = MaxRegister + 1
+
+    smallerRegisterUsed = 0
 
     def getAFreeWorkingRegister(self):
         temp = self.registerFromLeft
@@ -24,9 +27,21 @@ class Oracle:
 
 
     def releaseAWorkingRegister(self):
+
         self.registerFromLeft -= 1
         self.registerLeft += 1
+        while self.smallerRegisterUsed > 0:
+            self.smallerRegisterUsed -= 1
+            self.releaseAWorkingRegister()
         return self.registerFromLeft
+
+    def getASmallestFreeRegisterBeforePop(self,status):
+        count = 0
+        while status != 0:
+            status = status >> 1
+            count += 1
+        self.smallerRegisterUsed += 1
+        return count
 
 
 """

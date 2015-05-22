@@ -27,9 +27,9 @@ class RegisterAllocator:
             tempList = [7,number]
             self.generator.loadMultiple(tempList)
             while number != 0:
-                bit = number | 0b000001
+                bit = number & 0b000001
                 number = number >> 1
                 if bit == 1:
                     count += 1
-            for loop in range(0,count):
+            for loop in range(0,count+2):
                 self.generator.oracle.getAFreeWorkingRegister()

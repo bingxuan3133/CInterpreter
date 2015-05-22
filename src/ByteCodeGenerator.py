@@ -93,9 +93,9 @@ class ByteCodeGenerator:
         for index in range(0, len(token.data)):
             if token.data[index].id == '(identifier)':
                 if secondTime == 0:
-                    self.loadRegister([self.oracle.getAFreeWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]]])
+                    self.loadRegister([self.oracle.getAFreeWorkingRegister(), self.oracle.framePointerRegister, self.registersInThisAST[token.data[index].data[0]]])
                 else:
-                    self.loadRegister([self.oracle.getALargestWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]]])
+                    self.loadRegister([self.oracle.getALargestWorkingRegister(), self.oracle.framePointerRegister, self.registersInThisAST[token.data[index].data[0]]])
             elif token.data[index].id == '(literal)':
                 if secondTime == 0:
                     self.loadValue([self.oracle.getAFreeWorkingRegister(), token.data[index].data[0]])
@@ -106,7 +106,7 @@ class ByteCodeGenerator:
             secondTime += 1
 
     def findOutAndGenerateCorrectSideCode(self, token):
-        if token.registerRequiredAtThatLevel < 0:
+        if token.weight[2] >= token.weight[1]:
             self.generateRightCodeFirst(token)
         else:
             self.generateLeftCodeFirst(token)
@@ -116,15 +116,15 @@ class ByteCodeGenerator:
         firstRegister = self.oracle.releaseALargestWorkingRegister()
         secondRegister = self.oracle.releaseAWorkingRegister()
         if status != 0:
-            GPR.insert(0,firstRegister)
+            count = self.oracle.getASmallestFreeRegisterBeforePop(status)
+            GPR.insert(0,count)
             GPR.insert(1,secondRegister)
             GPR.insert(2,firstRegister)
-            if(generateByteCode==self.assignRegister):
-                GPR.insert(0,secondRegister)
-                GPR.insert(1,firstRegister)
-
+            if generateByteCode == self.assignRegister:
+                GPR[0] = secondRegister
+                GPR[1] = firstRegister
             generateByteCode(GPR)
-            self.oracle.getALargestWorkingRegister()
+            #self.oracle.getALargestWorkingRegister()
         else:
             GPR.insert(0,secondRegister)
             GPR.insert(1,secondRegister)
