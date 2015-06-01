@@ -1,5 +1,5 @@
 __author__ = 'JingWen'
-class Oracle:
+class Mapping:
 
 
     MaxRegister = 6  # The maximum available register, the sixth number is to enable the counter move ahead always.

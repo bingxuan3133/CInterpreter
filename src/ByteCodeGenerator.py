@@ -1,6 +1,6 @@
 __author__ = 'JingWen'
 
-from Oracle import *
+from Mapping import *
 from Context import *
 from ContextManager import *
 from RegisterAllocator import *
@@ -14,7 +14,7 @@ class ByteCodeGenerator:
     def __init__(self, context, contextManager):
         self.context = context
         self.contextManager = contextManager
-        self.oracle = Oracle()
+        self.mapping = Mapping()
         self.registerAllocator = RegisterAllocator(self)
 
     def nothing(self):
@@ -76,14 +76,14 @@ class ByteCodeGenerator:
         for index in range(len(token.data)-1, -1, -1):
             if token.data[index].id == '(identifier)':
                 if secondTime == 0:
-                    self.loadRegister([self.oracle.getAFreeWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]]])
+                    self.loadRegister([self.mapping.getAFreeWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]]])
                 else:
-                    self.loadRegister([self.oracle.getALargestWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]]])
+                    self.loadRegister([self.mapping.getALargestWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]]])
             elif token.data[index].id == '(literal)':
                 if secondTime == 0:
-                    self.loadValue([self.oracle.getAFreeWorkingRegister(), token.data[index].data[0]])
+                    self.loadValue([self.mapping.getAFreeWorkingRegister(), token.data[index].data[0]])
                 else:
-                    self.loadValue([self.oracle.getALargestWorkingRegister(), token.data[index].data[0]])
+                    self.loadValue([self.mapping.getALargestWorkingRegister(), token.data[index].data[0]])
             else:
                 token.data[index].generateByteCode()
             secondTime += 1
@@ -93,14 +93,14 @@ class ByteCodeGenerator:
         for index in range(0, len(token.data)):
             if token.data[index].id == '(identifier)':
                 if secondTime == 0:
-                    self.loadRegister([self.oracle.getAFreeWorkingRegister(), self.oracle.framePointerRegister, self.registersInThisAST[token.data[index].data[0]]])
+                    self.loadRegister([self.mapping.getAFreeWorkingRegister(), self.mapping.framePointerRegister, self.registersInThisAST[token.data[index].data[0]]])
                 else:
-                    self.loadRegister([self.oracle.getALargestWorkingRegister(), self.oracle.framePointerRegister, self.registersInThisAST[token.data[index].data[0]]])
+                    self.loadRegister([self.mapping.getALargestWorkingRegister(), self.mapping.framePointerRegister, self.registersInThisAST[token.data[index].data[0]]])
             elif token.data[index].id == '(literal)':
                 if secondTime == 0:
-                    self.loadValue([self.oracle.getAFreeWorkingRegister(), token.data[index].data[0]])
+                    self.loadValue([self.mapping.getAFreeWorkingRegister(), token.data[index].data[0]])
                 else:
-                    self.loadValue([self.oracle.getALargestWorkingRegister(), token.data[index].data[0]])
+                    self.loadValue([self.mapping.getALargestWorkingRegister(), token.data[index].data[0]])
             else:
                 token.data[index].generateByteCode()
             secondTime += 1
@@ -113,10 +113,10 @@ class ByteCodeGenerator:
 
     def decideWhetherToSaveSlotForPopValue(self, status, generateByteCode):
         GPR=[]
-        firstRegister = self.oracle.releaseALargestWorkingRegister()
-        secondRegister = self.oracle.releaseAWorkingRegister()
+        firstRegister = self.mapping.releaseALargestWorkingRegister()
+        secondRegister = self.mapping.releaseAWorkingRegister()
         if status != 0:
-            count = self.oracle.getASmallestFreeRegisterBeforePop(status)
+            count = self.mapping.getASmallestFreeRegisterBeforePop(status)
             GPR.insert(0,count)
             GPR.insert(1,secondRegister)
             GPR.insert(2,firstRegister)
@@ -130,7 +130,7 @@ class ByteCodeGenerator:
             GPR.insert(1,secondRegister)
             GPR.insert(2,firstRegister)
             generateByteCode(GPR)
-            self.oracle.getAFreeWorkingRegister()
+            self.mapping.getAFreeWorkingRegister()
 
     def initGeneration(self):
         thisGenerator = self

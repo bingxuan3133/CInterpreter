@@ -61,8 +61,8 @@ class TestByteCodeGenerator(unittest.TestCase):
 
         token = parser.parse(0)
         self.informationInjector.injectRegisterRequired(token)
-        self.byteCodeGenerator.oracle.registerFromLeft = 5
-        self.byteCodeGenerator.oracle.registerLeft = 1
+        self.byteCodeGenerator.mapping.registerFromLeft = 5
+        self.byteCodeGenerator.mapping.registerLeft = 1
         self.byteCodeGenerator.registersInThisAST['x'] =4
 
         self.byteCodeGenerator.initGeneration()
@@ -89,8 +89,8 @@ class TestByteCodeGenerator(unittest.TestCase):
 
         token = parser.parse(0)
         self.informationInjector.injectRegisterRequired(token)
-        self.byteCodeGenerator.oracle.registerFromLeft = 5
-        self.byteCodeGenerator.oracle.registerLeft = 1
+        self.byteCodeGenerator.mapping.registerFromLeft = 5
+        self.byteCodeGenerator.mapping.registerLeft = 1
         self.byteCodeGenerator.registersInThisAST['x'] = 4
 
         self.byteCodeGenerator.initGeneration()
@@ -121,8 +121,8 @@ class TestByteCodeGenerator(unittest.TestCase):
 
         token = parser.parse(0)
         self.informationInjector.injectRegisterRequired(token)
-        self.byteCodeGenerator.oracle.registerFromLeft = 5
-        self.byteCodeGenerator.oracle.registerLeft = 1
+        self.byteCodeGenerator.mapping.registerFromLeft = 5
+        self.byteCodeGenerator.mapping.registerLeft = 1
         self.byteCodeGenerator.registersInThisAST['x'] = 4
 
         self.byteCodeGenerator.initGeneration()
@@ -157,8 +157,8 @@ class TestByteCodeGenerator(unittest.TestCase):
         token.minRequiredRegister = 4
         token.data[1].minRequiredRegister = 6
         token.data[1].maxRequiredRegister = 6
-        self.byteCodeGenerator.oracle.registerLeft = 1
-        self.byteCodeGenerator.oracle.registerFromLeft = 5
+        self.byteCodeGenerator.mapping.registerLeft = 1
+        self.byteCodeGenerator.mapping.registerFromLeft = 5
         self.byteCodeGenerator.registersInThisAST['x'] = 4
 
         self.byteCodeGenerator.initGeneration()

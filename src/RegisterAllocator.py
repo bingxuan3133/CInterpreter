@@ -6,15 +6,15 @@ class RegisterAllocator:
 
     def decideWhetherToPush(self, token):
         number = 0b000000
-        if self.generator.oracle.registerLeft < token.minRequiredRegister:
-            registerToPush = token.maxRequiredRegister - self.generator.oracle.registerLeft
-            returnedWorkingRegister = self.generator.oracle.releaseAWorkingRegister()
+        if self.generator.mapping.registerLeft < token.minRequiredRegister:
+            registerToPush = token.maxRequiredRegister - self.generator.mapping.registerLeft
+            returnedWorkingRegister = self.generator.mapping.releaseAWorkingRegister()
             while returnedWorkingRegister != 'Finish':
                 registerToPush -= 1
                 number = number | 0b1 << (returnedWorkingRegister)
                 if registerToPush == 0:
                     break
-                returnedWorkingRegister = self.generator.oracle.releaseAWorkingRegister()
+                returnedWorkingRegister = self.generator.mapping.releaseAWorkingRegister()
             tempList = [7,number]
             self.generator.storeMultiple(tempList)
 
@@ -32,4 +32,4 @@ class RegisterAllocator:
                 if bit == 1:
                     count += 1
             for loop in range(0,count+2):
-                self.generator.oracle.getAFreeWorkingRegister()
+                self.generator.mapping.getAFreeWorkingRegister()
