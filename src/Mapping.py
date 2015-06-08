@@ -5,7 +5,7 @@ class Mapping:
     MaxRegister = 6  # The maximum available register, the sixth number is to enable the counter move ahead always.
     registerFromLeft = 0  # Start with the location 0
     registerFromRight = MaxRegister - 1
-    registerLeft = MaxRegister - 1
+    registerLeft = MaxRegister
     framePointerRegister = MaxRegister + 1
 
     smallerRegisterUsed = 0
