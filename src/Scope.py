@@ -1,23 +1,25 @@
 __author__ = 'admin'
 
 class Scope:
+    interestedTokens = []
+
     def __init__(self, closeBrace):
         self.list = []
-        self.currentScope = self.list
-        self.interestedTokens = []
+        self.parentScope = self.list
         self.closeBrace = closeBrace
 
     def buildScope(self, token):
+        self.currentScope = Scope(self.closeBrace)
         if token.id is '{':
             newList = []
-            self.currentScope.append(newList)
-            self.parentScope = self.currentScope
-            self.currentScope = newList
+            self.currentScope = Scope(self.closeBrace)
+            self.currentScope.parentScope = self.currentScope.list
+            self.currentScope.list = newList
         elif token.id is '}':
-            self.currentScope = self.parentScope
-            self.parentScope.pop()
+            self.currentScope.list = self.currentScope.parentScope
+            self.currentScope.parentScope.pop()
         else:
-            self.currentScope.append(token)
+            self.currentScope.list.append(token)
         return
 
     def scanForInterestedTokens(self, tree):
@@ -26,18 +28,22 @@ class Scope:
                 self.scanForInterestedTokens(subTree)
         else:
             if tree.id is 'int':
-                self.interestedTokens.append(tree)
+                Scope.interestedTokens.append(tree)
             elif tree.id is '{':
-                self.interestedTokens.append(tree)
+                Scope.interestedTokens.append(tree)
                 subTree = self.removeSubToken(tree)
                 self.scanForInterestedTokens(subTree)
-                self.interestedTokens.append(self.closeBrace)
-        return self.interestedTokens
+                Scope.interestedTokens.append(self.closeBrace)
+        return Scope.interestedTokens
 
     def removeSubToken(self, token):
-        if token.id is 'int':
-            pass
-        elif token.id is '{':
+        if token.id is '{':
             subToken = token.data
             token.data = []
         return subToken
+
+    def findLocal(self, identifier):
+        for dataType in self.currentScope.list:
+            if dataType.data[0].data[0] is identifier:
+                return dataType
+        return None
