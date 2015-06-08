@@ -120,7 +120,6 @@ class ByteCodeGenerator:
             GPR.insert(0,count)
             GPR.insert(1,secondRegister)
             GPR.insert(2,firstRegister)
-
             #self.oracle.getALargestWorkingRegister()
         else:
             GPR.insert(0,secondRegister)

@@ -6,6 +6,7 @@ class Mapping:
     registerFromLeft = 0  # Start with the location 0
     registerFromRight = MaxRegister - 1
     registerLeft = MaxRegister
+
     framePointerRegister = MaxRegister + 1
 
     smallerRegisterUsed = 0

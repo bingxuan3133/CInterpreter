@@ -10,8 +10,10 @@ class InformationInjector:
             #WHERE
             # =0 - equal weight or no child
             # >0 - right side is heavier
-            # <0 - left side is heavier
+
         for element in token.data:
+
+            element.weight = []
             if element.id == '(identifier)' or element.id == '(literal)':
                 tempRegisterRequiredAtThatLevel = self.insertBasicInformationForAChildToken(element)
             else:
@@ -71,3 +73,4 @@ class InformationInjector:
             suitableRegister = abs(registerNumber[1])
 
         return suitableRegister
+

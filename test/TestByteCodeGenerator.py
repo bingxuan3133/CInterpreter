@@ -53,7 +53,6 @@ class TestByteCodeGenerator(unittest.TestCase):
         lexer = Lexer('int x', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-
         token = parser.parseStatement(0)
         self.informationInjector.injectRegisterRequired(token[0])
         self.byteCodeGenerator.initGeneration()
@@ -102,16 +101,61 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.manager.setParser(parser)
 
         token = parser.parse(0)
+
+        self.byteCodeGenerator.mapping.registerFromLeft = 5
+        self.byteCodeGenerator.mapping.registerLeft = 1
+        self.byteCodeGenerator.variablesInThisAST['x'] = 4
         self.informationInjector.injectRegisterRequired(token)
+
         self.byteCodeGenerator.initGeneration()
         byteCodes = token.generateByteCode()
-        self.assertEqual(self.byteCodeGenerator.loadValue([0, 4]), byteCodes[0])
-        self.assertEqual(self.byteCodeGenerator.loadValue([5, 3]), byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.multiplyRegister([0, 0, 5]), byteCodes[2])
-        self.assertEqual(self.byteCodeGenerator.loadValue([5, 2]), byteCodes[3])
-        self.assertEqual(self.byteCodeGenerator.addRegister([0, 0, 5]), byteCodes[4])
+        self.assertEqual(self.byteCodeGenerator.storeMultiple([7, 0b011100]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue([2, 4]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 3]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.multiplyRegister([2, 2, 5]), byteCodes[3])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 2]), byteCodes[4])
+        self.assertEqual(self.byteCodeGenerator.addRegister([2, 2, 5]), byteCodes[5])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 10]), byteCodes[6])
+        self.assertEqual(self.byteCodeGenerator.subRegister([5, 2, 5]), byteCodes[7])
+        self.assertEqual(self.byteCodeGenerator.loadMultiple([7, 0b011100]), byteCodes[8])
+
+
+    def test_generateByteCode_will_push_the_register_two_times(self):
+        """
+                    =(max=4,min=2)
+            /                       \
+            x(max=1,min=1)       * (max=3,min=2)<- min is hardcoded to 6, max is hardcoded to 6 so that the push will works
+                            /                       \
+                        * (max=2,min=2)        10 (max=1,min=1)
+                    /                     \
+            8 (max=1,min=1)               9 (max=1,min=1)
+        """
+        lexer = Lexer(' x = 8 * 9 * 10', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parse(0)
+        self.informationInjector.injectRegisterRequired(token)
+        token.minRequiredRegister = 4
+        token.data[1].minRequiredRegister = 6
+        token.data[1].maxRequiredRegister = 6
+        self.byteCodeGenerator.mapping.registerLeft = 1
+        self.byteCodeGenerator.mapping.registerFromLeft = 5
+        self.byteCodeGenerator.registersInThisAST['x'] = 4
+
+        self.byteCodeGenerator.initGeneration()
+        byteCodes = token.generateByteCode()
+        self.assertEqual(self.byteCodeGenerator.storeMultiple([7, 0b011100]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.storeMultiple([7, 0b000011]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.loadValue([0, 9]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 8]), byteCodes[3])
+        self.assertEqual(self.byteCodeGenerator.multiplyRegister([0, 0, 5]), byteCodes[4])
         self.assertEqual(self.byteCodeGenerator.loadValue([5, 10]), byteCodes[5])
-        self.assertEqual(self.byteCodeGenerator.subRegister([0, 0, 5]), byteCodes[6])
+        self.assertEqual(self.byteCodeGenerator.multiplyRegister([2, 0, 5]), byteCodes[6])
+        self.assertEqual(self.byteCodeGenerator.loadMultiple([7, 0b000011]), byteCodes[7])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[8])
+        self.assertEqual(self.byteCodeGenerator.assignRegister([2, 5]), byteCodes[9])
+        self.assertEqual(self.byteCodeGenerator.loadMultiple([7, 0b011100]), byteCodes[10])
 
 
 

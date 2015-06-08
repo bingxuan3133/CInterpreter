@@ -123,5 +123,32 @@ class TestDeclarationContext(unittest.TestCase):
         self.assertEqual(15, token[0].data[3].data[1].data[0])
 
 
+    def test_nested_bracers(self):
+        lexer = Lexer('{ int x = 3 ;\
+                         { int y = 5 ; }\
+                         { int z = 15 ; } }', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        self.assertEqual('{', token[0].id)
+        self.assertEqual('int', token[0].data[0].id)
+        self.assertEqual('x', token[0].data[0].data[0].data[0])
+        self.assertEqual('=', token[0].data[1].id)
+        self.assertEqual('x', token[0].data[1].data[0].data[0])
+        self.assertEqual(3, token[0].data[1].data[1].data[0])
+        self.assertEqual('{', token[0].data[2].id)
+        self.assertEqual('int', token[0].data[2].data[0].id)
+        self.assertEqual('y', token[0].data[2].data[0].data[0].data[0])
+        self.assertEqual('=', token[0].data[2].data[1].id)
+        self.assertEqual('y', token[0].data[2].data[1].data[0].data[0])
+        self.assertEqual(5, token[0].data[2].data[1].data[1].data[0])
+        self.assertEqual('{', token[0].data[3].id)
+        self.assertEqual('int', token[0].data[3].data[0].id)
+        self.assertEqual('z', token[0].data[3].data[0].data[0].data[0])
+        self.assertEqual('=', token[0].data[3].data[1].id)
+        self.assertEqual('z', token[0].data[3].data[1].data[0].data[0])
+        self.assertEqual(15, token[0].data[3].data[1].data[1].data[0])
+
 if __name__ == '__main__':
     unittest.main()
