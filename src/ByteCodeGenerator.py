@@ -8,8 +8,8 @@ from RegisterAllocator import *
 
 class ByteCodeGenerator:
     byteCodeList = []
-    byteRequired = {'int': 4}
-    registersInThisAST = {}
+    byteRequired = {'char': 1, 'short': 1, 'int': 4, 'long': 4, 'float': 4, 'double': 8}
+    variablesInThisAST = {}
 
     def __init__(self, context, contextManager):
         self.context = context
@@ -76,9 +76,9 @@ class ByteCodeGenerator:
         for index in range(len(token.data)-1, -1, -1):
             if token.data[index].id == '(identifier)':
                 if secondTime == 0:
-                    self.loadRegister([self.mapping.getAFreeWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]]])
+                    self.loadRegister([self.mapping.getAFreeWorkingRegister(), 7, self.variablesInThisAST[token.data[index].data[0]]])
                 else:
-                    self.loadRegister([self.mapping.getALargestWorkingRegister(), 7, self.registersInThisAST[token.data[index].data[0]]])
+                    self.loadRegister([self.mapping.getALargestWorkingRegister(), 7, self.variablesInThisAST[token.data[index].data[0]]])
             elif token.data[index].id == '(literal)':
                 if secondTime == 0:
                     self.loadValue([self.mapping.getAFreeWorkingRegister(), token.data[index].data[0]])
@@ -93,9 +93,9 @@ class ByteCodeGenerator:
         for index in range(0, len(token.data)):
             if token.data[index].id == '(identifier)':
                 if secondTime == 0:
-                    self.loadRegister([self.mapping.getAFreeWorkingRegister(), self.mapping.framePointerRegister, self.registersInThisAST[token.data[index].data[0]]])
+                    self.loadRegister([self.mapping.getAFreeWorkingRegister(), self.mapping.framePointerRegister, self.variablesInThisAST[token.data[index].data[0]]])
                 else:
-                    self.loadRegister([self.mapping.getALargestWorkingRegister(), self.mapping.framePointerRegister, self.registersInThisAST[token.data[index].data[0]]])
+                    self.loadRegister([self.mapping.getALargestWorkingRegister(), self.mapping.framePointerRegister, self.variablesInThisAST[token.data[index].data[0]]])
             elif token.data[index].id == '(literal)':
                 if secondTime == 0:
                     self.loadValue([self.mapping.getAFreeWorkingRegister(), token.data[index].data[0]])
@@ -120,17 +120,17 @@ class ByteCodeGenerator:
             GPR.insert(0,count)
             GPR.insert(1,secondRegister)
             GPR.insert(2,firstRegister)
-            if generateByteCode == self.assignRegister:
-                GPR[0] = secondRegister
-                GPR[1] = firstRegister
-            generateByteCode(GPR)
             #self.oracle.getALargestWorkingRegister()
         else:
             GPR.insert(0,secondRegister)
             GPR.insert(1,secondRegister)
             GPR.insert(2,firstRegister)
-            generateByteCode(GPR)
             self.mapping.getAFreeWorkingRegister()
+
+        if generateByteCode == self.assignRegister:
+            GPR[0] = secondRegister
+            GPR[1] = firstRegister
+        generateByteCode(GPR)
 
     def initGeneration(self):
         thisGenerator = self
