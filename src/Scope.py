@@ -1,23 +1,32 @@
 __author__ = 'admin'
 
-class Scope:
-    interestedTokens = []
+import copy
 
-    def __init__(self, closeBrace):
+class Scope:
+    def __init__(self):
         self.list = []
-        self.parentScope = self.list
+        self.parentScope = None
+        self.__repr__ = self.revealSelf
+
+    def revealSelf(self):
+        return '{0}'.format(self.list)
+
+class ScopeBuilder:
+    def __init__(self, closeBrace):
+        self.scope = Scope()
+        self.currentScope = copy.copy(self.scope)
         self.closeBrace = closeBrace
+        self.interestedTokens = []
 
     def buildScope(self, token):
-        self.currentScope = Scope(self.closeBrace)
         if token.id is '{':
-            newList = []
-            self.currentScope = Scope(self.closeBrace)
-            self.currentScope.parentScope = self.currentScope.list
-            self.currentScope.list = newList
+            self.currentScope.parentScope = copy.copy(self.currentScope)
+            newScopeList = []
+            self.currentScope.list.append(newScopeList)
+            self.currentScope.list = newScopeList
         elif token.id is '}':
-            self.currentScope.list = self.currentScope.parentScope
-            self.currentScope.parentScope.pop()
+            self.currentScope = self.currentScope.parentScope
+            self.currentScope.list.pop()
         else:
             self.currentScope.list.append(token)
         return
@@ -28,15 +37,16 @@ class Scope:
                 self.scanForInterestedTokens(subTree)
         else:
             if tree.id is 'int':
-                Scope.interestedTokens.append(tree)
+                self.interestedTokens.append(tree)
             elif tree.id is '{':
-                Scope.interestedTokens.append(tree)
+                self.interestedTokens.append(tree)
                 subTree = self.removeSubToken(tree)
                 self.scanForInterestedTokens(subTree)
-                Scope.interestedTokens.append(self.closeBrace)
-        return Scope.interestedTokens
+                self.interestedTokens.append(self.closeBrace)
+        return self.interestedTokens
 
     def removeSubToken(self, token):
+        subToken = None
         if token.id is '{':
             subToken = token.data
             token.data = []
