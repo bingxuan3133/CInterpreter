@@ -1,7 +1,9 @@
 __author__ = 'JingWen'
-
+from ByteCodeGenerator import *
 class InformationInjector:
     def injectRegisterRequired(self, token):
+        if(self.bypassTheInjection(token)):
+            return 0
         registerNumber =[]
         token.weight = []
         weightIndex = 1
@@ -15,16 +17,16 @@ class InformationInjector:
 
             element.weight = []
             if element.id == '(identifier)' or element.id == '(literal)':
-                tempRegisterRequiredAtThatLevel = self.insertBasicInformationForAChildToken(element)
+                tempRegisterRequired = self.insertBasicInformationForAChildToken(element)
             else:
-                tempRegisterRequiredAtThatLevel = self.injectRegisterRequired(element)
-            registerNumber.append(tempRegisterRequiredAtThatLevel)
+                tempRegisterRequired = self.injectRegisterRequired(element)
+            registerNumber.append(tempRegisterRequired)
 
         self.getTheWeightFromChild(token, weightIndex)
         self.findOutTheHeavierSide(token)
 
         thisLevelRegister = self.getSuitableRegisterFromTheChild(registerNumber)
-        token.registerRequiredAtThatLevel = thisLevelRegister
+        token.registerRequired = thisLevelRegister
 
         if token.id != '(identifier)' and token.id != '(literal)':
             token.maxRequiredRegister = self.determineTheMaxRequiredRegister(token)
@@ -33,9 +35,15 @@ class InformationInjector:
         return thisLevelRegister
 
 
+
+    def bypassTheInjection(self, token):
+        return ByteCodeGenerator.isADeclaration(self,token.id)
+
+
+
     def insertBasicInformationForAChildToken(self, token):
         token.weight = []
-        token.registerRequiredAtThatLevel = 1
+        token.registerRequired = 1
         token.maxRequiredRegister = 1
         token.minRequiredRegister = 1
         token.weight.insert(0, 0)

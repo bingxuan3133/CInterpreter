@@ -49,7 +49,7 @@ class TestByteCodeGenerator(unittest.TestCase):
 
 
 
-    def xtest_generateByteCode_will_understand_declaration_and_generate_reservation_byteCode(self):
+    def test_generateByteCode_will_understand_declaration_and_generate_reservation_byteCode(self):
         lexer = Lexer('int x', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
@@ -57,7 +57,7 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.informationInjector.injectRegisterRequired(token[0])
         self.byteCodeGenerator.initGeneration()
         byteCodes = token[0].generateByteCode()
-        self.assertEqual(self.byteCodeGenerator.subRegister([7, 4]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.subFrameRegister([7, 4]), byteCodes[0])
 
     def test_generateByteCode_will_generate_code_in_the_list_form(self):
         """

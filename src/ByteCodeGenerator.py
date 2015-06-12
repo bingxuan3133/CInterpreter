@@ -19,6 +19,10 @@ class ByteCodeGenerator:
 
     def nothing(self):
         pass
+    def subFrameRegister(self, GPR=[]):
+        number = 0xf5 | GPR[0] << 8 | GPR[1] << 11
+        self.byteCodeList.append(number)
+        return number
     def divideRegister(self):
         pass
     def multiplyRegister(self, GPR=[]):
@@ -134,27 +138,29 @@ class ByteCodeGenerator:
     def initGeneration(self):
         thisGenerator = self
 
-        def initialization(self):
+        def initialization(self,token):
             variableCounter = 0
-            for token in self:
-                if token.id in thisGenerator.byteRequired:
-                    variableCounter += 1
+            if token.id in thisGenerator.byteRequired:
+                variableCounter += 1
 
-                thisGenerator.subRegister([7, thisGenerator.byteRequired[self.id]*variableCounter])
-                return thisGenerator.byteCodeList
+            thisGenerator.subFrameRegister([thisGenerator.mapping.framePointerRegister, thisGenerator.byteRequired[token.id]*variableCounter])
+            return thisGenerator.byteCodeList
 
         respectiveByteCodeFunction = {'int': initialization, '=': self.assignRegister, '+': self.addRegister, \
                                             '-': self.subRegister, '*': self.multiplyRegister, '/': self.divideRegister, \
                                             '(systemToken)': self.nothing, ';': self.nothing, ',': self.nothing, '}': self.nothing, '{': self.nothing}
 
         def generateByteCode(self):
-            pushed = thisGenerator.registerAllocator.decideWhetherToPush(self)
-            thisGenerator.findOutAndGenerateCorrectSideCode(self)
+            if thisGenerator.isADeclaration(self.id):
+                return initialization(None, self)
+            else:
+                pushed = thisGenerator.registerAllocator.decideWhetherToPush(self)
+                thisGenerator.findOutAndGenerateCorrectSideCode(self)
 
-            thisGenerator.decideWhetherToSaveSlotForPopValue(pushed, respectiveByteCodeFunction[self.id])
+                thisGenerator.decideWhetherToSaveSlotForPopValue(pushed, respectiveByteCodeFunction[self.id])
 
-            thisGenerator.registerAllocator.decideWhetherToPop(pushed)
-            return thisGenerator.byteCodeList
+                thisGenerator.registerAllocator.decideWhetherToPop(pushed)
+                return thisGenerator.byteCodeList
 
 
         #Start the initialization
@@ -162,6 +168,12 @@ class ByteCodeGenerator:
         for context in self.contextManager.currentContexts:
             for token in context.symbolTable:
                 context.symbolTable[token].generateByteCode = generateByteCode
+
+    def isADeclaration(self, unknownToken):
+        if unknownToken in ByteCodeGenerator.byteRequired:
+            return True
+        else:
+            return False
 
 
 

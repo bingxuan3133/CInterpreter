@@ -57,17 +57,17 @@ class TestInformationInjector(unittest.TestCase):
             token = token[0].data[0]
         self.informationInjector.injectRegisterRequired(token)
 
-        self.assertEqual(1, token.data[0].registerRequiredAtThatLevel)
-        self.assertEqual(2, token.registerRequiredAtThatLevel)
-        self.assertEqual(-2, token.data[1].registerRequiredAtThatLevel)
-        self.assertEqual(1, token.data[1].data[1].registerRequiredAtThatLevel)
-        self.assertEqual(2, token.data[1].data[0].registerRequiredAtThatLevel)
-        self.assertEqual(1, token.data[1].data[0].data[0].registerRequiredAtThatLevel)
-        self.assertEqual(-2, token.data[1].data[0].data[1].registerRequiredAtThatLevel)
-        self.assertEqual(-2, token.data[1].data[0].data[1].data[0].registerRequiredAtThatLevel)
-        self.assertEqual(1, token.data[1].data[0].data[1].data[1].registerRequiredAtThatLevel)
-        self.assertEqual(1, token.data[1].data[0].data[1].data[0].data[0].registerRequiredAtThatLevel)
-        self.assertEqual(1, token.data[1].data[0].data[1].data[0].data[1].registerRequiredAtThatLevel)
+        self.assertEqual(1, token.data[0].registerRequired)
+        self.assertEqual(2, token.registerRequired)
+        self.assertEqual(-2, token.data[1].registerRequired)
+        self.assertEqual(1, token.data[1].data[1].registerRequired)
+        self.assertEqual(2, token.data[1].data[0].registerRequired)
+        self.assertEqual(1, token.data[1].data[0].data[0].registerRequired)
+        self.assertEqual(-2, token.data[1].data[0].data[1].registerRequired)
+        self.assertEqual(-2, token.data[1].data[0].data[1].data[0].registerRequired)
+        self.assertEqual(1, token.data[1].data[0].data[1].data[1].registerRequired)
+        self.assertEqual(1, token.data[1].data[0].data[1].data[0].data[0].registerRequired)
+        self.assertEqual(1, token.data[1].data[0].data[1].data[0].data[1].registerRequired)
 
     def test_injectRegisterRequired_will_give_a_zero_for_equal_weight_side(self):
         lexer = Lexer('{ x = 2 ; }', self.context)
