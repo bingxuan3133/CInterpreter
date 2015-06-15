@@ -12,7 +12,7 @@ class Scope:
         return '{0}'.format(self.list)
 
 class ScopeBuilder:
-    def __init__(self, closeBrace):
+    def __init__(self, closeBrace):  # closing brace is used for implementation of buildScope
         self.scope = Scope()
         self.currentScope = copy.copy(self.scope)
         self.closeBrace = closeBrace
@@ -31,7 +31,7 @@ class ScopeBuilder:
             self.currentScope.list.append(token)
         return
 
-    def scanForInterestedTokens(self, tree):
+    def scanForInterestedTokens(self, tree):  # tree: Parsed Tree
         if type(tree) is list:
             for subTree in tree:
                 self.scanForInterestedTokens(subTree)
@@ -42,7 +42,9 @@ class ScopeBuilder:
                 self.interestedTokens.append(tree)
                 subTree = self.removeSubToken(tree)
                 self.scanForInterestedTokens(subTree)
-                self.interestedTokens.append(self.closeBrace)
+                self.interestedTokens.append(self.closeBrace)   # add closing brace when detect end of a scope
+            else:
+                pass
         return self.interestedTokens
 
     def removeSubToken(self, token):

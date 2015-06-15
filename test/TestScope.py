@@ -38,7 +38,7 @@ class TestScope(unittest.TestCase):
         self.manager.addContext('FlowControl', self.flowControlContext)
         self.manager.setCurrentContexts(self.contexts)
 
-    def test_buildScope(self):
+    def test_buildScope_can_deal_with_identifiers(self):
         lexer = Lexer('int x ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
@@ -64,7 +64,7 @@ class TestScope(unittest.TestCase):
         self.assertEqual('(identifier)', scopeBuilder.scope.list[1].data[0].id)
         self.assertEqual('y', scopeBuilder.scope.list[1].data[0].data[0])
 
-    def test_buildScope_with_bracers(self):
+    def test_buildScope_can_build_identifiers_with_braces(self):
         token1 = self.context.createToken('int')
         token2 = self.context.createToken('x')
         token3 = self.context.createToken('{')
@@ -104,14 +104,13 @@ class TestScope(unittest.TestCase):
         self.assertEqual('(identifier)', scopeBuilder.scope.list[0].data[0].id)
         self.assertEqual('x', scopeBuilder.scope.list[0].data[0].data[0])
 
-    def test_scanForInterestedTokens(self):
+    def test_scanForInterestedTokens_will_scan_for_identifiers_and_opening_curly_braces_and_buildScope(self):
         lexer = Lexer('int x ; { int y ; }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatements(0)
 
         closeBrace = self.context.createToken('}')
-        openBrace = self.context.createToken('{')
         scopeBuilder = ScopeBuilder(closeBrace)
 
         tokenLists = scopeBuilder.scanForInterestedTokens(token)
@@ -122,6 +121,17 @@ class TestScope(unittest.TestCase):
         self.assertEqual('int', tokenLists[2].id)
         self.assertEqual('y', tokenLists[2].data[0].data[0])
         self.assertEqual('}', tokenLists[3].id)
+
+    def test_buildScope_1(self):
+        lexer = Lexer('int x ; { int y ; }', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatements(0)
+
+        closeBrace = self.context.createToken('}')
+        scopeBuilder = ScopeBuilder(closeBrace)
+
+        tokenLists = scopeBuilder.scanForInterestedTokens(token)
 
         scopeBuilder.buildScope(tokenLists[0])
         self.assertEqual(1, len(scopeBuilder.scope.list))
@@ -166,6 +176,18 @@ class TestScope(unittest.TestCase):
         self.assertEqual('y', tokenLists[2].data[0].data[0])
         self.assertEqual('}', tokenLists[3].id)
 
+    def test_buildScope_2(self):
+        lexer = Lexer('int x ; x = 2 + 3 ; { x = 5 + 6 ; int y ; }', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatements(0)
+
+        closeBrace = self.context.createToken('}')
+        openBrace = self.context.createToken('{')
+        scopeBuilder = ScopeBuilder(closeBrace)
+
+        tokenLists = scopeBuilder.scanForInterestedTokens(token)
+
         scopeBuilder.buildScope(tokenLists[0])
         self.assertEqual(1, len(scopeBuilder.scope.list))
         self.assertEqual('int', scopeBuilder.scope.list[0].id)
@@ -190,26 +212,13 @@ class TestScope(unittest.TestCase):
         self.assertEqual('(identifier)', scopeBuilder.scope.list[0].data[0].id)
         self.assertEqual('x', scopeBuilder.scope.list[0].data[0].data[0])
 
-    def test_scanForInterestedTokens_and_build_scope(self):
-        lexer = Lexer('{ { { { } { } } { } } }', self.context)
-        parser = Parser(lexer, self.manager)
-        self.manager.setParser(parser)
-        token = parser.parseStatements(0)
-
-        closeBrace = self.context.createToken('}')
-        openBrace = self.context.createToken('{')
-        scopeBuilder = ScopeBuilder(closeBrace)
-
-        tokenLists = scopeBuilder.scanForInterestedTokens(token)
-
-    def test_findLocal(self):
+    def test_findLocal_with_2_variables(self):
         lexer = Lexer('{ int x ; { int y ; } }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatements(0)
 
         closeBrace = self.context.createToken('}')
-        openBrace = self.context.createToken('{')
         scopeBuilder = ScopeBuilder(closeBrace)
 
         tokenLists = scopeBuilder.scanForInterestedTokens(token)
@@ -242,7 +251,82 @@ class TestScope(unittest.TestCase):
         self.assertEqual('(identifier)', returnedToken.data[0].id)
         self.assertEqual('y', returnedToken.data[0].data[0])
 
-    def test_findLocal_with_many_variable(self):
+    def test_scanForInterestedTokens_and_buildScope_with_many_variables(self):
+        lexer = Lexer('{ int a ; int b ; { int x ; { int y ; } int z ; } }', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatements(0)
+
+        closeBrace = self.context.createToken('}')
+        openBrace = self.context.createToken('{')
+        scopeBuilder = ScopeBuilder(closeBrace)
+
+        tokenLists = scopeBuilder.scanForInterestedTokens(token)
+
+        # scopeBuilder.list = []
+
+        # scopeBuilder.list = [ [] ]
+        scopeBuilder.buildScope(tokenLists[0])
+        self.assertEqual(list(), scopeBuilder.scope.list[0])
+
+        # scopeBuilder.list = [ [a] ]
+        scopeBuilder.buildScope(tokenLists[1])
+        self.assertEqual('a', scopeBuilder.scope.list[0][0].data[0].data[0])
+
+        # scopeBuilder.list = [ [a, b] ]
+        scopeBuilder.buildScope(tokenLists[2])
+        self.assertEqual('a', scopeBuilder.scope.list[0][0].data[0].data[0])
+        self.assertEqual('b', scopeBuilder.scope.list[0][1].data[0].data[0])
+
+        # scopeBuilder.list = [ [a, b], [] ]
+        scopeBuilder.buildScope(tokenLists[3])
+        self.assertEqual('a', scopeBuilder.scope.list[0][0].data[0].data[0])
+        self.assertEqual('b', scopeBuilder.scope.list[0][1].data[0].data[0])
+        self.assertEqual(list(), scopeBuilder.scope.list[0][2])
+
+        # scopeBuilder.list = [ [a, b], [x] ]
+        scopeBuilder.buildScope(tokenLists[4])
+        self.assertEqual('a', scopeBuilder.scope.list[0][0].data[0].data[0])
+        self.assertEqual('b', scopeBuilder.scope.list[0][1].data[0].data[0])
+        self.assertEqual('x', scopeBuilder.scope.list[0][2][0].data[0].data[0])
+
+        # scopeBuilder.list = [ [a, b], [x, [] ] ]
+        scopeBuilder.buildScope(tokenLists[5])
+        self.assertEqual('a', scopeBuilder.scope.list[0][0].data[0].data[0])
+        self.assertEqual('b', scopeBuilder.scope.list[0][1].data[0].data[0])
+        self.assertEqual('x', scopeBuilder.scope.list[0][2][0].data[0].data[0])
+        self.assertEqual(list(), scopeBuilder.scope.list[0][2][1])
+
+        # scopeBuilder.list = [ [a, b], [x, [y] ] ]
+        scopeBuilder.buildScope(tokenLists[6])
+        self.assertEqual('a', scopeBuilder.scope.list[0][0].data[0].data[0])
+        self.assertEqual('b', scopeBuilder.scope.list[0][1].data[0].data[0])
+        self.assertEqual('x', scopeBuilder.scope.list[0][2][0].data[0].data[0])
+        self.assertEqual('y', scopeBuilder.scope.list[0][2][1][0].data[0].data[0])
+
+        # scopeBuilder.list = [ [a, b], [x] ]
+        scopeBuilder.buildScope(tokenLists[7])
+        self.assertEqual('a', scopeBuilder.scope.list[0][0].data[0].data[0])
+        self.assertEqual('b', scopeBuilder.scope.list[0][1].data[0].data[0])
+        self.assertEqual('x', scopeBuilder.scope.list[0][2][0].data[0].data[0])
+
+        # scopeBuilder.list = [ [a, b], [x, z] ]
+        scopeBuilder.buildScope(tokenLists[8])
+        self.assertEqual('a', scopeBuilder.scope.list[0][0].data[0].data[0])
+        self.assertEqual('b', scopeBuilder.scope.list[0][1].data[0].data[0])
+        self.assertEqual('x', scopeBuilder.scope.list[0][2][0].data[0].data[0])
+        self.assertEqual('z', scopeBuilder.scope.list[0][2][1].data[0].data[0])
+
+        # scopeBuilder.list = [ [a, b] ]
+        scopeBuilder.buildScope(tokenLists[9])
+        self.assertEqual('a', scopeBuilder.scope.list[0][0].data[0].data[0])
+        self.assertEqual('b', scopeBuilder.scope.list[0][1].data[0].data[0])
+
+        # scopeBuilder.list = [ ]
+        scopeBuilder.buildScope(tokenLists[10])
+        self.assertEqual(list(), scopeBuilder.scope.list)
+
+    def test_findLocal_with_many_variables(self):
         lexer = Lexer('{ int a ; int b ; { int x ; { int y ; } int z ; } }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
