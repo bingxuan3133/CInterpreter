@@ -142,7 +142,7 @@ class ByteCodeGenerator:
         def recordTheVariable(self,token):
             if token.id in thisGenerator.byteRequired:
                 thisGenerator.variableCounter += 1
-                thisGenerator.variablesInThisAST[token.data[0].id] = thisGenerator.byteRequired[token.id]
+                thisGenerator.variablesInThisAST[token.data[0].data[0]] = thisGenerator.byteRequired[token.id]
                 thisGenerator.memorySize += thisGenerator.byteRequired[token.id]
 
         respectiveByteCodeFunction = {'=': self.assignRegister, '+': self.addRegister, \

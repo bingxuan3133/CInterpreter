@@ -112,6 +112,25 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.assignRegister([0, 5]), byteCodes[3])
 
 
+    def xtest_generateByteCode_will_generate_code_for_multiple_initialization(self):
+        lexer = Lexer('int x = 3 , y = 5 , z = 10', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        self.byteCodeGenerator.initGeneration()
+        for subTree in token:
+            self.informationInjector.injectRegisterRequired(subTree)
+            byteCodes = subTree.generateByteCode()
+
+        byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
+        self.assertEqual(self.byteCodeGenerator.subFrameRegister([7, 12]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue([0, 3]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.assignRegister([0, 5]), byteCodes[3])
+        self.assertEqual(self.byteCodeGenerator.loadValue([0, 5]), byteCodes[4])
+
+
     def test_generateByteCode_will_return_the_byteCode_in_a_list_for_a_multiply_expression(self):
         lexer = Lexer('3 * 4 + 2 ', self.context)
         parser = Parser(lexer, self.manager)
@@ -193,20 +212,6 @@ class TestByteCodeGenerator(unittest.TestCase):
 
     """
 #These Test Code Might be useful in future(Do not Remove, admin:Jing Wen)
-    def test_generateByteCode_will_generate_code_for_multiple_initialization(self):
-        lexer = Lexer('int x = 3 , y = 5 , z = 10', self.context)
-        parser = Parser(lexer, self.manager)
-        self.manager.setParser(parser)
-
-        token = parser.parseStatement(0)
-        byteCodes = self.byteCodeGenerator.generateByteCode(token)
-        self.assertEqual(self.byteCodeGenerator.subRegister(7, 12), byteCodes[0])
-        self.assertEqual(self.byteCodeGenerator.loadValue(0, 3), byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.storeValue(0, 7, 4), byteCodes[2])
-        self.assertEqual(self.byteCodeGenerator.loadValue(0, 5), byteCodes[3])
-        self.assertEqual(self.byteCodeGenerator.storeValue(0, 7, 8), byteCodes[4])
-        self.assertEqual(self.byteCodeGenerator.loadValue(0, 10), byteCodes[5])
-        self.assertEqual(self.byteCodeGenerator.storeValue(0, 7, 12), byteCodes[6])
 
 
     def test_generateByteCode_will_generate_code_initialization_and_assignment(self):
