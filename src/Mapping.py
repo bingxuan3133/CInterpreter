@@ -10,30 +10,36 @@ class Mapping:
 
     smallerRegisterUsed = 0
 
+    def reset(self):
+        pass
+
     def getAFreeWorkingRegister(self):
+        if self.registerLeft == 0:
+            raise ReferenceError
+        self.checkReservedRegister()
         temp = self.registerFromLeft
         self.registerFromLeft += 1
         self.registerLeft -= 1
         return temp
 
     def getALargestWorkingRegister(self):
+        if self.registerLeft == 0:
+            raise ReferenceError
         temp = self.registerFromRight
         self.registerFromRight -= 1
         self.registerLeft -= 1
         return temp
 
     def releaseALargestWorkingRegister(self):
+        if self.registerLeft == self.MaxRegister:
+            raise ReferenceError
         self.registerFromRight += 1
         self.registerLeft += 1
         return self.registerFromRight
 
     def releaseAWorkingRegister(self):
-
         self.registerFromLeft -= 1
         self.registerLeft += 1
-        while self.smallerRegisterUsed > 0:
-            self.smallerRegisterUsed -= 1
-            self.releaseAWorkingRegister()
         return self.registerFromLeft
 
     def getASmallestFreeRegisterBeforePop(self,status):
@@ -44,9 +50,10 @@ class Mapping:
         self.smallerRegisterUsed += 1
         return count
 
-    def reset(self):
-        pass
-
+    def checkReservedRegister(self):
+        while self.smallerRegisterUsed > 0:
+            self.smallerRegisterUsed -= 1
+            self.getAFreeWorkingRegister()
 
 """
     def getSpecificWorkingRegister(self, numberOfRegister):
