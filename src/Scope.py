@@ -1,23 +1,34 @@
 __author__ = 'admin'
 
+import copy
+
 class Scope:
-    def __init__(self, closeBrace):
+    def __init__(self):
         self.list = []
-        self.currentScope = self.list
-        self.interestedTokens = []
+        self.parentScope = None
+        self.__repr__ = self.revealSelf
+
+    def revealSelf(self):
+        return '{0}'.format(self.list)
+
+class ScopeBuilder:
+    def __init__(self, closeBrace):
+        self.scope = Scope()
+        self.currentScope = copy.copy(self.scope)
         self.closeBrace = closeBrace
+        self.interestedTokens = []
 
     def buildScope(self, token):
         if token.id is '{':
-            newList = []
-            self.currentScope.append(newList)
-            self.parentScope = self.currentScope
-            self.currentScope = newList
+            self.currentScope.parentScope = copy.copy(self.currentScope)
+            newScopeList = []
+            self.currentScope.list.append(newScopeList)
+            self.currentScope.list = newScopeList
         elif token.id is '}':
-            self.currentScope = self.parentScope
-            self.parentScope.pop()
+            self.currentScope = self.currentScope.parentScope
+            self.currentScope.list.pop()
         else:
-            self.currentScope.append(token)
+            self.currentScope.list.append(token)
         return
 
     def scanForInterestedTokens(self, tree):
@@ -35,9 +46,14 @@ class Scope:
         return self.interestedTokens
 
     def removeSubToken(self, token):
-        if token.id is 'int':
-            pass
-        elif token.id is '{':
+        subToken = None
+        if token.id is '{':
             subToken = token.data
             token.data = []
         return subToken
+
+    def findLocal(self, identifier):
+        for dataType in self.currentScope.list:
+            if dataType.data[0].data[0] is identifier:
+                return dataType
+        return None

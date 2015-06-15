@@ -4,10 +4,13 @@ def revealSelf(self):
 class SymbolBase:
     def led(self):
         raise SyntaxError('No led(.) function defined!')
+
     def nud(self):
         raise SyntaxError('No nud(.) function defined!')
+
     def generateByteCode(self):
         raise SyntaxError('No generation function defined!')
+
 class Context:
     PREFIX_UNARY = 1
     POSTFIX_UNARY = 2

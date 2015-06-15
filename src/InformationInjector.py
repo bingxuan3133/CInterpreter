@@ -14,7 +14,6 @@ class InformationInjector:
             # >0 - right side is heavier
 
         for element in token.data:
-
             element.weight = []
             if element.id == '(identifier)' or element.id == '(literal)':
                 tempRegisterRequired = self.insertBasicInformationForAChildToken(element)

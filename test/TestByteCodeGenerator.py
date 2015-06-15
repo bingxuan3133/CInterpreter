@@ -86,6 +86,7 @@ class TestByteCodeGenerator(unittest.TestCase):
 
         token = parser.parse(0)
         self.informationInjector.injectRegisterRequired(token)
+
         self.byteCodeGenerator.variablesInThisAST['x'] =4
 
         self.byteCodeGenerator.initGeneration()
@@ -138,6 +139,7 @@ class TestByteCodeGenerator(unittest.TestCase):
 
         token = parser.parse(0)
         self.informationInjector.injectRegisterRequired(token)
+
         self.byteCodeGenerator.initGeneration()
         byteCodes = token.generateByteCode()
         self.assertEqual(self.byteCodeGenerator.loadValue([0, 4]), byteCodes[0])
@@ -372,7 +374,6 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[6])
         self.assertEqual(self.byteCodeGenerator.assignRegister([2, 5]), byteCodes[7])
         self.assertEqual(self.byteCodeGenerator.loadMultiple([7, 0b011100]), byteCodes[8])
-
 
     def test_generateByteCode_will_push_the_register_two_times(self):
         """
