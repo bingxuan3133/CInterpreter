@@ -16,7 +16,8 @@ class RegisterAllocator:
                     break
                 returnedWorkingRegister = self.generator.mapping.releaseAWorkingRegister()
             tempList = [7,number]
-            self.generator.storeMultiple(tempList)
+            Code = self.generator.storeMultiple(tempList)
+            self.generator.byteCodeList.append(Code)
 
 
         return number
@@ -25,7 +26,8 @@ class RegisterAllocator:
         count =0
         if number != 0:
             tempList = [7,number]
-            self.generator.loadMultiple(tempList)
+            Code = self.generator.loadMultiple(tempList)
+            self.generator.byteCodeList.append(Code)
             while number != 0:
                 bit = number & 0b000001
                 number = number >> 1

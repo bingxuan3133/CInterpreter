@@ -57,7 +57,21 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.informationInjector.injectRegisterRequired(token[0])
         self.byteCodeGenerator.initGeneration()
         byteCodes = token[0].generateByteCode()
+        byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
         self.assertEqual(self.byteCodeGenerator.subFrameRegister([7, 4]), byteCodes[0])
+
+    def test_generateByteCode_will_generate_multiple_byteCode_for_a_multiple_declaration(self):
+        lexer = Lexer('int x , y , z', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        self.byteCodeGenerator.initGeneration()
+        token[0].generateByteCode()
+        token[1].generateByteCode()
+        byteCodes = token[2].generateByteCode()
+        byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
+        self.assertEqual(self.byteCodeGenerator.subFrameRegister([7, 12]), byteCodes[0])
 
     def test_generateByteCode_will_generate_code_in_the_list_form(self):
         """
@@ -162,16 +176,6 @@ class TestByteCodeGenerator(unittest.TestCase):
     """
 #These Test Code Might be useful in future(Do not Remove, admin:Jing Wen)
 
-
-    def test_generateByteCode_will_generate_multiple_byteCode_for_a_multiple_declaration(self):
-        lexer = Lexer('int x , y , z', self.context)
-        parser = Parser(lexer, self.manager)
-        self.manager.setParser(parser)
-
-        token = parser.parseStatement(0)
-        self.byteCodeGenerator.initGeneration()
-        byteCodes = token.generateByteCode()
-        self.assertEqual(self.byteCodeGenerator.subRegister(7, 12), byteCodes[0])
 
     def test_generateByteCode_will_generate_code_to_initialize_the_(self):
         lexer = Lexer('int x = 2', self.context)

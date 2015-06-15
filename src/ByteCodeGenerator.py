@@ -10,6 +10,8 @@ class ByteCodeGenerator:
     byteCodeList = []
     byteRequired = {'char': 1, 'short': 1, 'int': 4, 'long': 4, 'float': 4, 'double': 8}
     variablesInThisAST = {}
+    variableCounter = 0
+    memorySize = 0
 
     def __init__(self, context, contextManager):
         self.context = context
@@ -19,60 +21,52 @@ class ByteCodeGenerator:
 
     def nothing(self):
         pass
+
     def subFrameRegister(self, GPR=[]):
         number = 0xf5 | GPR[0] << 8 | GPR[1] << 11
-        self.byteCodeList.append(number)
         return number
+
     def divideRegister(self):
         pass
+
     def multiplyRegister(self, GPR=[]):
         number = 0xf6 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
-        self.byteCodeList.append(number)
         return number
 
     def loadMultiple(self, GPR=[]):
         number = 0xf7 | GPR[0] << 8 | GPR[1] << 11
-        self.byteCodeList.append(number)
         return number
+
     def assignRegister(self, GPR=[]):
-    #Assign FirstRegister into Second Register and store into targetRegister
         number = 0xf8 | GPR[0] << 8 | GPR[1] << 11
-        self.byteCodeList.append(number)
         return number
 
     def storeMultiple(self, GPR=[]):
         number = 0xf9 | GPR[0] << 8 | GPR[1] << 11
-        self.byteCodeList.append(number)
         return number
 
     def addRegister(self,GPR =[]):
         number = 0xfa | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
-        self.byteCodeList.append(number)
         return number
 
     def subRegister(self,GPR=[]):
         number = 0xfb | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
-        self.byteCodeList.append(number)
         return number
 
     def loadValue(self, GPR=[]):
         number = 0xfc | GPR[0] << 8 | GPR[1] << 11
-        self.byteCodeList.append(number)
         return number
 
     def storeValue(self, GPR=[]):
         number = 0xfd | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
-        self.byteCodeList.append(number)
         return number
 
     def loadRegister(self, GPR=[]):
         number = 0xfe | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 17
-        self.byteCodeList.append(number)
         return number
 
     def storeRegister(self, GPR=[]):
         number = 0xff | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 17
-        self.byteCodeList.append(number)
         return number
 
     def generateRightCodeFirst(self, token):
@@ -80,14 +74,16 @@ class ByteCodeGenerator:
         for index in range(len(token.data)-1, -1, -1):
             if token.data[index].id == '(identifier)':
                 if secondTime == 0:
-                    self.loadRegister([self.mapping.getAFreeWorkingRegister(), 7, self.variablesInThisAST[token.data[index].data[0]]])
+                    Code = self.loadRegister([self.mapping.getAFreeWorkingRegister(), 7, self.variablesInThisAST[token.data[index].data[0]]])
                 else:
-                    self.loadRegister([self.mapping.getALargestWorkingRegister(), 7, self.variablesInThisAST[token.data[index].data[0]]])
+                    Code = self.loadRegister([self.mapping.getALargestWorkingRegister(), 7, self.variablesInThisAST[token.data[index].data[0]]])
+                self.byteCodeList.append(Code)
             elif token.data[index].id == '(literal)':
                 if secondTime == 0:
-                    self.loadValue([self.mapping.getAFreeWorkingRegister(), token.data[index].data[0]])
+                    Code = self.loadValue([self.mapping.getAFreeWorkingRegister(), token.data[index].data[0]])
                 else:
-                    self.loadValue([self.mapping.getALargestWorkingRegister(), token.data[index].data[0]])
+                    Code = self.loadValue([self.mapping.getALargestWorkingRegister(), token.data[index].data[0]])
+                self.byteCodeList.append(Code)
             else:
                 token.data[index].generateByteCode()
             secondTime += 1
@@ -97,17 +93,20 @@ class ByteCodeGenerator:
         for index in range(0, len(token.data)):
             if token.data[index].id == '(identifier)':
                 if secondTime == 0:
-                    self.loadRegister([self.mapping.getAFreeWorkingRegister(), self.mapping.framePointerRegister, self.variablesInThisAST[token.data[index].data[0]]])
+                    Code = self.loadRegister([self.mapping.getAFreeWorkingRegister(), self.mapping.framePointerRegister, self.variablesInThisAST[token.data[index].data[0]]])
                 else:
-                    self.loadRegister([self.mapping.getALargestWorkingRegister(), self.mapping.framePointerRegister, self.variablesInThisAST[token.data[index].data[0]]])
+                    Code = self.loadRegister([self.mapping.getALargestWorkingRegister(), self.mapping.framePointerRegister, self.variablesInThisAST[token.data[index].data[0]]])
+                self.byteCodeList.append(Code)
             elif token.data[index].id == '(literal)':
                 if secondTime == 0:
-                    self.loadValue([self.mapping.getAFreeWorkingRegister(), token.data[index].data[0]])
+                    Code = self.loadValue([self.mapping.getAFreeWorkingRegister(), token.data[index].data[0]])
                 else:
-                    self.loadValue([self.mapping.getALargestWorkingRegister(), token.data[index].data[0]])
+                    Code = self.loadValue([self.mapping.getALargestWorkingRegister(), token.data[index].data[0]])
+                self.byteCodeList.append(Code)
             else:
                 token.data[index].generateByteCode()
             secondTime += 1
+
 
     def findOutAndGenerateCorrectSideCode(self, token):
         if token.weight[2] >= token.weight[1]:
@@ -134,25 +133,29 @@ class ByteCodeGenerator:
         if generateByteCode == self.assignRegister:
             GPR[0] = secondRegister
             GPR[1] = firstRegister
-        generateByteCode(GPR)
+        Code = generateByteCode(GPR)
+        self.byteCodeList.append(Code)
+
     def initGeneration(self):
         thisGenerator = self
 
-        def initialization(self,token):
-            variableCounter = 0
+        def recordTheVariable(self,token):
             if token.id in thisGenerator.byteRequired:
-                variableCounter += 1
+                thisGenerator.variableCounter += 1
+                thisGenerator.variablesInThisAST[token.data[0]] = thisGenerator.byteRequired[token.id]
+                thisGenerator.memorySize += thisGenerator.byteRequired[token.id]
 
-            thisGenerator.subFrameRegister([thisGenerator.mapping.framePointerRegister, thisGenerator.byteRequired[token.id]*variableCounter])
-            return thisGenerator.byteCodeList
 
-        respectiveByteCodeFunction = {'int': initialization, '=': self.assignRegister, '+': self.addRegister, \
+            #thisGenerator.subFrameRegister([thisGenerator.mapping.framePointerRegister, thisGenerator.byteRequired[token.id]*variableCounter])
+            #return thisGenerator.byteCodeList
+
+        respectiveByteCodeFunction = {'=': self.assignRegister, '+': self.addRegister, \
                                             '-': self.subRegister, '*': self.multiplyRegister, '/': self.divideRegister, \
                                             '(systemToken)': self.nothing, ';': self.nothing, ',': self.nothing, '}': self.nothing, '{': self.nothing}
 
         def generateByteCode(self):
             if thisGenerator.isADeclaration(self.id):
-                return initialization(None, self)
+                recordTheVariable(None, self)
             else:
                 pushed = thisGenerator.registerAllocator.decideWhetherToPush(self)
                 thisGenerator.findOutAndGenerateCorrectSideCode(self)
@@ -160,7 +163,7 @@ class ByteCodeGenerator:
                 thisGenerator.decideWhetherToSaveSlotForPopValue(pushed, respectiveByteCodeFunction[self.id])
 
                 thisGenerator.registerAllocator.decideWhetherToPop(pushed)
-                return thisGenerator.byteCodeList
+            return thisGenerator.byteCodeList
 
 
         #Start the initialization
@@ -175,6 +178,11 @@ class ByteCodeGenerator:
         else:
             return False
 
+    def injectPrologue(self, oldList):
+        Code = self.subFrameRegister([self.mapping.framePointerRegister,self.memorySize])
+        newList = [Code]
+        newList.extend(oldList)
+        return newList
 
 
     #For the moment, these function is not been used
