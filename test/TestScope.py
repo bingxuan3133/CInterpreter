@@ -164,7 +164,6 @@ class TestScope(unittest.TestCase):
         token = parser.parseStatements(0)
 
         closeBrace = self.context.createToken('}')
-        openBrace = self.context.createToken('{')
         scopeBuilder = ScopeBuilder(closeBrace)
 
         tokenLists = scopeBuilder.scanForInterestedTokens(token)
@@ -183,7 +182,6 @@ class TestScope(unittest.TestCase):
         token = parser.parseStatements(0)
 
         closeBrace = self.context.createToken('}')
-        openBrace = self.context.createToken('{')
         scopeBuilder = ScopeBuilder(closeBrace)
 
         tokenLists = scopeBuilder.scanForInterestedTokens(token)
@@ -258,7 +256,6 @@ class TestScope(unittest.TestCase):
         token = parser.parseStatements(0)
 
         closeBrace = self.context.createToken('}')
-        openBrace = self.context.createToken('{')
         scopeBuilder = ScopeBuilder(closeBrace)
 
         tokenLists = scopeBuilder.scanForInterestedTokens(token)
@@ -278,39 +275,39 @@ class TestScope(unittest.TestCase):
         self.assertEqual('a', scopeBuilder.scope.list[0][0].data[0].data[0])
         self.assertEqual('b', scopeBuilder.scope.list[0][1].data[0].data[0])
 
-        # scopeBuilder.list = [ [a, b], [] ]
+        # scopeBuilder.list = [ [a, b, [] ] ]
         scopeBuilder.buildScope(tokenLists[3])
         self.assertEqual('a', scopeBuilder.scope.list[0][0].data[0].data[0])
         self.assertEqual('b', scopeBuilder.scope.list[0][1].data[0].data[0])
         self.assertEqual(list(), scopeBuilder.scope.list[0][2])
 
-        # scopeBuilder.list = [ [a, b], [x] ]
+        # scopeBuilder.list = [ [a, b, [x] ] ]
         scopeBuilder.buildScope(tokenLists[4])
         self.assertEqual('a', scopeBuilder.scope.list[0][0].data[0].data[0])
         self.assertEqual('b', scopeBuilder.scope.list[0][1].data[0].data[0])
         self.assertEqual('x', scopeBuilder.scope.list[0][2][0].data[0].data[0])
 
-        # scopeBuilder.list = [ [a, b], [x, [] ] ]
+        # scopeBuilder.list = [ [a, b, [x, [] ] ] ]
         scopeBuilder.buildScope(tokenLists[5])
         self.assertEqual('a', scopeBuilder.scope.list[0][0].data[0].data[0])
         self.assertEqual('b', scopeBuilder.scope.list[0][1].data[0].data[0])
         self.assertEqual('x', scopeBuilder.scope.list[0][2][0].data[0].data[0])
         self.assertEqual(list(), scopeBuilder.scope.list[0][2][1])
 
-        # scopeBuilder.list = [ [a, b], [x, [y] ] ]
+        # scopeBuilder.list = [ [a, b, [x, [y] ] ] ]
         scopeBuilder.buildScope(tokenLists[6])
         self.assertEqual('a', scopeBuilder.scope.list[0][0].data[0].data[0])
         self.assertEqual('b', scopeBuilder.scope.list[0][1].data[0].data[0])
         self.assertEqual('x', scopeBuilder.scope.list[0][2][0].data[0].data[0])
         self.assertEqual('y', scopeBuilder.scope.list[0][2][1][0].data[0].data[0])
 
-        # scopeBuilder.list = [ [a, b], [x] ]
+        # scopeBuilder.list = [ [a, b, [x] ] ]
         scopeBuilder.buildScope(tokenLists[7])
         self.assertEqual('a', scopeBuilder.scope.list[0][0].data[0].data[0])
         self.assertEqual('b', scopeBuilder.scope.list[0][1].data[0].data[0])
         self.assertEqual('x', scopeBuilder.scope.list[0][2][0].data[0].data[0])
 
-        # scopeBuilder.list = [ [a, b], [x, z] ]
+        # scopeBuilder.list = [ [a, b, [x, z] ] ]
         scopeBuilder.buildScope(tokenLists[8])
         self.assertEqual('a', scopeBuilder.scope.list[0][0].data[0].data[0])
         self.assertEqual('b', scopeBuilder.scope.list[0][1].data[0].data[0])
@@ -333,7 +330,6 @@ class TestScope(unittest.TestCase):
         token = parser.parseStatements(0)
 
         closeBrace = self.context.createToken('}')
-        openBrace = self.context.createToken('{')
         scopeBuilder = ScopeBuilder(closeBrace)
 
         tokenLists = scopeBuilder.scanForInterestedTokens(token)
@@ -489,6 +485,59 @@ class TestScope(unittest.TestCase):
         self.assertEqual(None, returnedToken)
         returnedToken = scopeBuilder.findLocal('z')
         self.assertEqual(None, returnedToken)
+
+    def test_findGlobal_with_many_variables(self):
+        lexer = Lexer('{ int a ; int b ; { int x ; { int y ; { int z ; } } } }', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatements(0)
+
+        closeBrace = self.context.createToken('}')
+        scopeBuilder = ScopeBuilder(closeBrace)
+
+        tokenLists = scopeBuilder.scanForInterestedTokens(token)
+
+        scopeBuilder.buildScope(tokenLists[0])
+        scopeBuilder.buildScope(tokenLists[1])
+        scopeBuilder.buildScope(tokenLists[2])
+        scopeBuilder.buildScope(tokenLists[3])
+        scopeBuilder.buildScope(tokenLists[4])
+        scopeBuilder.buildScope(tokenLists[5])
+        scopeBuilder.buildScope(tokenLists[6])
+
+        # scopeBuilder.list = [ [a, b, [x, [y, [z] ] ] ]
+        #                      currentScope ^  ^ not yet built
+        self.assertEqual('y', scopeBuilder.currentScope.list[0].data[0].data[0])
+        self.assertEqual('x', scopeBuilder.currentScope.parentScope.list[0].data[0].data[0])
+        self.assertEqual('a', scopeBuilder.currentScope.parentScope.parentScope.list[0].data[0].data[0])
+        self.assertEqual('b', scopeBuilder.currentScope.parentScope.parentScope.list[1].data[0].data[0])
+
+        returnedToken = scopeBuilder.findLocal('y')
+        self.assertEqual('y', returnedToken.data[0].data[0])
+        returnedToken = scopeBuilder.findLocal('x')
+        self.assertEqual(None, returnedToken)
+        returnedToken = scopeBuilder.findLocal('a')
+        self.assertEqual(None, returnedToken)
+        returnedToken = scopeBuilder.findLocal('b')
+        self.assertEqual(None, returnedToken)
+
+        returnedToken = scopeBuilder.findGlobal('y')
+        self.assertEqual('y', returnedToken.data[0].data[0])
+        returnedToken = scopeBuilder.findGlobal('x')
+        self.assertEqual('x', returnedToken.data[0].data[0])
+        returnedToken = scopeBuilder.findGlobal('a')
+        self.assertEqual('a', returnedToken.data[0].data[0])
+        returnedToken = scopeBuilder.findGlobal('b')
+        self.assertEqual('b', returnedToken.data[0].data[0])
+        returnedToken = scopeBuilder.findGlobal('z')
+        self.assertEqual(None, returnedToken)
+
+        # scopeBuilder.list = [ [a, b, [x, [y, [z] ] ] ]
+        #                      currentScope ^  ^ not yet built
+        self.assertEqual('y', scopeBuilder.currentScope.list[0].data[0].data[0])
+        self.assertEqual('x', scopeBuilder.currentScope.parentScope.list[0].data[0].data[0])
+        self.assertEqual('a', scopeBuilder.currentScope.parentScope.parentScope.list[0].data[0].data[0])
+        self.assertEqual('b', scopeBuilder.currentScope.parentScope.parentScope.list[1].data[0].data[0])
 
 if __name__ == '__main__':
     unittest.main()

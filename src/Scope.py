@@ -54,8 +54,21 @@ class ScopeBuilder:
             token.data = []
         return subToken
 
-    def findLocal(self, identifier):
-        for dataType in self.currentScope.list:
-            if dataType.data[0].data[0] is identifier:
-                return dataType
+    def findLocal(self, identifierName):
+        for identifierToken in self.currentScope.list:
+            if identifierToken.data[0].data[0] is identifierName:
+                return identifierToken
+        return None
+
+    def findGlobal(self, identifierName):
+        savedScope = self.currentScope
+        while self.currentScope.parentScope is not None:
+            for identifierToken in self.currentScope.list:
+                if isinstance(identifierToken, list):  # is list object
+                    break
+                elif identifierToken.data[0].data[0] is identifierName:
+                    self.currentScope = savedScope
+                    return identifierToken
+            self.currentScope = self.currentScope.parentScope
+        self.currentScope = savedScope
         return None
