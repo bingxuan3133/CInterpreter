@@ -10,6 +10,8 @@ class ByteCodeGenerator:
     byteCodeList = []
     byteRequired = {'char': 1, 'short': 1, 'int': 4, 'long': 4, 'float': 4, 'double': 8}
     variablesInThisAST = {}
+    variableCounter = 0
+    memorySize = 0
 
     def __init__(self, context, contextManager):
         self.context = context
@@ -19,56 +21,52 @@ class ByteCodeGenerator:
 
     def nothing(self):
         pass
+
+    def subFrameRegister(self, GPR=[]):
+        number = 0xf5 | GPR[0] << 8 | GPR[1] << 11
+        return number
+
     def divideRegister(self):
         pass
+
     def multiplyRegister(self, GPR=[]):
         number = 0xf6 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
-        self.byteCodeList.append(number)
         return number
 
     def loadMultiple(self, GPR=[]):
         number = 0xf7 | GPR[0] << 8 | GPR[1] << 11
-        self.byteCodeList.append(number)
         return number
+
     def assignRegister(self, GPR=[]):
-    #Assign FirstRegister into Second Register and store into targetRegister
         number = 0xf8 | GPR[0] << 8 | GPR[1] << 11
-        self.byteCodeList.append(number)
         return number
 
     def storeMultiple(self, GPR=[]):
         number = 0xf9 | GPR[0] << 8 | GPR[1] << 11
-        self.byteCodeList.append(number)
         return number
 
     def addRegister(self,GPR =[]):
         number = 0xfa | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
-        self.byteCodeList.append(number)
         return number
 
     def subRegister(self,GPR=[]):
         number = 0xfb | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
-        self.byteCodeList.append(number)
         return number
 
     def loadValue(self, GPR=[]):
         number = 0xfc | GPR[0] << 8 | GPR[1] << 11
-        self.byteCodeList.append(number)
         return number
 
     def storeValue(self, GPR=[]):
         number = 0xfd | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
-        self.byteCodeList.append(number)
         return number
 
     def loadRegister(self, GPR=[]):
         number = 0xfe | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 17
-        self.byteCodeList.append(number)
         return number
 
     def storeRegister(self, GPR=[]):
         number = 0xff | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 17
-        self.byteCodeList.append(number)
         return number
 
     def generateRightCodeFirst(self, token):
@@ -76,14 +74,16 @@ class ByteCodeGenerator:
         for index in range(len(token.data)-1, -1, -1):
             if token.data[index].id == '(identifier)':
                 if secondTime == 0:
-                    self.loadRegister([self.mapping.getAFreeWorkingRegister(), 7, self.variablesInThisAST[token.data[index].data[0]]])
+                    Code = self.loadRegister([self.mapping.getAFreeWorkingRegister(), self.mapping.framePointerRegister, self.variablesInThisAST[token.data[index].data[0]]])
                 else:
-                    self.loadRegister([self.mapping.getALargestWorkingRegister(), 7, self.variablesInThisAST[token.data[index].data[0]]])
+                    Code = self.loadRegister([self.mapping.getALargestWorkingRegister(), self.mapping.framePointerRegister, self.variablesInThisAST[token.data[index].data[0]]])
+                self.byteCodeList.append(Code)
             elif token.data[index].id == '(literal)':
                 if secondTime == 0:
-                    self.loadValue([self.mapping.getAFreeWorkingRegister(), token.data[index].data[0]])
+                    Code = self.loadValue([self.mapping.getAFreeWorkingRegister(), token.data[index].data[0]])
                 else:
-                    self.loadValue([self.mapping.getALargestWorkingRegister(), token.data[index].data[0]])
+                    Code = self.loadValue([self.mapping.getALargestWorkingRegister(), token.data[index].data[0]])
+                self.byteCodeList.append(Code)
             else:
                 token.data[index].generateByteCode()
             secondTime += 1
@@ -93,17 +93,20 @@ class ByteCodeGenerator:
         for index in range(0, len(token.data)):
             if token.data[index].id == '(identifier)':
                 if secondTime == 0:
-                    self.loadRegister([self.mapping.getAFreeWorkingRegister(), self.mapping.framePointerRegister, self.variablesInThisAST[token.data[index].data[0]]])
+                    Code = self.loadRegister([self.mapping.getAFreeWorkingRegister(), self.mapping.framePointerRegister, self.variablesInThisAST[token.data[index].data[0]]])
                 else:
-                    self.loadRegister([self.mapping.getALargestWorkingRegister(), self.mapping.framePointerRegister, self.variablesInThisAST[token.data[index].data[0]]])
+                    Code = self.loadRegister([self.mapping.getALargestWorkingRegister(), self.mapping.framePointerRegister, self.variablesInThisAST[token.data[index].data[0]]])
+                self.byteCodeList.append(Code)
             elif token.data[index].id == '(literal)':
                 if secondTime == 0:
-                    self.loadValue([self.mapping.getAFreeWorkingRegister(), token.data[index].data[0]])
+                    Code = self.loadValue([self.mapping.getAFreeWorkingRegister(), token.data[index].data[0]])
                 else:
-                    self.loadValue([self.mapping.getALargestWorkingRegister(), token.data[index].data[0]])
+                    Code = self.loadValue([self.mapping.getALargestWorkingRegister(), token.data[index].data[0]])
+                self.byteCodeList.append(Code)
             else:
                 token.data[index].generateByteCode()
             secondTime += 1
+
 
     def findOutAndGenerateCorrectSideCode(self, token):
         if token.weight[2] >= token.weight[1]:
@@ -130,31 +133,32 @@ class ByteCodeGenerator:
         if generateByteCode == self.assignRegister:
             GPR[0] = secondRegister
             GPR[1] = firstRegister
-        generateByteCode(GPR)
+        Code = generateByteCode(GPR)
+        self.byteCodeList.append(Code)
 
     def initGeneration(self):
         thisGenerator = self
 
-        def initialization(self):
-            variableCounter = 0
-            for token in self:
-                if token.id in thisGenerator.byteRequired:
-                    variableCounter += 1
+        def recordTheVariable(self,token):
+            if token.id in thisGenerator.byteRequired:
+                thisGenerator.variableCounter += 1
+                thisGenerator.variablesInThisAST[token.data[0].data[0]] = thisGenerator.byteRequired[token.id]
+                thisGenerator.memorySize += thisGenerator.byteRequired[token.id]
 
-                thisGenerator.subRegister([7, thisGenerator.byteRequired[self.id]*variableCounter])
-                return thisGenerator.byteCodeList
-
-        respectiveByteCodeFunction = {'int': initialization, '=': self.assignRegister, '+': self.addRegister, \
+        respectiveByteCodeFunction = {'=': self.assignRegister, '+': self.addRegister, \
                                             '-': self.subRegister, '*': self.multiplyRegister, '/': self.divideRegister, \
                                             '(systemToken)': self.nothing, ';': self.nothing, ',': self.nothing, '}': self.nothing, '{': self.nothing}
 
         def generateByteCode(self):
-            pushed = thisGenerator.registerAllocator.decideWhetherToPush(self)
-            thisGenerator.findOutAndGenerateCorrectSideCode(self)
+            if thisGenerator.isADeclaration(self.id):
+                recordTheVariable(None, self)
+            else:
+                pushed = thisGenerator.registerAllocator.decideWhetherToPush(self)
+                thisGenerator.findOutAndGenerateCorrectSideCode(self)
 
-            thisGenerator.decideWhetherToSaveSlotForPopValue(pushed, respectiveByteCodeFunction[self.id])
+                thisGenerator.decideWhetherToSaveSlotForPopValue(pushed, respectiveByteCodeFunction[self.id])
 
-            thisGenerator.registerAllocator.decideWhetherToPop(pushed)
+                thisGenerator.registerAllocator.decideWhetherToPop(pushed)
             return thisGenerator.byteCodeList
 
 
@@ -164,117 +168,14 @@ class ByteCodeGenerator:
             for token in context.symbolTable:
                 context.symbolTable[token].generateByteCode = generateByteCode
 
-
-
-    #For the moment, these function is not been used
-    """
-
-        def generateByteCode(self, token):
-        if token[0].id == '{':
-            token = token[0].data
-
-        self.byteCodeList =[]
-        index = 0
-        index = self.generateInitializationCode(token, index)
-
-        for value in range(index, len(token)):
-            self.injectregisterRequiredAtThatLevel(token[value])
-            self.generateProcessCode(token[value])
-
-
-    #define the sub-routine that generate byteCode(Infix)
-        def generateInfixByteCode():
-            for dataIndex in range(0, len(token.data)):
-                if not isinstance(token.data[dataIndex], int):
-                    token.data[dataIndex].generateByteCode()
-            suitableFunction = self.respectiveByteCodeFunction[self.getAFreeWorkingRegister()]
-            code = suitableFunction()
-            self.workingRegisterCounter += 1
-            thisGenerator.byteCodeList.append(str(code))
-            return thisGenerator.byteCodeList
-        #define the sub-routine that generate byteCode(literal)
-        def generateLiteralByteCode():
-            self.updateTheWorkingRegisterCounterAndStatus()
-            code = hex(self.byteCodeDictionaty[token.id] << 24 | self.workingRegisterCounter << 16 | token.data[0])
-            self.workingRegisterCounter += 1
-            thisGenerator.byteCodeList.append(str(code))
-            return thisGenerator.byteCodeList
-    def injectLevel(self, token):
-        levels =[]
-        for element in token.data:
-            if element.id == '(identifier)' or element.id == '(literal)':
-                element.level = 0
-                tempLevel = 0
-            else:
-                tempLevel = self.injectLevel(element)
-
-            levels.append(tempLevel)
-        if abs(levels[0]) >= abs(levels[1]):
-            largest = -abs(levels[0])
-
+    def isADeclaration(self, unknownToken):
+        if unknownToken in ByteCodeGenerator.byteRequired:
+            return True
         else:
-            largest = abs(levels[1])
-        if largest >= 0:
-            largest += 1
-        else:
-            largest -= 1
-        token.level = largest
-        return largest
+            return False
 
-    def assignRegisters(self, register1, register2):
-        number = 0xfa | register1 << 8 | register2 << 11
-        self.byteCodeList.append(number)
-        return number
-
-        #Start to make a fake switch case.
-        def storeIntoWorkingRegisterTwo():
-            code = hex(self.byteCodeDictionaty[token.id] << 24 | self.workingRegisterCounter << 16 | self.workingRegisterCounter-2 << 8 | self.workingRegisterCounter-1)
-            self.registerStatus[self.workingRegisterCounter-1] = 0
-            self.registerStatus[self.workingRegisterCounter-2] = 0
-            return code
-        def storeIntoWorkingRegisterOne():
-            code = hex(self.byteCodeDictionaty[token.id] << 24 | self.workingRegisterCounter << 16 | self.workingRegisterCounter+1 << 8 | self.workingRegisterCounter-1)
-            self.registerStatus[self.workingRegisterCounter+1] = 0
-            self.registerStatus[self.workingRegisterCounter-1] = 0
-            return code
-        def storeIntoWorkingRegisterZero():
-            code = hex(self.byteCodeDictionaty[token.id] << 24 | self.workingRegisterCounter << 16 | self.workingRegisterCounter+1 << 8 | self.workingRegisterCounter+2)
-            self.registerStatus[self.workingRegisterCounter+1] = 0
-            self.registerStatus[self.workingRegisterCounter+2] = 0
-            return code
-        storeLocation = {0: storeIntoWorkingRegisterZero, 1: storeIntoWorkingRegisterOne, 2: storeIntoWorkingRegisterTwo}
-        ###############################################################################################################
-        thisGenerator = self
-        #define the sub-routine that generate byteCode(Infix)
-        def generateInfixByteCode():
-            for dataIndex in range(0, len(token.data)):
-                if not isinstance(token.data[dataIndex], int):
-                    token.data[dataIndex].generateByteCode()
-            self.updateTheWorkingRegisterCounterAndStatus()
-            suitableFunction = storeLocation[self.workingRegisterCounter]
-            code = suitableFunction()
-            self.workingRegisterCounter += 1
-            thisGenerator.byteCodeList.append(str(code))
-            return thisGenerator.byteCodeList
-        #define the sub-routine that generate byteCode(literal)
-        def generateLiteralByteCode():
-            self.updateTheWorkingRegisterCounterAndStatus()
-            code = hex(self.byteCodeDictionaty[token.id] << 24 | self.workingRegisterCounter << 16 | token.data[0])
-            self.workingRegisterCounter += 1
-            thisGenerator.byteCodeList.append(str(code))
-            return thisGenerator.byteCodeList
-        #end define the generation subroutine
-        ###############################################################################################################
-        #Start the initialization
-        self.byteCodeList = []
-        if token.id == '(literal)':
-            token.generateByteCode = generateLiteralByteCode
-        else:
-            for context in self.contextManager.currentContexts:
-                if token.id in context.symbolTable:
-                    if token.arity == self.context.BINARY:
-                        token.generateByteCode = generateInfixByteCode
-        for dataIndex in range(0, len(token.data)):
-            if token.id != '(literal)':
-                self.initGeneration(token.data[dataIndex])
-    """
+    def injectPrologue(self, oldList):
+        Code = self.subFrameRegister([self.mapping.framePointerRegister,self.memorySize])
+        newList = [Code]
+        newList.extend(oldList)
+        return newList

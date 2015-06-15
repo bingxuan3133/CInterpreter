@@ -44,6 +44,9 @@ class Mapping:
         self.smallerRegisterUsed += 1
         return count
 
+    def reset(self):
+        pass
+
 
 """
     def getSpecificWorkingRegister(self, numberOfRegister):
@@ -56,3 +59,4 @@ class Mapping:
             self.registerStatus[numberOfRegister] = 0
             self.registerLeft += 1
 """
+
