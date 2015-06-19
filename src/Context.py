@@ -98,4 +98,4 @@ class Context:
         elif word.isnumeric():
             return self.createLiteral(word)
         else:
-            raise SyntaxError('Syntax error: \'{0}\' is an unknown token'.format(word))
+            raise SyntaxError('Syntax error: {0} is an unknown token'.format(word))
