@@ -26,6 +26,7 @@ class Parser:
             self.lexer.advance()
             return None
         elif firstToken.id == 'int':
+
             firstToken = deepcopy(secondToken)
             identifierName = self.lexer.advance()
             firstToken.data.append(identifierName)
@@ -35,6 +36,7 @@ class Parser:
                 returnedToken = self.parse(bindingPower)
                 if returnedToken.id != tempToken.id:
                     list.append(returnedToken)
+
             while self.lexer.peep().id == ',':
                 firstToken = deepcopy(secondToken)
                 identifierName = self.lexer.advance()

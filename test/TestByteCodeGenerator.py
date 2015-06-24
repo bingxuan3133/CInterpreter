@@ -301,7 +301,7 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.informationInjector.injectRegisterRequired(token)
         self.byteCodeGenerator.mapping.registerFromLeft = 5
         self.byteCodeGenerator.mapping.registerLeft = 1
-        self.byteCodeGenerator.variablesInThisAST['x'] =4
+        self.byteCodeGenerator.variablesInThisAST['x'] = 4
 
         self.byteCodeGenerator.initGeneration()
         byteCodes = token.generateByteCode()
