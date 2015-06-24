@@ -16,7 +16,7 @@ class LexerStateMachine:
         self.charGenerator = self.createCharGenerator()
 
         self.currentChar = None
-        self.currentString = None
+        self.currentString = ''
         self.currentToken = self.advance()
 
     #Function that belong to "stream"
@@ -36,6 +36,7 @@ class LexerStateMachine:
 
     #API for application
     def advance(self, expectedSymbol = None):
+        self.resetTheLexer()
         self.start()
         self.currentToken = self.context.createToken(self.currentString)
         if expectedSymbol is not None and self.currentToken.id != expectedSymbol:
@@ -58,7 +59,6 @@ class LexerStateMachine:
             self.getNextChar()
 
         if self.isNumber():
-            self.currentString = 0
             self.captureNumber()
             self.value()
 
@@ -66,13 +66,15 @@ class LexerStateMachine:
             self.floatingPointDot()
 
         elif self.isAlpha() or self.isUnderScore():
-            self.currentString = ''
             self.captureIdentifier()
             self.identifier()
 
         elif self.isOperator():
             self.captureOperator()
             self.operator()
+
+        elif self.isEnd():
+            return
         else:
             raise SyntaxError("Undefine symbol")
 
@@ -84,6 +86,8 @@ class LexerStateMachine:
             self.floatingPointDot()
         elif self.isE():
             self.floatingPointE()
+        else:
+            self.end()
 
     def floatingPointDot(self):
 
@@ -98,25 +102,30 @@ class LexerStateMachine:
         self.end()
 
     def floatingPointE(self):
+        self.getNextChar()
         if self.isPlusOrMinusSign() or self.isNumber():
             self.floatingPointEWithNotation()
         elif not self.isNumber():
+            pass
             raise SyntaxError("Expecting a positive or negative number after E/e.")
 
     def floatingPointEWithNotation(self):
         tempNumber = 0
+        tempResult = int(self.currentString)
         tempNotation = self.currentChar
         if self.isPlusOrMinusSign():
             self.getNextChar()
         while self.isNumber():
             tempNumber *= 10
-            tempNumber += self.getNextChar()
+            tempNumber += int(self.getNextChar())
         if tempNotation == '-':
             for num in range(0, tempNumber):
-                self.currentString /= 10
+                tempResult /= 10
         else:
             for num in range(0, tempNumber):
-                self.currentString *= 10
+                tempResult *= 10
+
+        self.currentString = str(format(tempResult, '.100f'))
 
         self.end()
 
@@ -136,7 +145,6 @@ class LexerStateMachine:
 
     #Action functions
     def captureNumber(self):
-        self.currentString *= 10
         self.currentString += self.getNextChar()
 
     def captureIdentifier(self):
@@ -144,14 +152,22 @@ class LexerStateMachine:
 
     def captureOperator(self):
         self.currentString = self.getNextChar()
+
+    def resetTheLexer(self):
+        self.currentChar = None
+        self.currentString = ''
+
     #End Action functions
 
     #Checking functions
     def isSpace(self):
-        return  self.currentChar == ' '
+        return self.currentChar == ' '
 
     def isNumber(self):
-        return isinstance(self.currentChar,(int))
+        if self.currentChar is None:
+            return False
+        else:
+            return self.currentChar.isdigit()
 
     def isDot(self):
         return self.currentChar == '.'
@@ -160,7 +176,10 @@ class LexerStateMachine:
         return not isinstance(self.currentChar,(int))
 
     def isAlpha(self):
-        return isinstance(self.currentChar, (str)) and self.currentChar != ' '
+        if self.currentChar is None:
+            return False
+        else:
+            return isinstance(self.currentChar, (str)) and self.currentChar != ' '
 
     def isUnderScore(self):
         return self.currentChar == '_'
@@ -177,4 +196,7 @@ class LexerStateMachine:
 
     def isMultipleSymbolOperator(self):
         return self.isPlusOrMinusSign()
+
+    def isEnd(self):
+        return self.currentChar is None
     #End checking functions
