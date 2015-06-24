@@ -4,5 +4,6 @@ test/__pycache__/*
 .*
 !/.gitignore
 !/.travis.yml
+/.idea/*
 VM/build/*
 !VM/build/README.txt

@@ -49,7 +49,7 @@ class TestByteCodeGenerator(unittest.TestCase):
 
 
 
-    def xtest_generateByteCode_will_understand_declaration_and_generate_reservation_byteCode(self):
+    def test_generateByteCode_will_understand_declaration_and_generate_reservation_byteCode(self):
         lexer = Lexer('int x', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
@@ -57,7 +57,21 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.informationInjector.injectRegisterRequired(token[0])
         self.byteCodeGenerator.initGeneration()
         byteCodes = token[0].generateByteCode()
-        self.assertEqual(self.byteCodeGenerator.subRegister([7, 4]), byteCodes[0])
+        byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
+        self.assertEqual(self.byteCodeGenerator.subFrameRegister([7, 4]), byteCodes[0])
+
+    def test_generateByteCode_will_generate_multiple_byteCode_for_a_multiple_declaration(self):
+        lexer = Lexer('int x , y , z', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        self.byteCodeGenerator.initGeneration()
+        token[0].generateByteCode()
+        token[1].generateByteCode()
+        byteCodes = token[2].generateByteCode()
+        byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
+        self.assertEqual(self.byteCodeGenerator.subFrameRegister([7, 12]), byteCodes[0])
 
     def test_generateByteCode_will_generate_code_in_the_list_form(self):
         """
@@ -80,6 +94,43 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.loadValue([0, 5]), byteCodes[0])
         self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[1])
         self.assertEqual(self.byteCodeGenerator.assignRegister([0, 5]), byteCodes[2])
+
+    def test_generateByteCode_will_generate_code_to_initialize_the_(self):
+        lexer = Lexer('int x = 2', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        self.byteCodeGenerator.initGeneration()
+        self.informationInjector.injectRegisterRequired(token[0])
+        token[0].generateByteCode()
+        self.informationInjector.injectRegisterRequired(token[1])
+        byteCodes = token[1].generateByteCode()
+        byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
+        self.assertEqual(self.byteCodeGenerator.subFrameRegister([7, 4]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue([0, 2]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.assignRegister([0, 5]), byteCodes[3])
+
+
+    def xtest_generateByteCode_will_generate_code_for_multiple_initialization(self):
+        lexer = Lexer('int x = 3 , y = 5 , z = 10', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        self.byteCodeGenerator.initGeneration()
+        for subTree in token:
+            self.informationInjector.injectRegisterRequired(subTree)
+            byteCodes = subTree.generateByteCode()
+
+        byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
+        self.assertEqual(self.byteCodeGenerator.subFrameRegister([7, 12]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue([0, 3]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.assignRegister([0, 5]), byteCodes[3])
+        self.assertEqual(self.byteCodeGenerator.loadValue([0, 5]), byteCodes[4])
+
 
     def test_generateByteCode_will_return_the_byteCode_in_a_list_for_a_multiply_expression(self):
         lexer = Lexer('3 * 4 + 2 ', self.context)
@@ -163,43 +214,6 @@ class TestByteCodeGenerator(unittest.TestCase):
 
     """
 #These Test Code Might be useful in future(Do not Remove, admin:Jing Wen)
-
-
-    def test_generateByteCode_will_generate_multiple_byteCode_for_a_multiple_declaration(self):
-        lexer = Lexer('int x , y , z', self.context)
-        parser = Parser(lexer, self.manager)
-        self.manager.setParser(parser)
-
-        token = parser.parseStatement(0)
-        self.byteCodeGenerator.initGeneration()
-        byteCodes = token.generateByteCode()
-        self.assertEqual(self.byteCodeGenerator.subRegister(7, 12), byteCodes[0])
-
-    def test_generateByteCode_will_generate_code_to_initialize_the_(self):
-        lexer = Lexer('int x = 2', self.context)
-        parser = Parser(lexer, self.manager)
-        self.manager.setParser(parser)
-
-        token = parser.parseStatement(0)
-        byteCodes = self.byteCodeGenerator.generateByteCode(token)
-        self.assertEqual(self.byteCodeGenerator.subRegister(7, 4), byteCodes[0])
-        self.assertEqual(self.byteCodeGenerator.loadValue(0, 2), byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.storeValue(0, 7, 4), byteCodes[2])
-
-    def test_generateByteCode_will_generate_code_for_multiple_initialization(self):
-        lexer = Lexer('int x = 3 , y = 5 , z = 10', self.context)
-        parser = Parser(lexer, self.manager)
-        self.manager.setParser(parser)
-
-        token = parser.parseStatement(0)
-        byteCodes = self.byteCodeGenerator.generateByteCode(token)
-        self.assertEqual(self.byteCodeGenerator.subRegister(7, 12), byteCodes[0])
-        self.assertEqual(self.byteCodeGenerator.loadValue(0, 3), byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.storeValue(0, 7, 4), byteCodes[2])
-        self.assertEqual(self.byteCodeGenerator.loadValue(0, 5), byteCodes[3])
-        self.assertEqual(self.byteCodeGenerator.storeValue(0, 7, 8), byteCodes[4])
-        self.assertEqual(self.byteCodeGenerator.loadValue(0, 10), byteCodes[5])
-        self.assertEqual(self.byteCodeGenerator.storeValue(0, 7, 12), byteCodes[6])
 
 
     def test_generateByteCode_will_generate_code_initialization_and_assignment(self):
