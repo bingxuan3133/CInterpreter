@@ -35,7 +35,7 @@ class Parser:
                 returnedToken = self.parse(bindingPower)
                 if returnedToken.id != tempToken.id:
                     list.append(returnedToken)
-            while (self.lexer.peep().id == ','):
+            while self.lexer.peep().id == ',':
                 firstToken = deepcopy(secondToken)
                 identifierName = self.lexer.advance()
                 firstToken.data.append(identifierName)
@@ -45,7 +45,6 @@ class Parser:
                     returnedToken = self.parse(bindingPower)
                     if returnedToken.id != tempToken.id:
                         list.append(returnedToken)
-
             return list
 
         for currentContext in self.contextManager.currentContexts:
