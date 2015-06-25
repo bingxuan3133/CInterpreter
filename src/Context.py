@@ -1,6 +1,7 @@
 def revealSelf(self):
     return '{0} {1}'.format(self.id, self.data)
 
+
 class SymbolBase:
     def led(self):
         raise SyntaxError('No led(.) function defined!')
@@ -10,6 +11,7 @@ class SymbolBase:
 
     def generateByteCode(self):
         raise SyntaxError('No generation function defined!')
+
 
 class Context:
     PREFIX_UNARY = 1
@@ -25,7 +27,6 @@ class Context:
             class Symbol(SymbolBase):
                 def __init__(self):
                     self.data = []
-
             symClass = Symbol
             symClass.id = id
             symClass.bindingPower = bindingPower
@@ -37,7 +38,6 @@ class Context:
             return self.symbolTable[id]
 
     def addOperator(self, id, bindingPower = 0, nud = None, led = None):
-
         symClass = self.symbol(id, bindingPower)
         symClass.nud = nud
         symClass.led = led
@@ -45,10 +45,10 @@ class Context:
 
     def createLiteral(self, value):
         thisContext = self
+
         def nud(self):
             thisContext.contextManager.parser.lexer.advance()
             return self
-
         sym = self.symbol('(literal)')
         sym.arity = None
         sym.__repr__ = revealSelf
@@ -59,6 +59,7 @@ class Context:
 
     def createIdentifier(self, value):
         thisContext = self
+
         def nud(self):
             thisContext.contextManager.parser.lexer.advance()
             return self
@@ -74,6 +75,7 @@ class Context:
 
     def createSystemToken(self, value):
         thisContext = self
+
         def nud(self):
             thisContext.contextManager.parser.lexer.advance()
             return self
@@ -83,6 +85,20 @@ class Context:
         sym.nud = nud
         symObj = sym()
         symObj.data.append(value)
+        return symObj
+
+    def createFloatingPoint(self, value):
+        thisContext = self
+        def nud(self):
+            thisContext.contextManager.parser.lexer.advance()
+            return self
+
+        sym = self.symbol('(floating)')
+        sym.arity = None
+        sym.__repr__ = revealSelf
+        sym.nud = nud
+        symObj = sym()
+        symObj.data.append(float(value))
         return symObj
 
     def createToken(self, word):
@@ -97,5 +113,14 @@ class Context:
             return self.createIdentifier(word)
         elif word.isnumeric():
             return self.createLiteral(word)
+        elif self.isNumber(word):
+            return self.createFloatingPoint(word)
         else:
-            raise SyntaxError('Syntax error: \'{0}\' is an unknown token'.format(word))
+            raise SyntaxError('Syntax error: [' + word + '] is an unknown token')
+
+    def isNumber(self, Unknown):
+        try:
+            float(Unknown)
+            return True
+        except:
+            return False

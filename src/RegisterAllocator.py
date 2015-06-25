@@ -18,8 +18,6 @@ class RegisterAllocator:
             tempList = [7,number]
             Code = self.generator.storeMultiple(tempList)
             self.generator.byteCodeList.append(Code)
-
-
         return number
 
     def decideWhetherToPop(self, number):
@@ -33,5 +31,5 @@ class RegisterAllocator:
                 number = number >> 1
                 if bit == 1:
                     count += 1
-            for loop in range(0,count+2):
+            for loop in range(0, count):
                 self.generator.mapping.getAFreeWorkingRegister()
