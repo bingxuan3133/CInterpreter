@@ -142,16 +142,128 @@ class TestLexer(unittest.TestCase):
         self.assertAlmostEqual(testToken.data[0], 1.2e-09)
         self.assertEqual(testToken.id, '(floating)')
 
-    def xtest_advance_will_throw_exception_if_no_number_is_added_after_the_e_or_E(self):
+    def test_advance_will_throw_exception_for_two_notation_is_included_in_the_e_floating_point(self):
         manager = ContextManager()
         context = Context(manager)
         manager.setCurrentContexts([context])
         context.addOperator('(')
         context.addOperator(')')
-        lexer = LexerStateMachine('12E', context)
+        lexer = LexerStateMachine('Price 12E--10', context)
         try:
-            self.assertRaises(SyntaxError, lexer.advance)
-        except SyntaxError:
-            return
+            lexer.advance()
+            raise SyntaxError("Exception test failed")
+        except SyntaxError as e:
+            self.assertEqual("Unexpected symbol \"-\" been found after -", e.msg)
+
+    def test_advance_will_throw_exception_for_plus_plus_appear_inside_the_floating_point_e(self):
+        manager = ContextManager()
+        context = Context(manager)
+        manager.setCurrentContexts([context])
+        context.addOperator('(')
+        context.addOperator(')')
+        lexer = LexerStateMachine('Price 12E++10', context)
+        try:
+            lexer.advance()
+            raise SyntaxError("Exception test failed")
+        except SyntaxError as e:
+            self.assertEqual("Unexpected symbol \"+\" been found after +", e.msg)
 
 
+    def test_advance_will_throw_exception_for_unknown_symbol_inside_the_floating_point_e(self):
+        manager = ContextManager()
+        context = Context(manager)
+        manager.setCurrentContexts([context])
+        context.addOperator('(')
+        context.addOperator(')')
+        lexer = LexerStateMachine('Price 12E*10', context)
+        try:
+            lexer.advance()
+            raise SyntaxError("Exception test failed")
+        except SyntaxError as e:
+            self.assertEqual("Expecting a positive or negative number after E/e.", e.msg)
+
+
+    def test_advance_will_throw_exception_if_no_number_is_added_after_the_e_or_E(self):
+        manager = ContextManager()
+        context = Context(manager)
+        manager.setCurrentContexts([context])
+        lexer = LexerStateMachine('Dummy 12E', context)
+        try:
+            lexer.advance()
+            raise SyntaxError("Exception test failed")
+        except SyntaxError as e:
+            self.assertEqual("Expecting a positive or negative number after E/e.", e.msg)
+
+    def test_advance_will_throw_exception_if_alphabet_added_after_the_E(self):
+        manager = ContextManager()
+        context = Context(manager)
+        manager.setCurrentContexts([context])
+        lexer = LexerStateMachine('Dummy 12EA', context)
+        try:
+            lexer.advance()
+            raise SyntaxError("Exception test failed")
+        except SyntaxError as e:
+            self.assertEqual("Expecting a positive or negative number after E/e.", e.msg)
+
+    def test_advance_will_accept_E_and_e_as_floating_point(self):
+        manager = ContextManager()
+        context = Context(manager)
+        manager.setCurrentContexts([context])
+        context.addOperator('(')
+        context.addOperator(')')
+        lexer = LexerStateMachine('Dummy 12e-10', context)
+        testToken = lexer.advance()
+        self.assertAlmostEqual(testToken.data[0], 1.2e-09)
+        self.assertEqual(testToken.id, '(floating)')
+
+    def test_advance_will_throw_the_same_error_if_e_is_replace_E_in_the_floating_point(self):
+        manager = ContextManager()
+        context = Context(manager)
+        manager.setCurrentContexts([context])
+        context.addOperator('(')
+        context.addOperator(')')
+        lexer = LexerStateMachine('Price 12e--10', context)
+        try:
+            lexer.advance()
+            raise SyntaxError("Exception test failed")
+        except SyntaxError as e:
+            self.assertEqual("Unexpected symbol \"-\" been found after -", e.msg)
+
+        lexer = LexerStateMachine('Price 12e++10', context)
+        try:
+            lexer.advance()
+            raise SyntaxError("Exception test failed")
+        except SyntaxError as e:
+            self.assertEqual("Unexpected symbol \"+\" been found after +", e.msg)
+
+        lexer = LexerStateMachine('Price 12e*10', context)
+        try:
+            lexer.advance()
+            raise SyntaxError("Exception test failed")
+        except SyntaxError as e:
+            self.assertEqual("Expecting a positive or negative number after E/e.", e.msg)
+
+        lexer = LexerStateMachine('Dummy 12e', context)
+        try:
+            lexer.advance()
+            raise SyntaxError("Exception test failed")
+        except SyntaxError as e:
+            self.assertEqual("Expecting a positive or negative number after E/e.", e.msg)
+
+        lexer = LexerStateMachine('Dummy 12eA', context)
+        try:
+            lexer.advance()
+            raise SyntaxError("Exception test failed")
+        except SyntaxError as e:
+            self.assertEqual("Expecting a positive or negative number after E/e.", e.msg)
+
+    def test_advance_will_return_the_actual_value_if_the_floating_point_with_bigger_number_on_both_sides(self):
+        manager = ContextManager()
+        context = Context(manager)
+        manager.setCurrentContexts([context])
+        context.addOperator('(')
+        context.addOperator(')')
+        lexer = LexerStateMachine('Dummy 13123e151', context)
+        testToken = lexer.advance()
+        self.assertAlmostEqual(testToken.data[0], 1.3123e+155)
+        self.assertEqual(testToken.id, '(floating)')

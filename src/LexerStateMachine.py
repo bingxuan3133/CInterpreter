@@ -115,6 +115,8 @@ class LexerStateMachine:
         tempNotation = self.currentChar
         if self.isPlusOrMinusSign():
             self.getNextChar()
+            if not self.isNumber():
+                raise SyntaxError("Unexpected symbol \"" + self.currentChar + "\" been found after " + tempNotation)
         while self.isNumber():
             tempNumber *= 10
             tempNumber += int(self.getNextChar())
