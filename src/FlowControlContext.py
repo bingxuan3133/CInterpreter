@@ -87,7 +87,7 @@ class FlowControlContext(Context):
             thisContext.contextManager.setCurrentContexts([newContext])
             nextToken = thisContext.contextManager.parser.lexer.advance()
             if nextToken.id == ')':
-                raise SyntaxError('No expression found on the context.')
+                raise SyntaxError('Expecting a condition expression')
             returnedToken = thisContext.contextManager.parser.parse(bindingPower)
             headToken.data.append(returnedToken)
             self.data.append(headToken)
