@@ -128,6 +128,20 @@ class TestLexer(unittest.TestCase):
         self.assertEqual(testToken.data[0],120000000000)
         self.assertEqual(testToken.id, '(floating)')
 
+    def test_advance_will_get_the_number_with_eE_power_to_positive(self):
+        manager = ContextManager()
+        context = Context(manager)
+        manager.setCurrentContexts([context])
+        context.addOperator('(')
+        context.addOperator(')')
+        lexer = LexerStateMachine('Price 12E+10', context)
+        testToken = lexer.peep()
+        self.assertEqual(testToken.data[0], 'Price')
+        self.assertEqual(testToken.id, '(identifier)')
+        testToken = lexer.advance()
+        self.assertEqual(testToken.data[0],120000000000)
+        self.assertEqual(testToken.id, '(floating)')
+
     def test_advance_will_get_the_number_with_eE_power_to_negative(self):
         manager = ContextManager()
         context = Context(manager)

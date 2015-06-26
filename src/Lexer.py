@@ -28,10 +28,10 @@ class Lexer:
         nextWord = next(self.wordGenerator)
         self.currentToken = self.context.createToken(nextWord)
         if expectedSymbol is not None and self.currentToken.id != expectedSymbol:
-            raise SyntaxError('Expected ' + expectedSymbol + ' but is ' + self.currentToken.id)
+            raise SyntaxError('Expecting ' + expectedSymbol + ' before ' + self.currentToken.id)
         return self.currentToken
 
     def peep(self, expectedSymbol = None):
         if expectedSymbol is not None and self.currentToken.id != expectedSymbol:
-            raise SyntaxError('Expected ' + expectedSymbol + ' but is ' + self.currentToken.id)
+            raise SyntaxError('Expecting ' + expectedSymbol + ' before ' + self.currentToken.id)
         return self.currentToken
