@@ -44,13 +44,13 @@ class LexerStateMachine:
         self.start()
         self.currentToken = self.context.createToken(self.currentString)
         if expectedSymbol is not None and self.currentToken.id != expectedSymbol:
-            raise SyntaxError('Expected ' + expectedSymbol + ' but is ' + self.currentToken.id)
+            raise SyntaxError('Expecting ' + expectedSymbol + ' before ' + self.currentToken.id)
         self.resetCurrentString()
         return self.currentToken
 
     def peep(self, expectedSymbol = None):
         if expectedSymbol is not None and self.currentToken.id != expectedSymbol:
-            raise SyntaxError('Expected ' + expectedSymbol + ' but is ' + self.currentToken.id)
+            raise SyntaxError('Expecting ' + expectedSymbol + ' before ' + self.currentToken.id)
         return self.currentToken
     #End API
 
@@ -87,6 +87,7 @@ class LexerStateMachine:
             self.operator()
 
         elif self.isEnd():
+            self.currentString = None
             return
         else:
             raise SyntaxError("Undefine symbol")
@@ -252,7 +253,8 @@ class LexerStateMachine:
         return self.currentChar == 'e' or self.currentChar == 'E'
 
     def isMultipleSymbolOperator(self):
-        return self.isPlusOrMinusSign()
+        potentialSymbol = ['+','-','=']
+        return self.currentChar in potentialSymbol
 
     def isEnd(self):
         return self.currentChar is None

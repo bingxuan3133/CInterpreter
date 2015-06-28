@@ -39,12 +39,12 @@ class TestScope(unittest.TestCase):
         self.manager.setCurrentContexts(self.contexts)
 
     def test_buildScope_can_deal_with_identifiers(self):
-        lexer = Lexer('int x ;', self.context)
+        lexer = LexerStateMachine('int x ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token1 = parser.parse(0)
 
-        lexer = Lexer('int y ;', self.context)
+        lexer = LexerStateMachine('int y ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token2 = parser.parse(0)
@@ -105,7 +105,7 @@ class TestScope(unittest.TestCase):
         self.assertEqual('x', scopeBuilder.scope.list[0].data[0].data[0])
 
     def test_scanForInterestedTokens_will_scan_for_identifiers_and_opening_curly_braces_and_buildScope(self):
-        lexer = Lexer('int x ; { int y ; }', self.context)
+        lexer = LexerStateMachine('int x ; { int y ; }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatements(0)
@@ -123,7 +123,7 @@ class TestScope(unittest.TestCase):
         self.assertEqual('}', tokenLists[3].id)
 
     def test_buildScope_1(self):
-        lexer = Lexer('int x ; { int y ; }', self.context)
+        lexer = LexerStateMachine('int x ; { int y ; }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatements(0)
@@ -158,7 +158,7 @@ class TestScope(unittest.TestCase):
         self.assertEqual('x', scopeBuilder.scope.list[0].data[0].data[0])
 
     def test_scanForInterestedTokens_will_ignore_expressions(self):
-        lexer = Lexer('int x ; x = 2 + 3 ; { x = 5 + 6 ; int y ; }', self.context)
+        lexer = LexerStateMachine('int x ; x = 2 + 3 ; { x = 5 + 6 ; int y ; }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatements(0)
@@ -176,7 +176,7 @@ class TestScope(unittest.TestCase):
         self.assertEqual('}', tokenLists[3].id)
 
     def test_buildScope_2(self):
-        lexer = Lexer('int x ; x = 2 + 3 ; { x = 5 + 6 ; int y ; }', self.context)
+        lexer = LexerStateMachine('int x ; x = 2 + 3 ; { x = 5 + 6 ; int y ; }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatements(0)
@@ -211,7 +211,7 @@ class TestScope(unittest.TestCase):
         self.assertEqual('x', scopeBuilder.scope.list[0].data[0].data[0])
 
     def test_findLocal_with_2_variables(self):
-        lexer = Lexer('{ int x ; { int y ; } }', self.context)
+        lexer = LexerStateMachine('{ int x ; { int y ; } }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatements(0)
@@ -250,7 +250,7 @@ class TestScope(unittest.TestCase):
         self.assertEqual('y', returnedToken.data[0].data[0])
 
     def test_scanForInterestedTokens_and_buildScope_with_many_variables(self):
-        lexer = Lexer('{ int a ; int b ; { int x ; { int y ; } int z ; } }', self.context)
+        lexer = LexerStateMachine('{ int a ; int b ; { int x ; { int y ; } int z ; } }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatements(0)
@@ -324,7 +324,7 @@ class TestScope(unittest.TestCase):
         self.assertEqual(list(), scopeBuilder.scope.list)
 
     def test_findLocal_with_many_variables(self):
-        lexer = Lexer('{ int a ; int b ; { int x ; { int y ; } int z ; } }', self.context)
+        lexer = LexerStateMachine('{ int a ; int b ; { int x ; { int y ; } int z ; } }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatements(0)
@@ -487,7 +487,7 @@ class TestScope(unittest.TestCase):
         self.assertEqual(None, returnedToken)
 
     def test_findGlobal_with_many_variables(self):
-        lexer = Lexer('{ int a ; int b ; { int x ; { int y ; { int z ; } } } }', self.context)
+        lexer = LexerStateMachine('{ int a ; int b ; { int x ; { int y ; { int z ; } } } }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatements(0)
