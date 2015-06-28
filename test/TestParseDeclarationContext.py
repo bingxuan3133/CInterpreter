@@ -52,6 +52,30 @@ class TestDeclarationContext(unittest.TestCase):
 
         self.assertRaises(SyntaxError, parser.parseStatement, 0)
 
+    def test_int_x_int_y_will_raise_SyntaxError(self):
+        lexer = LexerStateMachine('int x, int y ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        self.assertRaises(SyntaxError, parser.parseStatement, 0)
+
+    def test_int_x_coma_but_left_empty_will_raise_SyntaxError(self):
+        lexer = LexerStateMachine('int x, ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        self.assertRaises(SyntaxError, parser.parseStatement, 0)
+
+    def test_int_x_x(self):
+        lexer = LexerStateMachine('int x x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        try:
+            parser.parseStatement(0)
+        except SyntaxError as e:
+            self.assertEqual("Expecting ; before (identifier)", e.msg)
+
     def test_int_x(self):
         lexer = LexerStateMachine('int x ;', self.context)
         parser = Parser(lexer, self.manager)
@@ -178,6 +202,32 @@ class TestDeclarationContext(unittest.TestCase):
         self.assertEqual('=', token[0].data[3].data[1].id)
         self.assertEqual('z', token[0].data[3].data[1].data[0].data[0])
         self.assertEqual(15, token[0].data[3].data[1].data[1].data[0])
+
+    def test_declaration_expression_declaration(self):
+        lexer = LexerStateMachine('{ int x = 3 ;\
+                                     x = 5 + 10 ;\
+                                     int z = 15 ; }', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        self.assertEqual('{', token[0].id)
+        self.assertEqual('int', token[0].data[0].id)
+        self.assertEqual('x', token[0].data[0].data[0].data[0])
+        self.assertEqual('=', token[0].data[1].id)
+        self.assertEqual('x', token[0].data[1].data[0].data[0])
+        self.assertEqual(3, token[0].data[1].data[1].data[0])
+        self.assertEqual('=', token[0].data[2].id)
+        self.assertEqual('x', token[0].data[2].data[0].data[0])
+        self.assertEqual('+', token[0].data[2].data[1].id)
+        self.assertEqual(5, token[0].data[2].data[1].data[0].data[0])
+        self.assertEqual(10, token[0].data[2].data[1].data[1].data[0])
+        self.assertEqual('int', token[0].data[3].id)
+        self.assertEqual('z', token[0].data[3].data[0].data[0])
+        self.assertEqual('=', token[0].data[4].id)
+        self.assertEqual('z', token[0].data[4].data[0].data[0])
+        self.assertEqual(15, token[0].data[4].data[1].data[0])
+
 """
     def test_int_int_will_raiseException(self):
         lexer = Lexer('int int x = 3 ;', self.context)

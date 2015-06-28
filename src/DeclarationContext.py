@@ -23,10 +23,12 @@ class DeclarationContext(Context):
             ddToken = thisContext.createDeclarationAndDefinitionToken()
             ddToken.data = []
             identifierToken = thisContext.contextManager.parser.lexer.advance()
-            if identifierToken.id == 'int':
-                raise SyntaxError('2 or more data types in declaration')
             while True:
                 identifierToken = thisContext.contextManager.parser.lexer.peep()
+                if identifierToken.id == 'int':
+                    raise SyntaxError('2 or more data types in declaration')
+                elif identifierToken.id != '(identifier)':
+                    raise SyntaxError('expect identifier before ' + identifierToken.id)
                 self.data.append(identifierToken)
                 expressionToken = thisContext.contextManager.parser.parse(0)
                 ddToken.data.append(copy.copy(self))
@@ -37,7 +39,6 @@ class DeclarationContext(Context):
                 if testToken.id != ',':
                     break
                 thisContext.contextManager.parser.lexer.advance()
-            testToken = thisContext.contextManager.parser.lexer.peep(';')
             return ddToken
         def led(self):
             pass

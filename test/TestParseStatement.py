@@ -37,7 +37,7 @@ class TestParseStatement(unittest.TestCase):
 
 
     def test_testtesttest(self):
-        lexer = Lexer('x = ;', self.context)
+        lexer = LexerStateMachine('x = ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 

@@ -29,7 +29,8 @@ class Parser:
                 returnedToken = self.parse(bindingPower)
                 if returnedToken.id == '(declaration&definition)':  # For declaration & definition
                     list.extend(returnedToken.data)
-                else:                                               # For normal token
+                    self.lexer.peep(';')
+                else:                                               # For some context that do not need ';'
                     list.append(returnedToken)
                 return list
         if firstToken.id == '{':            # For one block of statements
