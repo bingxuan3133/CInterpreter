@@ -36,7 +36,7 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.manager.setCurrentContexts(self.contexts)
 
     def test_parse_while_1(self):
-        lexer = Lexer('while ( 1 ) ;', self.context)
+        lexer = LexerStateMachine('while ( 1 ) ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -47,7 +47,7 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.assertEqual(1, token.data[0].data[0])
 
     def test_parse_while_1_while_1(self):
-        lexer = Lexer('while ( 1 ) while ( 1 ) ;', self.context)
+        lexer = LexerStateMachine('while ( 1 ) while ( 1 ) ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -61,7 +61,7 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.assertEqual(1, token.data[1][0].data[0].data[0])
 
     def test_parse_while_1_do_something(self):
-        lexer = Lexer('while ( 1 ) i ++ ;', self.context)
+        lexer = LexerStateMachine('while ( 1 ) i ++ ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -75,13 +75,13 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.assertEqual('i', token.data[1][0].data[0].data[0])
 
     def test_parse_while_while_1_should_raise_an_error(self):
-        lexer = Lexer('while ( while ( 1 ) ) ;', self.context)
+        lexer = LexerStateMachine('while ( while ( 1 ) ) ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         self.assertRaises(SyntaxError, parser.parse, 0)
 
     def test_parse_while_1_without_closing_bracket_should_raise_an_error(self):
-        lexer = Lexer('while ( 1', self.context)
+        lexer = LexerStateMachine('while ( 1', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -96,7 +96,7 @@ class TestParseWhileFlowControl(unittest.TestCase):
         :return:
         """
         self.flowControlContext.addBlockOperator('{', 0)
-        lexer = Lexer('while ( 1 ) { }', self.context)
+        lexer = LexerStateMachine('while ( 1 ) { }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -117,7 +117,7 @@ class TestParseWhileFlowControl(unittest.TestCase):
                    1     {
         :return:
         """
-        lexer = Lexer('while ( 1 ) { while ( 1 ) { } } ', self.context)
+        lexer = LexerStateMachine('while ( 1 ) { while ( 1 ) { } } ', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -142,7 +142,7 @@ class TestParseWhileFlowControl(unittest.TestCase):
                    1
         :return:
         """
-        lexer = Lexer('while ( 1 ) { while ( 1 ) ; } ', self.context)
+        lexer = LexerStateMachine('while ( 1 ) { while ( 1 ) ; } ', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -166,7 +166,7 @@ class TestParseWhileFlowControl(unittest.TestCase):
                  |- j
         :return:
         """
-        lexer = Lexer('while ( 1 ) { 2 + 3 ; i ; j ; }', self.context)
+        lexer = LexerStateMachine('while ( 1 ) { 2 + 3 ; i ; j ; }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -216,7 +216,7 @@ class TestParseDoWhileFlowControl(unittest.TestCase):
         self.manager.setCurrentContexts(self.contexts)
 
     def test_parse_do_while(self):
-        lexer = Lexer('do ; while ( 1 ) ;', self.context)
+        lexer = LexerStateMachine('do ; while ( 1 ) ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -227,7 +227,7 @@ class TestParseDoWhileFlowControl(unittest.TestCase):
         self.assertEqual(None, token.data[1])
 
     def test_parse_do_2_plus_3_while_1(self):
-        lexer = Lexer('do 2 + 3 ; while ( 1 ) ;', self.context)
+        lexer = LexerStateMachine('do 2 + 3 ; while ( 1 ) ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -241,7 +241,7 @@ class TestParseDoWhileFlowControl(unittest.TestCase):
 
     def test_parse_should_not_raise_SyntaxError_when_missing_semicolon_at_while(self):
         # it should be checked by the parseStatement who called parse
-        lexer = Lexer('do { ; } while ( 1 )', self.context)
+        lexer = LexerStateMachine('do { ; } while ( 1 )', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -253,7 +253,7 @@ class TestParseDoWhileFlowControl(unittest.TestCase):
         self.assertEqual([], token.data[1][0].data)
 
     def test_parse_do_few_statements_while_1(self):
-        lexer = Lexer('do { x = 2 + 3 ; y = 4 + 5 ; z = 6 - 7 ; } while ( 1 ) ;', self.context)
+        lexer = LexerStateMachine('do { x = 2 + 3 ; y = 4 + 5 ; z = 6 - 7 ; } while ( 1 ) ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -279,7 +279,7 @@ class TestParseDoWhileFlowControl(unittest.TestCase):
         self.assertEqual(7, token.data[1][0].data[2].data[1].data[1].data[0])
 
     def test_parse_nested_do_while_loop(self):
-        lexer = Lexer('do { x = 2 + 3 ; do y = 4 + 5 ; while ( 1 ) ; z = 6 - 7 ; } while ( 1 ) ;', self.context)
+        lexer = LexerStateMachine('do { x = 2 + 3 ; do y = 4 + 5 ; while ( 1 ) ; z = 6 - 7 ; } while ( 1 ) ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -309,21 +309,21 @@ class TestParseDoWhileFlowControl(unittest.TestCase):
         self.assertEqual(7, token.data[1][0].data[2].data[1].data[1].data[0])
 
     def test_parse_should_raise_SyntaxError_when(self):
-        lexer = Lexer('do 2 + 3 ; while ( do 2 + 3 ; while ( 1 ) ; ) ;', self.context)
+        lexer = LexerStateMachine('do 2 + 3 ; while ( do 2 + 3 ; while ( 1 ) ; ) ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         self.assertRaises(SyntaxError, parser.parse, 0)
 
     def test_parse_should_raise_SyntaxError_when_missing_close_brace(self):
-        lexer = Lexer('do { ; while ( 1 ) ;', self.context)
+        lexer = LexerStateMachine('do { ; while ( 1 ) ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         self.assertRaises(SyntaxError, parser.parse, 0)
 
     def test_parse_should_raise_SyntaxError_when_missing_open_brace(self):
-        lexer = Lexer('do ; } while ( 1 ) ;', self.context)
+        lexer = LexerStateMachine('do ; } while ( 1 ) ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -374,7 +374,7 @@ class TestParseIfFlowControl(unittest.TestCase):
         :return:
         """
 
-        lexer = Lexer('if ( 2 == 3 ) { } ', self.context)
+        lexer = LexerStateMachine('if ( 2 == 3 ) { } ', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -398,7 +398,7 @@ class TestParseIfFlowControl(unittest.TestCase):
         2    3
         :return:
         """
-        lexer = Lexer(' if ( 2 == 3 ) { 5 * 6 ; } ', self.context)
+        lexer = LexerStateMachine(' if ( 2 == 3 ) { 5 * 6 ; } ', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -425,7 +425,7 @@ class TestParseIfFlowControl(unittest.TestCase):
         2    3
         :return:
         """
-        lexer = Lexer(' if ( 2 == 3 ) { }\
+        lexer = LexerStateMachine(' if ( 2 == 3 ) { }\
                         else { } ', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
@@ -444,7 +444,7 @@ class TestParseIfFlowControl(unittest.TestCase):
 
     def test_parse_will_raise_error_if_the_if_statement_contain_no_condition(self):
 
-        lexer = Lexer(' if ( ) ', self.context)
+        lexer = LexerStateMachine(' if ( ) ', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         try:
@@ -467,7 +467,7 @@ class TestParseIfFlowControl(unittest.TestCase):
                     2    3
         :return:
         """
-        lexer = Lexer(' if ( 2 == 3 ) { x = 2 * 3 ; } ', self.context)
+        lexer = LexerStateMachine(' if ( 2 == 3 ) { x = 2 * 3 ; } ', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -499,7 +499,7 @@ class TestParseIfFlowControl(unittest.TestCase):
                     2    3
         :return:
         """
-        lexer = Lexer('if ( 2 == 3 ) { x = 2 * 3 ;\
+        lexer = LexerStateMachine('if ( 2 == 3 ) { x = 2 * 3 ;\
                                         y = 5 + 7 ; } ', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
@@ -536,7 +536,7 @@ class TestParseIfFlowControl(unittest.TestCase):
         :return:
         """
 
-        lexer = Lexer('if ( 2 == 3 ) x = 2 * 3 ; ', self.context)
+        lexer = LexerStateMachine('if ( 2 == 3 ) x = 2 * 3 ; ', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parse(0)
@@ -553,7 +553,7 @@ class TestParseIfFlowControl(unittest.TestCase):
         self.assertEqual(3, token.data[1][0].data[1].data[1].data[0])
 
     def test_parse_will_throw_exception_for_braces_do_not_close_in_pair(self):
-        lexer = Lexer(' if ( 1 ; 2 ) ', self.context)
+        lexer = LexerStateMachine(' if ( 1 ; 2 ) ', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -565,13 +565,13 @@ class TestParseIfFlowControl(unittest.TestCase):
 
     def test_parse_throw_an_error_if_the_brace_does_not_close(self):
 
-        lexer = Lexer('( 2 == 3 ', self.context)
+        lexer = LexerStateMachine('( 2 == 3 ', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         self.assertRaises(SyntaxError, parser.parse, 0)
 
     def test_parse_throw_an_error_if_the_if_is_being_in_the_condition_brace(self):
-        lexer = Lexer('if ( if ( x == 2 ) ) ', self.context)
+        lexer = LexerStateMachine('if ( if ( x == 2 ) ) ', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         self.assertRaises(SyntaxError, parser.parse, 0)

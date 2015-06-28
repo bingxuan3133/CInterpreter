@@ -49,7 +49,7 @@ class TestParseStatement(unittest.TestCase):
             ;
         :return:
         """
-        lexer = Lexer(';', self.context)
+        lexer = LexerStateMachine(';', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatement(0)
@@ -60,7 +60,7 @@ class TestParseStatement(unittest.TestCase):
             2 + 3 ;
         :return:
         """
-        lexer = Lexer('2 + 3 ;', self.context)
+        lexer = LexerStateMachine('2 + 3 ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatement(0)
@@ -73,7 +73,7 @@ class TestParseStatement(unittest.TestCase):
             2 + 3
         :return:
         """
-        lexer = Lexer('2 + 3', self.context)
+        lexer = LexerStateMachine('2 + 3', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -110,7 +110,7 @@ class TestParseStatementWithBraces(unittest.TestCase):
             { }
         :return:
         """
-        lexer = Lexer('{ }', self.context)
+        lexer = LexerStateMachine('{ }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatements(0)
@@ -122,7 +122,7 @@ class TestParseStatementWithBraces(unittest.TestCase):
             { ; }
         :return:
         """
-        lexer = Lexer('{ ; }', self.context)
+        lexer = LexerStateMachine('{ ; }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatements(0)
@@ -134,7 +134,7 @@ class TestParseStatementWithBraces(unittest.TestCase):
             { ; ; ; }
         :return:
         """
-        lexer = Lexer('{ ; ; ; }', self.context)
+        lexer = LexerStateMachine('{ ; ; ; }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatements(0)
@@ -150,7 +150,7 @@ class TestParseStatementWithBraces(unittest.TestCase):
          2     3
         :return:
         """
-        lexer = Lexer('{ 2 + 3 ; }', self.context)
+        lexer = LexerStateMachine('{ 2 + 3 ; }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatements(0)
@@ -170,7 +170,7 @@ class TestParseStatementWithBraces(unittest.TestCase):
          2     3
         :return:
         """
-        lexer = Lexer('{ { 2 + 3 ; } }', self.context)
+        lexer = LexerStateMachine('{ { 2 + 3 ; } }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatements(0)
@@ -189,7 +189,7 @@ class TestParseStatementWithBraces(unittest.TestCase):
          2     3  3     4  5     9
         :return:
         """
-        lexer = Lexer('{ 2 + 3 ; \
+        lexer = LexerStateMachine('{ 2 + 3 ; \
                         3 * 4 ; \
                         5 / 9 ; \
                         }', self.context)
@@ -220,7 +220,7 @@ class TestParseStatementWithBraces(unittest.TestCase):
          3    8
         :return:
         """
-        lexer = Lexer(' { 2 + 3 * 8 / 9 ; }', self.context)
+        lexer = LexerStateMachine(' { 2 + 3 * 8 / 9 ; }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatements(0)
@@ -234,7 +234,7 @@ class TestParseStatementWithBraces(unittest.TestCase):
         self.assertEqual(9, token[0].data[0].data[1].data[1].data[0])
 
     def test_parseStatement_should_return_a_list_of_tree_if_the_expression_is_long_and_being_in_braces(self):
-        lexer = Lexer('{ x = y + 8 * 16 / 180 - 20 ; }', self.context)
+        lexer = LexerStateMachine('{ x = y + 8 * 16 / 180 - 20 ; }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -252,21 +252,21 @@ class TestParseStatementWithBraces(unittest.TestCase):
         self.assertEqual(8, token[0].data[0].data[1].data[0].data[1].data[0].data[0].data[0])
         self.assertEqual(16, token[0].data[0].data[1].data[0].data[1].data[0].data[1].data[0])
     def test_parseStatement_should_raise_SyntaxError_when_there_is_missing_close_brace(self):
-        lexer = Lexer('{ 2 + 3 ;', self.context)
+        lexer = LexerStateMachine('{ 2 + 3 ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         self.assertRaises(SyntaxError, parser.parseStatement, 0)
 
     def test_parseStatement_should_raise_SyntaxError_when_there_is_missing_one_close_brace(self):
-        lexer = Lexer('{ 2 + 3 ; { }', self.context)
+        lexer = LexerStateMachine('{ 2 + 3 ; { }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         self.assertRaises(SyntaxError, parser.parseStatement, 0)
 
     def xtest_parseStatement_should_raise_SyntaxError_when_there_is_missing_open_brace(self):
-        lexer = Lexer('2 + 3 ; }', self.context)
+        lexer = LexerStateMachine('2 + 3 ; }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatement(0)

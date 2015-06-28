@@ -53,7 +53,7 @@ class MyTestCase(unittest.TestCase):
             x(max=1,min=1)       5 (max=1,min=1)
         """
 
-        lexer = Lexer(' x = 5 ', self.context)
+        lexer = LexerStateMachine(' x = 5 ', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 

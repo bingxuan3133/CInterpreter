@@ -1,5 +1,5 @@
 # Pratt's parser implementation
-from Lexer import *
+from LexerStateMachine import *
 from ContextManager import *
 from copy import *
 

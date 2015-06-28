@@ -48,7 +48,7 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.informationInjector = InformationInjector()
 
     def test_generateByteCode_will_understand_declaration_and_generate_reservation_byteCode(self):
-        lexer = Lexer('int x ;', self.context)
+        lexer = LexerStateMachine('int x ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatement(0)
@@ -59,7 +59,7 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.subFrameRegister([7, 4]), byteCodes[0])
 
     def test_generateByteCode_will_generate_multiple_byteCode_for_a_multiple_declaration(self):
-        lexer = Lexer('int x , y , z ;', self.context)
+        lexer = LexerStateMachine('int x , y , z ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -78,7 +78,7 @@ class TestByteCodeGenerator(unittest.TestCase):
             x(max=1,min=1)       5 (max=1,min=1)
         """
 
-        lexer = Lexer(' x = 5 ', self.context)
+        lexer = LexerStateMachine(' x = 5 ', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -94,7 +94,7 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.assignRegister([0, 5]), byteCodes[2])
 
     def test_generateByteCode_will_generate_code_to_initialize_the_(self):
-        lexer = Lexer('int x = 2 ;', self.context)
+        lexer = LexerStateMachine('int x = 2;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -112,7 +112,7 @@ class TestByteCodeGenerator(unittest.TestCase):
 
 
     def xtest_generateByteCode_will_generate_code_for_multiple_initialization(self):
-        lexer = Lexer('int x = 3 , y = 5 , z = 10', self.context)
+        lexer = LexerStateMachine('int x = 3 , y = 5 , z = 10 ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -131,7 +131,7 @@ class TestByteCodeGenerator(unittest.TestCase):
 
 
     def test_generateByteCode_will_return_the_byteCode_in_a_list_for_a_multiply_expression(self):
-        lexer = Lexer('3 * 4 + 2 ', self.context)
+        lexer = LexerStateMachine('3 * 4 + 2 ', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -147,7 +147,7 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.addRegister([0, 0, 5]), byteCodes[4])
 
     def test_generateByteCode_will_return_the_byteCode_in_a_list_with_a_longer_expression(self):
-        lexer = Lexer('3 * 4 + 2 - 10', self.context)
+        lexer = LexerStateMachine('3 * 4 + 2 - 10', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -181,7 +181,7 @@ class TestByteCodeGenerator(unittest.TestCase):
                     /                     \
             8 (max=1,min=1)               9 (max=1,min=1)
         """
-        lexer = Lexer(' x = 8 * 9 * 10', self.context)
+        lexer = LexerStateMachine(' x = 8 * 9 * 10', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -215,7 +215,7 @@ class TestByteCodeGenerator(unittest.TestCase):
 
 
     def test_generateByteCode_will_generate_code_initialization_and_assignment(self):
-        lexer = Lexer('{ int x = 3 ; \
+        lexer = LexerStateMachine('{ int x = 3 ; \
                       int y = 15 ; }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
@@ -229,7 +229,7 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.storeValue(0, 7, 8), byteCodes[4])
 
     def xtest_generateByteCode_will_generate_for_expression_with_add_command(self):
-        lexer = Lexer('{ int x = 3 ;\
+        lexer = LexerStateMachine('{ int x = 3 ;\
                       int y = 15 ; \
                       x = y ; }', self.context)
         parser = Parser(lexer, self.manager)
@@ -245,7 +245,7 @@ class TestByteCodeGenerator(unittest.TestCase):
 
 
     def test_generateByteCode_will_generate_for_an_arithmetic_statements(self):
-        lexer = Lexer('{ int x = 20 ;\
+        lexer = LexerStateMachine('{ int x = 20 ;\
                       int y = 35 ; \
                       x = 5 ; }', self.context)
         parser = Parser(lexer, self.manager)
@@ -263,7 +263,7 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.storeValue(1, 0), byteCodes[7])
 
     def test_generateByteCode_will_generate_byteCodes_for_an_add_expression(self):
-        lexer = Lexer('{ int x = 3 ;\
+        lexer = LexerStateMachine('{ int x = 3 ;\
                       int y = 15 ; \
                       x = y + 8 ; }', self.context)
         parser = Parser(lexer, self.manager)
@@ -291,7 +291,7 @@ class TestByteCodeGenerator(unittest.TestCase):
             x(max=1,min=1)       5 (max=1,min=1)
         """
 
-        lexer = Lexer(' x = 5 ', self.context)
+        lexer = LexerStateMachine(' x = 5 ', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -319,7 +319,7 @@ class TestByteCodeGenerator(unittest.TestCase):
                     /                     \
             5 (max=1,min=1)               10 (max=1,min=1)
         """
-        lexer = Lexer(' x = 5 + 10 + 20', self.context)
+        lexer = LexerStateMachine(' x = 5 + 10 + 20', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -351,7 +351,7 @@ class TestByteCodeGenerator(unittest.TestCase):
                     /                     \
             8 (max=1,min=1)               9 (max=1,min=1)
         """
-        lexer = Lexer(' x = 8 * 9 * 10', self.context)
+        lexer = LexerStateMachine(' x = 8 * 9 * 10', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -383,7 +383,7 @@ class TestByteCodeGenerator(unittest.TestCase):
                     /                     \
             8 (max=1,min=1)               9 (max=1,min=1)
         """
-        lexer = Lexer(' x = 8 * 9 * 10', self.context)
+        lexer = LexerStateMachine(' x = 8 * 9 * 10', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
