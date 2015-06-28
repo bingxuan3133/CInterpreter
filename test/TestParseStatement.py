@@ -35,6 +35,15 @@ class TestParseStatement(unittest.TestCase):
         self.manager.addContext('FlowControl', self.flowControlContext)
         self.manager.setCurrentContexts(self.contexts)
 
+
+    def test_testtesttest(self):
+        lexer = Lexer('x = ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        self.assertRaises(SyntaxError, parser.parseStatement, 0)
+
+
     def test_parseStatement_will_return_None_for_an_empty_statement(self):
         """
             ;

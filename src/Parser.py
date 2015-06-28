@@ -21,43 +21,20 @@ class Parser:
     def parseStatement(self, bindingPower):
         list = []
         firstToken = self.lexer.peep()
-        secondToken = deepcopy(firstToken)
         if firstToken.id == ';':
             self.lexer.advance()
             return None
-        elif firstToken.id == 'int':
-
-            firstToken = deepcopy(secondToken)
-            identifierName = self.lexer.advance()
-            firstToken.data.append(identifierName)
-            list.append(firstToken)
-            if self.lexer.peep().id != '(systemToken)':
-                tempToken =self.lexer.peep()
-                returnedToken = self.parse(bindingPower)
-                if returnedToken.id != tempToken.id:
-                    list.append(returnedToken)
-
-            while self.lexer.peep().id == ',':
-                firstToken = deepcopy(secondToken)
-                identifierName = self.lexer.advance()
-                firstToken.data.append(identifierName)
-                list.append(firstToken)
-                if self.lexer.peep().id != '(systemToken)':
-                    tempToken =self.lexer.peep()
-                    returnedToken = self.parse(bindingPower)
-                    if returnedToken.id != tempToken.id:
-                        list.append(returnedToken)
-            return list
-
-        for currentContext in self.contextManager.currentContexts:
+        for currentContext in self.contextManager.currentContexts:  # For some context that do not need ';'
             if firstToken.id in currentContext.symbolTable:
                 returnedToken = self.parse(bindingPower)
-                list.append(returnedToken)
+                if returnedToken.id == '(declaration&definition)':  # For declaration & definition
+                    list.extend(returnedToken.data)
+                else:                                               # For normal token
+                    list.append(returnedToken)
                 return list
-
-        if firstToken.id == '{':
+        if firstToken.id == '{':            # For one block of statements
             returnedToken = self.parse(bindingPower)
-        else:
+        else:                               # For one statement
             returnedToken = self.parse(bindingPower)
             self.lexer.peep(';')
             self.lexer.advance()

@@ -38,8 +38,22 @@ class TestDeclarationContext(unittest.TestCase):
         self.manager.addContext('FlowControl', self.flowControlContext)
         self.manager.setCurrentContexts(self.contexts)
 
-    def test_int_x(self):
+    def test_int_x_without_semicolon(self):
         lexer = Lexer('int x', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        self.assertRaises(SyntaxError, parser.parseStatement, 0)
+
+    def test_int_int_will_raise_SyntaxError(self):
+        lexer = Lexer('int int x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        self.assertRaises(SyntaxError, parser.parseStatement, 0)
+
+    def test_int_x(self):
+        lexer = Lexer('int x ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -48,7 +62,7 @@ class TestDeclarationContext(unittest.TestCase):
         self.assertEqual('x', token[0].data[0].data[0])
 
     def test_int_x_equal_to_2(self):
-        lexer = Lexer('int x = 2', self.context)
+        lexer = Lexer('int x = 2 ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -60,7 +74,7 @@ class TestDeclarationContext(unittest.TestCase):
         self.assertEqual(2, token[1].data[1].data[0])
 
     def test_int_x_y_and_z(self):
-        lexer = Lexer('int x , y , z ', self.context)
+        lexer = Lexer('int x , y , z ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -72,8 +86,29 @@ class TestDeclarationContext(unittest.TestCase):
         self.assertEqual('int', token[2].id)
         self.assertEqual('z', token[2].data[0].data[0])
 
+    def test_int_x_y_and_z_with_some_initialization(self):
+        lexer = Lexer('int x = 3 , y , z = 2 + 3 ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('x', token[0].data[0].data[0])
+        self.assertEqual('=', token[1].id)
+        self.assertEqual('x', token[1].data[0].data[0])
+        self.assertEqual(3, token[1].data[1].data[0])
+        self.assertEqual('int', token[2].id)
+        self.assertEqual('y', token[2].data[0].data[0])
+        self.assertEqual('int', token[3].id)
+        self.assertEqual('z', token[3].data[0].data[0])
+        self.assertEqual('=', token[4].id)
+        self.assertEqual('z', token[4].data[0].data[0])
+        self.assertEqual('+', token[4].data[1].id)
+        self.assertEqual(2, token[4].data[1].data[0].data[0])
+        self.assertEqual(3, token[4].data[1].data[1].data[0])
+
     def test_int_x_y_z_with_initialization(self):
-        lexer = Lexer('int x = 3 , y = 2 + 3 , z = y + 3', self.context)
+        lexer = Lexer('int x = 3 , y = 2 + 3 , z = y + 3 ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -183,6 +218,7 @@ class TestPointerDeclaration(unittest.TestCase):
         self.manager.addContext('FlowControl', self.flowControlContext)
         self.manager.setCurrentContexts(self.contexts)
 
+"""
     def test_int_pointer(self):
         lexer = Lexer('int * ptr ;', self.context)
         parser = Parser(lexer, self.manager)
@@ -193,7 +229,7 @@ class TestPointerDeclaration(unittest.TestCase):
         self.assertEqual('*', token[0].data[0].id)
         self.assertEqual('ptr', token[0].data[0].data[0].data[0])
 
-"""
+
     def test_int_pointer_equal_3(self):
         lexer = Lexer('int * ptr = 3 ;', self.context)
         parser = Parser(lexer, self.manager)
