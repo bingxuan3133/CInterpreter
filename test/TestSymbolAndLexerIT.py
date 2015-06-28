@@ -5,7 +5,7 @@ lib_path = os.path.abspath('../src')
 sys.path.append(lib_path)
 
 import unittest
-from Lexer import *
+from LexerStateMachine import *
 from Context import *
 from ExpressionContext import *
 
@@ -21,7 +21,7 @@ class MyTestCase(unittest.TestCase):
         manager = ContextManager()
         context = Context(manager)
         manager.setCurrentContexts([context])
-        lexer = Lexer('xyz 1234', context)
+        lexer = LexerStateMachine('xyz 1234', context)
         token = lexer.peep()
         self.assertEqual(token.id, '(identifier)')
         self.assertEqual(token.data[0], 'xyz')
@@ -36,7 +36,7 @@ class MyTestCase(unittest.TestCase):
         manager.setCurrentContexts([context, expression])
         expression.addInfixOperator('+', 70)
         expression.addInfixOperator('-', 70)
-        lexer = Lexer('+ -', context)
+        lexer = LexerStateMachine('+ -', context)
         token = lexer.peep()
         self.assertEqual(token.id, '+')
         self.assertEqual(token.arity, Context.BINARY)
@@ -51,7 +51,7 @@ class MyTestCase(unittest.TestCase):
         manager.setCurrentContexts([context, expression])
         expression.addInfixOperator('+', 70)
         expression.addInfixOperator('-', 70)
-        lexer = Lexer('3 + 5 - 6', context)
+        lexer = LexerStateMachine('3 + 5 - 6', context)
         token = lexer.peep()
         self.assertEqual(token.id, '(literal)')
         self.assertEqual(token.data[0], 3)
@@ -65,7 +65,7 @@ class MyTestCase(unittest.TestCase):
         manager.setCurrentContexts([context, expression])
         expression.addInfixOperator('+', 70)
         expression.addInfixOperator('-', 70)
-        lexer = Lexer('13 + 5 - 6', context)
+        lexer = LexerStateMachine('13 + 5 - 6', context)
         token = lexer.peep()
         self.assertEqual(token.id, '(literal)')
         self.assertEqual(token.data[0], 13)
@@ -79,7 +79,7 @@ class MyTestCase(unittest.TestCase):
         expression = ExpressionContext(manager)
         manager.setCurrentContexts([context, expression])
         expression.addInfixOperator('+', 70)
-        lexer = Lexer('13 + 5', context)
+        lexer = LexerStateMachine('13 + 5', context)
         token = lexer.peep()
         self.assertEqual(token.id, '(literal)')
         self.assertEqual(token.data[0], 13)

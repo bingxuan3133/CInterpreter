@@ -42,7 +42,7 @@ class TestDeclarationContext(unittest.TestCase):
 
 
     def test_int_x(self):
-        lexer = Lexer('int x', self.context)
+        lexer = LexerStateMachine('int x', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -51,7 +51,7 @@ class TestDeclarationContext(unittest.TestCase):
         self.assertEqual('x', token[0].data[0].data[0])
 
     def test_int_x_equal_to_2(self):
-        lexer = Lexer('int x = 2', self.context)
+        lexer = LexerStateMachine('int x = 2', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -63,7 +63,7 @@ class TestDeclarationContext(unittest.TestCase):
         self.assertEqual(2, token[1].data[1].data[0])
 
     def test_int_x_y_and_z(self):
-        lexer = Lexer('int x , y , z ', self.context)
+        lexer = LexerStateMachine('int x , y , z ', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -76,7 +76,7 @@ class TestDeclarationContext(unittest.TestCase):
         self.assertEqual('z', token[2].data[0].data[0])
 
     def test_int_x_y_z_with_initialization(self):
-        lexer = Lexer('int x = 3 , y = 2 + 3 , z = y + 3', self.context)
+        lexer = LexerStateMachine('int x = 3 , y = 2 + 3 , z = y + 3', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -104,7 +104,7 @@ class TestDeclarationContext(unittest.TestCase):
 
 
     def test_expression_with_separate_initialization(self):
-        lexer = Lexer('{ int x = 3 ;\
+        lexer = LexerStateMachine('{ int x = 3 ;\
                       int y = 15 ; }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
@@ -124,7 +124,7 @@ class TestDeclarationContext(unittest.TestCase):
 
 
     def test_nested_bracers(self):
-        lexer = Lexer('{ int x = 3 ;\
+        lexer = LexerStateMachine('{ int x = 3 ;\
                          { int y = 5 ; }\
                          { int z = 15 ; } }', self.context)
         parser = Parser(lexer, self.manager)
