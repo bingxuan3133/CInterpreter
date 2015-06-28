@@ -113,12 +113,12 @@ class Context:
             return self.createIdentifier(word)
         elif word.isnumeric():
             return self.createLiteral(word)
-        elif self.isNumber(word):
+        elif self.isFloat(word):
             return self.createFloatingPoint(word)
         else:
             raise SyntaxError('Syntax error: [' + word + '] is an unknown token')
 
-    def isNumber(self, Unknown):
+    def isFloat(self, Unknown):
         try:
             float(Unknown)
             return True
