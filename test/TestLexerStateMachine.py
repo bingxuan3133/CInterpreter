@@ -19,6 +19,8 @@ class TestLexer(unittest.TestCase):
         self.context.addOperator('+')
         self.context.addOperator('++')
         self.context.addOperator('-')
+        self.context.addOperator('*')
+        self.context.addOperator('=')
 
     def testAdvance(self):
         lexer = LexerStateMachine(""" hi krizz
@@ -461,3 +463,30 @@ class TestLexer(unittest.TestCase):
         self.assertEqual(testToken.id, '(literal)')
         self.assertEqual(testToken.data[0], 3)
 
+    def test_lexer_will_split_the_token_if_there_is_multiple_line_in_the_string(self):
+        lexer = LexerStateMachine("""x =myVar +
+                                  hisVar*oursVar
+                                  -0X123F""", self.context)
+        testToken = lexer.currentToken
+        self.assertEqual(testToken.data[0],'x')
+        self.assertEqual(testToken.id, '(identifier)')
+        testToken = lexer.advance()
+        self.assertEqual(testToken.id, '=')
+        testToken = lexer.advance()
+        self.assertEqual(testToken.data[0],'myVar')
+        self.assertEqual(testToken.id, '(identifier)')
+        testToken = lexer.advance()
+        self.assertEqual(testToken.id, '+')
+        testToken = lexer.advance()
+        self.assertEqual(testToken.data[0],'hisVar')
+        self.assertEqual(testToken.id, '(identifier)')
+        testToken = lexer.advance()
+        self.assertEqual(testToken.id, '*')
+        testToken = lexer.advance()
+        self.assertEqual(testToken.data[0],'oursVar')
+        self.assertEqual(testToken.id, '(identifier)')
+        testToken = lexer.advance()
+        self.assertEqual(testToken.id, '-')
+        testToken = lexer.advance()
+        self.assertEqual(testToken.data[0],4671)
+        self.assertEqual(testToken.id, '(literal)')
