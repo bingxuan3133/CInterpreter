@@ -19,6 +19,14 @@ class ScopeBuilder:
         self.interestedTokens = []
 
     def buildScope(self, token):
+        if tree.id is 'int':
+            self.interestedTokens.append(tree)
+        elif tree.id is '{':
+            self.interestedTokens.append(tree)
+            subTree = self.removeSubToken(tree)
+            self.scanForInterestedTokens(subTree)
+            self.interestedTokens.append(self.closeBrace)   # add closing brace when detect end of a scope
+
         if token.id is '{':
             self.currentScope.parentScope = copy.copy(self.currentScope)
             newScopeList = []

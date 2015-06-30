@@ -79,6 +79,17 @@ class TestParseStatement(unittest.TestCase):
 
         self.assertRaises(SyntaxError, parser.parseStatement, 0)
 
+    def test_parseStatement_should_raise_SyntaxError_for_a_plus_3_statement_without_semicolon(self):
+        """
+            2 + 3
+        :return:
+        """
+        lexer = LexerStateMachine('+ 3', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        self.assertRaises(SyntaxError, parser.parseStatement, 0)
+
 class TestParseStatementWithBraces(unittest.TestCase):
     def setUp(self):
         self.manager = ContextManager()

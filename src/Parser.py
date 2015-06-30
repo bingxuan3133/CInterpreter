@@ -24,19 +24,18 @@ class Parser:
         if firstToken.id == ';':
             self.lexer.advance()
             return None
-        for currentContext in self.contextManager.currentContexts:  # For some context that do not need ';'
-            if firstToken.id in currentContext.symbolTable:
-                returnedToken = self.parse(bindingPower)
-                if returnedToken.id == '(declaration&definition)':  # For declaration & definition
-                    list.extend(returnedToken.data)
-                    self.lexer.peep(';')
-                else:                                               # For some context that do not need ';'
-                    list.append(returnedToken)
-                return list
+        if firstToken.id in self.contextManager.getContext('FlowControl').symbolTable:  # For some context that do not need ';'
+            returnedToken = self.parse(bindingPower)
+            list.append(returnedToken)
+            return list
         if firstToken.id == '{':            # For one block of statements
             returnedToken = self.parse(bindingPower)
         else:                               # For one statement
             returnedToken = self.parse(bindingPower)
+            if returnedToken.id == '(declaration&definition)':  # For declaration & definition
+                list.extend(returnedToken.data)
+                self.lexer.peep(';')
+                return list
             self.lexer.peep(';')
             self.lexer.advance()
         list.append(returnedToken)
