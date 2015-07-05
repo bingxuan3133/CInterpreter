@@ -9,6 +9,12 @@ from ContextManager import *
 import copy
 
 class DeclarationContext(Context):
+    def __init__(self, *args, **kwargs):
+        super(DeclarationContext, self).__init__(*args, **kwargs)
+        self.modifier = []
+        self.modifierCount = 0
+        self.primitiveCount = 0
+
     def createDeclarationAndDefinitionToken(self):
         thisContext = self
         sym = self.symbol('(declaration&definition)')
@@ -47,6 +53,41 @@ class DeclarationContext(Context):
         symClass.led = led
         return symClass
         pass
+
+    def addPrimitive(self, id, bindingPower):
+        thisContext = self
+        def nud(self):
+            thisContext.ruleCheck(self)
+            return
+        def led(self):
+            pass
+        symClass = self.symbol(id, bindingPower)
+        symClass.type = 'primitive'
+        symClass.nud = nud
+        symClass.led = led
+        return symClass
+        pass
+
+    def addModifier(self, id, bindingPower):
+        thisContext = self
+        def nud(self):
+            thisContext.ruleCheck(self)
+        def led(self):
+            pass
+        symClass = self.symbol(id, bindingPower)
+        symClass.type = 'modifier'
+        symClass.nud = nud
+        symClass.led = led
+        return symClass
+        pass
+
+    def ruleCheck(self, token):
+        if token.type == 'modifier':
+            self.modifier.append(token.id)
+            self.modifierCount += 1
+        elif token.type == 'primitive':
+            self.primitiveCount += 1
+        return
 
     def addPointerDeclaration(self, id, bindingPower):
         thisContext = self

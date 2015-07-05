@@ -38,6 +38,60 @@ class TestScope(unittest.TestCase):
         self.manager.addContext('FlowControl', self.flowControlContext)
         self.manager.setCurrentContexts(self.contexts)
 
+    def test_buildScope(self):
+        lexer = LexerStateMachine('int x ;\
+                                   int y ;\
+                                   int z ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        scopeBuilder = ScopeBuilder()
+
+        token = parser.parseStatement(0)
+        scopeBuilder.buildScope(token[0])
+        self.assertEqual(['x'], scopeBuilder.scope.list)
+        token = parser.parseStatement(0)  # for ;
+        token = parser.parseStatement(0)
+        scopeBuilder.buildScope(token[0])
+        self.assertEqual(['x', 'y'], scopeBuilder.scope.list)
+        token = parser.parseStatement(0)  # for ;
+        token = parser.parseStatement(0)
+        scopeBuilder.buildScope(token[0])
+        self.assertEqual(['x', 'y', 'z'], scopeBuilder.scope.list)
+
+    def test_buildScope_xx1(self):
+        lexer = LexerStateMachine('int x ;\
+                                   x = 2 + 3 ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatements(0)
+        scopeBuilder = ScopeBuilder()
+
+        scopeBuilder.buildScope(token[0])
+        self.assertEqual(['x'], scopeBuilder.scope.list)
+        scopeBuilder.buildScope(token[1])
+        self.assertEqual(['x'], scopeBuilder.scope.list)
+
+    def test_buildScope_xx2(self):
+        lexer = LexerStateMachine('{ int x ;\
+                                   { int y ;}\
+                                   }', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        scopeBuilder = ScopeBuilder()
+
+        scopeBuilder.buildScope(token[0])
+        self.assertEqual([[]], scopeBuilder.scope.list)
+        scopeBuilder.buildScope(token[0].data[0])
+        self.assertEqual([['x']], scopeBuilder.scope.list)
+        scopeBuilder.buildScope(token[0].data[1])
+        self.assertEqual([['x', []]], scopeBuilder.scope.list)
+        scopeBuilder.buildScope(token[0].data[1].data[0])
+        self.assertEqual([['x', ['y']]], scopeBuilder.scope.list)
+        parser.lexer.peep('}')
+        self.assertEqual([], scopeBuilder.scope.list)
+        self.assertEqual([['x']], scopeBuilder.scope.list)
+
     def test_buildScope_can_deal_with_identifiers(self):
         lexer = LexerStateMachine('int x ;', self.context)
         parser = Parser(lexer, self.manager)

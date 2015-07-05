@@ -87,6 +87,13 @@ class TestParseWhileFlowControl(unittest.TestCase):
 
         self.assertRaises(SyntaxError, parser.parse, 0)
 
+    def test_parse_while_curly_brackets_should_raise_an_error(self):
+        lexer = LexerStateMachine('while ( { 1 } )', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        self.assertRaises(SyntaxError, parser.parse, 0)
+
     # while control with block statement
     def test_parse_while_1_empty_block_statement(self):
         """

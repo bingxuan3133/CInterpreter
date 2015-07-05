@@ -100,7 +100,7 @@ class TestParseStatementWithBraces(unittest.TestCase):
 
         self.flowControlContext.addBlockOperator('{', 0)
         self.flowControlContext.addOperator('}', 0)
-        #self.flowControlContext.addBlockOperator('}', 0)
+        self.flowControlContext.addBlockOperator('}', 0)
         self.expressionContext.addPrefixInfixOperator('+', 70)
         self.expressionContext.addPrefixInfixOperator('-', 70)
         self.expressionContext.addInfixOperator('*', 100)

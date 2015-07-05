@@ -243,6 +243,41 @@ class TestDeclarationContext(unittest.TestCase):
         self.assertEqual(3, token[0].data[1].data[1].data[0])
 """
 
+class TestDeclarationWithModifier(unittest.TestCase):
+    def setUp(self):
+        self.manager = ContextManager()
+        self.context = Context(self.manager)
+        self.flowControlContext = FlowControlContext(self.manager)
+        self.defaultContext = DefaultContext(self.manager)
+        self.defaultContext.addKeyword('int')
+        self.declarationContext = DeclarationContext(self.manager)
+        self.expressionContext = ExpressionContext(self.manager)
+        self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext, self.flowControlContext]
+        self.expressionContext.addInfixOperator('=', 20)
+        self.expressionContext.addPrefixInfixOperator('+', 70)
+        self.declarationContext.addPrimitive('int', 0)
+        self.declarationContext.addModifier('short', 0)
+        self.expressionContext.addOperator(',', 0)
+        self.expressionContext.addOperator(';', 0)
+        self.flowControlContext.addBlockOperator('{', 0)
+        self.flowControlContext.addOperator('}', 0)
+
+        self.manager.addContext('Default', self.defaultContext)
+        self.manager.addContext('Declaration', self.declarationContext)
+        self.manager.addContext('Expression', self.expressionContext)
+        self.manager.addContext('FlowControl', self.flowControlContext)
+        self.manager.setCurrentContexts(self.contexts)
+
+    def test_short_int_x_equal_to_2(self):
+        lexer = LexerStateMachine('short int x;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        self.assertEqual('int', token[0].id)
+        self.assertEqual(['short'], token[0].modifier)
+        self.assertEqual('x', token[0].data[0].data[0])
+
 class TestPointerDeclaration(unittest.TestCase):
     def setUp(self):
         self.manager = ContextManager()
