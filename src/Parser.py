@@ -1,13 +1,16 @@
 # Pratt's parser implementation
 from LexerStateMachine import *
 from ContextManager import *
+from Scope import *
+from Context import *
+from Scope import ScopeBuilder
 from copy import *
 
 class Parser:
-
     def __init__(self, lexer, contextManager):
         self.lexer = lexer
         self.contextManager = contextManager
+        self.scopeBuilder = ScopeBuilder()
 
     def parse(self, bindingPower):
         token = self.lexer.peep()        # token = leftToken
@@ -24,22 +27,30 @@ class Parser:
         if firstToken.id == ';':
             self.lexer.advance()
             return None
-        if firstToken.id in self.contextManager.getContext('FlowControl').symbolTable:  # For some context that do not need ';'
+        elif firstToken.id == '{':            # For one block of statements
+            #self.scopeBuilder.buildScope(firstToken)
             returnedToken = self.parse(bindingPower)
+            flowControlContext = self.contextManager.getContext('FlowControl')
+            #self.scopeBuilder.buildScope(Context.createToken(flowControlContext, '}'))  # Create '}' token for scopeBuilder
             list.append(returnedToken)
             return list
-        if firstToken.id == '{':            # For one block of statements
+        elif firstToken.id in self.contextManager.getContext('FlowControl').symbolTable:  # For some context that do not need ';'
             returnedToken = self.parse(bindingPower)
+            #self.scopeBuilder.buildScope(returnedToken)
+            list.append(returnedToken)
+            return list
         else:                               # For one statement
             returnedToken = self.parse(bindingPower)
             if returnedToken.id == '(declaration&definition)':  # For declaration & definition
                 list.extend(returnedToken.data)
+                #self.scopeBuilder.buildScope(returnedToken.data[0])
                 self.lexer.peep(';')
                 return list
+            #self.scopeBuilder.buildScope(returnedToken)
             self.lexer.peep(';')
             self.lexer.advance()
-        list.append(returnedToken)
-        return list
+            list.append(returnedToken)
+            return list
 
     def parseStatements(self, bindingPower):
         list = []

@@ -14,6 +14,331 @@ from DefaultContext import *
 from ExpressionContext import *
 from FlowControlContext import *
 
+class TestDeclarationContextWithModifier(unittest.TestCase):
+    def setUp(self):
+        self.manager = ContextManager()
+        self.context = Context(self.manager)
+        self.flowControlContext = FlowControlContext(self.manager)
+        self.defaultContext = DefaultContext(self.manager)
+        self.defaultContext.addKeyword('int')
+        self.declarationContext = DeclarationContext(self.manager)
+        self.expressionContext = ExpressionContext(self.manager)
+        self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext, self.flowControlContext]
+        self.expressionContext.addInfixOperator('=', 20)
+        self.expressionContext.addPrefixInfixOperator('+', 70)
+        self.expressionContext.addOperator(',', 0)
+        self.expressionContext.addOperator(';', 0)
+        self.flowControlContext.addBlockOperator('{', 0)
+        self.flowControlContext.addOperator('}', 0)
+        self.declarationContext.addInt('int', 0)
+        self.declarationContext.addShort('short', 0)
+        self.declarationContext.addLong('long', 0)
+        self.declarationContext.addSignedAndUnsigned('signed', 0)
+        self.declarationContext.addSignedAndUnsigned('unsigned', 0)
+
+        self.manager.addContext('Default', self.defaultContext)
+        self.manager.addContext('Declaration', self.declarationContext)
+        self.manager.addContext('Expression', self.expressionContext)
+        self.manager.addContext('FlowControl', self.flowControlContext)
+        self.manager.setCurrentContexts(self.contexts)
+    """
+    # short
+    """
+    def test_short(self):
+        lexer = LexerStateMachine('short x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('short', token[0].modifier[0])
+        self.assertEqual('x', token[0].data[0].data[0])
+
+    def test_short_int_x(self):
+        lexer = LexerStateMachine('short int x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('short', token[0].modifier[0])
+        self.assertEqual('x', token[0].data[0].data[0])
+
+    def test_short_unsigned_x(self):
+        lexer = LexerStateMachine('short unsigned x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('unsigned', token[0].modifier[0])
+        self.assertEqual('short', token[0].modifier[1])
+        self.assertEqual('x', token[0].data[0].data[0])
+
+    def test_short_int_signed_x(self):
+        lexer = LexerStateMachine('short signed int x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('signed', token[0].modifier[0])
+        self.assertEqual('short', token[0].modifier[1])
+        self.assertEqual('x', token[0].data[0].data[0])
+
+    def test_short_unsigned_int_x(self):
+        lexer = LexerStateMachine('short unsigned int x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('unsigned', token[0].modifier[0])
+        self.assertEqual('short', token[0].modifier[1])
+        self.assertEqual('x', token[0].data[0].data[0])
+
+    def test_short_x_with_assignment(self):
+        lexer = LexerStateMachine('short x = 5 ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        try:
+            token = parser.parseStatement(0)
+            self.assertEqual('int', token[0].id)
+            self.assertEqual('short', token[0].modifier[0])
+            self.assertEqual('x', token[0].data[0].data[0])
+            self.assertEqual('=', token[1].id)
+            self.assertEqual('x', token[1].data[0].data[0])
+            self.assertEqual(5, token[1].data[1].data[0])
+        except SyntaxError as e:
+            self.fail('should not raise Exception')
+
+    def test_short_without_identifier(self):
+        lexer = LexerStateMachine('short ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        try:
+            parser.parseStatement(0)
+        except SyntaxError as e:
+            self.assertEqual("Expecting (identifier) before ;", e.msg)
+
+    def test_short_without_identifier_and_semicolon(self):
+        lexer = LexerStateMachine('short', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        try:
+            parser.parseStatement(0)
+        except SyntaxError as e:
+            self.assertEqual("Expecting (identifier) before (systemToken)", e.msg)
+
+    def test_short_without_semicolon(self):
+        lexer = LexerStateMachine('short x ', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        try:
+            parser.parseStatement(0)
+        except SyntaxError as e:
+            self.assertEqual("Expecting ; before (systemToken)", e.msg)
+
+    def test_short_x_int(self):
+        lexer = LexerStateMachine('short x int ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        try:
+            parser.parseStatement(0)
+        except SyntaxError as e:
+            self.assertEqual("Expecting ; before int", e.msg)
+
+    def test_short_long_x(self):
+        lexer = LexerStateMachine('short long x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        try:
+            parser.parseStatement(0)
+        except SyntaxError as e:
+            self.assertEqual("Cannot have both 'short' and 'long' in declaration statement", e.msg)
+
+    def test_short_short_x(self):
+        lexer = LexerStateMachine('short short x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        try:
+            parser.parseStatement(0)
+        except SyntaxError as e:
+            self.assertEqual("Duplication of 'short' in declaration statement", e.msg)
+    """
+    # long
+    """
+    def test_long_x(self):
+        lexer = LexerStateMachine('long x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('long', token[0].modifier[0])
+        self.assertEqual('x', token[0].data[0].data[0])
+
+    def test_long_long_x(self):
+        lexer = LexerStateMachine('long long x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('long long', token[0].modifier[0])
+        self.assertEqual('x', token[0].data[0].data[0])
+
+    def test_long_long_int_x(self):
+        lexer = LexerStateMachine('long long int x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('long long', token[0].modifier[0])
+        self.assertEqual('x', token[0].data[0].data[0])
+
+    def test_long_long_int_unsigned_x(self):
+        lexer = LexerStateMachine('long long int unsigned x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('unsigned', token[0].modifier[0])
+        self.assertEqual('long long', token[0].modifier[1])
+        self.assertEqual('x', token[0].data[0].data[0])
+
+    def test_long_long_signed_x(self):
+        lexer = LexerStateMachine('long long signed x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('signed', token[0].modifier[0])
+        self.assertEqual('long long', token[0].modifier[1])
+        self.assertEqual('x', token[0].data[0].data[0])
+
+    def test_long_long_unsigned_int_x(self):
+        lexer = LexerStateMachine('long long unsigned int x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('unsigned', token[0].modifier[0])
+        self.assertEqual('long long', token[0].modifier[1])
+        self.assertEqual('x', token[0].data[0].data[0])
+
+    def test_long_unsigned_x(self):
+        lexer = LexerStateMachine('long unsigned x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('unsigned', token[0].modifier[0])
+        self.assertEqual('long', token[0].modifier[1])
+        self.assertEqual('x', token[0].data[0].data[0])
+
+    def test_long_signed_long_x(self):
+        lexer = LexerStateMachine('long signed long x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('signed', token[0].modifier[0])
+        self.assertEqual('long long', token[0].modifier[1])
+        self.assertEqual('x', token[0].data[0].data[0])
+
+    def test_long_unsigned_long_x(self):
+        lexer = LexerStateMachine('long unsigned long int x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('unsigned', token[0].modifier[0])
+        self.assertEqual('long long', token[0].modifier[1])
+        self.assertEqual('x', token[0].data[0].data[0])
+
+    def test_long_signed_int_x(self):
+        lexer = LexerStateMachine('long signed int x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('signed', token[0].modifier[0])
+        self.assertEqual('long', token[0].modifier[1])
+        self.assertEqual('x', token[0].data[0].data[0])
+
+    def test_long_unsigned_int_long_x(self):
+        lexer = LexerStateMachine('long unsigned int long x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('unsigned', token[0].modifier[0])
+        self.assertEqual('long long', token[0].modifier[1])
+        self.assertEqual('x', token[0].data[0].data[0])
+
+    def test_long_int_x(self):
+        lexer = LexerStateMachine('long int x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('long', token[0].modifier[0])
+        self.assertEqual('x', token[0].data[0].data[0])
+
+    def test_long_int_long_x(self):
+        lexer = LexerStateMachine('long int long x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('long long', token[0].modifier[0])
+        self.assertEqual('x', token[0].data[0].data[0])
+
+    def test_long_int_long_signed_x(self):
+        lexer = LexerStateMachine('long int long signed x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('signed', token[0].modifier[0])
+        self.assertEqual('long long', token[0].modifier[1])
+        self.assertEqual('x', token[0].data[0].data[0])
+
+    def test_long_int_unsigned_x(self):
+        lexer = LexerStateMachine('long int unsigned x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('unsigned', token[0].modifier[0])
+        self.assertEqual('long', token[0].modifier[1])
+        self.assertEqual('x', token[0].data[0].data[0])
+
+    def test_long_int_signed_long_x(self):
+        lexer = LexerStateMachine('long int signed long x ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('signed', token[0].modifier[0])
+        self.assertEqual('long long', token[0].modifier[1])
+        self.assertEqual('x', token[0].data[0].data[0])
+
 class TestDeclarationContext(unittest.TestCase):
     def setUp(self):
         self.manager = ContextManager()
@@ -26,7 +351,7 @@ class TestDeclarationContext(unittest.TestCase):
         self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext, self.flowControlContext]
         self.expressionContext.addInfixOperator('=', 20)
         self.expressionContext.addPrefixInfixOperator('+', 70)
-        self.declarationContext.addIntDeclaration('int', 0)
+        self.declarationContext.addIntDeclaration('int', 0)  # ================== PLEASE CHANGE THIS TO addInt LATER!!!
         self.expressionContext.addOperator(',', 0)
         self.expressionContext.addOperator(';', 0)
         self.flowControlContext.addBlockOperator('{', 0)
@@ -242,41 +567,6 @@ class TestDeclarationContext(unittest.TestCase):
         self.assertEqual('x', token[0].data[1].data[0].data[0])
         self.assertEqual(3, token[0].data[1].data[1].data[0])
 """
-
-class TestDeclarationWithModifier(unittest.TestCase):
-    def setUp(self):
-        self.manager = ContextManager()
-        self.context = Context(self.manager)
-        self.flowControlContext = FlowControlContext(self.manager)
-        self.defaultContext = DefaultContext(self.manager)
-        self.defaultContext.addKeyword('int')
-        self.declarationContext = DeclarationContext(self.manager)
-        self.expressionContext = ExpressionContext(self.manager)
-        self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext, self.flowControlContext]
-        self.expressionContext.addInfixOperator('=', 20)
-        self.expressionContext.addPrefixInfixOperator('+', 70)
-        self.declarationContext.addPrimitive('int', 0)
-        self.declarationContext.addModifier('short', 0)
-        self.expressionContext.addOperator(',', 0)
-        self.expressionContext.addOperator(';', 0)
-        self.flowControlContext.addBlockOperator('{', 0)
-        self.flowControlContext.addOperator('}', 0)
-
-        self.manager.addContext('Default', self.defaultContext)
-        self.manager.addContext('Declaration', self.declarationContext)
-        self.manager.addContext('Expression', self.expressionContext)
-        self.manager.addContext('FlowControl', self.flowControlContext)
-        self.manager.setCurrentContexts(self.contexts)
-
-    def test_short_int_x_equal_to_2(self):
-        lexer = LexerStateMachine('short int x;', self.context)
-        parser = Parser(lexer, self.manager)
-        self.manager.setParser(parser)
-
-        token = parser.parseStatement(0)
-        self.assertEqual('int', token[0].id)
-        self.assertEqual(['short'], token[0].modifier)
-        self.assertEqual('x', token[0].data[0].data[0])
 
 class TestPointerDeclaration(unittest.TestCase):
     def setUp(self):

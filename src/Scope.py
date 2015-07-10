@@ -29,8 +29,12 @@ class ScopeBuilder:
             newScopeList = []
             self.currentScope.list.append(newScopeList)
             self.currentScope.list = newScopeList
+        elif token.id is '}':
+            self.currentScope = self.currentScope.parentScope
+            self.currentScope.list.pop()
         else:
             pass
+        self.scopeHistory.append(copy.deepcopy(self.scope.list))
         return
 
     def removeSubToken(self, token):
