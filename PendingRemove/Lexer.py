@@ -23,6 +23,7 @@ class Lexer:
         while True:
             yield None
 
+
     def advance(self, expectedSymbol = None):
         nextWord = next(self.wordGenerator)
         self.currentToken = self.context.createToken(nextWord)

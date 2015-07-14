@@ -145,7 +145,7 @@ class TestParseStatementWithBraces(unittest.TestCase):
             { ; ; ; }
         :return:
         """
-        lexer = LexerStateMachine('{ ; ; ; }', self.context)
+        lexer = LexerStateMachine('{ ;; ; }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatements(0)
