@@ -13,12 +13,20 @@ class InStream:
         self.charGenerator = self.createCharGenerator()
         self.currentChar = ''
         self.previousChar = ''
+        self.oriString = ''
+        self.line = 0
+        self.column = 0
 
     def createCharGenerator(self):
         for str in self.lists:
+            self.oriString = str
+            if str != ' ':
+                self.line += 1
             for word in str:
                 for ch in word:
+                    self.column += 1
                     yield ch
+            self.column = 0
         while True:
             yield None
 

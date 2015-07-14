@@ -111,7 +111,9 @@ class TestLexer(unittest.TestCase):
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Unexpected symbol \"-\" been found after -", e.msg)
+            self.assertEqual("Error[1][11]:Unexpected symbol \"-\" been found after -"+'\n'+
+            'Price 12E--10'+'\n'+
+            '          ^', e.msg)
 
     def test_advance_will_throw_exception_for_plus_plus_appear_inside_the_floating_point_e(self):
         lexer = LexerStateMachine('Price 12E++10', self.context)
@@ -119,7 +121,32 @@ class TestLexer(unittest.TestCase):
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Unexpected symbol \"+\" been found after +", e.msg)
+            self.assertEqual("Error[1][11]:Unexpected symbol \"+\" been found after +"+'\n'+
+            'Price 12E++10'+'\n'+
+            '          ^', e.msg)
+
+    def test_advance_will_throw_exception_for_the_error_That_occurred_after_the_first_line(self):
+        lexer = LexerStateMachine("""Price
+                                  12E++10""", self.context)
+        try:
+            lexer.advance()
+            raise SyntaxError("Exception test failed")
+        except SyntaxError as e:
+            self.assertEqual("Error[2][5]:Unexpected symbol \"+\" been found after +"+'\n'+
+            '12E++10'+'\n'+
+            '    ^', e.msg)
+
+        lexer = LexerStateMachine("""Price
+                                    IsRising
+                                  12E++10""", self.context)
+        try:
+            lexer.advance()
+            lexer.advance()
+            raise SyntaxError("Exception test failed")
+        except SyntaxError as e:
+            self.assertEqual("Error[3][5]:Unexpected symbol \"+\" been found after +"+'\n'+
+            '12E++10'+'\n'+
+            '    ^', e.msg)
 
     def test_advance_will_throw_exception_for_invalid_number_after_minus_sign(self):
         lexer = LexerStateMachine('Price 12E-/10', self.context)
@@ -127,7 +154,9 @@ class TestLexer(unittest.TestCase):
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Unexpected symbol \"/\" been found after -", e.msg)
+            self.assertEqual("Error[1][11]:Unexpected symbol \"/\" been found after -"+'\n'+
+            'Price 12E-/10'+'\n'+
+            '          ^', e.msg)
 
 
     def test_advance_will_throw_exception_for_unknown_symbol_inside_the_floating_point_e(self):
@@ -167,14 +196,18 @@ class TestLexer(unittest.TestCase):
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Unexpected symbol \"-\" been found after -", e.msg)
+            self.assertEqual("Error[1][11]:Unexpected symbol \"-\" been found after -"+'\n'+
+            'Price 12e--10'+'\n'+
+            '          ^', e.msg)
 
         lexer = LexerStateMachine('Price 12e++10', self.context)
         try:
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Unexpected symbol \"+\" been found after +", e.msg)
+            self.assertEqual("Error[1][11]:Unexpected symbol \"+\" been found after +"+'\n'+
+            'Price 12e++10'+'\n'+
+            '          ^', e.msg)
 
         lexer = LexerStateMachine('Price 12e*10', self.context)
         try:

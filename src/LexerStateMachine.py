@@ -124,7 +124,8 @@ class LexerStateMachine:
         if self.isPlusOrMinusSign():
             self.inStream.getNextChar()
             if not self.isNumber():
-                raise SyntaxError("Unexpected symbol \"" + self.inStream.currentChar + "\" been found after " + tempNotation)
+                caretMessage = ' '*(self.inStream.column-1)+'^'
+                raise SyntaxError("Error[{}][{}]:Unexpected symbol \"{}\" been found after {}\n{}\n{}".format(self.inStream.line,self.inStream.column,self.inStream.currentChar, tempNotation,self.inStream.oriString,caretMessage))
         while self.isNumber():
             tempNumber *= 10
             tempNumber += int(self.inStream.getNextChar())
