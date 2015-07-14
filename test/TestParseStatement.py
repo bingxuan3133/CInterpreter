@@ -35,6 +35,15 @@ class TestParseStatement(unittest.TestCase):
         self.manager.addContext('FlowControl', self.flowControlContext)
         self.manager.setCurrentContexts(self.contexts)
 
+
+    def test_testtesttest(self):
+        lexer = LexerStateMachine('x = ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        self.assertRaises(SyntaxError, parser.parseStatement, 0)
+
+
     def test_parseStatement_will_return_None_for_an_empty_statement(self):
         """
             ;
@@ -70,6 +79,17 @@ class TestParseStatement(unittest.TestCase):
 
         self.assertRaises(SyntaxError, parser.parseStatement, 0)
 
+    def test_parseStatement_should_raise_SyntaxError_for_a_plus_3_statement_without_semicolon(self):
+        """
+            2 + 3
+        :return:
+        """
+        lexer = LexerStateMachine('+ 3', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        self.assertRaises(SyntaxError, parser.parseStatement, 0)
+
 class TestParseStatementWithBraces(unittest.TestCase):
     def setUp(self):
         self.manager = ContextManager()
@@ -80,7 +100,7 @@ class TestParseStatementWithBraces(unittest.TestCase):
 
         self.flowControlContext.addBlockOperator('{', 0)
         self.flowControlContext.addOperator('}', 0)
-        #self.flowControlContext.addBlockOperator('}', 0)
+        self.flowControlContext.addBlockOperator('}', 0)
         self.expressionContext.addPrefixInfixOperator('+', 70)
         self.expressionContext.addPrefixInfixOperator('-', 70)
         self.expressionContext.addInfixOperator('*', 100)

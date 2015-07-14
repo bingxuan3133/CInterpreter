@@ -57,3 +57,10 @@ void __declspec(dllexport) VMRun(int *bytecode) {
     bytecode++;
   }
 }
+
+void __declspec(dllexport) VMStep(int *bytecode) {
+  if(*bytecode != 0xFFFFFFFF) {
+    instruction[(unsigned char)*bytecode](*bytecode);
+    bytecode++;
+  }
+}

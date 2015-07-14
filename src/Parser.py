@@ -1,13 +1,16 @@
 # Pratt's parser implementation
 from LexerStateMachine import *
 from ContextManager import *
+from Scope import *
+from Context import *
+from Scope import ScopeBuilder
 from copy import *
 
 class Parser:
-
     def __init__(self, lexer, contextManager):
         self.lexer = lexer
         self.contextManager = contextManager
+        self.scopeBuilder = ScopeBuilder()
 
     def parse(self, bindingPower):
         token = self.lexer.peep()        # token = leftToken
@@ -21,49 +24,33 @@ class Parser:
     def parseStatement(self, bindingPower):
         list = []
         firstToken = self.lexer.peep()
-        secondToken = deepcopy(firstToken)
         if firstToken.id == ';':
             self.lexer.advance()
             return None
-        elif firstToken.id == 'int':
-
-            firstToken = deepcopy(secondToken)
-            identifierName = self.lexer.advance()
-            firstToken.data.append(identifierName)
-            list.append(firstToken)
-            if self.lexer.peep().id != '(systemToken)':
-                tempToken =self.lexer.peep()
-                returnedToken = self.parse(bindingPower)
-                if returnedToken.id != tempToken.id:
-                    list.append(returnedToken)
-
-            while (self.lexer.peep().id == ','):
-                firstToken = deepcopy(secondToken)
-                identifierName = self.lexer.advance()
-                firstToken.data.append(identifierName)
-                list.append(firstToken)
-                if self.lexer.peep().id != '(systemToken)':
-                    tempToken =self.lexer.peep()
-                    returnedToken = self.parse(bindingPower)
-                    if returnedToken.id != tempToken.id:
-                        list.append(returnedToken)
-
+        elif firstToken.id == '{':            # For one block of statements
+            #self.scopeBuilder.buildScope(firstToken)
+            returnedToken = self.parse(bindingPower)
+            flowControlContext = self.contextManager.getContext('FlowControl')
+            #self.scopeBuilder.buildScope(Context.createToken(flowControlContext, '}'))  # Create '}' token for scopeBuilder
+            list.append(returnedToken)
             return list
-
-        for currentContext in self.contextManager.currentContexts:
-            if firstToken.id in currentContext.symbolTable:
-                returnedToken = self.parse(bindingPower)
-                list.append(returnedToken)
+        elif firstToken.id in self.contextManager.getContext('FlowControl').symbolTable:  # For some context that do not need ';'
+            returnedToken = self.parse(bindingPower)
+            #self.scopeBuilder.buildScope(returnedToken)
+            list.append(returnedToken)
+            return list
+        else:                               # For one statement
+            returnedToken = self.parse(bindingPower)
+            if returnedToken.id == '(declaration&definition)':  # For declaration & definition
+                list.extend(returnedToken.data)
+                #self.scopeBuilder.buildScope(returnedToken.data[0])
+                self.lexer.peep(';')
                 return list
-
-        if firstToken.id == '{':
-            returnedToken = self.parse(bindingPower)
-        else:
-            returnedToken = self.parse(bindingPower)
+            #self.scopeBuilder.buildScope(returnedToken)
             self.lexer.peep(';')
             self.lexer.advance()
-        list.append(returnedToken)
-        return list
+            list.append(returnedToken)
+            return list
 
     def parseStatements(self, bindingPower):
         list = []

@@ -12,14 +12,19 @@ class Scope:
         return '{0}'.format(self.list)
 
 class ScopeBuilder:
-    def __init__(self, closeBrace):  # closing brace is used for implementation of buildScope
+    def __init__(self):  # closing brace is used for implementation of buildScope
         self.scope = Scope()
         self.currentScope = copy.copy(self.scope)
-        self.closeBrace = closeBrace
         self.interestedTokens = []
+        self.scopeHistory = []
+
+    def addScope(self):
+        pass
 
     def buildScope(self, token):
-        if token.id is '{':
+        if token.id is 'int':
+            self.currentScope.list.append(token.data[0].data[0])
+        elif token.id is '{':
             self.currentScope.parentScope = copy.copy(self.currentScope)
             newScopeList = []
             self.currentScope.list.append(newScopeList)
@@ -28,24 +33,9 @@ class ScopeBuilder:
             self.currentScope = self.currentScope.parentScope
             self.currentScope.list.pop()
         else:
-            self.currentScope.list.append(token)
+            pass
+        self.scopeHistory.append(copy.deepcopy(self.scope.list))
         return
-
-    def scanForInterestedTokens(self, tree):  # tree: Parsed Tree
-        if type(tree) is list:
-            for subTree in tree:
-                self.scanForInterestedTokens(subTree)
-        else:
-            if tree.id is 'int':
-                self.interestedTokens.append(tree)
-            elif tree.id is '{':
-                self.interestedTokens.append(tree)
-                subTree = self.removeSubToken(tree)
-                self.scanForInterestedTokens(subTree)
-                self.interestedTokens.append(self.closeBrace)   # add closing brace when detect end of a scope
-            else:
-                pass
-        return self.interestedTokens
 
     def removeSubToken(self, token):
         subToken = None
