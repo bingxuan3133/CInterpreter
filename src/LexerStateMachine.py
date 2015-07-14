@@ -91,14 +91,18 @@ class LexerStateMachine:
             self.capture()
             self.floatingPointDot()
         else:
-            raise SyntaxError("Expecting X/x, B/b, . or octal number after " + self.inStream.previousChar)
+            caretMessage = ' '*(self.inStream.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:Expecting X/x, B/b, . or octal number after {}.\n{}\n{}"\
+                              .format(self.inStream.line,self.inStream.column,self.inStream.previousChar,self.inStream.oriString,caretMessage))
 
     def initialDot(self):
         if self.isNumber():
             self.capture()
             self.floatingPointDot()
         else:
-            raise SyntaxError("Expecting number after .")
+            caretMessage = ' '*(self.inStream.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:Expecting number after .\n{}\n{}"\
+                              .format(self.inStream.line,self.inStream.column,self.inStream.oriString,caretMessage))
 
     def floatingPointDot(self):
         if self.inStream.previousChar == None or self.inStream.previousChar.isalpha():
@@ -114,8 +118,9 @@ class LexerStateMachine:
         if self.isPlusOrMinusSign() or self.isNumber():
             self.floatingPointEWithNotation()
         elif not self.isNumber():
-            pass
-            raise SyntaxError("Expecting a positive or negative number after E/e.")
+            caretMessage = ' '*(self.inStream.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:Expecting a positive or negative number after E/e.\n{}\n{}"\
+                              .format(self.inStream.line,self.inStream.column,self.inStream.oriString,caretMessage))
 
     def floatingPointEWithNotation(self):
         tempNumber = 0
@@ -125,7 +130,8 @@ class LexerStateMachine:
             self.inStream.getNextChar()
             if not self.isNumber():
                 caretMessage = ' '*(self.inStream.column-1)+'^'
-                raise SyntaxError("Error[{}][{}]:Unexpected symbol \"{}\" been found after {}\n{}\n{}".format(self.inStream.line,self.inStream.column,self.inStream.currentChar, tempNotation,self.inStream.oriString,caretMessage))
+                raise SyntaxError("Error[{}][{}]:Unexpected symbol \"{}\" been found after {}\n{}\n{}"\
+                                  .format(self.inStream.line,self.inStream.column,self.inStream.currentChar, tempNotation,self.inStream.oriString,caretMessage))
         while self.isNumber():
             tempNumber *= 10
             tempNumber += int(self.inStream.getNextChar())
@@ -142,14 +148,17 @@ class LexerStateMachine:
 
     def hexadecimal(self):
         if not self.isHexadecimal():
-            raise SyntaxError("Expecting hex number after " + self.currentString)
+            caretMessage = ' '*(self.inStream.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:Expecting hex number after {}\n{}\n{}"\
+                              .format(self.inStream.line,self.inStream.column,self.currentString,self.inStream.oriString,caretMessage))
 
         while self.isHexadecimal():
             self.capture()
 
         if self.isAlpha() and not self.isHexadecimal():
-            raise SyntaxError ("Expecting hex number after "+self.currentString[self.currentString.__len__()-1])
-
+            caretMessage = ' '*(self.inStream.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:Expecting hex number after {}\n{}\n{}"\
+                              .format(self.inStream.line,self.inStream.column,self.currentString[self.currentString.__len__()-1],self.inStream.oriString,caretMessage))
         self.currentString = str(int(self.currentString, 16))
         self.end()
 
@@ -158,7 +167,9 @@ class LexerStateMachine:
             self.capture()
 
         if self.isNumber() and not self.isOctal():
-            raise SyntaxError("Expecting octal number after "+self.currentString[self.currentString.__len__()-1])
+            caretMessage = ' '*(self.inStream.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:Expecting octal number after {}\n{}\n{}"\
+                              .format(self.inStream.line,self.inStream.column,self.currentString[self.currentString.__len__()-1],self.inStream.oriString,caretMessage))
 
         self.currentString = str(int(self.currentString, 8))
         self.end()
@@ -168,7 +179,9 @@ class LexerStateMachine:
             self.capture()
 
         if self.isNumber() and not self.isBinary():
-            raise SyntaxError("Expecting binary number after "+self.currentString[self.currentString.__len__()-1])
+            caretMessage = ' '*(self.inStream.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:Expecting binary number after {}\n{}\n{}"\
+                              .format(self.inStream.line,self.inStream.column,self.currentString[self.currentString.__len__()-1],self.inStream.oriString,caretMessage))
 
         self.currentString = str(int(self.currentString, 2))
         self.end()

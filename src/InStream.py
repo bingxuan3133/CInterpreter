@@ -26,7 +26,9 @@ class InStream:
                 for ch in word:
                     self.column += 1
                     yield ch
+            temp = self.column
             self.column = 0
+        self.column = temp
         while True:
             yield None
 

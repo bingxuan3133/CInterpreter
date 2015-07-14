@@ -165,7 +165,9 @@ class TestLexer(unittest.TestCase):
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Expecting a positive or negative number after E/e.", e.msg)
+            self.assertEqual("Error[1][10]:Expecting a positive or negative number after E/e."+'\n'+
+                             'Price 12E*10'+'\n'+
+                             '         ^', e.msg)
 
 
     def test_advance_will_throw_exception_if_no_number_is_added_after_the_e_or_E(self):
@@ -174,7 +176,9 @@ class TestLexer(unittest.TestCase):
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Expecting a positive or negative number after E/e.", e.msg)
+            self.assertEqual("Error[1][9]:Expecting a positive or negative number after E/e."+'\n'+
+                             'Dummy 12E'+'\n'+
+                             '        ^', e.msg)
 
     def test_advance_will_throw_exception_if_alphabet_added_after_the_E(self):
         lexer = LexerStateMachine('Dummy 12EA', self.context)
@@ -182,7 +186,9 @@ class TestLexer(unittest.TestCase):
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Expecting a positive or negative number after E/e.", e.msg)
+            self.assertEqual("Error[1][10]:Expecting a positive or negative number after E/e."+'\n'+
+                             'Dummy 12EA'+'\n'+
+                             '         ^', e.msg)
 
     def test_advance_will_accept_E_and_e_as_floating_point(self):
         lexer = LexerStateMachine('Dummy 12e-10', self.context)
@@ -214,21 +220,27 @@ class TestLexer(unittest.TestCase):
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Expecting a positive or negative number after E/e.", e.msg)
+            self.assertEqual("Error[1][10]:Expecting a positive or negative number after E/e."+'\n'+
+                             'Price 12e*10'+'\n'+
+                             '         ^', e.msg)
 
         lexer = LexerStateMachine('Dummy 12e', self.context)
         try:
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Expecting a positive or negative number after E/e.", e.msg)
+            self.assertEqual("Error[1][9]:Expecting a positive or negative number after E/e."+'\n'+
+                             'Dummy 12e'+'\n'+
+                             '        ^', e.msg)
 
         lexer = LexerStateMachine('Dummy 12eA', self.context)
         try:
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Expecting a positive or negative number after E/e.", e.msg)
+            self.assertEqual("Error[1][10]:Expecting a positive or negative number after E/e."+'\n'+
+                             'Dummy 12eA'+'\n'+
+                             '         ^', e.msg)
 
     def test_advance_will_return_the_actual_value_if_the_floating_point_with_bigger_number_on_both_sides(self):
         lexer = LexerStateMachine('Dummy 13123e151', self.context)
@@ -278,7 +290,9 @@ class TestLexer(unittest.TestCase):
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Expecting number after .", e.msg)
+            self.assertEqual("Error[1][7]:Expecting number after ."+'\n'+
+                             'Dummy .'+'\n'+
+                             '      ^', e.msg)
 
     def test_advance_will_produce_a_token_which_carry_the_dot(self):
         lexer = LexerStateMachine('Dummy.', self.context)
@@ -305,14 +319,18 @@ class TestLexer(unittest.TestCase):
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Expecting number after .", e.msg)
+            self.assertEqual("Error[1][7]:Expecting number after ."+'\n'+
+                             'Dummy .'+'\n'+
+                             '      ^', e.msg)
 
     def test_advance_will_throw_exception_if_the_dot_is_being_in_the_first_location(self):
         try:
             lexer = LexerStateMachine('.', self.context)
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Expecting number after .", e.msg)
+            self.assertEqual("Error[1][1]:Expecting number after ."+'\n'+
+                             '.'+'\n'+
+                             '^', e.msg)
 
 
     def test_advance_will_generate_a_token_for_hexadecimal_number(self):
@@ -351,42 +369,54 @@ class TestLexer(unittest.TestCase):
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Expecting hex number after 0X", e.msg)
+            self.assertEqual("Error[1][8]:Expecting hex number after 0X"+'\n'+
+                             'Dummy 0X'+'\n'+
+                             '       ^', e.msg)
 
         lexer = LexerStateMachine('Dummy 0x', self.context)
         try:
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Expecting hex number after 0x", e.msg)
+            self.assertEqual("Error[1][8]:Expecting hex number after 0x"+'\n'+
+                             'Dummy 0x'+'\n'+
+                             '       ^', e.msg)
 
         lexer = LexerStateMachine('Dummy 0xghi', self.context)
         try:
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Expecting hex number after 0x", e.msg)
+            self.assertEqual("Error[1][9]:Expecting hex number after 0x"+'\n'+
+                             'Dummy 0xghi'+'\n'+
+                             '        ^', e.msg)
 
         lexer = LexerStateMachine('Dummy 0xz', self.context)
         try:
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Expecting hex number after 0x", e.msg)
+            self.assertEqual("Error[1][9]:Expecting hex number after 0x"+'\n'+
+                             'Dummy 0xz'+'\n'+
+                             '        ^', e.msg)
 
         lexer = LexerStateMachine('Dummy 0x1234567989abcdefh', self.context)
         try:
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Expecting hex number after f", e.msg)
+            self.assertEqual("Error[1][25]:Expecting hex number after f"+'\n'+
+                             'Dummy 0x1234567989abcdefh'+'\n'+
+                             '                        ^', e.msg)
 
         lexer = LexerStateMachine('Dummy 0x 123', self.context)
         try:
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Expecting hex number after 0x", e.msg)
+            self.assertEqual("Error[1][9]:Expecting hex number after 0x"+'\n'+
+                             'Dummy 0x 123'+'\n'+
+                             '        ^', e.msg)
 
     def test_advance_will_make_two_token_for_seperation_with_space(self):
         lexer = LexerStateMachine('0x123 Hello 0x456 0x789', self.context)
@@ -421,7 +451,9 @@ class TestLexer(unittest.TestCase):
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Expecting X/x, B/b, . or octal number after 0", e.msg)
+            self.assertEqual("Error[1][8]:Expecting X/x, B/b, . or octal number after 0."+'\n'+
+                             'Dummy 08'+'\n'+
+                             '       ^', e.msg)
 
     def test_advance_will_throw_exception_for_invalid_number_after_some_valid_number(self):
         lexer = LexerStateMachine('Dummy 01238', self.context)
@@ -429,7 +461,9 @@ class TestLexer(unittest.TestCase):
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Expecting octal number after 3", e.msg)
+            self.assertEqual("Error[1][11]:Expecting octal number after 3"+'\n'+
+                             'Dummy 01238'+'\n'+
+                             '          ^', e.msg)
 
     def test_advance_will_throw_exception_for_invalid_number_after_long_valid_number(self):
         lexer = LexerStateMachine('Dummy 012123456123457778', self.context)
@@ -437,7 +471,9 @@ class TestLexer(unittest.TestCase):
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Expecting octal number after 7", e.msg)
+            self.assertEqual("Error[1][24]:Expecting octal number after 7"+'\n'+
+                             'Dummy 012123456123457778'+'\n'+
+                             '                       ^', e.msg)
 
     def test_advance_will_return_a_token_that_constructed_from_binary_number(self):
         lexer = LexerStateMachine('Dummy 0b1011', self.context)
@@ -451,7 +487,9 @@ class TestLexer(unittest.TestCase):
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Expecting binary number after 1", e.msg)
+            self.assertEqual("Error[1][13]:Expecting binary number after 1"+'\n'+
+                             'Dummy 0b10115'+'\n'+
+                             '            ^', e.msg)
 
 
     def test_advance_will_throw_exception_for_the_alphabet_after_0_is_not_x(self):
@@ -460,7 +498,9 @@ class TestLexer(unittest.TestCase):
             lexer.advance()
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Expecting X/x, B/b, . or octal number after 0", e.msg)
+            self.assertEqual("Error[1][8]:Expecting X/x, B/b, . or octal number after 0."+'\n'+
+                             'Dummy 0c1234'+'\n'+
+                             '       ^', e.msg)
 
     def test_advance_will_create_token_for_identifier(self):
         lexer = LexerStateMachine('var1', self.context)
