@@ -129,7 +129,6 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.assignRegister([0, 5]), byteCodes[3])
         self.assertEqual(self.byteCodeGenerator.loadValue([0, 5]), byteCodes[4])
 
-
     def test_generateByteCode_will_return_the_byteCode_in_a_list_for_a_multiply_expression(self):
         lexer = LexerStateMachine('3 * 4 + 2 ', self.context)
         parser = Parser(lexer, self.manager)

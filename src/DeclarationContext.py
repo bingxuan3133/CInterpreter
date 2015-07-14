@@ -156,6 +156,7 @@ class DeclarationContext(Context):
             ddToken = thisContext.buildToken(self)
             return ddToken
 
+
         def led(self):
             pass
         symClass = self.symbol(id, bindingPower)
@@ -324,7 +325,6 @@ class DeclarationContext(Context):
                 expressionToken = thisContext.contextManager.parser.parse(0)
                 self.identifierList.append(thisContext.getIdentifier(expressionToken))
                 self.expressionList.append(expressionToken)
-
             elif nextToken.id == 'long':
                 self.modifier = 'long long'
                 nextToken = thisContext.contextManager.parser.lexer.advance()
@@ -511,7 +511,6 @@ class DeclarationContext(Context):
                 expressionToken = thisContext.contextManager.parser.parse(0)
                 self.identifierList.append(thisContext.getIdentifier(expressionToken))
                 self.expressionList.append(expressionToken)
-
             elif nextToken.id == 'int':
                 self.primitive = nextToken.id
                 nextToken = thisContext.contextManager.parser.lexer.advance()

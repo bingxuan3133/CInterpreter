@@ -393,7 +393,6 @@ class TestDeclarationContextStartingWithSignedOrUnsigned(unittest.TestCase):
         self.declarationContext.addLong('long', 0)
         self.declarationContext.addSignedAndUnsigned('signed', 0)
         self.declarationContext.addSignedAndUnsigned('unsigned', 0)
-
         self.manager.addContext('Default', self.defaultContext)
         self.manager.addContext('Declaration', self.declarationContext)
         self.manager.addContext('Expression', self.expressionContext)
@@ -692,7 +691,6 @@ class TestDeclarationContextWithAssignmentAndComa(unittest.TestCase):
         self.declarationContext.addLong('long', 0)
         self.declarationContext.addSignedAndUnsigned('signed', 0)
         self.declarationContext.addSignedAndUnsigned('unsigned', 0)
-
         self.manager.addContext('Default', self.defaultContext)
         self.manager.addContext('Declaration', self.declarationContext)
         self.manager.addContext('Expression', self.expressionContext)
@@ -784,6 +782,32 @@ class TestDeclarationContextWithAssignmentAndComa(unittest.TestCase):
         token = parser.parseStatement(0)
         self.assertEqual('int', token[0].id)
         self.assertEqual(None, token[0].sign)
+        self.assertEqual('long', token[0].modifier)
+        self.assertEqual('x', token[0].data[0].data[0])
+        self.assertEqual('=', token[1].id)
+        self.assertEqual('x', token[1].data[0].data[0])
+        self.assertEqual(2, token[1].data[1].data[0])
+
+    def test_short_x_equal_to_2(self):
+        lexer = LexerStateMachine('short x = 2 ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('short', token[0].modifier)
+        self.assertEqual('x', token[0].data[0].data[0])
+        self.assertEqual('=', token[1].id)
+        self.assertEqual('x', token[1].data[0].data[0])
+        self.assertEqual(2, token[1].data[1].data[0])
+
+    def test_long_x_equal_to_2(self):
+        lexer = LexerStateMachine('long x = 2 ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        self.assertEqual('int', token[0].id)
         self.assertEqual('long', token[0].modifier)
         self.assertEqual('x', token[0].data[0].data[0])
         self.assertEqual('=', token[1].id)
@@ -995,7 +1019,6 @@ class TestDeclarationContextWithAssignmentAndComa(unittest.TestCase):
             self.assertEqual("Duplication of 'int' in declaration statement", e.msg)
 
 """
-
 class TestPointerDeclaration(unittest.TestCase):
     def setUp(self):
         self.manager = ContextManager()

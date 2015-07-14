@@ -1,42 +1,16 @@
 __author__ = 'Jing'
 
 from Context import *
+from InStream import *
 import string
 
 class LexerStateMachine:
     def __init__(self, string, context):
-        self.lists = []
-        self.string = string
         self.context = context
-        if string is not None:
-            statements = string.split('\n')
-            for statement in statements:
-                self.lists.append(statement.strip())
-                self.lists.append(' ')
-            self.lists.pop()
-        self.charGenerator = self.createCharGenerator()
-
-        self.currentChar = ''
-        self.previousChar = ''
+        self.inStream = InStream(string)
         self.currentString = ''
         self.capture()
         self.currentToken = self.advance()
-
-    #Function that belong to "stream"
-    def createCharGenerator(self):
-        for str in self.lists:
-            for word in str:
-                for ch in word:
-                    yield ch
-        while True:
-            yield None
-
-    def getNextChar(self):
-        nextChar = self.currentChar
-        self.previousChar = nextChar
-        self.currentChar = next(self.charGenerator)
-        return nextChar
-    #end "stream" function
 
     #API for application
     def advance(self, expectedSymbol = None):
@@ -60,7 +34,7 @@ class LexerStateMachine:
 
     def waitChar(self):
         while self.isSpace():
-            self.getNextChar()
+            self.inStream.getNextChar()
 
         if self.isZero():
             self.capture()
@@ -71,7 +45,7 @@ class LexerStateMachine:
             self.value()
 
         elif self.isDot():
-            if self.previousChar.isalnum() or self.previousChar == '_':
+            if self.inStream.previousChar.isalnum() or self.inStream.previousChar == '_':
                 self.capture()
                 self.end()
             else:
@@ -116,18 +90,24 @@ class LexerStateMachine:
         elif self.isDot():
             self.capture()
             self.floatingPointDot()
+        elif self.isSpace() or self.isEnd():
+            self.value()
         else:
-            raise SyntaxError("Expecting X/x, B/b, . or octal number after " + self.previousChar)
+            caretMessage = ' '*(self.inStream.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:Expecting X/x, B/b, . or octal number after {}.\n{}\n{}"\
+                             .format(self.inStream.line,self.inStream.column,self.inStream.previousChar,self.inStream.oriString,caretMessage))
 
     def initialDot(self):
         if self.isNumber():
             self.capture()
             self.floatingPointDot()
         else:
-            raise SyntaxError("Expecting number after .")
+            caretMessage = ' '*(self.inStream.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:Expecting number after .\n{}\n{}"\
+                              .format(self.inStream.line,self.inStream.column,self.inStream.oriString,caretMessage))
 
     def floatingPointDot(self):
-        if self.previousChar == None or self.previousChar.isalpha():
+        if self.inStream.previousChar == None or self.inStream.previousChar.isalpha():
             pass
         else:
             while self.isNumber():
@@ -136,24 +116,27 @@ class LexerStateMachine:
         self.end()
 
     def floatingPointE(self):
-        self.getNextChar()
+        self.inStream.getNextChar()
         if self.isPlusOrMinusSign() or self.isNumber():
             self.floatingPointEWithNotation()
         elif not self.isNumber():
-            pass
-            raise SyntaxError("Expecting a positive or negative number after E/e.")
+            caretMessage = ' '*(self.inStream.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:Expecting a positive or negative number after E/e.\n{}\n{}"\
+                              .format(self.inStream.line,self.inStream.column,self.inStream.oriString,caretMessage))
 
     def floatingPointEWithNotation(self):
         tempNumber = 0
         tempResult = int(self.currentString)
-        tempNotation = self.currentChar
+        tempNotation = self.inStream.currentChar
         if self.isPlusOrMinusSign():
-            self.getNextChar()
+            self.inStream.getNextChar()
             if not self.isNumber():
-                raise SyntaxError("Unexpected symbol \"" + self.currentChar + "\" been found after " + tempNotation)
+                caretMessage = ' '*(self.inStream.column-1)+'^'
+                raise SyntaxError("Error[{}][{}]:Unexpected symbol \"{}\" been found after {}\n{}\n{}"\
+                                  .format(self.inStream.line,self.inStream.column,self.inStream.currentChar, tempNotation,self.inStream.oriString,caretMessage))
         while self.isNumber():
             tempNumber *= 10
-            tempNumber += int(self.getNextChar())
+            tempNumber += int(self.inStream.getNextChar())
 
         for num in range(0, tempNumber):
             if tempNotation == '-':
@@ -167,14 +150,17 @@ class LexerStateMachine:
 
     def hexadecimal(self):
         if not self.isHexadecimal():
-            raise SyntaxError("Expecting hex number after " + self.currentString)
+            caretMessage = ' '*(self.inStream.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:Expecting hex number after {}\n{}\n{}"\
+                              .format(self.inStream.line,self.inStream.column,self.currentString,self.inStream.oriString,caretMessage))
 
         while self.isHexadecimal():
             self.capture()
 
         if self.isAlpha() and not self.isHexadecimal():
-            raise SyntaxError ("Expecting hex number after "+self.currentString[self.currentString.__len__()-1])
-
+            caretMessage = ' '*(self.inStream.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:Expecting hex number after {}\n{}\n{}"\
+                              .format(self.inStream.line,self.inStream.column,self.currentString[self.currentString.__len__()-1],self.inStream.oriString,caretMessage))
         self.currentString = str(int(self.currentString, 16))
         self.end()
 
@@ -183,7 +169,9 @@ class LexerStateMachine:
             self.capture()
 
         if self.isNumber() and not self.isOctal():
-            raise SyntaxError("Expecting octal number after "+self.currentString[self.currentString.__len__()-1])
+            caretMessage = ' '*(self.inStream.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:Expecting octal number after {}\n{}\n{}"\
+                              .format(self.inStream.line,self.inStream.column,self.currentString[self.currentString.__len__()-1],self.inStream.oriString,caretMessage))
 
         self.currentString = str(int(self.currentString, 8))
         self.end()
@@ -193,7 +181,9 @@ class LexerStateMachine:
             self.capture()
 
         if self.isNumber() and not self.isBinary():
-            raise SyntaxError("Expecting binary number after "+self.currentString[self.currentString.__len__()-1])
+            caretMessage = ' '*(self.inStream.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:Expecting binary number after {}\n{}\n{}"\
+                              .format(self.inStream.line,self.inStream.column,self.currentString[self.currentString.__len__()-1],self.inStream.oriString,caretMessage))
 
         self.currentString = str(int(self.currentString, 2))
         self.end()
@@ -214,7 +204,7 @@ class LexerStateMachine:
 
     #Action functions
     def capture(self):
-        self.currentString += self.getNextChar()
+        self.currentString += self.inStream.getNextChar()
 
     def resetCurrentString(self):
         self.currentString = ''
@@ -223,66 +213,66 @@ class LexerStateMachine:
 
     #Checking functions
     def isSpace(self):
-        return self.currentChar == ' '
+        return self.inStream.currentChar == ' '
 
     def isNumber(self):
-        if self.currentChar is None:
+        if self.inStream.currentChar is None:
             return False
         else:
-            return self.currentChar.isdigit()
+            return self.inStream.currentChar.isdigit()
 
     def isDot(self):
-        return self.currentChar == '.'
+        return self.inStream.currentChar == '.'
 
     def isAlpha(self):
-        if self.currentChar is None:
+        if self.inStream.currentChar is None:
             return False
         else:
-            return self.currentChar.isalpha() and self.currentChar != ' ' and self.currentChar != '.'
+            return self.inStream.currentChar.isalpha() and self.inStream.currentChar != ' ' and self.inStream.currentChar != '.'
 
     def isUnderScore(self):
-        return self.currentChar == '_'
+        return self.inStream.currentChar == '_'
 
     def isOperator(self):
-        return isinstance(self.currentChar,str) and not self.currentChar.isalpha()
+        return isinstance(self.inStream.currentChar,str) and not self.inStream.currentChar.isalpha()
 
     def isPlusOrMinusSign(self):
-        return self.currentChar == '+' or self.currentChar == '-'
+        return self.inStream.currentChar == '+' or self.inStream.currentChar == '-'
 
     def isE(self):
-        return self.currentChar == 'e' or self.currentChar == 'E'
+        return self.inStream.currentChar == 'e' or self.inStream.currentChar == 'E'
 
     def isMultipleSymbolOperator(self):
         potentialSymbol = ['+','-','=']
-        return self.currentChar in potentialSymbol
+        return self.inStream.currentChar in potentialSymbol
 
     def isEnd(self):
-        return self.currentChar is None
+        return self.inStream.currentChar is None
 
     def isZero(self):
-        return self.currentChar == '0'
+        return self.inStream.currentChar == '0'
 
     def isHexaSign(self):
-        return self.currentChar == 'X' or self.currentChar == 'x'
+        return self.inStream.currentChar == 'X' or self.inStream.currentChar == 'x'
 
     def isBinSign(self):
-        return self.currentChar == 'B' or self.currentChar == 'b'
+        return self.inStream.currentChar == 'B' or self.inStream.currentChar == 'b'
 
     def isHexadecimal(self):
-        if self.currentChar is None:
+        if self.inStream.currentChar is None:
             return False
         else:
-            return self.currentChar in string.hexdigits
+            return self.inStream.currentChar in string.hexdigits
 
     def isOctal(self):
-        if self.currentChar is None:
+        if self.inStream.currentChar is None:
             return False
         else:
-            return self.currentChar in string.octdigits
+            return self.inStream.currentChar in string.octdigits
 
     def isBinary(self):
-        if self.currentChar is None:
+        if self.inStream.currentChar is None:
             return False
         else:
-            return self.currentChar == '0' or self.currentChar == '1'
+            return self.inStream.currentChar == '0' or self.inStream.currentChar == '1'
     #End checking functions
