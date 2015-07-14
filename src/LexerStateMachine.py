@@ -90,10 +90,12 @@ class LexerStateMachine:
         elif self.isDot():
             self.capture()
             self.floatingPointDot()
+        elif self.isSpace() or self.isEnd():
+            self.value()
         else:
             caretMessage = ' '*(self.inStream.column-1)+'^'
             raise SyntaxError("Error[{}][{}]:Expecting X/x, B/b, . or octal number after {}.\n{}\n{}"\
-                              .format(self.inStream.line,self.inStream.column,self.inStream.previousChar,self.inStream.oriString,caretMessage))
+                             .format(self.inStream.line,self.inStream.column,self.inStream.previousChar,self.inStream.oriString,caretMessage))
 
     def initialDot(self):
         if self.isNumber():

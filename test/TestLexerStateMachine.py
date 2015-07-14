@@ -536,6 +536,15 @@ class TestLexer(unittest.TestCase):
         self.assertEqual(testToken.id, '(literal)')
         self.assertEqual(testToken.data[0], 3)
 
+    def test_advance_will_treat_the_zero_as_a_normal_number(self):
+        lexer = LexerStateMachine('x = 0', self.context)
+        testToken = lexer.advance()
+        self.assertEqual(testToken.id, '=')
+        testToken = lexer.advance()
+        self.assertEqual(testToken.id, '(literal)')
+        self.assertEqual(testToken.data[0],0)
+
+
     def test_lexer_will_split_the_token_if_there_is_multiple_line_in_the_string(self):
         lexer = LexerStateMachine("""x =myVar +
                                   hisVar*oursVar
