@@ -22,7 +22,7 @@ class TestScope(unittest.TestCase):
         self.defaultContext = DefaultContext(self.manager)
         self.defaultContext.addKeyword('int')
         self.declarationContext = DeclarationContext(self.manager)
-        self.declarationContext.addIntDeclaration('int', 0)
+        self.declarationContext.addInt('int', 0)
         self.expressionContext = ExpressionContext(self.manager)
         self.flowControlContext = FlowControlContext(self.manager)
         self.expressionContext.addOperator(';', 0)
@@ -43,7 +43,7 @@ class TestScope(unittest.TestCase):
                                    int y ;\
                                    int z ;', self.context)
         scopeBuilder = ScopeBuilder()
-        parser = Parser(lexer, self.manager, scopeBuilder)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parseStatements(0)
@@ -56,7 +56,7 @@ class TestScope(unittest.TestCase):
         lexer = LexerStateMachine('int x ;\
                                    x = 2 + 3 ;', self.context)
         scopeBuilder = ScopeBuilder()
-        parser = Parser(lexer, self.manager, scopeBuilder)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parseStatements(0)
@@ -67,7 +67,7 @@ class TestScope(unittest.TestCase):
     def test_buildScope_to_deal_with_curly_brace(self):
         lexer = LexerStateMachine('int x ; { int y ; }', self.context)
         scopeBuilder = ScopeBuilder()
-        parser = Parser(lexer, self.manager, scopeBuilder)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parseStatements(0)
@@ -82,7 +82,7 @@ class TestScope(unittest.TestCase):
                                    { int y ; }\
                                    }', self.context)
         scopeBuilder = ScopeBuilder()
-        parser = Parser(lexer, self.manager, scopeBuilder)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parseStatements(0)
@@ -98,7 +98,7 @@ class TestScope(unittest.TestCase):
     def test_buildScope_can_deal_with_3_nested_curly_braces(self):
         lexer = LexerStateMachine('{ int a ; int b ; { int x ; { int y ; } int z ; } }', self.context)
         scopeBuilder = ScopeBuilder()
-        parser = Parser(lexer, self.manager, scopeBuilder)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parseStatements(0)
@@ -118,7 +118,7 @@ class TestScope(unittest.TestCase):
     def test_findLocal(self):
         lexer = LexerStateMachine('int x ; x = 2 + 3 ; { x = 5 + 6 ; int y ; }', self.context)
         scopeBuilder = ScopeBuilder()
-        parser = Parser(lexer, self.manager, scopeBuilder)
+        parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parseStatements(0)
