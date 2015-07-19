@@ -5,7 +5,7 @@
 
 void (*instruction[256])(int)  = {[DUMPR] = dumpRegister,
                                   [DUMPR_HEX] = dumpRegisterHex,
-                                  [LDR_IMM] = loadRegisterWithLiteral,
+                                  [LDR_IMM] = loadRegisterWithImmediate,
                                   [LDR_MEM] = loadRegisterFromMemory,
                                   [STR_MEM] = storeRegisterIntoMemory,
                                   [MOV_REG] = moveRegister,
@@ -17,6 +17,7 @@ void (*instruction[256])(int)  = {[DUMPR] = dumpRegister,
                                   [STMS] = storeMultipleRegistersIntoMemorySafe,
                                   [ADD] = addRegisters,
                                   [SUB] = subtractRegisters,
+                                  [SUB_IMM] = subtractRegisters,
                                   [MUL] = multiplyRegisters,
                                   [DIV] = divideRegisters,
                                   [AND] = andRegisters,
@@ -58,9 +59,12 @@ void __declspec(dllexport) VMRun(int *bytecode) {
   }
 }
 
-void __declspec(dllexport) VMStep(int *bytecode) {
-  if(*bytecode != 0xFFFFFFFF) {
-    instruction[(unsigned char)*bytecode](*bytecode);
-    bytecode++;
+/**
+ *  pc = Program Counter
+ *
+ */
+void __declspec(dllexport) VMStep(int bytecode) {
+  if(bytecode != 0xFFFFFFFF) {
+    instruction[(unsigned char)bytecode](bytecode);
   }
 }

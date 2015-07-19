@@ -16,6 +16,7 @@ from DeclarationContext import *
 from FlowControlContext import *
 from RegisterAllocator import *
 from InformationInjector import *
+
 class TestByteCodeGenerator(unittest.TestCase):
     def setUp(self):
         self.manager = ContextManager()
@@ -33,7 +34,7 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.expressionContext.addPrefixInfixOperator('-', 70)
         self.expressionContext.addInfixOperator('*', 100)
         self.expressionContext.addInfixOperator('/', 100)
-        self.declarationContext.addIntDeclaration('int', 0)
+        self.declarationContext.addInt('int', 0)
         self.expressionContext.addOperator(';', 0)
         self.flowControlContext.addBlockOperator('{', 0)
         self.flowControlContext.addOperator('}', 0)

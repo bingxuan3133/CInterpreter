@@ -1,10 +1,7 @@
 # Pratt's parser implementation
+
 from LexerStateMachine import *
-from ContextManager import *
-from Scope import *
-from Context import *
 from Scope import ScopeBuilder
-from copy import *
 
 class Parser:
     def __init__(self, lexer, contextManager):

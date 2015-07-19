@@ -1,6 +1,5 @@
 __author__ = 'Jing'
 
-from Context import *
 from InStream import *
 import string
 

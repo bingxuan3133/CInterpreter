@@ -98,10 +98,10 @@ void dumpRegisterHex(int bytecode) {
 }
 
 /**
- *  This function load register with a literal value
+ *  This function load register with a immediate value
  *  Input:  bytecode
  */
-void loadRegisterWithLiteral(int bytecode) {
+void loadRegisterWithImmediate(int bytecode) {
   int regIndex = getRd(bytecode);
   reg[regIndex].data = bytecode >> (8 + MAX_REG_BIT);
 }
@@ -338,6 +338,13 @@ void subtractRegisters(int bytecode) {
   int reg1 = getR1(bytecode);
   int reg2 = getR2(bytecode);
   reg[resultReg].data = reg[reg1].data - reg[reg2].data;
+}
+
+void subtractRegisterWithImmediate(int bytecode) {
+  int regIndex = getRd(bytecode);
+  int value = bytecode >> (8 + MAX_REG_BIT);
+  
+  reg[regIndex].data = reg[regIndex].data - value;
 }
 
 void multiplyRegisters(int bytecode) {

@@ -32,19 +32,19 @@ void test_dumpRegister(void)  {
   dumpRegister(dumpr(REG_1));
 }
 
-void test_loadRegisterWithLiteral(void) {
-  loadRegisterWithLiteral(ldrImm(REG_0, 2)); // ldr r0, #2
+void test_loadRegisterWithImmediate(void) {
+  loadRegisterWithImmediate(ldrImm(REG_0, 2)); // ldr r0, #2
   TEST_ASSERT_EQUAL(2, reg[0].data);
-  loadRegisterWithLiteral(ldrImm(REG_1, 2)); // ldr REG_1, #2
+  loadRegisterWithImmediate(ldrImm(REG_1, 2)); // ldr REG_1, #2
   TEST_ASSERT_EQUAL(2, reg[1].data);
-  loadRegisterWithLiteral(ldrImm(REG_2, 2)); // ldr r2, #2
+  loadRegisterWithImmediate(ldrImm(REG_2, 2)); // ldr r2, #2
   TEST_ASSERT_EQUAL(2, reg[2].data);
-  loadRegisterWithLiteral(ldrImm(REG_7, 2)); // ldr r7, #2
+  loadRegisterWithImmediate(ldrImm(REG_7, 2)); // ldr r7, #2
   TEST_ASSERT_EQUAL(2, reg[7].data);
 }
 
-void test_loadRegisterWithLiteral_should_keep_data_signed_value(void) {
-  loadRegisterWithLiteral(ldrImm(0, -1)); // ldr r0, #-1
+void test_loadRegisterWithImmediate_should_keep_data_signed_value(void) {
+  loadRegisterWithImmediate(ldrImm(0, -1)); // ldr r0, #-1
   TEST_ASSERT_EQUAL(-1, reg[0].data);
 }
 
@@ -496,6 +496,12 @@ void test_subtractRegisters_should_subtract_reg1_from_reg0(void) {
   reg[1].data = 20;
   subtractRegisters(sub(REG_0, REG_0, REG_1));
   TEST_ASSERT_EQUAL(-30, reg[0].data);
+}
+
+void test_subtractRegisterWithImmediate_should_subtract_reg_from_imm(void) {
+  reg[7].data = 0;
+  subtractRegisterWithImmediate(subImm(REG_7, 4));
+  TEST_ASSERT_EQUAL(-4, reg[7].data);
 }
 
 void test_multiplyRegisters_should_multiply_2_registers(void) {

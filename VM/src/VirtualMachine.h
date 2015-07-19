@@ -8,4 +8,4 @@ extern void (*instruction[256])(int);
 int getBytecode(FILE *file);
 void __declspec(dllexport) VMLoad(char* filepath, int *bytecode);
 void __declspec(dllexport) VMRun(int *bytecode);
-void __declspec(dllexport) VMStep(int *bytecode);
+void __declspec(dllexport) VMStep(int bytecode);

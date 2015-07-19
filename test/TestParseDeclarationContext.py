@@ -788,32 +788,6 @@ class TestDeclarationContextWithAssignmentAndComa(unittest.TestCase):
         self.assertEqual('x', token[1].data[0].data[0])
         self.assertEqual(2, token[1].data[1].data[0])
 
-    def test_short_x_equal_to_2(self):
-        lexer = LexerStateMachine('short x = 2 ;', self.context)
-        parser = Parser(lexer, self.manager)
-        self.manager.setParser(parser)
-
-        token = parser.parseStatement(0)
-        self.assertEqual('int', token[0].id)
-        self.assertEqual('short', token[0].modifier)
-        self.assertEqual('x', token[0].data[0].data[0])
-        self.assertEqual('=', token[1].id)
-        self.assertEqual('x', token[1].data[0].data[0])
-        self.assertEqual(2, token[1].data[1].data[0])
-
-    def test_long_x_equal_to_2(self):
-        lexer = LexerStateMachine('long x = 2 ;', self.context)
-        parser = Parser(lexer, self.manager)
-        self.manager.setParser(parser)
-
-        token = parser.parseStatement(0)
-        self.assertEqual('int', token[0].id)
-        self.assertEqual('long', token[0].modifier)
-        self.assertEqual('x', token[0].data[0].data[0])
-        self.assertEqual('=', token[1].id)
-        self.assertEqual('x', token[1].data[0].data[0])
-        self.assertEqual(2, token[1].data[1].data[0])
-
     def test_int_x_y_and_z(self):
         lexer = LexerStateMachine('int x , y , z ;', self.context)
         parser = Parser(lexer, self.manager)

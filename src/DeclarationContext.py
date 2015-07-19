@@ -5,8 +5,6 @@ lib_path = os.path.abspath('\..\src')
 sys.path.append(lib_path)
 
 from Context import *
-from ContextManager import *
-import copy
 
 class DeclarationContext(Context):
     def __init__(self, *args, **kwargs):

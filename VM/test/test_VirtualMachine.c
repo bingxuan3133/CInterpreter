@@ -52,8 +52,8 @@ void test_run_VirtualMachine(void) {
   char strBuffer[300] = {0};
   bytecodes[0] = dumpr(REG_0);
   bytecodes[1] = dumpr(REG_1);
-  bytecodes[2] = ldrImm(REG_0, 50);
-  bytecodes[3] = ldrImm(REG_1, 100);
+  bytecodes[2] = ldrImm(REG_0, 0x50);
+  bytecodes[3] = ldrImm(REG_1, 0x100);
   bytecodes[4] = dumpr(REG_0);
   bytecodes[5] = dumpr(REG_1);
   bytecodes[6] = add(REG_0, REG_1, REG_0);
@@ -64,11 +64,47 @@ void test_run_VirtualMachine(void) {
   VMRun(bytecodes);
 }
 
-void test_VMLoad(void) {
+void test_run_VirtualMachine_testcode(void) {
+  int bytecodes[10] = {0};
+  char strBuffer[300] = {0};
+  bytecodes[0] = 10229;
+  bytecodes[1] = 0xffffffff;
+
+  VMRun(bytecodes);
+}
+
+void test_stepVM(void) {
+  int programCounter = 0;
+  int bytecodes[10] = {0};
+  char strBuffer[300] = {0};
+  bytecodes[0] = ldrImm(REG_0, 0x50);
+  bytecodes[1] = ldrImm(REG_0, 0x100);
+
+  VMStep(bytecodes[0]);
+  TEST_ASSERT_EQUAL_HEX(0x50, reg[REG_0].data);
+  VMStep(bytecodes[1]);
+  TEST_ASSERT_EQUAL_HEX(0x100, reg[REG_0].data);
+}
+
+void test_stepVM_will_reset(void) {
+  int programCounter = 0;
+  int bytecodes[10] = {0};
+  char strBuffer[300] = {0};
+  bytecodes[0] = ldrImm(REG_0, 0x50);
+  bytecodes[1] = ldrImm(REG_0, 0x100);
+
+  VMStep(bytecodes[0]);
+  TEST_ASSERT_EQUAL_HEX(0x50, reg[REG_0].data);
+  VMStep(bytecodes[1]);
+  TEST_ASSERT_EQUAL_HEX(0x100, reg[REG_0].data);
+}
+
+void xtest_VMLoad(void) {
   int bytecodes[10] = {0};
   VMLoad("../myFirstByteCode", bytecodes);
   
   TEST_ASSERT_EQUAL_HEX(bytecodes[0], stm(REG_7, R3, DEC, NO_UPDATE));
   TEST_ASSERT_EQUAL_HEX(bytecodes[1], ldrMem(REG_12, REG_3, 8));
   TEST_ASSERT_EQUAL_HEX(bytecodes[2], ldrImm(REG_13, 2));
+  TEST_ASSERT_EQUAL_HEX(bytecodes[3], 0xffffffff);
 }

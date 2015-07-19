@@ -1,7 +1,7 @@
 #ifndef Instruction_H
 #define Instruction_H
 
-// Register Mode
+// Register Mode (supports only 2 to 16 registers mode)
 #define MAX_REG 16      // 2 to 16
 #define MAX_REG_BIT 4   // 1 to 4
 
@@ -82,6 +82,8 @@
                 ADD | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
 #define sub(resultReg, reg1, reg2) \
                 SUB | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
+#define subImm(reg, imm) \
+                SUB_IMM | (reg)<<8 | (imm)<<(8+MAX_REG_BIT)
 #define mul(resultRegH, resultRegL, reg1, reg2) \
                 MUL | (resultRegH)<<8 | (resultRegL)<<(8+MAX_REG_BIT) | (reg1)<<(8+2*MAX_REG_BIT) | (reg2)<<(8+3*MAX_REG_BIT)
 #define div(resultRegQ, resultRegR, reg1, reg2) \
@@ -116,6 +118,7 @@ typedef enum {
   AND,
   OR,
   XOR,
+  SUB_IMM = 0xf5,
   LDM = 0xf7,
   STR_MEM = 0xf8,
   STM = 0xf9,
@@ -130,7 +133,7 @@ void dumpRegister(int bytecode);
 void dumpRegisterHex(int bytecode);
 
 // load store
-void loadRegisterWithLiteral(int bytecode);
+void loadRegisterWithImmediate(int bytecode);
 void loadRegisterFromMemory(int bytecode);
 void storeRegisterIntoMemory(int bytecode);
 void moveRegister(int bytecode);
@@ -143,6 +146,7 @@ void storeMultipleRegistersIntoMemorySafe(int bytecode);
 
 // arithmetic
 void addRegisters(int bytecode);
+void subtractRegisterWithImmediate(int bytecode);
 void subtractRegisters(int bytecode);
 void multiplyRegisters(int bytecode);
 void divideRegisters(int bytecode);
