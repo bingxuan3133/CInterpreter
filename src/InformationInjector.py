@@ -35,8 +35,8 @@ class InformationInjector:
 
 
 
-    def bypassTheInjection(self, token):
-        return ByteCodeGenerator.isADeclaration(self,token.id)
+    def bypassTheInjection(self,token):
+        return ByteCodeGenerator.isADeclaration(self, token.id)
 
 
 

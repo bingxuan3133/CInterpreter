@@ -11,7 +11,13 @@ class Mapping:
     smallerRegisterUsed = 0
 
     def reset(self):
-        pass
+        self.registerFromLeft = 0  # Start with the location 0
+        self.registerFromRight = self.MaxRegister - 1
+        self.registerLeft = self.MaxRegister
+
+        self.framePointerRegister = self.MaxRegister + 1
+
+        self.smallerRegisterUsed = 0
 
     def getAFreeWorkingRegister(self):
         if self.registerLeft == 0:

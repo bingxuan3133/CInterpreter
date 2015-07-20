@@ -1,8 +1,6 @@
 __author__ = 'JingWen'
 
 from Mapping import *
-from Context import *
-from ContextManager import *
 from RegisterAllocator import *
 
 
@@ -12,6 +10,7 @@ class ByteCodeGenerator:
     variablesInThisAST = {}
     variableCounter = 0
     memorySize = 0
+
 
     def __init__(self, context, contextManager):
         self.context = context
@@ -175,7 +174,10 @@ class ByteCodeGenerator:
             return False
 
     def injectPrologue(self, oldList):
+        if self.memorySize == 0:
+            return oldList
         Code = self.subFrameRegister([self.mapping.framePointerRegister,self.memorySize])
         newList = [Code]
         newList.extend(oldList)
         return newList
+
