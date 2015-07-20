@@ -11,11 +11,12 @@ from Context import *
 from ContextManager import *
 from DefaultContext import *
 from ExpressionContext import *
-from ByteCodeGenerator import *
+
 from DeclarationContext import *
 from FlowControlContext import *
 from RegisterAllocator import *
 from InformationInjector import *
+from ByteCodeGenerator import *
 
 class TestByteCodeGenerator(unittest.TestCase):
     def setUp(self):
@@ -192,7 +193,7 @@ class TestByteCodeGenerator(unittest.TestCase):
         token.data[1].maxRequiredRegister = 6
         self.byteCodeGenerator.mapping.registerLeft = 1
         self.byteCodeGenerator.mapping.registerFromLeft = 5
-        self.byteCodeGenerator.registersInThisAST['x'] = 4
+        self.byteCodeGenerator.variablesInThisAST['x'] = 4
 
         self.byteCodeGenerator.initGeneration()
         byteCodes = token.generateByteCode()
@@ -373,7 +374,7 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.assignRegister([2, 5]), byteCodes[7])
         self.assertEqual(self.byteCodeGenerator.loadMultiple([7, 0b011100]), byteCodes[8])
 
-    def test_generateByteCode_will_push_the_register_two_times(self):
+    def test_generateByteCode_will_push_the_register_two_times_with_multiply(self):
         """
                     =(max=4,min=2)
             /                       \
