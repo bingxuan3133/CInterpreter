@@ -568,7 +568,9 @@ class TestParseIfFlowControl(unittest.TestCase):
             parser.parse(0)
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Expecting ) before ;", e.msg)
+            self.assertEqual("Error[1][9]:Expecting ) before ;"+'\n'
+                             " if ( 1 ; 2 ) "+'\n'
+                             '        ^', e.msg)
 
     def test_parse_throw_an_error_if_the_brace_does_not_close(self):
 

@@ -101,22 +101,32 @@ class Context:
         symObj.data.append(float(value))
         return symObj
 
-    def createToken(self, word):
+    def createToken(self, word, line=0, column=0, originalString=""):
+
         for currentContext in self.contextManager.currentContexts:
             if word in currentContext.symbolTable:
                 symClass = currentContext.symbol(word)
                 if symClass is not None:
-                    return symClass()
+                    newToken = symClass()
+                    newToken.line = line
+                    newToken.column = column
+                    newToken.oriString = originalString
+                    return newToken
+
         if word is None:
-            return self.createSystemToken('(end)')
+            newToken = self.createSystemToken('(end)')
         elif word.isidentifier():
-            return self.createIdentifier(word)
+            newToken = self.createIdentifier(word)
         elif word.isnumeric():
-            return self.createLiteral(word)
+            newToken = self.createLiteral(word)
         elif self.isFloat(word):
-            return self.createFloatingPoint(word)
+            newToken = self.createFloatingPoint(word)
         else:
             raise SyntaxError('Syntax error: [' + word + '] is an unknown token')
+        newToken.line = line
+        newToken.column = column
+        newToken.oriString = originalString
+        return newToken
 
     def isFloat(self, Unknown):
         try:

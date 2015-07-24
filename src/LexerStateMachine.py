@@ -4,7 +4,7 @@ from InStream import *
 import string
 
 class LexerStateMachine:
-    def __init__(self, string, context):
+    def __init__(self, string, context, commentToken=False):
         self.context = context
         self.inStream = InStream(string)
         self.currentString = ''
@@ -15,15 +15,21 @@ class LexerStateMachine:
     def advance(self, expectedSymbol = None):
 
         self.start()
-        self.currentToken = self.context.createToken(self.currentString)
+        self.currentToken = self.context.createToken(self.currentString,self.inStream.line,self.inStream.column,self.inStream.oriString)
         if expectedSymbol is not None and self.currentToken.id != expectedSymbol:
-            raise SyntaxError('Expecting ' + expectedSymbol + ' before ' + self.currentToken.id)
+            caretMessage = ' '*(self.inStream.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:Expecting {} before {}\n{}\n{}"\
+                             .format(self.inStream.line,self.inStream.column,expectedSymbol,self.currentToken.id,self.inStream.oriString,caretMessage))
         self.resetCurrentString()
         return self.currentToken
 
     def peep(self, expectedSymbol = None):
         if expectedSymbol is not None and self.currentToken.id != expectedSymbol:
-            raise SyntaxError('Expecting ' + expectedSymbol + ' before ' + self.currentToken.id)
+            self.byPassTheSpace()
+            caretMessage = ' '*(self.inStream.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:Expecting {} before {}\n{}\n{}"\
+                             .format(self.inStream.line,self.inStream.column,expectedSymbol,self.currentToken.id,self.inStream.oriString,caretMessage))
+            #raise SyntaxError('Expecting ' + expectedSymbol + ' before ' + self.currentToken.id)
         return self.currentToken
     #End API
 
@@ -32,8 +38,7 @@ class LexerStateMachine:
         self.waitChar()
 
     def waitChar(self):
-        while self.isSpace():
-            self.inStream.getNextChar()
+        self.byPassTheSpace()
 
         if self.isZero():
             self.capture()
@@ -208,6 +213,9 @@ class LexerStateMachine:
     def resetCurrentString(self):
         self.currentString = ''
 
+    def byPassTheSpace(self):
+        while self.isSpace():
+            self.inStream.getNextChar()
     #End Action functions
 
     #Checking functions

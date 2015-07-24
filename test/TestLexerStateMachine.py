@@ -572,3 +572,15 @@ class TestLexer(unittest.TestCase):
         testToken = lexer.advance()
         self.assertEqual(testToken.data[0],4671)
         self.assertEqual(testToken.id, '(literal)')
+
+    def test_peep_will_throw_exception_for_unexpected_token(self):
+        lexer = LexerStateMachine("""x =myVar +
+                                  hisVar*oursVar
+                                  -0X123F""", self.context)
+        try:
+            lexer.peep('(literal)')
+            raise SyntaxError("Exception test failed!")
+        except SyntaxError as e:
+            self.assertEqual("Error[1][3]:Expecting (literal) before (identifier)"+'\n'+
+                             'x =myVar +'+'\n'+
+                             '  ^', e.msg)
