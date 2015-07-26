@@ -101,7 +101,7 @@ class Context:
         symObj.data.append(float(value))
         return symObj
 
-    def createToken(self, word, line=0, column=0, originalString=""):
+    def createToken(self, word, line=0, column=0, length =0,originalString=""):
 
         for currentContext in self.contextManager.currentContexts:
             if word in currentContext.symbolTable:
@@ -109,7 +109,8 @@ class Context:
                 if symClass is not None:
                     newToken = symClass()
                     newToken.line = line
-                    newToken.column = column
+                    newToken.column = column - length
+                    newToken.length = length
                     newToken.oriString = originalString
                     return newToken
 
@@ -124,7 +125,8 @@ class Context:
         else:
             raise SyntaxError('Syntax error: [' + word + '] is an unknown token')
         newToken.line = line
-        newToken.column = column
+        newToken.column = column - length
+        newToken.length = length
         newToken.oriString = originalString
         return newToken
 

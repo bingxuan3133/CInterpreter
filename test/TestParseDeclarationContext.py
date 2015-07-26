@@ -139,9 +139,9 @@ class TestDeclarationContextStartingWithShort(unittest.TestCase):
             parser.parseStatement(0)
             raise SyntaxError("Exception test failed!")
         except SyntaxError as e:
-            self.assertEqual("Error[1][7]:Expecting ; before (systemToken)"+'\n'+
+            self.assertEqual("Error[1][8]:Expecting ; before (systemToken)"+'\n'+
                              'short x'+'\n'+
-                             '      ^', e.msg)
+                             '       ^', e.msg)
 
     def test_addShort_nud_given_short_x_int(self):
         lexer = LexerStateMachine('short x int ;', self.context)
@@ -151,9 +151,9 @@ class TestDeclarationContextStartingWithShort(unittest.TestCase):
             parser.parseStatement(0)
             raise SyntaxError("Exception test failed!")
         except SyntaxError as e:
-            self.assertEqual("Error[1][13]:Expecting ; before int"+'\n'
+            self.assertEqual("Error[1][9]:Expecting ; before int"+'\n'
                              "short x int ;"+'\n'
-                             '            ^', e.msg)
+                             '        ^', e.msg)
 
     def test_addShort_nud_given_short_long_x(self):
         lexer = LexerStateMachine('short long x ;', self.context)

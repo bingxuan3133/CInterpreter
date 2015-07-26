@@ -21,12 +21,16 @@ class ByteCodeGenerator:
     def nothing(self):
         pass
 
+    def compareRegister(self,GPR=[]):
+        number = 0xf3 | GPR[0] << 8 | GPR[1] << 11
+        return number
     def subFrameRegister(self, GPR=[]):
-        number = 0xf5 | GPR[0] << 8 | GPR[1] << 11
+        number = 0xf4 | GPR[0] << 8 | GPR[1] << 11
         return number
 
-    def divideRegister(self):
-        pass
+    def divideRegister(self, GPR=[]):
+        number = 0xf5 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        return number
 
     def multiplyRegister(self, GPR=[]):
         number = 0xf6 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
@@ -129,7 +133,7 @@ class ByteCodeGenerator:
             GPR.insert(2,firstRegister)
             self.mapping.getAFreeWorkingRegister()
 
-        if generateByteCode == self.assignRegister:
+        if generateByteCode == self.assignRegister or generateByteCode == self.compareRegister:
             GPR[0] = secondRegister
             GPR[1] = firstRegister
         Code = generateByteCode(GPR)
@@ -144,7 +148,7 @@ class ByteCodeGenerator:
                 thisGenerator.variablesInThisAST[token.data[0].data[0]] = thisGenerator.byteRequired[token.id]
                 thisGenerator.memorySize += thisGenerator.byteRequired[token.id]
 
-        respectiveByteCodeFunction = {'=': self.assignRegister, '+': self.addRegister, \
+        respectiveByteCodeFunction = {'=': self.assignRegister, '+': self.addRegister, '==':self.compareRegister, \
                                             '-': self.subRegister, '*': self.multiplyRegister, '/': self.divideRegister, \
                                             '(systemToken)': self.nothing, ';': self.nothing, ',': self.nothing, '}': self.nothing, '{': self.nothing}
 

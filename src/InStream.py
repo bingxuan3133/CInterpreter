@@ -28,7 +28,7 @@ class InStream:
                     yield ch
             temp = self.column
             self.column = 0
-        self.column = temp
+        self.column = temp + 1
         while True:
             yield None
 

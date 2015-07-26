@@ -8,6 +8,7 @@ class LexerStateMachine:
         self.context = context
         self.inStream = InStream(string)
         self.currentString = ''
+        self.length = 0
         self.capture()
         self.currentToken = self.advance()
 
@@ -15,12 +16,12 @@ class LexerStateMachine:
     def advance(self, expectedSymbol = None):
 
         self.start()
-        self.currentToken = self.context.createToken(self.currentString,self.inStream.line,self.inStream.column,self.inStream.oriString)
+        self.currentToken = self.context.createToken(self.currentString,self.inStream.line,self.inStream.column,self.length,self.inStream.oriString)
         if expectedSymbol is not None and self.currentToken.id != expectedSymbol:
             caretMessage = ' '*(self.inStream.column-1)+'^'
             raise SyntaxError("Error[{}][{}]:Expecting {} before {}\n{}\n{}"\
                              .format(self.inStream.line,self.inStream.column,expectedSymbol,self.currentToken.id,self.inStream.oriString,caretMessage))
-        self.resetCurrentString()
+        self.resetLexer()
         return self.currentToken
 
     def peep(self, expectedSymbol = None):
@@ -29,7 +30,6 @@ class LexerStateMachine:
             caretMessage = ' '*(self.inStream.column-1)+'^'
             raise SyntaxError("Error[{}][{}]:Expecting {} before {}\n{}\n{}"\
                              .format(self.inStream.line,self.inStream.column,expectedSymbol,self.currentToken.id,self.inStream.oriString,caretMessage))
-            #raise SyntaxError('Expecting ' + expectedSymbol + ' before ' + self.currentToken.id)
         return self.currentToken
     #End API
 
@@ -208,10 +208,12 @@ class LexerStateMachine:
 
     #Action functions
     def capture(self):
+        self.length += 1
         self.currentString += self.inStream.getNextChar()
 
-    def resetCurrentString(self):
+    def resetLexer(self):
         self.currentString = ''
+        self.length = 0
 
     def byPassTheSpace(self):
         while self.isSpace():
