@@ -19,8 +19,8 @@ class Parser:
                 token2 = self.lexer.peep()
             return token  # number token: come in first time, else operator token: after rolling in the while loop
         except SyntaxError as e:
-            MSG = self.processException(e)
-            raise SyntaxError(MSG)
+            errorMSG = self.processException(e)
+            raise SyntaxError(errorMSG )
 
     def parseStatement(self, bindingPower):
         try:
@@ -49,8 +49,8 @@ class Parser:
                     self.lexer.peep(';')
                     return list
         except SyntaxError as e:
-            MSG = self.processException(e)
-            raise SyntaxError (MSG)
+            errorMSG  = self.processException(e)
+            raise SyntaxError (errorMSG )
         #self.scopeBuilder.buildScope(returnedToken)
         self.lexer.peep(';')
         self.lexer.advance()
@@ -69,11 +69,11 @@ class Parser:
 
     def processException(self, e):
         temp = e.msg.split('\n')
+        tempToken = self.lexer.peep()
+        caretMessage = ' '*(tempToken.column-1)+'^'
         if temp.__len__() == 1:
-            MSG = temp[0]
+            MSG="Error[{}][{}]:{}\n{}\n{}".format(tempToken.line,tempToken.column,temp[0],tempToken.oriString,caretMessage)
         else:
-            tempToken = self.lexer.peep()
-            caretMessage = ' '*(tempToken.column-1)+'^'
             temp = temp[0].split(':')
             temp[0]="Error[{}][{}]".format(tempToken.line,tempToken.column)
             temp[0]=temp[0]+':'+temp[1]
