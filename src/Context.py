@@ -38,9 +38,18 @@ class Context:
             return self.symbolTable[id]
 
     def addOperator(self, id, bindingPower = 0, nud = None, led = None):
+        thisContext = self
+        def nud2(self):
+            raise SyntaxError("Expected a declaration")
+        def led2(self):
+            raise SyntaxError("Expected a declaration")
         symClass = self.symbol(id, bindingPower)
-        symClass.nud = nud
-        symClass.led = led
+        if nud == None and led == None:
+            symClass.nud = nud2
+            symClass.led = led2
+        else:
+            symClass.nud = nud
+            symClass.led = led
         return symClass
 
     def createLiteral(self, value):

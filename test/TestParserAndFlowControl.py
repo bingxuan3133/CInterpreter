@@ -458,9 +458,9 @@ class TestParseIfFlowControl(unittest.TestCase):
             parser.parse(0)
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Error[1][6]:Expecting a condition expression"+'\n'+
-                             'if ( )'+'\n'+
-                             '     ^', e.msg)
+            self.assertEqual("Error[1][7]:Expecting a condition expression"+'\n'+
+                             ' if ( ) '+'\n'+
+                             '      ^', e.msg)
 
     def test_parse_will_build_an_if_statement_with_expression_inside(self):
         """

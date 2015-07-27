@@ -127,8 +127,8 @@ class TestLexer(unittest.TestCase):
             '          ^', e.msg)
 
     def test_advance_will_throw_exception_for_the_error_That_occurred_after_the_first_line(self):
-        lexer = LexerStateMachine("""Price
-                                  12E++10""", self.context)
+        lexer = LexerStateMachine("Price"+"\n"+
+                                  "12E++10", self.context)
         try:
             lexer.advance()
             raise SyntaxError("Exception test failed")
@@ -137,9 +137,9 @@ class TestLexer(unittest.TestCase):
             '12E++10'+'\n'+
             '    ^', e.msg)
 
-        lexer = LexerStateMachine("""Price
-                                    IsRising
-                                  12E++10""", self.context)
+        lexer = LexerStateMachine("Price"+"\n"+
+                                "IsRising"+"\n"+
+                                  "12E++10", self.context)
         try:
             lexer.advance()
             lexer.advance()

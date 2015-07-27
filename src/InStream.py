@@ -5,10 +5,16 @@ class InStream:
         self.lists = []
         self.string = string
         if string is not None:
-            statements = string.split('\n')
-            for statement in statements:
-                self.lists.append(statement.strip())
-                self.lists.append(' ')
+            tempWord = ""
+            for char in string:
+                if char != '\n':
+                    tempWord += char
+                else:
+                    self.lists.append(tempWord)
+                    self.lists.append(' ')
+                    tempWord = ""
+            self.lists.append(tempWord)
+            self.lists.append(' ')
             self.lists.pop()
         self.charGenerator = self.createCharGenerator()
         self.currentChar = ''
