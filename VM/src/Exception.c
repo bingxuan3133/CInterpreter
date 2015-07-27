@@ -2,12 +2,12 @@
 #include <malloc.h>
 #include <stdio.h>
 
-Exception *exception;
-
-Exception *createException(char *errorMessage, int errorCode) {
+Exception *_createException(char *errorMessage, int errorCode, unsigned int programCounter, int bytecode) {
   Exception *e = malloc(sizeof(Exception));
-  e->errMsg = errorMessage;
   e->errCode = errorCode;
+  e->errMsg = errorMessage;
+  e->pc = programCounter;
+  e->bc = bytecode;
   return e;
 }
 

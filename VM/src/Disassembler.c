@@ -1,10 +1,13 @@
+#include "VirtualMachine.h"
 #include "Disassembler.h"
 #include "Instruction.h"
 #include "Exception.h"
 #include <stdio.h>
 #include <string.h>
 
-void (*disassemble[256])(char*, int)  = { [LDR_IMM] = disassembleLdrImm,
+void (*disassemble[256])(char*, int)  = { [DUMPR] = disassembleDumpr,
+                                          [DUMPR_HEX] = disassembleDumprHex,
+                                          [LDR_IMM] = disassembleLdrImm,
                                           [LDR_MEM] = disassembleLdrMem,
                                           [STR_MEM] = disassembleStrMem,
                                           [MOV_REG] = disassembleMovReg,
@@ -23,8 +26,6 @@ void (*disassemble[256])(char*, int)  = { [LDR_IMM] = disassembleLdrImm,
                                           [XOR] = disassembleXor
                                           };
 //
-
-
 
 /**
  *  This function disassemble multiple bytecodes into readable assembly code
@@ -55,10 +56,32 @@ int disassembleBytecodes(char *strBuffer, int *bytecode) {
  */
 int disassembleBytecode(char *strBuffer, int bytecode) {
   unsigned char command = bytecode;
-  if(command < 256 && command >= 0)
+  if(command < 256 && command >= 0) {
     disassemble[command](strBuffer, bytecode);
-  else
+  } else {
     printf("Invalid bytecode");
+  }
+}
+
+/**
+ *  Simpler version of disassembleBytecode
+ */
+void dumpBytecode(int bytecode) {
+  char dumpBuffer[300] = {0};
+  unsigned char command = bytecode;
+  disassembleBytecode(dumpBuffer, bytecode);
+  printf("%s", dumpBuffer);
+}
+
+// Disassemble Functions
+void disassembleDumpr(char *strBuffer, int bytecode) {
+  int regIndex = getRd(bytecode);
+  sprintf(strBuffer, "dumpr r%d", regIndex);
+}
+
+void disassembleDumprHex(char *strBuffer, int bytecode) {
+  int regIndex = getRd(bytecode);
+  sprintf(strBuffer, "dumprhex r%d", regIndex);
 }
 
 void disassembleLdrImm(char *strBuffer, int bytecode) {

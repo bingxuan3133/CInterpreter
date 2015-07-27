@@ -1,10 +1,6 @@
 #ifndef Instruction_H
 #define Instruction_H
 
-// Register Mode (supports only 2 to 16 registers mode)
-#define MAX_REG 16      // 2 to 16
-#define MAX_REG_BIT 4   // 1 to 4
-
 // Registers
 #define REG_0  0
 #define REG_1  1
@@ -54,6 +50,8 @@
 #define UPDATE    1
 
 // Bytecode Macros
+#define halt() \
+                0xffffffff
 #define dumpr(reg) \
                 DUMPR | (reg)<<8
 #define dumprHex(reg) \
@@ -94,39 +92,36 @@
                 OR | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
 #define xor(resultReg, reg1, reg2) \
                 XOR | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
-
-typedef struct Register Register;
-
-struct Register {
-  int data;
-  int base;
-  int limit;
-};
-
-extern Register reg[MAX_REG];
+//
 
 typedef enum {
-  DUMPR,
-  DUMPR_HEX,
-  MOV_REG,
-  LDR_MEM_SAFE,
-  STR_MEM_SAFE,
-  LDMS,
-  STMS,
-  MUL,
-  DIV,
-  AND,
-  OR,
-  XOR,
-  SUB_IMM = 0xf5,
-  LDM = 0xf7,
-  STR_MEM = 0xf8,
-  STM = 0xf9,
-  ADD = 0xfa,
-  SUB = 0xfb,
-  LDR_IMM = 0xfc,
-  LDR_MEM = 0xfe, 
+  DUMPR = 0x00,
+  DUMPR_HEX = 0x01,
+  MOV_REG = 0x02,
+  LDR_MEM_SAFE = 0x03,
+  STR_MEM_SAFE = 0x04,
+  LDMS = 0x05,
+  STMS = 0x06,
+  MUL = 0x07,
+  DIV = 0x08,
+  AND = 0x09,
+  OR = 0x0a,
+  XOR = 0x0b,
+  SUB_IMM = 0x0c,
+  LDM = 0x0d,
+  STR_MEM = 0x0e,
+  STM = 0x0f,
+  ADD = 0x10,
+  SUB = 0x11,
+  LDR_IMM = 0x12,
+  LDR_MEM = 0x13,
+  HALT = 0xff,
 } Instruction;
+
+#define MAX_INSTRUCTION LDR_MEM
+
+// main function
+void execute(int bytecode);
 
 // debug helper
 void dumpRegister(int bytecode);

@@ -1,5 +1,6 @@
 #include "unity.h"
 #include "Disassembler.h"
+#include "VirtualMachine.h"
 #include "Instruction.h"
 #include "Exception.h"
 #include <stdio.h>

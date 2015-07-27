@@ -3,29 +3,16 @@
 #include "Exception.h"
 #include <stdio.h>
 
-void (*instruction[256])(int)  = {[DUMPR] = dumpRegister,
-                                  [DUMPR_HEX] = dumpRegisterHex,
-                                  [LDR_IMM] = loadRegisterWithImmediate,
-                                  [LDR_MEM] = loadRegisterFromMemory,
-                                  [STR_MEM] = storeRegisterIntoMemory,
-                                  [MOV_REG] = moveRegister,
-                                  [LDR_MEM_SAFE] = loadRegisterFromMemorySafe,
-                                  [STR_MEM_SAFE] = storeRegisterIntoMemorySafe,
-                                  [LDM] = loadMultipleRegistersFromMemory,
-                                  [STM] = storeMultipleRegistersIntoMemory,
-                                  [LDMS] = loadMultipleRegistersFromMemorySafe,
-                                  [STMS] = storeMultipleRegistersIntoMemorySafe,
-                                  [ADD] = addRegisters,
-                                  [SUB] = subtractRegisters,
-                                  [SUB_IMM] = subtractRegisters,
-                                  [MUL] = multiplyRegisters,
-                                  [DIV] = divideRegisters,
-                                  [AND] = andRegisters,
-                                  [OR] = orRegisters,
-                                  [XOR] = xorRegisters
-                                  };
+unsigned int programCounter = 0;
+Register reg[MAX_REG];
 
-//
+unsigned int getProgramCounter() {
+  return programCounter;
+}
+
+void clearProgramCounter() {
+  programCounter = 0;
+}
 
 int getBytecode(FILE *file) {
   int bytecode = 0;
@@ -36,35 +23,64 @@ int getBytecode(FILE *file) {
   return bytecode;
 }
 
-void __declspec(dllexport) VMLoad(char* filepath, int *bytecode) {
-  FILE *file;
-  char fileNameBuffer[100];
-  sprintf(fileNameBuffer, "%s", filepath);
-  file = fopen(filepath, "r+");
-  int i;
+void VMLoad(char* filepath, int *bytecode) {
+  // FILE *file;
+  // char fileNameBuffer[100];
+  // sprintf(fileNameBuffer, "%s", filepath);
+  // file = fopen(filepath, "r+");
+  // int i;
   
-  *bytecode = getBytecode(file);
-  while(*bytecode != 0xFFFFFFFF) {
-    bytecode++;
-    *bytecode = getBytecode(file);
-  }
+  // *bytecode = getBytecode(file);
+  // while(*bytecode != 0xFFFFFFFF) {
+    // bytecode++;
+    // *bytecode = getBytecode(file);
+  // }
   
-  fclose(file);
+  // fclose(file);
 }
 
-void __declspec(dllexport) VMRun(int *bytecode) {
-  while(*bytecode != 0xFFFFFFFF) {
-    instruction[(unsigned char)*bytecode](*bytecode);
-    bytecode++;
+void VMRun(int *bytecode) {
+  unsigned char opcode = bytecode[programCounter];
+  while(bytecode[programCounter] != halt()) {
+    execute(bytecode[programCounter]);
+    programCounter++;
   }
 }
 
-/**
- *  pc = Program Counter
- *
- */
-void __declspec(dllexport) VMStep(int bytecode) {
-  if(bytecode != 0xFFFFFFFF) {
-    instruction[(unsigned char)bytecode](bytecode);
+void VMStep(int *bytecode) {
+  unsigned char opcode = bytecode[programCounter];
+  if(bytecode[programCounter] != halt()) {
+    execute(bytecode[programCounter]);
+    programCounter++;
+  }
+}
+
+Exception* __declspec(dllexport) _VMLoad(char *filepath, int *bytecode) {
+  // Exception* exception;
+  // Try {
+    // VMLoad(filepath, bytecode);
+    // return NULL;
+  // } Catch (exception) {
+    // return exception;
+  // }
+}
+
+Exception* __declspec(dllexport) _VMRun(int *bytecode) {
+  Exception* exception;
+  Try {
+    VMRun(bytecode);
+    return NULL;
+  } Catch (exception) {
+    return exception;
+  }
+}
+
+Exception* __declspec(dllexport) _VMStep(int *bytecode) {
+  Exception* exception;
+  Try {
+    VMStep(bytecode);
+    return NULL;
+  } Catch (exception) {
+    return exception;
   }
 }
