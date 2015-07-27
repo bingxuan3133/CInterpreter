@@ -5,7 +5,10 @@ extern void (*disassemble[256])(char*, int);
 
 int disassembleBytecodes(char *strBuffer, int *bytecode);
 int disassembleBytecode(char *strBuffer, int bytecode);
+void dumpBytecode(int bytecode);
 
+void disassembleDumpr(char *strBuffer, int bytecode);
+void disassembleDumprHex(char *strBuffer, int bytecode);
 void disassembleLdrImm(char *strBuffer, int bytecode);
 void disassembleLdrMem(char *strBuffer, int bytecode);
 void disassembleStrMem(char *strBuffer, int bytecode);

@@ -1,100 +1,55 @@
+#include "VirtualMachine.h"
 #include "Instruction.h"
-#include <stdio.h>
 #include "Exception.h"
+#include <stdio.h>
 
-Register reg[MAX_REG];
 char errBuffer[100] = {0};
 
-//========================
-//    Helper Functions
-//========================
-
-/**
- *  This is a helper function to get a specific range of bits from a 32-bit data
- *  Input:  data    original 32-bit data
- *          start   the start bit index of the returning bits (MSB)
- *          length  the length of returning bits
- *  Return: result  returning bits
- */
-int getBits(int data, unsigned char start, unsigned char length) {
-  int result;
-  result = data >> (start - length + 1);
-  result = result & (0xFFFFFFFF >> (32 - length));
-  return result;
-}
-
-//-----------------------
-//    Bytecode Format
-//-----------------------
-
-//  COMMAND | Rd | R1 | imm
-//  ldr Rd, [R1 + imm]
-
-//  COMMAND | Rd | R1 | R2
-//  add Rd, R1, R2
-
-//  COMMAND | Rd | R1 | R2 | R3
-//  mul Rhigh, Rlow, R1, R2
-
-//  COMMAND | Rd | R1 | Rd.attribute
-//  mov Rd, R1, R2
-
-//  COMMAND | Rd | Rlist
-//  ldm Rd, [Rlist]
-
-/**
- *  This is a helper function to get the destination register
- *  Input:  
- */
-int getRd(int bytecode) {
-  return getBits(bytecode, 7 + MAX_REG_BIT, MAX_REG_BIT);
-}
-
-/**
- *  This is a helper function to get the destination register
- *  Input:  
- */
-int getR1(int bytecode) {
-  return getBits(bytecode, 7 + (2 * MAX_REG_BIT), MAX_REG_BIT);
-}
-
-/**
- *  This is a helper function to get the destination register
- *  Input:  
- */
-int getR2(int bytecode) {
-  return getBits(bytecode, 7 + (3 * MAX_REG_BIT), MAX_REG_BIT);
-}
-
-/**
- *  This is a helper function to get the destination register
- *  Input:  
- */
-int getR3(int bytecode) {
-  return getBits(bytecode, 7 + (4 * MAX_REG_BIT), MAX_REG_BIT);
-}
-
-/**
- *  This is a helper function to get the register list (used in ldm and stm)
- *  Input:  
- */
-int getRlist(int bytecode) {
-  return getBits(bytecode, 7 + MAX_REG_BIT + MAX_REG, MAX_REG);
-}
-
+// Instruction Entry
+void (*instruction[256])(int)  = {[DUMPR] = dumpRegister,
+                                  [DUMPR_HEX] = dumpRegisterHex,
+                                  [LDR_IMM] = loadRegisterWithImmediate,
+                                  [LDR_MEM] = loadRegisterFromMemory,
+                                  [STR_MEM] = storeRegisterIntoMemory,
+                                  [MOV_REG] = moveRegister,
+                                  [LDR_MEM_SAFE] = loadRegisterFromMemorySafe,
+                                  [STR_MEM_SAFE] = storeRegisterIntoMemorySafe,
+                                  [LDM] = loadMultipleRegistersFromMemory,
+                                  [STM] = storeMultipleRegistersIntoMemory,
+                                  [LDMS] = loadMultipleRegistersFromMemorySafe,
+                                  [STMS] = storeMultipleRegistersIntoMemorySafe,
+                                  [ADD] = addRegisters,
+                                  [SUB] = subtractRegisters,
+                                  [SUB_IMM] = subtractRegisters,
+                                  [MUL] = multiplyRegisters,
+                                  [DIV] = divideRegisters,
+                                  [AND] = andRegisters,
+                                  [OR] = orRegisters,
+                                  [XOR] = xorRegisters
+                                  };
+//
 
 //======================
-//    Main Functions
+//    Main Function
+//======================
+
+void execute(int bytecode) {
+  unsigned char opcode = bytecode;
+  instruction[opcode](bytecode);
+}
+
+//======================
+//    Instructions
 //======================
 
 void dumpRegister(int bytecode) {
   int regIndex = getRd(bytecode);
-  printf("r%d: %d\n", regIndex, reg[regIndex].data);
+  printf("r%d: %d\0", regIndex, reg[regIndex].data);
 }
 
 void dumpRegisterHex(int bytecode) {
   int regIndex = getRd(bytecode);
-  printf("r%d: 0x%x\n", regIndex, reg[regIndex].data);
+  printf("r%d: 0x%x\0", regIndex, reg[regIndex].data);
 }
 
 /**
@@ -180,11 +135,12 @@ void loadRegisterFromMemorySafe(int bytecode) {
   ref = (int *)(reg[referenceRegister].data + relativeAddress);
   int base = reg[referenceRegister].base;
   int limit = reg[referenceRegister].limit;
+  Exception *exception;
   if(base <= (int)ref &&  base + limit >= (int)ref + 4) { // Safe area
     reg[registerToBeLoaded].data = *ref;
   } else {
-    sprintf(errBuffer, "ERROR: r%d (%p - %p) has invalid access to address %p.", registerToBeLoaded, base, base+limit-1, ref);
-    exception = createException(errBuffer, INVALID_MEMORY_ACCESS);
+    sprintf(errBuffer, "ERROR: r%d (%p-%p) has invalid access to memory location (%p).", registerToBeLoaded, base, base+limit, ref);
+    exception = createException(errBuffer, INVALID_MEMORY_ACCESS, bytecode);
     Throw(exception);
   }
 }
@@ -201,11 +157,12 @@ void storeRegisterIntoMemorySafe(int bytecode) {
   ref = (int *)(reg[referenceRegister].data + relativeAddress);
   int base = reg[referenceRegister].base;
   int limit = reg[referenceRegister].limit;
+  Exception *exception;
   if(base <= (int)ref && base + limit >= (int)ref + 4) { // Safe area
     *ref = reg[registerToBeStored].data;
   } else {
-    sprintf(errBuffer, "ERROR: r%d (%p - %p) has invalid access to address %p.", registerToBeStored, base, base+limit-1, ref);
-    exception = createException(errBuffer, INVALID_MEMORY_ACCESS);
+    sprintf(errBuffer, "ERROR: r%d (%p-%p) has invalid access to memory location (%p).", registerToBeStored, base, base+limit, ref);
+    exception = createException(errBuffer, INVALID_MEMORY_ACCESS, bytecode);
     Throw(exception);
   }
 }
@@ -273,13 +230,14 @@ void loadMultipleRegistersFromMemorySafe(int bytecode) {
   int base = reg[referenceRegister].base;
   int limit = reg[referenceRegister].limit;
   int i;
+  Exception *exception;
   for(i = 0; i < MAX_REG; i++) {
     if(0x01 & (registersToBeLoaded >> i)) {
       if(base <= (int)ref &&  base + limit >= (int)ref + 4) { // Safe area
         reg[i].data = *ref;
       } else {
-        sprintf(errBuffer, "ERROR: r%d (%p - %p) has invalid access when loading r%d from address %p.", referenceRegister, base, base+limit-1, i, ref);
-        exception = createException(errBuffer, INVALID_MEMORY_ACCESS);
+        sprintf(errBuffer, "ERROR: r%d (%p-%p) has invalid access when loading r%d from memory location (%p).", referenceRegister, base, base+limit, i, ref);
+        exception = createException(errBuffer, INVALID_MEMORY_ACCESS, bytecode);
         Throw(exception);
       }
       if(direction == INC) {
@@ -306,13 +264,14 @@ void storeMultipleRegistersIntoMemorySafe(int bytecode) {
   int base = reg[referenceRegister].base;
   int limit = reg[referenceRegister].limit;
   int i;
+  Exception *exception;
   for(i = 0; i < MAX_REG; i++) {
     if(0x01 & (registersToBeStored >> i)) {
         if(base <= (int)ref && base + limit >= (int)ref + 4) { // Safe area
           *ref = reg[i].data;
         } else {
-          sprintf(errBuffer, "ERROR: r%d (%p - %p) has invalid access when storing r%d into address %p.", referenceRegister, base, base+limit-1, i, ref);
-          exception = createException(errBuffer, INVALID_MEMORY_ACCESS);
+          sprintf(errBuffer, "ERROR: r%d (%p-%p) has invalid access when storing r%d into memory location (%p).", referenceRegister, base, base+limit, i, ref);
+          exception = createException(errBuffer, INVALID_MEMORY_ACCESS, bytecode);
           Throw(exception);
         }
       if(direction == INC) {
@@ -389,3 +348,82 @@ void xorRegisters(int bytecode) {
   int reg2 = getR2(bytecode);
   reg[resultReg].data = reg[reg1].data ^ reg[reg2].data;
 }
+
+
+//========================
+//    Helper Functions
+//========================
+
+//-----------------------
+//    Bytecode Format
+//-----------------------
+
+//  COMMAND | Rd | R1 | imm
+//  ldr Rd, [R1 + imm]
+
+//  COMMAND | Rd | R1 | R2
+//  add Rd, R1, R2
+
+//  COMMAND | Rd | R1 | R2 | R3
+//  mul Rhigh, Rlow, R1, R2
+
+//  COMMAND | Rd | R1 | Rd.attribute
+//  mov Rd, R1, R2
+
+//  COMMAND | Rd | Rlist
+//  ldm Rd, [Rlist]
+
+/**
+ *  This is a helper function to get a specific range of bits from a 32-bit data
+ *  Input:  data    original 32-bit data
+ *          start   the start bit index of the returning bits (MSB)
+ *          length  the length of returning bits
+ *  Return: result  returning bits
+ */
+int getBits(int data, unsigned char start, unsigned char length) {
+  int result;
+  result = data >> (start - length + 1);
+  result = result & (0xFFFFFFFF >> (32 - length));
+  return result;
+}
+
+/**
+ *  This is a helper function to get the destination register
+ *  Input:  
+ */
+int getRd(int bytecode) {
+  return getBits(bytecode, 7 + MAX_REG_BIT, MAX_REG_BIT);
+}
+
+/**
+ *  This is a helper function to get the destination register
+ *  Input:  
+ */
+int getR1(int bytecode) {
+  return getBits(bytecode, 7 + (2 * MAX_REG_BIT), MAX_REG_BIT);
+}
+
+/**
+ *  This is a helper function to get the destination register
+ *  Input:  
+ */
+int getR2(int bytecode) {
+  return getBits(bytecode, 7 + (3 * MAX_REG_BIT), MAX_REG_BIT);
+}
+
+/**
+ *  This is a helper function to get the destination register
+ *  Input:  
+ */
+int getR3(int bytecode) {
+  return getBits(bytecode, 7 + (4 * MAX_REG_BIT), MAX_REG_BIT);
+}
+
+/**
+ *  This is a helper function to get the register list (used in ldm and stm)
+ *  Input:  
+ */
+int getRlist(int bytecode) {
+  return getBits(bytecode, 7 + MAX_REG_BIT + MAX_REG, MAX_REG);
+}
+
