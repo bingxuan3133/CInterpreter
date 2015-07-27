@@ -120,7 +120,9 @@ class TestDeclarationContextStartingWithShort(unittest.TestCase):
         try:
             parser.parseStatement(0)
         except SyntaxError as e:
-            self.assertEqual("Expecting (identifier) before ;", e.msg)
+            self.assertEqual("Error[1][7]:Expecting (identifier) before ;"+'\n'+
+                             'short ;'+'\n'+
+                             '      ^', e.msg)
 
     def test_addShort_nud_given_short_without_identifier_and_semicolon(self):
         lexer = LexerStateMachine('short', self.context)
@@ -129,7 +131,9 @@ class TestDeclarationContextStartingWithShort(unittest.TestCase):
         try:
             parser.parseStatement(0)
         except SyntaxError as e:
-            self.assertEqual("Expecting (identifier) before (systemToken)", e.msg)
+            self.assertEqual("Error[1][6]:Expecting (identifier) before (systemToken)"+'\n'+
+                             'short'+'\n'+
+                             '     ^', e.msg)
 
     def test_addShort_nud_given_short_without_semicolon(self):
         lexer = LexerStateMachine('short x ', self.context)
@@ -162,7 +166,9 @@ class TestDeclarationContextStartingWithShort(unittest.TestCase):
         try:
             parser.parseStatement(0)
         except SyntaxError as e:
-            self.assertEqual("Cannot have both 'short' and 'long' in declaration statement", e.msg)
+            self.assertEqual("Error[1][7]:Cannot have both 'short' and 'long' in declaration statement"+'\n'
+                             "short long x ;"+'\n'
+                             '      ^', e.msg)
 
     def test_addShort_nud_given_short_short_x(self):
         lexer = LexerStateMachine('short short x ;', self.context)
@@ -171,7 +177,9 @@ class TestDeclarationContextStartingWithShort(unittest.TestCase):
         try:
             parser.parseStatement(0)
         except SyntaxError as e:
-            self.assertEqual("Duplication of 'short' in declaration statement", e.msg)
+            self.assertEqual("Error[1][7]:Duplication of 'short' in declaration statement"+'\n'
+                             "short short x ;"+'\n'
+                             '      ^', e.msg)
 
 
 class TestDeclarationContextStartingWithLong(unittest.TestCase):
@@ -998,7 +1006,9 @@ class TestDeclarationContextWithAssignmentAndComa(unittest.TestCase):
         try:
             parser.parseStatement(0)
         except SyntaxError as e:
-            self.assertEqual("Duplication of 'int' in declaration statement", e.msg)
+            self.assertEqual("Error[1][5]:Duplication of 'int' in declaration statement"+'\n'+
+                             'int int x = 3 ;'+'\n'+
+                             '    ^', e.msg)
 
 """
 class TestPointerDeclaration(unittest.TestCase):

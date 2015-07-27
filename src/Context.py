@@ -101,8 +101,7 @@ class Context:
         symObj.data.append(float(value))
         return symObj
 
-    def createToken(self, word, line=0, column=0, length =0,originalString=""):
-
+    def createToken(self, word, line=0, column=0, length =0, originalString=""):
         for currentContext in self.contextManager.currentContexts:
             if word in currentContext.symbolTable:
                 symClass = currentContext.symbol(word)

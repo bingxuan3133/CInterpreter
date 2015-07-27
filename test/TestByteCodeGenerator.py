@@ -31,7 +31,13 @@ class TestByteCodeGenerator(unittest.TestCase):
 
         self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext, self.flowControlContext]
         self.expressionContext.addInfixOperator('=', 20)
+
         self.expressionContext.addInfixOperator('==', 10)
+        self.expressionContext.addInfixOperator('<', 10)
+        self.expressionContext.addInfixOperator('<=', 10)
+        self.expressionContext.addInfixOperator('>', 10)
+        self.expressionContext.addInfixOperator('>=', 10)
+
         self.expressionContext.addPrefixInfixOperator('+', 70)
         self.expressionContext.addPrefixInfixOperator('-', 70)
         self.expressionContext.addInfixOperator('*', 100)
@@ -462,6 +468,37 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[4])
         self.assertEqual(self.byteCodeGenerator.multiplyRegister([5, 1, 5]), byteCodes[5])
         self.assertEqual(self.byteCodeGenerator.compareRegister([0, 5]), byteCodes[6])
+
+    def test_generateByteCode_will_make_byteCode_for_identifier_comparison(self):
+        lexer = LexerStateMachine(' x == y', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parse(0)
+        self.informationInjector.injectRegisterRequired(token)
+        self.byteCodeGenerator.variablesInThisAST['x'] = 4
+        self.byteCodeGenerator.variablesInThisAST['y'] = 8
+
+        self.byteCodeGenerator.initGeneration()
+        byteCodes = token.generateByteCode()
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 8]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.compareRegister([0, 5]), byteCodes[2])
+
+    def test_generateByteCode_will_make_byteCode_for_less_than_expression(self):
+        lexer = LexerStateMachine(' x < 3', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parse(0)
+        self.informationInjector.injectRegisterRequired(token)
+        self.byteCodeGenerator.variablesInThisAST['x'] = 4
+
+        self.byteCodeGenerator.initGeneration()
+        byteCodes = token.generateByteCode()
+        self.assertEqual(self.byteCodeGenerator.loadValue([0, 3]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.compareIsLessThan([0, 5]), byteCodes[2])
 
 if __name__ == '__main__':
     unittest.main()

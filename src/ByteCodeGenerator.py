@@ -21,6 +21,9 @@ class ByteCodeGenerator:
     def nothing(self):
         pass
 
+    def compareIsLessThan(self, GPR=[]):
+        number = 0xf2 | GPR[0] << 8 | GPR[1] << 11
+        return number
     def compareRegister(self,GPR=[]):
         number = 0xf3 | GPR[0] << 8 | GPR[1] << 11
         return number
@@ -139,9 +142,7 @@ class ByteCodeGenerator:
                 GPR.insert(2,firstRegister)
                 self.mapping.getALargestWorkingRegister()
 
-
-
-        if generateByteCode == self.assignRegister or generateByteCode == self.compareRegister:
+        if self.isTwoParameters(generateByteCode):
             GPR[0] = secondRegister
             GPR[1] = firstRegister
         Code = generateByteCode(GPR)
@@ -156,9 +157,11 @@ class ByteCodeGenerator:
                 thisGenerator.variablesInThisAST[token.data[0].data[0]] = thisGenerator.byteRequired[token.id]
                 thisGenerator.memorySize += thisGenerator.byteRequired[token.id]
 
-        respectiveByteCodeFunction = {'=': self.assignRegister, '+': self.addRegister, '==':self.compareRegister, \
+        respectiveByteCodeFunction = {'=': self.assignRegister, '+': self.addRegister, '==':self.compareRegister,'<':self.compareIsLessThan, \
                                             '-': self.subRegister, '*': self.multiplyRegister, '/': self.divideRegister, \
                                             '(systemToken)': self.nothing, ';': self.nothing, ',': self.nothing, '}': self.nothing, '{': self.nothing}
+
+        self.twoParamFunctions =[self.assignRegister, self.compareRegister, self.compareIsLessThan]
 
         def generateByteCode(self, sequenceCheck=None):
             if thisGenerator.isADeclaration(self.id):
@@ -184,6 +187,9 @@ class ByteCodeGenerator:
             return True
         else:
             return False
+
+    def isTwoParameters(self, unknownFunction):
+        return unknownFunction in self.twoParamFunctions
 
     def injectPrologue(self, oldList):
         if self.memorySize == 0:

@@ -584,15 +584,18 @@ class DeclarationContext(Context):
 
     def handleError(self, token):
         if token.errorToken.id in (';', '(systemToken)'):
-            raise SyntaxError('Expecting (identifier) before ' + token.errorToken.id)
+            tempMSG = 'Expecting (identifier) before ' + token.errorToken.id
         elif token.errorToken.id in (token.sign, token.modifier, token.primitive):
-            raise SyntaxError('Duplication of ' + "'" + token.errorToken.id + "'" + ' in declaration statement')
+            tempMSG = 'Duplication of ' + "'" + token.errorToken.id + "'" + ' in declaration statement'
         elif token.errorToken.id in ('short', 'long'):
-            raise SyntaxError("Cannot have both 'short' and 'long' in declaration statement")
+            tempMSG = "Cannot have both 'short' and 'long' in declaration statement"
         elif token.errorToken.id in ('unsigned', 'signed'):
-            raise SyntaxError("Cannot have both 'signed' and 'unsigned' in this declaration statement")
+            tempMSG = "Cannot have both 'signed' and 'unsigned' in this declaration statement"
         else:
-            raise SyntaxError(token.errorToken.id + " causes error")
+            tempMSG = token.errorToken.id + " causes error"
+        caretMessage = ' '*(token.errorToken.column)+'^'
+        errorMSG = "Error[{}][{}]:{}\n{}\n{}".format(token.errorToken.line,token.errorToken.column,tempMSG,token.errorToken.oriString,caretMessage)
+        raise SyntaxError(errorMSG)
 
     def buildToken(self, token):
         if token.errorToken is not None:

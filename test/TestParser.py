@@ -441,5 +441,54 @@ class TestParsePrefixGroup(unittest.TestCase):
 
         self.assertRaises(SyntaxError, parser.parse, 0)
 
+    def test_parse_a_expression_that_contain_floating_parser(self):
+        lexer = LexerStateMachine('2.3 + 10.5', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parse(0)
+        self.assertEqual('+', token.id)
+        self.assertEqual('(floating)', token.data[0].id)
+        self.assertEqual('(floating)', token.data[1].id)
+        self.assertEqual(2.3, token.data[0].data[0])
+        self.assertEqual(10.5, token.data[1].data[0])
+
+    def test_parse_a_expression_that_contain_notation_e_floating_parser(self):
+        lexer = LexerStateMachine('2e3 + 10E5', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parse(0)
+        self.assertEqual('+', token.id)
+        self.assertEqual('(floating)', token.data[0].id)
+        self.assertEqual('(floating)', token.data[1].id)
+        self.assertEqual(2000, token.data[0].data[0])
+        self.assertEqual(1000000, token.data[1].data[0])
+
+    def test_parse_a_expression_that_contain_floating_start_with_dot(self):
+        lexer = LexerStateMachine('.10 + .515', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parse(0)
+        self.assertEqual('+', token.id)
+        self.assertEqual('(floating)', token.data[0].id)
+        self.assertEqual('(floating)', token.data[1].id)
+        self.assertEqual(.10, token.data[0].data[0])
+        self.assertEqual(.515, token.data[1].data[0])
+
+    def test_parse_expression_with_mixture_of_floating_and_literal(self):
+        lexer = LexerStateMachine('10 + .515', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parse(0)
+        self.assertEqual('+', token.id)
+        self.assertEqual('(literal)', token.data[0].id)
+        self.assertEqual('(floating)', token.data[1].id)
+        self.assertEqual(10, token.data[0].data[0])
+        self.assertEqual(.515, token.data[1].data[0])
+
+
 if __name__ == '__main__':
     unittest.main()
