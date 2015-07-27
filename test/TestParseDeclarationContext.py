@@ -119,6 +119,7 @@ class TestDeclarationContextStartingWithShort(unittest.TestCase):
         self.manager.setParser(parser)
         try:
             parser.parseStatement(0)
+            raise SyntaxError ("Exception test failed")
         except SyntaxError as e:
             self.assertEqual("Error[1][7]:Expecting (identifier) before ;"+'\n'+
                              'short ;'+'\n'+
@@ -130,6 +131,7 @@ class TestDeclarationContextStartingWithShort(unittest.TestCase):
         self.manager.setParser(parser)
         try:
             parser.parseStatement(0)
+            raise SyntaxError ("Exception test failed")
         except SyntaxError as e:
             self.assertEqual("Error[1][6]:Expecting (identifier) before (systemToken)"+'\n'+
                              'short'+'\n'+
@@ -165,6 +167,7 @@ class TestDeclarationContextStartingWithShort(unittest.TestCase):
         self.manager.setParser(parser)
         try:
             parser.parseStatement(0)
+            raise SyntaxError ("Exception test failed")
         except SyntaxError as e:
             self.assertEqual("Error[1][7]:Cannot have both 'short' and 'long' in declaration statement"+'\n'
                              "short long x ;"+'\n'
@@ -176,6 +179,7 @@ class TestDeclarationContextStartingWithShort(unittest.TestCase):
         self.manager.setParser(parser)
         try:
             parser.parseStatement(0)
+            raise SyntaxError ("Exception test failed")
         except SyntaxError as e:
             self.assertEqual("Error[1][7]:Duplication of 'short' in declaration statement"+'\n'
                              "short short x ;"+'\n'
