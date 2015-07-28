@@ -131,7 +131,8 @@ class Context:
         elif self.isFloat(word):
             newToken = self.createFloatingPoint(word)
         else:
-            raise SyntaxError('Syntax error: [' + word + '] is an unknown token')
+            caretMessage = ' '*(column - length-1)+ '^'
+            raise SyntaxError('Ignore:Error[{}][{}]:{} is an unknown token\n{}\n{}'.format(line,column-length,word,originalString,caretMessage))
         newToken.line = line
         newToken.column = column - length
         newToken.length = length

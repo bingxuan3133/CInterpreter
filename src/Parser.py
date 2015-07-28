@@ -74,8 +74,11 @@ class Parser:
         if temp.__len__() == 1:
             MSG="Error[{}][{}]:{}\n{}\n{}".format(tempToken.line,tempToken.column,temp[0],tempToken.oriString,caretMessage)
         else:
-            temp = temp[0].split(':')
-            temp[0]="Error[{}][{}]".format(tempToken.line,tempToken.column)
-            temp[0]=temp[0]+':'+temp[1]
-            MSG = temp[0] + '\n' + tempToken.oriString + '\n' + caretMessage
+            splittedTemp = temp[0].split(':')
+            if splittedTemp[0] == "Ignore":
+                MSG=splittedTemp[1]+':'+splittedTemp[2] + '\n'+ temp[1] + '\n'+temp[2]
+            else:
+                splittedTemp[0]="Error[{}][{}]".format(tempToken.line,tempToken.column)
+                splittedTemp[0]=splittedTemp[0]+':'+splittedTemp[1]
+                MSG = splittedTemp[0] + '\n' + tempToken.oriString + '\n' + caretMessage
         return MSG

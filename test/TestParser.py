@@ -489,6 +489,20 @@ class TestParsePrefixGroup(unittest.TestCase):
         self.assertEqual(10, token.data[0].data[0])
         self.assertEqual(.515, token.data[1].data[0])
 
+    def test_parse_will_raise_error_when_an_unknown_token_is_detected(self):
+        lexer = LexerStateMachine('10 @ .515', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        try:
+            parser.parse(0)
+            raise SyntaxError("Exception test failed")
+        except SyntaxError as e:
+            self.assertEqual("Error[1][4]:@ is an unknown token"+'\n'
+                             "10 @ .515"+'\n'
+                             "   ^",e.msg)
+
+
 
 if __name__ == '__main__':
     unittest.main()
