@@ -458,7 +458,9 @@ class TestParseIfFlowControl(unittest.TestCase):
             parser.parse(0)
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Expecting a condition expression", e.msg)
+            self.assertEqual("Error[1][7]:Expecting a condition expression"+'\n'+
+                             ' if ( ) '+'\n'+
+                             '      ^', e.msg)
 
     def test_parse_will_build_an_if_statement_with_expression_inside(self):
         """
@@ -560,7 +562,7 @@ class TestParseIfFlowControl(unittest.TestCase):
         self.assertEqual(3, token.data[1][0].data[1].data[1].data[0])
 
     def test_parse_will_throw_exception_for_braces_do_not_close_in_pair(self):
-        lexer = LexerStateMachine(' if ( 1 ; 2 ) ', self.context)
+        lexer = LexerStateMachine('if ( 1 ; 2 )', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -568,7 +570,9 @@ class TestParseIfFlowControl(unittest.TestCase):
             parser.parse(0)
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Expecting ) before ;", e.msg)
+            self.assertEqual("Error[1][8]:Expecting ) before ;"+'\n'
+                             "if ( 1 ; 2 )"+'\n'
+                             '       ^', e.msg)
 
     def test_parse_throw_an_error_if_the_brace_does_not_close(self):
 

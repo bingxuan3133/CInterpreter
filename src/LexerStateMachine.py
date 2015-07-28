@@ -4,10 +4,11 @@ from InStream import *
 import string
 
 class LexerStateMachine:
-    def __init__(self, string, context):
+    def __init__(self, string, context, commentToken=False):
         self.context = context
         self.inStream = InStream(string)
         self.currentString = ''
+        self.length = 0
         self.capture()
         self.currentToken = self.advance()
 
@@ -15,15 +16,20 @@ class LexerStateMachine:
     def advance(self, expectedSymbol = None):
 
         self.start()
-        self.currentToken = self.context.createToken(self.currentString)
+        self.currentToken = self.context.createToken(self.currentString,self.inStream.line,self.inStream.column,self.length,self.inStream.oriString)
         if expectedSymbol is not None and self.currentToken.id != expectedSymbol:
-            raise SyntaxError('Expecting ' + expectedSymbol + ' before ' + self.currentToken.id)
-        self.resetCurrentString()
+            caretMessage = ' '*(self.inStream.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:Expecting {} before {}\n{}\n{}"\
+                             .format(self.inStream.line,self.inStream.column,expectedSymbol,self.currentToken.id,self.inStream.oriString,caretMessage))
+        self.resetLexer()
         return self.currentToken
 
     def peep(self, expectedSymbol = None):
         if expectedSymbol is not None and self.currentToken.id != expectedSymbol:
-            raise SyntaxError('Expecting ' + expectedSymbol + ' before ' + self.currentToken.id)
+            self.byPassTheSpace()
+            caretMessage = ' '*(self.inStream.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:Expecting {} before {}\n{}\n{}"\
+                             .format(self.inStream.line,self.inStream.column,expectedSymbol,self.currentToken.id,self.inStream.oriString,caretMessage))
         return self.currentToken
     #End API
 
@@ -32,8 +38,7 @@ class LexerStateMachine:
         self.waitChar()
 
     def waitChar(self):
-        while self.isSpace():
-            self.inStream.getNextChar()
+        self.byPassTheSpace()
 
         if self.isZero():
             self.capture()
@@ -131,8 +136,9 @@ class LexerStateMachine:
             self.inStream.getNextChar()
             if not self.isNumber():
                 caretMessage = ' '*(self.inStream.column-1)+'^'
-                raise SyntaxError("Error[{}][{}]:Unexpected symbol \"{}\" been found after {}\n{}\n{}"\
-                                  .format(self.inStream.line,self.inStream.column,self.inStream.currentChar, tempNotation,self.inStream.oriString,caretMessage))
+                MSG = "Error[{}][{}]:Unexpected symbol \"{}\" been found after {}\n{}\n{}"\
+                                  .format(self.inStream.line,self.inStream.column,self.inStream.currentChar, tempNotation,self.inStream.oriString,caretMessage)
+                raise SyntaxError(MSG)
         while self.isNumber():
             tempNumber *= 10
             tempNumber += int(self.inStream.getNextChar())
@@ -203,11 +209,16 @@ class LexerStateMachine:
 
     #Action functions
     def capture(self):
+        self.length += 1
         self.currentString += self.inStream.getNextChar()
 
-    def resetCurrentString(self):
+    def resetLexer(self):
         self.currentString = ''
+        self.length = 0
 
+    def byPassTheSpace(self):
+        while self.isSpace():
+            self.inStream.getNextChar()
     #End Action functions
 
     #Checking functions

@@ -21,7 +21,7 @@ class Mapping:
 
     def getAFreeWorkingRegister(self):
         if self.registerLeft == 0:
-            raise ReferenceError
+            raise ReferenceError("No register is free to allocate")
         self.checkReservedRegister()
         temp = self.registerFromLeft
         self.registerFromLeft += 1
@@ -30,7 +30,7 @@ class Mapping:
 
     def getALargestWorkingRegister(self):
         if self.registerLeft == 0:
-            raise ReferenceError
+            raise ReferenceError("No register is free to allocate")
         temp = self.registerFromRight
         self.registerFromRight -= 1
         self.registerLeft -= 1
@@ -38,12 +38,14 @@ class Mapping:
 
     def releaseALargestWorkingRegister(self):
         if self.registerLeft == self.MaxRegister:
-            raise ReferenceError
+            raise ReferenceError("No register can be release")
         self.registerFromRight += 1
         self.registerLeft += 1
         return self.registerFromRight
 
     def releaseAWorkingRegister(self):
+        if self.registerLeft == self.MaxRegister:
+            raise ReferenceError("No register can be release")
         self.registerFromLeft -= 1
         self.registerLeft += 1
         return self.registerFromLeft

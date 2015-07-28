@@ -26,6 +26,13 @@ class ByteCodeGenerator:
 
     def dumpRegisterHex(self, GPR=[]):
         number = 0x01 | GPR[0] << 8
+
+    def compareIsLessThan(self, GPR=[]):
+        number = 0xf2 | GPR[0] << 8 | GPR[1] << 11
+        return number
+
+    def compareRegister(self,GPR=[]):
+        number = 0xf3 | GPR[0] << 8 | GPR[1] << 11
         return number
 
     def loadValue(self, GPR=[]):
@@ -83,7 +90,7 @@ class ByteCodeGenerator:
                     Code = self.loadValue([self.mapping.getALargestWorkingRegister(), token.data[index].data[0]])
                 self.byteCodeList.append(Code)
             else:
-                token.data[index].generateByteCode()
+                token.data[index].generateByteCode(secondTime)
             secondTime += 1
 
     def generateLeftCodeFirst(self, token):
@@ -102,7 +109,7 @@ class ByteCodeGenerator:
                     Code = self.loadValue([self.mapping.getALargestWorkingRegister(), token.data[index].data[0]])
                 self.byteCodeList.append(Code)
             else:
-                token.data[index].generateByteCode()
+                token.data[index].generateByteCode(secondTime)
             secondTime += 1
 
 
@@ -112,7 +119,7 @@ class ByteCodeGenerator:
         else:
             self.generateLeftCodeFirst(token)
 
-    def decideWhetherToSaveSlotForPopValue(self, status, generateByteCode):
+    def decideWhetherToSaveSlotForPopValue(self, status, sequence, generateByteCode):
         GPR=[]
         firstRegister = self.mapping.releaseALargestWorkingRegister()
         secondRegister = self.mapping.releaseAWorkingRegister()
@@ -123,12 +130,18 @@ class ByteCodeGenerator:
             GPR.insert(2,firstRegister)
             #self.oracle.getALargestWorkingRegister()
         else:
-            GPR.insert(0,secondRegister)
-            GPR.insert(1,secondRegister)
-            GPR.insert(2,firstRegister)
-            self.mapping.getAFreeWorkingRegister()
+            if sequence == 0 or sequence == None:
+                GPR.insert(0,secondRegister)
+                GPR.insert(1,secondRegister)
+                GPR.insert(2,firstRegister)
+                self.mapping.getAFreeWorkingRegister()
+            else:
+                GPR.insert(0,firstRegister)
+                GPR.insert(1,secondRegister)
+                GPR.insert(2,firstRegister)
+                self.mapping.getALargestWorkingRegister()
 
-        if generateByteCode == self.assignRegister:
+        if self.isTwoParameters(generateByteCode):
             GPR[0] = secondRegister
             GPR[1] = firstRegister
         Code = generateByteCode(GPR)
@@ -143,18 +156,20 @@ class ByteCodeGenerator:
                 thisGenerator.variablesInThisAST[token.data[0].data[0]] = thisGenerator.byteRequired[token.id]
                 thisGenerator.memorySize += thisGenerator.byteRequired[token.id]
 
-        respectiveByteCodeFunction = {'=': self.assignRegister, '+': self.addRegister, \
+        respectiveByteCodeFunction = {'=': self.assignRegister, '+': self.addRegister, '==':self.compareRegister,'<':self.compareIsLessThan, \
                                             '-': self.subRegister, '*': self.multiplyRegister, '/': self.divideRegister, \
                                             '(systemToken)': self.nothing, ';': self.nothing, ',': self.nothing, '}': self.nothing, '{': self.nothing}
 
-        def generateByteCode(self):
+        self.twoParamFunctions =[self.assignRegister, self.compareRegister, self.compareIsLessThan]
+
+        def generateByteCode(self, sequenceCheck=None):
             if thisGenerator.isADeclaration(self.id):
                 recordTheVariable(None, self)
             else:
                 pushed = thisGenerator.registerAllocator.decideWhetherToPush(self)
                 thisGenerator.findOutAndGenerateCorrectSideCode(self)
 
-                thisGenerator.decideWhetherToSaveSlotForPopValue(pushed, respectiveByteCodeFunction[self.id])
+                thisGenerator.decideWhetherToSaveSlotForPopValue(pushed, sequenceCheck, respectiveByteCodeFunction[self.id])
 
                 thisGenerator.registerAllocator.decideWhetherToPop(pushed)
             return thisGenerator.byteCodeList
@@ -171,6 +186,9 @@ class ByteCodeGenerator:
             return True
         else:
             return False
+
+    def isTwoParameters(self, unknownFunction):
+        return unknownFunction in self.twoParamFunctions
 
     def injectPrologue(self, oldList):
         if self.memorySize == 0:

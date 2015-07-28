@@ -22,7 +22,7 @@ class ContextManager:
 
     def popContexts(self):
         if self.contextsStack.__len__() is 0:
-            raise RuntimeError
+            raise RuntimeError("No contexts is inside the stack.Please contact service person.")
         return self.contextsStack.pop()
 
     def pushContexts(self, contexts):
