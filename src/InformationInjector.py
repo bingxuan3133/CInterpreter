@@ -33,12 +33,8 @@ class InformationInjector:
 
         return thisLevelRegister
 
-
-
     def bypassTheInjection(self,token):
         return ByteCodeGenerator.isADeclaration(self, token.id)
-
-
 
     def insertBasicInformationForAChildToken(self, token):
         token.weight = []
