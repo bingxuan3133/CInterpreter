@@ -1,9 +1,15 @@
 __author__ = 'JingWen'
 from ByteCodeGenerator import *
+from FlowControlContext import *
 class InformationInjector:
-    def injectRegisterRequired(self, token):
-        if(self.bypassTheInjection(token)):
+    def injectRegisterRequired(self, tokenToInject):
+        tempToken = None
+        if(self.bypassTheInjection(tokenToInject)):
             return 0
+        elif tokenToInject.id == 'if':
+            token = tokenToInject.data[0].data[0]
+        else:
+            token = tokenToInject
         registerNumber =[]
         token.weight = []
         weightIndex = 1

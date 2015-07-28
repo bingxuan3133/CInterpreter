@@ -46,7 +46,9 @@ class TestFlowControlByteCodeGeneration(unittest.TestCase):
         self.declarationContext.addInt('int', 0)
         self.expressionContext.addOperator(';', 0)
         self.flowControlContext.addBlockOperator('{', 0)
-        self.flowControlContext.addOperator('}', 0)
+        self.expressionContext.addOperator('}', 0)
+        self.expressionContext.addOperator(')', 0)
+        self.flowControlContext.addIfControl('if')
 
 
         self.manager.addContext('Default', self.defaultContext)
@@ -57,20 +59,22 @@ class TestFlowControlByteCodeGeneration(unittest.TestCase):
         self.byteCodeGenerator = ByteCodeGenerator(self.context, self.manager)
         self.informationInjector = InformationInjector()
 
-    def test_generateByteCode_will_understand_declaration_and_generate_reservation_byteCode(self):
-        lexer = LexerStateMachine('if(x==2)', self.context)
+    def test_generateByteCode_will_make_code_for_if(self):
+        lexer = LexerStateMachine('if(x==2 ) { }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-        token = parser.parseStatement(0)
+        token = parser.parse(0)
         self.byteCodeGenerator.variablesInThisAST['x'] = 16
-        self.informationInjector.injectRegisterRequired(token[0])
+
+        self.informationInjector.injectRegisterRequired(token)
         self.byteCodeGenerator.initGeneration()
-        byteCodes = token[0].generateByteCode()
+        byteCodes = token.generateByteCode()
         byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
-        self.assertEqual(self.byteCodeGenerator.loadValue(0, 2), byteCodes[0])
-        self.assertEqual(self.byteCodeGenerator.loadRegister(5,7,16), byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.compareRegister(0,5), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.loadValue([0, 2]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 16]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.compareRegister([0, 5]), byteCodes[2])
         self.assertEqual(self.byteCodeGenerator.branchIfFalse(), byteCodes[3])
         self.assertEqual('IF1', byteCodes[4])
+        self.assertEqual('IF1', byteCodes[5])
 if __name__ == '__main__':
     unittest.main()

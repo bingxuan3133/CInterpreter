@@ -4,6 +4,8 @@ from Mapping import *
 from RegisterAllocator import *
 from Context import *
 from ExpressionContext import *
+from FlowControlContext import *
+from DeclarationContext import *
 class ByteCodeGenerator:
     byteCodeList = []
     byteRequired = {'char': 1, 'short': 1, 'int': 4, 'long': 4, 'float': 4, 'double': 8}
@@ -71,9 +73,14 @@ class ByteCodeGenerator:
         number = 0x0f | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
-    def divideRegister(self):
-        pass
+    def divideRegister(self,GPR=[]):
+        number = 0x10 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        return number
 
+    def branchIfFalse(self):
+        number = 0x11
+        return number
+        pass
     def generateRightCodeFirst(self, token):
         secondTime = 0
         for index in range(len(token.data)-1, -1, -1):
@@ -174,13 +181,24 @@ class ByteCodeGenerator:
                 thisGenerator.registerAllocator.decideWhetherToPop(pushed)
             return thisGenerator.byteCodeList
 
+        def flowControlByteCode(self):
 
+            self.data[0].data[0].generateByteCode()
+            label = thisGenerator.mapping.ifLabel()
+            thisGenerator.byteCodeList.append(label)
+            thisGenerator.byteCodeList.insert(thisGenerator.byteCodeList.__len__()-1,thisGenerator.branchIfFalse())
+            thisGenerator.byteCodeList.insert(thisGenerator.byteCodeList.__len__()-1,label)
+
+            return thisGenerator.byteCodeList
         #Start the initialization
         self.byteCodeList = []
         for context in self.contextManager.currentContexts:
-            if isinstance(context, Context) or isinstance(context, ExpressionContext):
+            if isinstance(context, ExpressionContext) or isinstance(context,DeclarationContext):
                 for token in context.symbolTable:
                     context.symbolTable[token].generateByteCode = generalByteCode
+            elif isinstance(context, FlowControlContext):
+                for token in context.symbolTable:
+                    context.symbolTable[token].generateByteCode = flowControlByteCode
 
     def isADeclaration(self, unknownToken):
         if unknownToken in ByteCodeGenerator.byteRequired:
