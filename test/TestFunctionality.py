@@ -1,9 +1,8 @@
 __author__ = 'admin'
 
 import unittest
-#from Context import *
-from LexerStateMachine import *
 import os
+from LexerStateMachine import *
 from ctypes import *
 from Parser import *
 from DefaultContext import *
@@ -11,7 +10,7 @@ from DeclarationContext import *
 from ExpressionContext import *
 from FlowControlContext import *
 from InformationInjector import *
-
+from VirtualMachine import *
 
 class MyTestCase(unittest.TestCase):
     def setUp(self):
@@ -60,7 +59,7 @@ class MyTestCase(unittest.TestCase):
         byteCodesSize = len(byteCodes)
         cByteCodes_t = c_uint * byteCodesSize
         cByteCodes = cByteCodes_t(*byteCodes)
-        vmdll.VMRun(cByteCodes)
+        vmdll._VMRun(cByteCodes)
 
     def test_VMStep(self):
         lexer = LexerStateMachine('int x = 5;', self.context)
@@ -71,6 +70,8 @@ class MyTestCase(unittest.TestCase):
         self.byteCodeGenerator.initGeneration()
         byteCodes = token[0].generateByteCode()
         byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
+        byteCodes.insert(0, self.byteCodeGenerator.dumpRegisterHex([0]))  # display register value
+        byteCodes.insert(2, self.byteCodeGenerator.dumpRegisterHex([0]))  #
 
         vmdll = cdll.LoadLibrary('../VM/build/release/out/c/VirtualMachine.dll')
 
@@ -81,8 +82,12 @@ class MyTestCase(unittest.TestCase):
         cByteCodes = cByteCodes_t(*byteCodes)
         programCounter = c_uint(0)
 
-        vmdll.VMStep(cByteCodes[0])
-        vmdll.VMStep(cByteCodes[1])
+        vmdll.restype = POINTER(C_Exception)
+
+        exception = vmdll._VMStep(cByteCodes)
+        exception = vmdll._VMStep(cByteCodes)
+        exception = vmdll._VMStep(cByteCodes)
+        exception = vmdll._VMStep(cByteCodes)
 
 if __name__ == '__main__':
     unittest.main()

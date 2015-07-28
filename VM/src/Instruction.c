@@ -44,12 +44,12 @@ void execute(int bytecode) {
 
 void dumpRegister(int bytecode) {
   int regIndex = getRd(bytecode);
-  printf("r%d: %d\0", regIndex, reg[regIndex].data);
+  printf("r%d: %d\n", regIndex, reg[regIndex].data);
 }
 
 void dumpRegisterHex(int bytecode) {
   int regIndex = getRd(bytecode);
-  printf("r%d: 0x%x\0", regIndex, reg[regIndex].data);
+  printf("r%d: 0x%x\n", regIndex, reg[regIndex].data);
 }
 
 /**

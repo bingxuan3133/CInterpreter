@@ -11,7 +11,6 @@ class ByteCodeGenerator:
     variableCounter = 0
     memorySize = 0
 
-
     def __init__(self, context, contextManager):
         self.context = context
         self.contextManager = contextManager
@@ -21,52 +20,52 @@ class ByteCodeGenerator:
     def nothing(self):
         pass
 
+    def dumpRegister(self, GPR=[]):
+        number = 0x00 | GPR[0] << 8
+        return number
+
+    def dumpRegisterHex(self, GPR=[]):
+        number = 0x01 | GPR[0] << 8
+        return number
+
+    def loadValue(self, GPR=[]):
+        number = 0x02 | GPR[0] << 8 | GPR[1] << 11
+        return number
+
+    def loadRegister(self, GPR=[]):
+        number = 0x04 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 17
+        return number
+
+    def assignRegister(self, GPR=[]):
+        number = 0x06 | GPR[0] << 8 | GPR[1] << 11
+        return number
+
+    def loadMultiple(self, GPR=[]):
+        number = 0x08 | GPR[0] << 8 | GPR[1] << 11
+        return number
+
+    def storeMultiple(self, GPR=[]):
+        number = 0x0a | GPR[0] << 8 | GPR[1] << 11
+        return number
+
     def subFrameRegister(self, GPR=[]):
-        number = 0xf5 | GPR[0] << 8 | GPR[1] << 11
+        number = 0x0c | GPR[0] << 8 | GPR[1] << 11
+        return number
+
+    def addRegister(self,GPR =[]):
+        number = 0x0d | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        return number
+
+    def subRegister(self,GPR=[]):
+        number = 0x0e | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        return number
+
+    def multiplyRegister(self, GPR=[]):
+        number = 0x0f | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def divideRegister(self):
         pass
-
-    def multiplyRegister(self, GPR=[]):
-        number = 0xf6 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
-        return number
-
-    def loadMultiple(self, GPR=[]):
-        number = 0xf7 | GPR[0] << 8 | GPR[1] << 11
-        return number
-
-    def assignRegister(self, GPR=[]):
-        number = 0xf8 | GPR[0] << 8 | GPR[1] << 11
-        return number
-
-    def storeMultiple(self, GPR=[]):
-        number = 0xf9 | GPR[0] << 8 | GPR[1] << 11
-        return number
-
-    def addRegister(self,GPR =[]):
-        number = 0xfa | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
-        return number
-
-    def subRegister(self,GPR=[]):
-        number = 0xfb | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
-        return number
-
-    def loadValue(self, GPR=[]):
-        number = 0xfc | GPR[0] << 8 | GPR[1] << 11
-        return number
-
-    def storeValue(self, GPR=[]):
-        number = 0xfd | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
-        return number
-
-    def loadRegister(self, GPR=[]):
-        number = 0xfe | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 17
-        return number
-
-    def storeRegister(self, GPR=[]):
-        number = 0xff | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 17
-        return number
 
     def generateRightCodeFirst(self, token):
         secondTime = 0
