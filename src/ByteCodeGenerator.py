@@ -2,8 +2,8 @@ __author__ = 'JingWen'
 
 from Mapping import *
 from RegisterAllocator import *
-
-
+from Context import *
+from ExpressionContext import *
 class ByteCodeGenerator:
     byteCodeList = []
     byteRequired = {'char': 1, 'short': 1, 'int': 4, 'long': 4, 'float': 4, 'double': 8}
@@ -163,7 +163,7 @@ class ByteCodeGenerator:
 
         self.twoParamFunctions =[self.assignRegister, self.compareRegister, self.compareIsLessThan]
 
-        def generateByteCode(self, sequenceCheck=None):
+        def generalByteCode(self, sequenceCheck=None):
             if thisGenerator.isADeclaration(self.id):
                 recordTheVariable(None, self)
             else:
@@ -179,8 +179,9 @@ class ByteCodeGenerator:
         #Start the initialization
         self.byteCodeList = []
         for context in self.contextManager.currentContexts:
-            for token in context.symbolTable:
-                context.symbolTable[token].generateByteCode = generateByteCode
+            if isinstance(context, Context) or isinstance(context, ExpressionContext):
+                for token in context.symbolTable:
+                    context.symbolTable[token].generateByteCode = generalByteCode
 
     def isADeclaration(self, unknownToken):
         if unknownToken in ByteCodeGenerator.byteRequired:
