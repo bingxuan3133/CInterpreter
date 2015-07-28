@@ -21,12 +21,11 @@ class TestParseStatement(unittest.TestCase):
 
         self.flowControlContext.addBlockOperator('{', 0)
         self.flowControlContext.addOperator('}', 0)
-        #self.flowControlContext.addBlockOperator('}', 0)
         self.expressionContext.addPrefixInfixOperator('+', 70)
         self.expressionContext.addPrefixInfixOperator('-', 70)
         self.expressionContext.addInfixOperator('*', 100)
         self.expressionContext.addInfixOperator('/', 100)
-        self.expressionContext.addInfixOperator('==', 20)
+        self.expressionContext.addInfixOperator('=', 20)
         self.expressionContext.addOperator(';')
         self.flowControlContext.addIfControl('if', 0)
         self.expressionContext.addGroupOperator('(', 0)
@@ -37,12 +36,18 @@ class TestParseStatement(unittest.TestCase):
         self.manager.setCurrentContexts(self.contexts)
 
 
-    def test_testtesttest(self):
+    def test_without_expression_after_equal(self):
         lexer = LexerStateMachine('x = ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
+        try:
 
-        self.assertRaises(SyntaxError, parser.parseStatement, 0)
+            parser.parseStatement(0)
+            raise SyntaxError("Exception test failed")
+        except SyntaxError as e:
+             self.assertEqual("Error[1][5]:Expected a declaration"+'\n'+
+                             'x = ;'+'\n'+
+                             '    ^', e.msg)
 
 
     def test_parseStatement_will_return_None_for_an_empty_statement(self):
@@ -77,8 +82,14 @@ class TestParseStatement(unittest.TestCase):
         lexer = LexerStateMachine('2 + 3', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
+        try:
 
-        self.assertRaises(SyntaxError, parser.parseStatement, 0)
+            parser.parseStatement(0)
+            raise SyntaxError("Exception test failed")
+        except SyntaxError as e:
+            self.assertEqual("Error[1][6]:Expecting ; before (systemToken)"+'\n'+
+                             '2 + 3'+'\n'+
+                             '     ^', e.msg)
 
     def test_parseStatement_should_raise_SyntaxError_for_a_plus_3_statement_without_semicolon(self):
         """
@@ -88,8 +99,13 @@ class TestParseStatement(unittest.TestCase):
         lexer = LexerStateMachine('+ 3', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-
-        self.assertRaises(SyntaxError, parser.parseStatement, 0)
+        try:
+            parser.parseStatement(0)
+            raise SyntaxError("Exception test failed")
+        except SyntaxError as e:
+            self.assertEqual("Error[1][4]:Expecting ; before (systemToken)"+'\n'+
+                             '+ 3'+'\n'+
+                             '   ^', e.msg)
 
 class TestParseStatementWithBraces(unittest.TestCase):
     def setUp(self):
@@ -101,7 +117,6 @@ class TestParseStatementWithBraces(unittest.TestCase):
 
         self.flowControlContext.addBlockOperator('{', 0)
         self.flowControlContext.addOperator('}', 0)
-        self.flowControlContext.addBlockOperator('}', 0)
         self.expressionContext.addPrefixInfixOperator('+', 70)
         self.expressionContext.addPrefixInfixOperator('-', 70)
         self.expressionContext.addInfixOperator('*', 100)
@@ -263,26 +278,43 @@ class TestParseStatementWithBraces(unittest.TestCase):
         self.assertEqual('*', token[0].data[0].data[1].data[0].data[1].data[0].id)
         self.assertEqual(8, token[0].data[0].data[1].data[0].data[1].data[0].data[0].data[0])
         self.assertEqual(16, token[0].data[0].data[1].data[0].data[1].data[0].data[1].data[0])
+
     def test_parseStatement_should_raise_SyntaxError_when_there_is_missing_close_brace(self):
         lexer = LexerStateMachine('{ 2 + 3 ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-
-        self.assertRaises(SyntaxError, parser.parseStatement, 0)
+        try:
+            parser.parseStatement(0)
+            raise SyntaxError("Exception test failed")
+        except SyntaxError as e:
+            self.assertEqual("Error[1][10]:Expecting } before (systemToken)"+'\n'+
+                             '{ 2 + 3 ;'+'\n'+
+                             '         ^', e.msg)
 
     def test_parseStatement_should_raise_SyntaxError_when_there_is_missing_one_close_brace(self):
         lexer = LexerStateMachine('{ 2 + 3 ; { }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
+        try:
+            parser.parseStatement(0)
+            raise SyntaxError("Exception test failed")
+        except SyntaxError as e:
+            self.assertEqual("Error[1][14]:Expecting } before (systemToken)"+'\n'+
+                             '{ 2 + 3 ; { }'+'\n'+
+                             '             ^', e.msg)
 
-        self.assertRaises(SyntaxError, parser.parseStatement, 0)
-
-    def xtest_parseStatement_should_raise_SyntaxError_when_there_is_missing_open_brace(self):
+    def test_parseStatement_should_raise_SyntaxError_when_there_is_missing_open_brace(self):
         lexer = LexerStateMachine('2 + 3 ; }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatement(0)
-        self.assertRaises(SyntaxError, parser.parseStatement, 0)
+        try:
+            parser.parseStatement(0)
+            raise SyntaxError("Exception test failed")
+        except SyntaxError as e:
+            self.assertEqual("Error[1][9]:Expected a declaration"+'\n'+
+                             '2 + 3 ; }'+'\n'+
+                             '        ^', e.msg)
 
 if __name__ == '__main__':
     unittest.main()

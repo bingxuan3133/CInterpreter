@@ -38,9 +38,18 @@ class Context:
             return self.symbolTable[id]
 
     def addOperator(self, id, bindingPower = 0, nud = None, led = None):
+        thisContext = self
+        def nud2(self):
+            raise SyntaxError("Expected a declaration")
+        def led2(self):
+            raise SyntaxError("Expected a declaration")
         symClass = self.symbol(id, bindingPower)
-        symClass.nud = nud
-        symClass.led = led
+        if nud == None and led == None:
+            symClass.nud = nud2
+            symClass.led = led2
+        else:
+            symClass.nud = nud
+            symClass.led = led
         return symClass
 
     def createLiteral(self, value):
@@ -101,22 +110,34 @@ class Context:
         symObj.data.append(float(value))
         return symObj
 
-    def createToken(self, word):
+    def createToken(self, word, line=0, column=0, length =0, originalString=""):
         for currentContext in self.contextManager.currentContexts:
             if word in currentContext.symbolTable:
                 symClass = currentContext.symbol(word)
                 if symClass is not None:
-                    return symClass()
+                    newToken = symClass()
+                    newToken.line = line
+                    newToken.column = column - length
+                    newToken.length = length
+                    newToken.oriString = originalString
+                    return newToken
+
         if word is None:
-            return self.createSystemToken('(end)')
+            newToken = self.createSystemToken('(end)')
         elif word.isidentifier():
-            return self.createIdentifier(word)
+            newToken = self.createIdentifier(word)
         elif word.isnumeric():
-            return self.createLiteral(word)
+            newToken = self.createLiteral(word)
         elif self.isFloat(word):
-            return self.createFloatingPoint(word)
+            newToken = self.createFloatingPoint(word)
         else:
-            raise SyntaxError('Syntax error: [' + word + '] is an unknown token')
+            caretMessage = ' '*(column - length-1)+ '^'
+            raise SyntaxError('Ignore:Error[{}][{}]:{} is an unknown token\n{}\n{}'.format(line,column-length,word,originalString,caretMessage))
+        newToken.line = line
+        newToken.column = column - length
+        newToken.length = length
+        newToken.oriString = originalString
+        return newToken
 
     def isFloat(self, Unknown):
         try:
