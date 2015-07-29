@@ -173,6 +173,8 @@ class ByteCodeGenerator:
             if thisGenerator.isADeclaration(self.id):
                 recordTheVariable(None, self)
             else:
+                if self.id == '(':
+                    self = self.data[0]
                 pushed = thisGenerator.registerAllocator.decideWhetherToPush(self)
                 thisGenerator.findOutAndGenerateCorrectSideCode(self)
 
