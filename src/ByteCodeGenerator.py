@@ -212,10 +212,12 @@ class ByteCodeGenerator:
         return unknownFunction in self.twoParamFunctions
 
     def injectPrologue(self, oldList):
+        self.mapping.reset()
         if self.memorySize == 0:
             return oldList
-        Code = self.subFrameRegister([self.mapping.framePointerRegister,self.memorySize])
-        newList = [Code]
+        newList=[]
+        newList.append(self.loadValue([self.mapping.getAFreeWorkingRegister(), self.memorySize]))
+        newList.append(self.subRegister([self.mapping.framePointerRegister, self.mapping.framePointerRegister,self.mapping.releaseAWorkingRegister()]))
         newList.extend(oldList)
         return newList
 
