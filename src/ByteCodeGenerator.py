@@ -77,10 +77,14 @@ class ByteCodeGenerator:
         number = 0x10 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
-    def branchIfFalse(self):
-        number = 0x11
+    def branchIfTrue(self, GPR = []):
+        number = 0x11 | GPR[0] << 8
         return number
-        pass
+
+    def branch(self, GPR =[]):
+        number = 0x11 | GPR[0] << 8
+        return number
+
     def generateRightCodeFirst(self, token):
         secondTime = 0
         for index in range(len(token.data)-1, -1, -1):
@@ -167,7 +171,12 @@ class ByteCodeGenerator:
                                             '-': self.subRegister, '*': self.multiplyRegister, '/': self.divideRegister, \
                                             '(systemToken)': self.nothing, ';': self.nothing, ',': self.nothing, '}': self.nothing, '{': self.nothing}
 
+
+
         self.twoParamFunctions =[self.assignRegister, self.compareRegister, self.compareIsLessThan]
+
+        def noByteCode(self):
+            raise SyntaxError("This Symbol(Token) does not contain a generateByteCode function.")
 
         def generalByteCode(self, sequenceCheck=None):
             if thisGenerator.isADeclaration(self.id):
@@ -183,24 +192,35 @@ class ByteCodeGenerator:
                 thisGenerator.registerAllocator.decideWhetherToPop(pushed)
             return thisGenerator.byteCodeList
 
-        def flowControlByteCode(self):
-
+        def ifByteCode(self):
             self.data[0].data[0].generateByteCode()
-            label = thisGenerator.mapping.ifLabel()
-            thisGenerator.byteCodeList.append(label)
-            thisGenerator.byteCodeList.insert(thisGenerator.byteCodeList.__len__()-1,thisGenerator.branchIfFalse())
-            thisGenerator.byteCodeList.insert(thisGenerator.byteCodeList.__len__()-1,label)
+            thisGenerator.mapping.reset()
+            thisGenerator.byteCodeList.append(thisGenerator.branchIfTrue([1]))
+            tempLocation = thisGenerator.byteCodeList.__len__()
+            for statement in self.data[1][0].data:
+                statement.generateByteCode()
+                thisGenerator.mapping.reset()
+
+            thisGenerator.byteCodeList.insert(tempLocation, thisGenerator.branch([thisGenerator.byteCodeList.__len__()-tempLocation]))
+
+
 
             return thisGenerator.byteCodeList
+        generationFunction = {'(literal)':([None],[generalByteCode]), '(identifier)':([None],[generalByteCode]), '+':([None],[generalByteCode]),
+                              '-':([None],[generalByteCode],), '*':([None],[generalByteCode]), '/':([None],[generalByteCode]),'==':([None],[generalByteCode]),
+                            '=':([None],[generalByteCode]),'<':([None],[generalByteCode]),
+                              'int':([None],[generalByteCode]),'long':([None],[generalByteCode]), 'short':([None],[generalByteCode]),
+                              'if':([None],[ifByteCode]),
+                              ',':([None],[noByteCode]),'(declaration&definition)':([None],[noByteCode]),
+                              'unsigned':([None],[noByteCode]),'signed':([None],[noByteCode]),'>':([None],[noByteCode]),'<=':([None],[noByteCode]),'>=':([None],[noByteCode]),
+                              '(':([None],[noByteCode]),';':([None],[noByteCode]),')':([None],[noByteCode]),'{':([None],[noByteCode]),'}':([None],[noByteCode]),
+                              }
         #Start the initialization
         self.byteCodeList = []
         for context in self.contextManager.currentContexts:
-            if isinstance(context, ExpressionContext) or isinstance(context,DeclarationContext):
                 for token in context.symbolTable:
-                    context.symbolTable[token].generateByteCode = generalByteCode
-            elif isinstance(context, FlowControlContext):
-                for token in context.symbolTable:
-                    context.symbolTable[token].generateByteCode = flowControlByteCode
+                    context.symbolTable[token].generateByteCode = generationFunction[token][1][0]
+
 
     def isADeclaration(self, unknownToken):
         if unknownToken in ByteCodeGenerator.byteRequired:

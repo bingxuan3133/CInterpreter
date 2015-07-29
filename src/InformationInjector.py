@@ -8,8 +8,12 @@ class InformationInjector:
             return 0
         elif tokenToInject.id == 'if':
             token = tokenToInject.data[0].data[0]
+            self.injectRegisterRequired(token)
+            for token in tokenToInject.data[1][0].data:
+                self.injectRegisterRequired(token)
         elif tokenToInject.id == '(':
             token = tokenToInject.data[0]
+            return
         else:
             token = tokenToInject
         registerNumber =[]
