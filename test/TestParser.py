@@ -501,6 +501,22 @@ class TestParsePrefixGroup(unittest.TestCase):
             self.assertEqual("Error[1][4]:@ is an unknown token"+'\n'
                              "10 @ .515"+'\n'
                              "   ^",e.msg)
+    def test_parse_will_make_an_AST_for_expression_that_consisted_the_braces(self):
+        lexer = LexerStateMachine('2 * ( 3 + 4)', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parse(0)
+        self.assertEqual('*', token.id)
+        self.assertEqual('(literal)', token.data[0].id)
+        self.assertEqual('(', token.data[1].id)
+        self.assertEqual('+', token.data[1].data[0].id)
+        self.assertEqual(2, token.data[0].data[0])
+        self.assertEqual('(literal)', token.data[1].data[0].data[0].id)
+        self.assertEqual('(literal)', token.data[1].data[0].data[1].id)
+        self.assertEqual(3, token.data[1].data[0].data[0].data[0])
+        self.assertEqual(4, token.data[1].data[0].data[1].data[0])
+        
 
 
 

@@ -51,9 +51,10 @@ class TestMapping(unittest.TestCase):
         self.mapping.registerLeft = 0
         try:
             self.mapping.getAFreeWorkingRegister()
-        except ReferenceError:
-            return
-        raise SystemError
+            raise SyntaxError("Exception test failed")
+        except SyntaxError as e :
+            self.assertEqual("No register is free to allocate", e.msg)
+
 
     def test_getALargestWorkingRegister_will_return_the_largest_value(self):
         result = self.mapping.getALargestWorkingRegister()
@@ -94,9 +95,9 @@ class TestMapping(unittest.TestCase):
         self.mapping.registerLeft = 0
         try:
             self.mapping.getALargestWorkingRegister()
-        except ReferenceError:
-            return
-        raise SystemError
+            raise SyntaxError("Exception test failed")
+        except SyntaxError as e:
+            self.assertEqual("No register is free to allocate",e.msg)
 
     def test_releaseALargestWorkingRegister_will_return_5_when_registerFromRight_is_4(self):
         self.mapping.registerFromRight = 4
@@ -122,18 +123,29 @@ class TestMapping(unittest.TestCase):
         self.mapping.MaxRegister = self.mapping.registerLeft
         try:
             self.mapping.releaseALargestWorkingRegister()
-        except ReferenceError:
-            return
-        raise SystemError
+            raise SyntaxError("Exception test failed")
+        except SyntaxError as e:
+            self.assertEqual("No register can be release",e.msg)
+
 
     def test_releaseAWorkingRegister_will_decrease_registerFromLeft_by_1(self):
         testNumber = random.randint(0, self.mapping.MaxRegister-1)
         self.mapping.registerFromLeft = testNumber
-        testNumberLeft = self.mapping.MaxRegister - testNumber
+        testNumberLeft = self.mapping.MaxRegister - testNumber-1
         self.mapping.registerLeft = testNumberLeft
         result = self.mapping.releaseAWorkingRegister()
         self.assertEqual(result, testNumber-1)
         self.assertEqual(self.mapping.registerLeft, testNumberLeft+1)
+
+    def test_releaseAWorkingRegister_will_throw_ReferenceError_exception(self):
+        self.mapping.registerLeft = random.randint(0, 99999999)
+        self.mapping.MaxRegister = self.mapping.registerLeft
+        try:
+            self.mapping.releaseAWorkingRegister()
+            raise SyntaxError("Exception test failed")
+        except SyntaxError as e:
+            self.assertEqual("No register can be release",e.msg)
+
 
 if __name__ == '__main__':
     unittest.main()
