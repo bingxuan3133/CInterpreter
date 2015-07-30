@@ -164,8 +164,8 @@ class ByteCodeGenerator:
         def recordTheVariable(self,token):
             if token.id in thisGenerator.byteRequired:
                 thisGenerator.variableCounter += 1
-                thisGenerator.variablesInThisAST[token.data[0].data[0]] = thisGenerator.byteRequired[token.id]
                 thisGenerator.memorySize += thisGenerator.byteRequired[token.id]
+                thisGenerator.variablesInThisAST[token.data[0].data[0]] = thisGenerator.memorySize
 
         respectiveByteCodeFunction = {'=': self.assignRegister, '+': self.addRegister, '==':self.compareRegister,'<':self.compareIsLessThan, \
                                             '-': self.subRegister, '*': self.multiplyRegister, '/': self.divideRegister, \
@@ -175,8 +175,9 @@ class ByteCodeGenerator:
 
         self.twoParamFunctions =[self.assignRegister, self.compareRegister, self.compareIsLessThan]
 
-        def noByteCode(self):
-            raise SyntaxError("This Symbol(Token) does not contain a generateByteCode function.")
+        def noByteCode(self, sequenceCheck=None):
+            if self.id == "(":
+                self.data[0].generateByteCode(sequenceCheck)
 
         def generalByteCode(self, sequenceCheck=None):
             if thisGenerator.isADeclaration(self.id):
@@ -200,7 +201,6 @@ class ByteCodeGenerator:
             for statement in self.data[1][0].data:
                 statement.generateByteCode()
                 thisGenerator.mapping.reset()
-
             thisGenerator.byteCodeList.insert(tempLocation, thisGenerator.branch([thisGenerator.byteCodeList.__len__()-tempLocation]))
 
 

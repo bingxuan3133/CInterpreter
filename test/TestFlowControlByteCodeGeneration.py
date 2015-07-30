@@ -74,7 +74,7 @@ class TestFlowControlByteCodeGeneration(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 16]), byteCodes[1])
         self.assertEqual(self.byteCodeGenerator.compareRegister([0, 5]), byteCodes[2])
         self.assertEqual(self.byteCodeGenerator.branchIfTrue([1]), byteCodes[3])
-        self.assertEqual(self.byteCodeGenerator.branch([1]), byteCodes[4])
+        self.assertEqual(self.byteCodeGenerator.branch([0]), byteCodes[4])
 
     def test_generateByteCode_will_make_code_for_if_with_statements(self):
         lexer = LexerStateMachine('if(x==2 ) { x = 123 + 4567 * 90 /121;\n y = x +1234;\n x = y *x;}', self.context)
