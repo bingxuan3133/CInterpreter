@@ -3,7 +3,6 @@ from ByteCodeGenerator import *
 from FlowControlContext import *
 class InformationInjector:
     def injectRegisterRequired(self, tokenToInject):
-        tempToken = None
         if(self.bypassTheInjection(tokenToInject)):
             return
         elif tokenToInject.id == 'if':
@@ -11,6 +10,10 @@ class InformationInjector:
             self.injectRegisterRequired(token)
             for token in tokenToInject.data[1][0].data:
                 self.injectRegisterRequired(token)
+            return
+        elif tokenToInject.id == 'while':
+            token = tokenToInject.data[0]
+            self.injectRegisterRequired(token)
             return
         elif tokenToInject.id == '(':
             token = tokenToInject.data[0]

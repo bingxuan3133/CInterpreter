@@ -18,6 +18,7 @@ class ByteCodeGenerator:
         self.contextManager = contextManager
         self.mapping = Mapping()
         self.registerAllocator = RegisterAllocator(self)
+        self.lastUseInstruction =None
 
     def nothing(self):
         pass
@@ -89,12 +90,14 @@ class ByteCodeGenerator:
         secondTime = 0
         for index in range(len(token.data)-1, -1, -1):
             if token.data[index].id == '(identifier)':
+                self.lastUseInstruction = self.loadRegister
                 if secondTime == 0:
                     Code = self.loadRegister([self.mapping.getAFreeWorkingRegister(), self.mapping.framePointerRegister, self.variablesInThisAST[token.data[index].data[0]]])
                 else:
                     Code = self.loadRegister([self.mapping.getALargestWorkingRegister(), self.mapping.framePointerRegister, self.variablesInThisAST[token.data[index].data[0]]])
                 self.byteCodeList.append(Code)
             elif token.data[index].id == '(literal)':
+                self.lastUseInstruction = self.loadValue
                 if secondTime == 0:
                     Code = self.loadValue([self.mapping.getAFreeWorkingRegister(), token.data[index].data[0]])
                 else:
@@ -108,12 +111,14 @@ class ByteCodeGenerator:
         secondTime = 0
         for index in range(0, len(token.data)):
             if token.data[index].id == '(identifier)':
+                self.lastUseInstruction = self.loadRegister
                 if secondTime == 0:
                     Code = self.loadRegister([self.mapping.getAFreeWorkingRegister(), self.mapping.framePointerRegister, self.variablesInThisAST[token.data[index].data[0]]])
                 else:
                     Code = self.loadRegister([self.mapping.getALargestWorkingRegister(), self.mapping.framePointerRegister, self.variablesInThisAST[token.data[index].data[0]]])
                 self.byteCodeList.append(Code)
             elif token.data[index].id == '(literal)':
+                self.lastUseInstruction = self.loadValue
                 if secondTime == 0:
                     Code = self.loadValue([self.mapping.getAFreeWorkingRegister(), token.data[index].data[0]])
                 else:
@@ -125,7 +130,7 @@ class ByteCodeGenerator:
 
 
     def findOutAndGenerateCorrectSideCode(self, token):
-        if token.weight[2] >= token.weight[1]:
+        if token.weight[2] > token.weight[1]:
             self.generateRightCodeFirst(token)
         else:
             self.generateLeftCodeFirst(token)
@@ -153,8 +158,12 @@ class ByteCodeGenerator:
                 self.mapping.getALargestWorkingRegister()
 
         if self.isTwoParameters(generateByteCode):
-            GPR[0] = secondRegister
-            GPR[1] = firstRegister
+            if self.lastUseInstruction == self.loadRegister:
+                GPR[0] = secondRegister
+                GPR[1] = firstRegister
+            else:
+                GPR[0] = firstRegister
+                GPR[1] = secondRegister
         Code = generateByteCode(GPR)
         self.byteCodeList.append(Code)
 
@@ -202,15 +211,17 @@ class ByteCodeGenerator:
                 statement.generateByteCode()
                 thisGenerator.mapping.reset()
             thisGenerator.byteCodeList.insert(tempLocation, thisGenerator.branch([thisGenerator.byteCodeList.__len__()-tempLocation]))
+            return thisGenerator.byteCodeList
 
-
-
+        def whileByteCode(self):
+            self.data[0].generateByteCode()
+            thisGenerator.mapping.reset()
             return thisGenerator.byteCodeList
         generationFunction = {'(literal)':([None],[generalByteCode]), '(identifier)':([None],[generalByteCode]), '+':([None],[generalByteCode]),
                               '-':([None],[generalByteCode],), '*':([None],[generalByteCode]), '/':([None],[generalByteCode]),'==':([None],[generalByteCode]),
                             '=':([None],[generalByteCode]),'<':([None],[generalByteCode]),
                               'int':([None],[generalByteCode]),'long':([None],[generalByteCode]), 'short':([None],[generalByteCode]),
-                              'if':([None],[ifByteCode]),
+                              'if':([None],[ifByteCode]),'while':([None],[whileByteCode]),
                               ',':([None],[noByteCode]),'(declaration&definition)':([None],[noByteCode]),
                               'unsigned':([None],[noByteCode]),'signed':([None],[noByteCode]),'>':([None],[noByteCode]),'<=':([None],[noByteCode]),'>=':([None],[noByteCode]),
                               '(':([None],[noByteCode]),';':([None],[noByteCode]),')':([None],[noByteCode]),'{':([None],[noByteCode]),'}':([None],[noByteCode]),
