@@ -2,8 +2,10 @@ __author__ = 'JingWen'
 
 from Mapping import *
 from RegisterAllocator import *
-
-
+from Context import *
+from ExpressionContext import *
+from FlowControlContext import *
+from DeclarationContext import *
 class ByteCodeGenerator:
     byteCodeList = []
     byteRequired = {'char': 1, 'short': 1, 'int': 4, 'long': 4, 'float': 4, 'double': 8}
@@ -72,11 +74,17 @@ class ByteCodeGenerator:
         number = 0x0f | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
-    def divideRegister(self):
-        pass
+    def divideRegister(self,GPR=[]):
+        number = 0x10 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        return number
 
     def halt(self):
         return 0xffffffff
+
+    def branchIfFalse(self):
+        number = 0x11
+        return number
+        pass
 
     def generateRightCodeFirst(self, token):
         secondTime = 0
@@ -166,10 +174,12 @@ class ByteCodeGenerator:
 
         self.twoParamFunctions =[self.storeRegister, self.compareRegister, self.compareIsLessThan]
 
-        def generateByteCode(self, sequenceCheck=None):
+        def generalByteCode(self, sequenceCheck=None):
             if thisGenerator.isADeclaration(self.id):
                 recordTheVariable(None, self)
             else:
+                if self.id == '(':
+                    self = self.data[0]
                 pushed = thisGenerator.registerAllocator.decideWhetherToPush(self)
                 thisGenerator.findOutAndGenerateCorrectSideCode(self)
 
@@ -178,12 +188,24 @@ class ByteCodeGenerator:
                 thisGenerator.registerAllocator.decideWhetherToPop(pushed)
             return thisGenerator.byteCodeList
 
+        def flowControlByteCode(self):
 
+            self.data[0].data[0].generateByteCode()
+            label = thisGenerator.mapping.ifLabel()
+            thisGenerator.byteCodeList.append(label)
+            thisGenerator.byteCodeList.insert(thisGenerator.byteCodeList.__len__()-1,thisGenerator.branchIfFalse())
+            thisGenerator.byteCodeList.insert(thisGenerator.byteCodeList.__len__()-1,label)
+
+            return thisGenerator.byteCodeList
         #Start the initialization
         self.byteCodeList = []
         for context in self.contextManager.currentContexts:
-            for token in context.symbolTable:
-                context.symbolTable[token].generateByteCode = generateByteCode
+            if isinstance(context, ExpressionContext) or isinstance(context,DeclarationContext):
+                for token in context.symbolTable:
+                    context.symbolTable[token].generateByteCode = generalByteCode
+            elif isinstance(context, FlowControlContext):
+                for token in context.symbolTable:
+                    context.symbolTable[token].generateByteCode = flowControlByteCode
 
     def isADeclaration(self, unknownToken):
         if unknownToken in ByteCodeGenerator.byteRequired:
@@ -195,10 +217,12 @@ class ByteCodeGenerator:
         return unknownFunction in self.twoParamFunctions
 
     def injectPrologue(self, oldList):
+        self.mapping.reset()
         if self.memorySize == 0:
             return oldList
-        Code = self.subFrameRegister([self.mapping.framePointerRegister,self.memorySize])
-        newList = [Code]
+        newList=[]
+        newList.append(self.loadValue([self.mapping.getAFreeWorkingRegister(), self.memorySize]))
+        newList.append(self.subRegister([self.mapping.framePointerRegister, self.mapping.framePointerRegister,self.mapping.releaseAWorkingRegister()]))
         newList.extend(oldList)
         return newList
 
