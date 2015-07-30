@@ -1014,7 +1014,7 @@ class TestDeclarationContextWithAssignmentAndComa(unittest.TestCase):
                              'int int x = 3 ;'+'\n'+
                              '    ^', e.msg)
 
-"""
+
 class TestPointerDeclaration(unittest.TestCase):
     def setUp(self):
         self.manager = ContextManager()
@@ -1027,8 +1027,12 @@ class TestPointerDeclaration(unittest.TestCase):
         self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext, self.flowControlContext]
         self.expressionContext.addInfixOperator('=', 20)
         self.expressionContext.addPrefixInfixOperator('+', 70)
-        self.declarationContext.addIntDeclaration('int', 0)
-        self.declarationContext.addPointerDeclaration('*', 120)
+        self.declarationContext.addInt('int', 0)
+        self.declarationContext.addPointer('*', 120)
+        self.declarationContext.addSubscript('[', 150)
+        self.declarationContext.addOperator(']', 0)
+        self.expressionContext.addGroupOperator('(', 0)
+        self.expressionContext.addOperator(')', 0)
         self.expressionContext.addOperator(',', 0)
         self.expressionContext.addOperator(';', 0)
         self.flowControlContext.addBlockOperator('{', 0)
@@ -1040,8 +1044,8 @@ class TestPointerDeclaration(unittest.TestCase):
         self.manager.addContext('FlowControl', self.flowControlContext)
         self.manager.setCurrentContexts(self.contexts)
 
-    def test_int_pointer(self):
-        lexer = Lexer('int * ptr ;', self.context)
+    def test_pointer_to_int(self):
+        lexer = LexerStateMachine('int *ptr ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -1050,8 +1054,29 @@ class TestPointerDeclaration(unittest.TestCase):
         self.assertEqual('*', token[0].data[0].id)
         self.assertEqual('ptr', token[0].data[0].data[0].data[0])
 
+    def test_bracket_pointer_to_int(self):
+        lexer = LexerStateMachine('int (*ptr) ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
 
-    def test_int_pointer_equal_3(self):
+        token = parser.parseStatement(0)
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('*', token[0].data[0].id)
+        self.assertEqual('ptr', token[0].data[0].data[0].data[0])
+
+    def test_int_pointer_array(self):
+        lexer = LexerStateMachine('int *ptr [ 10 ] ;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('*', token[0].data[0].id)
+        self.assertEqual('[', token[0].data[0].data[0].id)
+        self.assertEqual('ptr', token[0].data[0].data[0].data[0].data[0])
+        self.assertEqual(10, token[0].data[0].data[0].data[1].data[0])
+
+    def xtest_int_pointer_equal_3(self):
         lexer = Lexer('int * ptr = 3 ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
@@ -1063,7 +1088,6 @@ class TestPointerDeclaration(unittest.TestCase):
         self.assertEqual('=', token[1].data[0].id)
         self.assertEqual('ptr', token[1].data[0].data[0])
         self.assertEqual('3', token[1].data[0].data[1])
-"""
 
 if __name__ == '__main__':
     unittest.main()

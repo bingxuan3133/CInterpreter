@@ -105,19 +105,19 @@ class TestFlowControlByteCodeGeneration(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.loadValue([5, 123]), byteCodes[10])
         self.assertEqual(self.byteCodeGenerator.addRegister([0, 0, 5]),byteCodes[11])
         self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 16]),byteCodes[12])
-        self.assertEqual(self.byteCodeGenerator.assignRegister([0, 5]), byteCodes[13])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([0, 5]), byteCodes[13])
 
         self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 16]),byteCodes[14])
         self.assertEqual(self.byteCodeGenerator.loadValue([5, 1234]),byteCodes[15])
         self.assertEqual(self.byteCodeGenerator.addRegister([0, 0, 5]),byteCodes[16])
         self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 20]),byteCodes[17])
-        self.assertEqual(self.byteCodeGenerator.assignRegister([0, 5]),byteCodes[18])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([0, 5]),byteCodes[18])
 
         self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 20]),byteCodes[19])
         self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 16]),byteCodes[20])
         self.assertEqual(self.byteCodeGenerator.multiplyRegister([0, 0, 5]), byteCodes[21])
         self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 16]),byteCodes[22])
-        self.assertEqual(self.byteCodeGenerator.assignRegister([0, 5]),byteCodes[23])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([0, 5]),byteCodes[23])
 
     def test_byteCodeGenerator_will_generate_code_for_the_while_loop_that_contain_no_statements(self):
         lexer = LexerStateMachine('while (x+ (3 - 4 ) * 100 == 200 / 100 * (310 -400) + 120) { } ', self.context)

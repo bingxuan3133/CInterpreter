@@ -3,8 +3,6 @@
 #include "Exception.h"
 #include <stdio.h>
 
-char errBuffer[100] = {0};
-
 // Instruction Entry
 void (*instruction[256])(int)  = {[DUMPR] = dumpRegister,
                                   [DUMPR_HEX] = dumpRegisterHex,
@@ -20,7 +18,7 @@ void (*instruction[256])(int)  = {[DUMPR] = dumpRegister,
                                   [STMS] = storeMultipleRegistersIntoMemorySafe,
                                   [ADD] = addRegisters,
                                   [SUB] = subtractRegisters,
-                                  [SUB_IMM] = subtractRegisters,
+                                  [SUB_IMM] = subtractRegisterWithImmediate,
                                   [MUL] = multiplyRegisters,
                                   [DIV] = divideRegisters,
                                   [AND] = andRegisters,
@@ -35,7 +33,14 @@ void (*instruction[256])(int)  = {[DUMPR] = dumpRegister,
 
 void execute(int bytecode) {
   unsigned char opcode = bytecode;
-  instruction[opcode](bytecode);
+  Exception *exception;
+  if(opcode > MAX_INSTRUCTION) {
+    sprintf(errBuffer, "ERROR: invalid bytecode (0x%08x, pc = %d).", bytecode, getProgramCounter());
+    exception = createException(errBuffer, INVALID_BYTECODE, bytecode);
+    Throw(exception);
+  } else {
+    instruction[opcode](bytecode);
+  }
 }
 
 //======================
@@ -301,7 +306,7 @@ void subtractRegisters(int bytecode) {
 
 void subtractRegisterWithImmediate(int bytecode) {
   int regIndex = getRd(bytecode);
-  int value = bytecode >> (8 + MAX_REG_BIT);
+  unsigned int value = bytecode >> (8 + MAX_REG_BIT);
   
   reg[regIndex].data = reg[regIndex].data - value;
 }

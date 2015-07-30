@@ -68,26 +68,18 @@ void test_VMRun(void) {
 }
 
 void test_VMStep_test(void) {
-  int programCounter = 0;
   int bytecodes[10] = {0};
   char strBuffer[300] = {0};
-  bytecodes[0] = ldrImm(REG_0, 0x50);
-  bytecodes[1] = dumprHex(REG_0);
-  bytecodes[2] = ldrImm(REG_0, 0x100);
-  bytecodes[3] = dumprHex(REG_0);
+  bytecodes[0] = 0x270c;
+  bytecodes[1] = halt();
 
   VMStep(bytecodes);
-  TEST_ASSERT_EQUAL_HEX(0x50, reg[REG_0].data);
+  dumpBytecode(0x270c);
+  TEST_ASSERT_EQUAL(-4, reg[REG_7].data);
   VMStep(bytecodes);
-  TEST_ASSERT_EQUAL_HEX(0x50, reg[REG_0].data);
-  VMStep(bytecodes);
-  TEST_ASSERT_EQUAL_HEX(0x100, reg[REG_0].data);
-  VMStep(bytecodes);
-  TEST_ASSERT_EQUAL_HEX(0x100, reg[REG_0].data);
 }
 
 void test_VMStep(void) {
-  int programCounter = 0;
   int bytecodes[10] = {0};
   char strBuffer[300] = {0};
   bytecodes[0] = ldrImm(REG_0, 0x50);
@@ -100,7 +92,6 @@ void test_VMStep(void) {
 }
 
 void test_Proxy_VMStep(void) {
-  int programCounter = 0;
   int bytecodes[10] = {0};
   char strBuffer[300] = {0};
   bytecodes[0] = ldrMemSafe(REG_0, REG_0, 0x01); // <-- invalid memory access
@@ -108,14 +99,13 @@ void test_Proxy_VMStep(void) {
   
   exception = _VMStep(bytecodes);
   TEST_ASSERT_NOT_NULL(exception);
-  TEST_ASSERT_EQUAL(0, exception->errCode);
+  TEST_ASSERT_EQUAL(INVALID_MEMORY_ACCESS, exception->errCode);
   TEST_ASSERT_EQUAL(ldrMemSafe(REG_0, REG_0, 0x01), exception->bc);
   TEST_ASSERT_EQUAL(0, exception->pc);
   freeException(exception);
 }
 
 void test_Proxy_VMRun(void) {
-  int programCounter = 0;
   int bytecodes[11] = {0};
   char strBuffer[300] = {0};
   bytecodes[0] = dumpr(REG_0);
@@ -133,9 +123,25 @@ void test_Proxy_VMRun(void) {
   
   exception = _VMRun(bytecodes);
   TEST_ASSERT_NOT_NULL(exception);
-  TEST_ASSERT_EQUAL(0, exception->errCode);
-  TEST_ASSERT_EQUAL(ldrMemSafe(REG_0, REG_1, 0x00), exception->bc);
+  TEST_ASSERT_EQUAL(INVALID_MEMORY_ACCESS, exception->errCode);
   TEST_ASSERT_EQUAL(9, exception->pc);
+  TEST_ASSERT_EQUAL_HEX(ldrMemSafe(REG_0, REG_1, 0x00), exception->bc);
+  freeException(exception);
+}
+
+void test_Proxy_VMRun_should_return_INVALID_BYTECODE_exception(void) {
+  int bytecodes[10] = {0};
+  char strBuffer[300] = {0};
+  bytecodes[0] = 0x01230123;  // invalid bytecode
+  bytecodes[1] = halt();
+  Exception *exception;
+  
+  exception = _VMRun(bytecodes);
+  TEST_ASSERT_NOT_NULL(exception);
+  TEST_ASSERT_EQUAL_STRING("ERROR: invalid bytecode (0x01230123, pc = 0).", exception->errMsg);
+  TEST_ASSERT_EQUAL(INVALID_BYTECODE, exception->errCode);
+  TEST_ASSERT_EQUAL(0, exception->pc);
+  TEST_ASSERT_EQUAL_HEX(0x01230123, exception->bc);
   freeException(exception);
 }
 
