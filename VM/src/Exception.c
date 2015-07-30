@@ -2,6 +2,8 @@
 #include <malloc.h>
 #include <stdio.h>
 
+char errBuffer[100] = {0};
+
 Exception *_createException(char *errorMessage, int errorCode, unsigned int programCounter, int bytecode) {
   Exception *e = malloc(sizeof(Exception));
   e->errCode = errorCode;

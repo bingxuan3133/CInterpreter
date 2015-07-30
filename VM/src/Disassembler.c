@@ -17,6 +17,7 @@ void (*disassemble[256])(char*, int)  = { [DUMPR] = disassembleDumpr,
                                           [STM] = disassembleStm,
                                           [LDMS] = disassembleLdms,
                                           [STMS] = disassembleStms,
+                                          [SUB_IMM] = disassembleSubImm,
                                           [ADD] = disassembleAdd,
                                           [SUB] = disassembleSub,
                                           [MUL] = disassembleMul,
@@ -248,6 +249,12 @@ void disassembleStms(char *strBuffer, int bytecode) {
   if(update == UPDATE) updateChar = '!';
   else updateChar = ' ';
   sprintf(strBuffer, "stms%c r%d%c [%s]", directionChar, referenceRegister, updateChar, regList);
+}
+
+void disassembleSubImm(char *strBuffer, int bytecode) {
+  int regIndex = getRd(bytecode);
+  int value = bytecode >> (8 + MAX_REG_BIT);
+  sprintf(strBuffer, "sub r%d #%d", regIndex, value);
 }
 
 void disassembleAdd(char *strBuffer, int bytecode) {

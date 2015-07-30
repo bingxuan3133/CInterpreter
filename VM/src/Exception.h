@@ -4,9 +4,10 @@
 typedef struct Exception Exception;
 typedef struct Exception* ExceptionPtr;
 
-#include "VirtualMachine.h"
+#include "VirtualMachine.h" // for getProgramCounter & Exception define
 
 typedef enum {
+  INVALID_BYTECODE,
   INVALID_MEMORY_ACCESS
 } ErrorCode;
 
@@ -17,7 +18,7 @@ struct Exception {
   int bc;             // bytecode or instruction
 };
 
-extern Exception *exception;
+extern char errBuffer[100];
 
 #define CEXCEPTION_T    ExceptionPtr
 #define CEXCEPTION_NONE   (ExceptionPtr)(0x5A5A5A5A)

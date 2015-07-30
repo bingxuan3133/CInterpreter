@@ -20,6 +20,37 @@ class DeclarationContext(Context):
         symObj = sym()
         return symObj
 
+    def addPointer(self, id, bindingPower):  # *
+        thisContext = self
+        def nud(self):
+            thisContext.contextManager.parser.lexer.advance()
+            returnedToken = thisContext.contextManager.parser.parse(bindingPower)
+            self.data.append(returnedToken)
+            return self
+        def led(self):
+            pass
+        symClass = self.symbol(id, bindingPower)
+        symClass.nud = nud
+        symClass.led = led
+        return symClass
+
+    def addSubscript(self, id, bindingPower):  # []
+        thisContext = self
+        def nud(self):
+            raise SyntaxError("expected expression before '[' token")  # error handling
+        def led(self, leftToken):
+            self.data.append(leftToken)
+            thisContext.contextManager.parser.lexer.advance()
+            returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
+            self.data.append(returnedToken)
+            thisContext.contextManager.parser.lexer.peep(']')
+            thisContext.contextManager.parser.lexer.advance()
+            return self
+        symClass = self.symbol(id, bindingPower)
+        symClass.nud = nud
+        symClass.led = led
+        return symClass
+
     def addInt(self, id, bindingPower):
         thisContext = self
         def nud(self):
@@ -31,21 +62,21 @@ class DeclarationContext(Context):
             self.errorToken = None  # token that causes error
 
             nextToken = thisContext.contextManager.parser.lexer.advance()
-            if nextToken.id == '(identifier)':
+            if nextToken.id in ('(identifier)', '*'):
                 expressionToken = thisContext.contextManager.parser.parse(0)
                 self.identifierList.append(thisContext.getIdentifier(expressionToken))
                 self.expressionList.append(expressionToken)
             elif nextToken.id == 'short':
                 self.modifier = 'short'
                 nextToken = thisContext.contextManager.parser.lexer.advance()
-                if nextToken.id == '(identifier)':
+                if nextToken.id in ('(identifier)', '*'):
                     expressionToken = thisContext.contextManager.parser.parse(0)
                     self.identifierList.append(thisContext.getIdentifier(expressionToken))
                     self.expressionList.append(expressionToken)
                 elif nextToken.id in ('signed', 'unsigned'):
                     self.sign = nextToken.id
                     nextToken = thisContext.contextManager.parser.lexer.advance()
-                    if nextToken.id == '(identifier)':
+                    if nextToken.id in ('(identifier)', '*'):
                         expressionToken = thisContext.contextManager.parser.parse(0)
                         self.identifierList.append(thisContext.getIdentifier(expressionToken))
                         self.expressionList.append(expressionToken)
@@ -57,21 +88,21 @@ class DeclarationContext(Context):
             elif nextToken.id == 'long':
                 self.modifier = 'long'
                 nextToken = thisContext.contextManager.parser.lexer.advance()
-                if nextToken.id == '(identifier)':
+                if nextToken.id in ('(identifier)', '*'):
                     expressionToken = thisContext.contextManager.parser.parse(0)
                     self.identifierList.append(thisContext.getIdentifier(expressionToken))
                     self.expressionList.append(expressionToken)
                 elif nextToken.id == 'long':
                     self.modifier = 'long long'
                     nextToken = thisContext.contextManager.parser.lexer.advance()
-                    if nextToken.id == '(identifier)':
+                    if nextToken.id in ('(identifier)', '*'):
                         expressionToken = thisContext.contextManager.parser.parse(0)
                         self.identifierList.append(thisContext.getIdentifier(expressionToken))
                         self.expressionList.append(expressionToken)
                     elif nextToken.id in ('signed', 'unsigned'):
                         self.sign = nextToken.id
                         nextToken = thisContext.contextManager.parser.lexer.advance()
-                        if nextToken.id == '(identifier)':
+                        if nextToken.id in ('(identifier)', '*'):
                             expressionToken = thisContext.contextManager.parser.parse(0)
                             self.identifierList.append(thisContext.getIdentifier(expressionToken))
                             self.expressionList.append(expressionToken)
@@ -82,14 +113,14 @@ class DeclarationContext(Context):
                 elif nextToken.id in ('signed', 'unsigned'):
                     self.sign = nextToken.id
                     nextToken = thisContext.contextManager.parser.lexer.advance()
-                    if nextToken.id == '(identifier)':
+                    if nextToken.id in ('(identifier)', '*'):
                         expressionToken = thisContext.contextManager.parser.parse(0)
                         self.identifierList.append(thisContext.getIdentifier(expressionToken))
                         self.expressionList.append(expressionToken)
                     elif nextToken.id == 'long':
                         self.modifier = 'long long'
                         nextToken = thisContext.contextManager.parser.lexer.advance()
-                        if nextToken.id == '(identifier)':
+                        if nextToken.id in ('(identifier)', '*'):
                             expressionToken = thisContext.contextManager.parser.parse(0)
                             self.identifierList.append(thisContext.getIdentifier(expressionToken))
                             self.expressionList.append(expressionToken)
@@ -103,14 +134,14 @@ class DeclarationContext(Context):
             elif nextToken.id in ('signed', 'unsigned'):
                 self.sign = nextToken.id
                 nextToken = thisContext.contextManager.parser.lexer.advance()
-                if nextToken.id == '(identifier)':
+                if nextToken.id in ('(identifier)', '*'):
                     expressionToken = thisContext.contextManager.parser.parse(0)
                     self.identifierList.append(thisContext.getIdentifier(expressionToken))
                     self.expressionList.append(expressionToken)
                 elif nextToken.id == 'short':
                     self.modifier = 'short'
                     nextToken = thisContext.contextManager.parser.lexer.advance()
-                    if nextToken.id == '(identifier)':
+                    if nextToken.id in ('(identifier)', '*'):
                         expressionToken = thisContext.contextManager.parser.parse(0)
                         self.identifierList.append(thisContext.getIdentifier(expressionToken))
                         self.expressionList.append(expressionToken)
@@ -119,14 +150,14 @@ class DeclarationContext(Context):
                 elif nextToken.id == 'long':
                     self.modifier = 'long'
                     nextToken = thisContext.contextManager.parser.lexer.advance()
-                    if nextToken.id == '(identifier)':
+                    if nextToken.id in ('(identifier)', '*'):
                         expressionToken = thisContext.contextManager.parser.parse(0)
                         self.identifierList.append(thisContext.getIdentifier(expressionToken))
                         self.expressionList.append(expressionToken)
                     elif nextToken.id == 'long':
                         self.modifier = 'long long'
                         nextToken = thisContext.contextManager.parser.lexer.advance()
-                        if nextToken.id == '(identifier)':
+                        if nextToken.id in ('(identifier)', '*'):
                             expressionToken = thisContext.contextManager.parser.parse(0)
                             self.identifierList.append(thisContext.getIdentifier(expressionToken))
                             self.expressionList.append(expressionToken)
@@ -145,7 +176,7 @@ class DeclarationContext(Context):
                 if nextToken.id != ',':
                     break
                 nextToken = thisContext.contextManager.parser.lexer.advance()
-                if nextToken.id == '(identifier)':
+                if nextToken.id in ('(identifier)', '*'):
                     expressionToken = thisContext.contextManager.parser.parse(0)
                     self.identifierList.append(thisContext.getIdentifier(expressionToken))
                     self.expressionList.append(expressionToken)
@@ -154,15 +185,12 @@ class DeclarationContext(Context):
             ddToken = thisContext.buildToken(self)
             return ddToken
 
-
         def led(self):
             pass
         symClass = self.symbol(id, bindingPower)
-        symClass.type = 'modifier'
         symClass.nud = nud
         symClass.led = led
         return symClass
-        pass
 
     def addSignedAndUnsigned(self, id, bindingPower):
         thisContext = self
@@ -175,7 +203,7 @@ class DeclarationContext(Context):
             self.errorToken = None  # token that causes error
 
             nextToken = thisContext.contextManager.parser.lexer.advance()
-            if nextToken.id == '(identifier)':
+            if nextToken.id in ('(identifier)', '*'):
                 expressionToken = thisContext.contextManager.parser.parse(0)
                 self.identifierList.append(thisContext.getIdentifier(expressionToken))
                 self.expressionList.append(expressionToken)
@@ -183,14 +211,14 @@ class DeclarationContext(Context):
             elif nextToken.id == 'int':
                 self.primitive = nextToken.id
                 nextToken = thisContext.contextManager.parser.lexer.advance()
-                if nextToken.id == '(identifier)':
+                if nextToken.id in ('(identifier)', '*'):
                     expressionToken = thisContext.contextManager.parser.parse(0)
                     self.identifierList.append(thisContext.getIdentifier(expressionToken))
                     self.expressionList.append(expressionToken)
                 elif nextToken.id == 'short':
                     self.modifier = 'short'
                     nextToken = thisContext.contextManager.parser.lexer.advance()
-                    if nextToken.id == '(identifier)':
+                    if nextToken.id in ('(identifier)', '*'):
                         expressionToken = thisContext.contextManager.parser.parse(0)
                         self.identifierList.append(thisContext.getIdentifier(expressionToken))
                         self.expressionList.append(expressionToken)
@@ -199,14 +227,14 @@ class DeclarationContext(Context):
                 elif nextToken.id == 'long':
                     self.modifier = 'long'
                     nextToken = thisContext.contextManager.parser.lexer.advance()
-                    if nextToken.id == '(identifier)':
+                    if nextToken.id in ('(identifier)', '*'):
                         expressionToken = thisContext.contextManager.parser.parse(0)
                         self.identifierList.append(thisContext.getIdentifier(expressionToken))
                         self.expressionList.append(expressionToken)
                     elif nextToken.id == 'long':
                         self.modifier = 'long long'
                         nextToken = thisContext.contextManager.parser.lexer.advance()
-                        if nextToken.id == '(identifier)':
+                        if nextToken.id in ('(identifier)', '*'):
                             expressionToken = thisContext.contextManager.parser.parse(0)
                             self.identifierList.append(thisContext.getIdentifier(expressionToken))
                             self.expressionList.append(expressionToken)
@@ -220,21 +248,21 @@ class DeclarationContext(Context):
             elif nextToken.id == 'long':
                 self.modifier = 'long'
                 nextToken = thisContext.contextManager.parser.lexer.advance()
-                if nextToken.id == '(identifier)':
+                if nextToken.id in ('(identifier)', '*'):
                     expressionToken = thisContext.contextManager.parser.parse(0)
                     self.identifierList.append(thisContext.getIdentifier(expressionToken))
                     self.expressionList.append(expressionToken)
                 elif nextToken.id == 'long':
                     self.modifier = 'long long'
                     nextToken = thisContext.contextManager.parser.lexer.advance()
-                    if nextToken.id == '(identifier)':
+                    if nextToken.id in ('(identifier)', '*'):
                         expressionToken = thisContext.contextManager.parser.parse(0)
                         self.identifierList.append(thisContext.getIdentifier(expressionToken))
                         self.expressionList.append(expressionToken)
                     elif nextToken.id == 'int':
                         self.primitive = nextToken.id
                         nextToken = thisContext.contextManager.parser.lexer.advance()
-                        if nextToken.id == '(identifier)':
+                        if nextToken.id in ('(identifier)', '*'):
                             expressionToken = thisContext.contextManager.parser.parse(0)
                             self.identifierList.append(thisContext.getIdentifier(expressionToken))
                             self.expressionList.append(expressionToken)
@@ -245,14 +273,14 @@ class DeclarationContext(Context):
                 elif nextToken.id == 'int':
                     self.primitive = nextToken.id
                     nextToken = thisContext.contextManager.parser.lexer.advance()
-                    if nextToken.id == '(identifier)':
+                    if nextToken.id in ('(identifier)', '*'):
                         expressionToken = thisContext.contextManager.parser.parse(0)
                         self.identifierList.append(thisContext.getIdentifier(expressionToken))
                         self.expressionList.append(expressionToken)
                     elif nextToken.id == 'long':
                         self.modifier = 'long long'
                         nextToken = thisContext.contextManager.parser.lexer.advance()
-                        if nextToken.id == '(identifier)':
+                        if nextToken.id in ('(identifier)', '*'):
                             expressionToken = thisContext.contextManager.parser.parse(0)
                             self.identifierList.append(thisContext.getIdentifier(expressionToken))
                             self.expressionList.append(expressionToken)
@@ -266,14 +294,14 @@ class DeclarationContext(Context):
             elif nextToken.id == 'short':
                 self.modifier = 'short'
                 nextToken = thisContext.contextManager.parser.lexer.advance()
-                if nextToken.id == '(identifier)':
+                if nextToken.id in ('(identifier)', '*'):
                     expressionToken = thisContext.contextManager.parser.parse(0)
                     self.identifierList.append(thisContext.getIdentifier(expressionToken))
                     self.expressionList.append(expressionToken)
                 elif nextToken.id == 'int':
                     self.primitive = nextToken.id
                     nextToken = thisContext.contextManager.parser.lexer.advance()
-                    if nextToken.id == '(identifier)':
+                    if nextToken.id in ('(identifier)', '*'):
                         expressionToken = thisContext.contextManager.parser.parse(0)
                         self.identifierList.append(thisContext.getIdentifier(expressionToken))
                         self.expressionList.append(expressionToken)
@@ -290,7 +318,7 @@ class DeclarationContext(Context):
                 if nextToken.id != ',':
                     break
                 nextToken = thisContext.contextManager.parser.lexer.advance()
-                if nextToken.id == '(identifier)':
+                if nextToken.id in ('(identifier)', '*'):
                     expressionToken = thisContext.contextManager.parser.parse(0)
                     self.identifierList.append(thisContext.getIdentifier(expressionToken))
                     self.expressionList.append(expressionToken)
@@ -301,11 +329,9 @@ class DeclarationContext(Context):
         def led(self):
             pass
         symClass = self.symbol(id, bindingPower)
-        symClass.type = 'modifier'
         symClass.nud = nud
         symClass.led = led
         return symClass
-        pass
 
     def addLong(self, id, bindingPower):
         thisContext = self
@@ -319,28 +345,28 @@ class DeclarationContext(Context):
 
             nextToken = thisContext.contextManager.parser.lexer.advance()
 
-            if nextToken.id == '(identifier)':
+            if nextToken.id in ('(identifier)', '*'):
                 expressionToken = thisContext.contextManager.parser.parse(0)
                 self.identifierList.append(thisContext.getIdentifier(expressionToken))
                 self.expressionList.append(expressionToken)
             elif nextToken.id == 'long':
                 self.modifier = 'long long'
                 nextToken = thisContext.contextManager.parser.lexer.advance()
-                if nextToken.id == '(identifier)':
+                if nextToken.id in ('(identifier)', '*'):
                     expressionToken = thisContext.contextManager.parser.parse(0)
                     self.identifierList.append(thisContext.getIdentifier(expressionToken))
                     self.expressionList.append(expressionToken)
                 elif nextToken.id == 'int':
                     self.primitive = nextToken.id
                     nextToken = thisContext.contextManager.parser.lexer.advance()
-                    if nextToken.id == '(identifier)':
+                    if nextToken.id in ('(identifier)', '*'):
                         expressionToken = thisContext.contextManager.parser.parse(0)
                         self.identifierList.append(thisContext.getIdentifier(expressionToken))
                         self.expressionList.append(expressionToken)
                     elif nextToken.id in ('signed', 'unsigned'):
                         self.sign = nextToken.id
                         nextToken = thisContext.contextManager.parser.lexer.advance()
-                        if nextToken.id == '(identifier)':
+                        if nextToken.id in ('(identifier)', '*'):
                             expressionToken = thisContext.contextManager.parser.parse(0)
                             self.identifierList.append(thisContext.getIdentifier(expressionToken))
                             self.expressionList.append(expressionToken)
@@ -351,14 +377,14 @@ class DeclarationContext(Context):
                 elif nextToken.id in ('signed', 'unsigned'):
                     self.sign = nextToken.id
                     nextToken = thisContext.contextManager.parser.lexer.advance()
-                    if nextToken.id == '(identifier)':
+                    if nextToken.id in ('(identifier)', '*'):
                         expressionToken = thisContext.contextManager.parser.parse(0)
                         self.identifierList.append(thisContext.getIdentifier(expressionToken))
                         self.expressionList.append(expressionToken)
                     elif nextToken.id == 'int':
                         self.primitive = nextToken.id
                         nextToken = thisContext.contextManager.parser.lexer.advance()
-                        if nextToken.id == '(identifier)':
+                        if nextToken.id in ('(identifier)', '*'):
                             expressionToken = thisContext.contextManager.parser.parse(0)
                             self.identifierList.append(thisContext.getIdentifier(expressionToken))
                             self.expressionList.append(expressionToken)
@@ -370,21 +396,21 @@ class DeclarationContext(Context):
             elif nextToken.id == 'int':
                 self.primitive = nextToken.id
                 nextToken = thisContext.contextManager.parser.lexer.advance()
-                if nextToken.id == '(identifier)':
+                if nextToken.id in ('(identifier)', '*'):
                     expressionToken = thisContext.contextManager.parser.parse(0)
                     self.identifierList.append(thisContext.getIdentifier(expressionToken))
                     self.expressionList.append(expressionToken)
                 elif nextToken.id == 'long':
                     self.modifier = 'long long'
                     nextToken = thisContext.contextManager.parser.lexer.advance()
-                    if nextToken.id == '(identifier)':
+                    if nextToken.id in ('(identifier)', '*'):
                         expressionToken = thisContext.contextManager.parser.parse(0)
                         self.identifierList.append(thisContext.getIdentifier(expressionToken))
                         self.expressionList.append(expressionToken)
                     elif nextToken.id in ('signed', 'unsigned'):
                         self.sign = nextToken.id
                         nextToken = thisContext.contextManager.parser.lexer.advance()
-                        if nextToken.id == '(identifier)':
+                        if nextToken.id in ('(identifier)', '*'):
                             expressionToken = thisContext.contextManager.parser.parse(0)
                             self.identifierList.append(thisContext.getIdentifier(expressionToken))
                             self.expressionList.append(expressionToken)
@@ -395,14 +421,14 @@ class DeclarationContext(Context):
                 elif nextToken.id in ('signed', 'unsigned'):
                     self.sign = nextToken.id
                     nextToken = thisContext.contextManager.parser.lexer.advance()
-                    if nextToken.id == '(identifier)':
+                    if nextToken.id in ('(identifier)', '*'):
                         expressionToken = thisContext.contextManager.parser.parse(0)
                         self.identifierList.append(thisContext.getIdentifier(expressionToken))
                         self.expressionList.append(expressionToken)
                     elif nextToken.id == 'long':
                         self.modifier = 'long long'
                         nextToken = thisContext.contextManager.parser.lexer.advance()
-                        if nextToken.id == '(identifier)':
+                        if nextToken.id in ('(identifier)', '*'):
                             expressionToken = thisContext.contextManager.parser.parse(0)
                             self.identifierList.append(thisContext.getIdentifier(expressionToken))
                             self.expressionList.append(expressionToken)
@@ -416,21 +442,21 @@ class DeclarationContext(Context):
             elif nextToken.id in ('signed', 'unsigned'):
                 self.sign = nextToken.id
                 nextToken = thisContext.contextManager.parser.lexer.advance()
-                if nextToken.id == '(identifier)':
+                if nextToken.id in ('(identifier)', '*'):
                     expressionToken = thisContext.contextManager.parser.parse(0)
                     self.identifierList.append(thisContext.getIdentifier(expressionToken))
                     self.expressionList.append(expressionToken)
                 elif nextToken.id == 'long':
                     self.modifier = 'long long'
                     nextToken = thisContext.contextManager.parser.lexer.advance()
-                    if nextToken.id == '(identifier)':
+                    if nextToken.id in ('(identifier)', '*'):
                         expressionToken = thisContext.contextManager.parser.parse(0)
                         self.identifierList.append(thisContext.getIdentifier(expressionToken))
                         self.expressionList.append(expressionToken)
                     elif nextToken.id == 'int':
                         self.primitive = nextToken.id
                         nextToken = thisContext.contextManager.parser.lexer.advance()
-                        if nextToken.id == '(identifier)':
+                        if nextToken.id in ('(identifier)', '*'):
                             expressionToken = thisContext.contextManager.parser.parse(0)
                             self.identifierList.append(thisContext.getIdentifier(expressionToken))
                             self.expressionList.append(expressionToken)
@@ -441,21 +467,21 @@ class DeclarationContext(Context):
                 elif nextToken.id == 'int':
                     self.primitive = nextToken.id
                     nextToken = thisContext.contextManager.parser.lexer.advance()
-                    if nextToken.id == '(identifier)':
+                    if nextToken.id in ('(identifier)', '*'):
                         expressionToken = thisContext.contextManager.parser.parse(0)
                         self.identifierList.append(thisContext.getIdentifier(expressionToken))
                         self.expressionList.append(expressionToken)
                     elif nextToken.id == 'long':
                         self.modifier = 'long long'
                         nextToken = thisContext.contextManager.parser.lexer.advance()
-                        if nextToken.id == '(identifier)':
+                        if nextToken.id in ('(identifier)', '*'):
                             expressionToken = thisContext.contextManager.parser.parse(0)
                             self.identifierList.append(thisContext.getIdentifier(expressionToken))
                             self.expressionList.append(expressionToken)
                         elif nextToken.id in ('signed', 'unsigned'):
                             self.sign = nextToken.id
                             nextToken = thisContext.contextManager.parser.lexer.advance()
-                            if nextToken.id == '(identifier)':
+                            if nextToken.id in ('(identifier)', '*'):
                                 expressionToken = thisContext.contextManager.parser.parse(0)
                                 self.identifierList.append(thisContext.getIdentifier(expressionToken))
                                 self.expressionList.append(expressionToken)
@@ -476,7 +502,7 @@ class DeclarationContext(Context):
                 if nextToken.id != ',':
                     break
                 nextToken = thisContext.contextManager.parser.lexer.advance()
-                if nextToken.id == '(identifier)':
+                if nextToken.id in ('(identifier)', '*'):
                     expressionToken = thisContext.contextManager.parser.parse(0)
                     self.identifierList.append(thisContext.getIdentifier(expressionToken))
                     self.expressionList.append(expressionToken)
@@ -488,11 +514,9 @@ class DeclarationContext(Context):
         def led(self):
             pass
         symClass = self.symbol(id, bindingPower)
-        symClass.type = 'modifier'
         symClass.nud = nud
         symClass.led = led
         return symClass
-        pass
 
     def addShort(self, id, bindingPower):
         thisContext = self
@@ -505,21 +529,21 @@ class DeclarationContext(Context):
             self.errorToken = None  # token that causes error
 
             nextToken = thisContext.contextManager.parser.lexer.advance()
-            if nextToken.id == '(identifier)':
+            if nextToken.id in ('(identifier)', '*'):
                 expressionToken = thisContext.contextManager.parser.parse(0)
                 self.identifierList.append(thisContext.getIdentifier(expressionToken))
                 self.expressionList.append(expressionToken)
             elif nextToken.id == 'int':
                 self.primitive = nextToken.id
                 nextToken = thisContext.contextManager.parser.lexer.advance()
-                if nextToken.id == '(identifier)':
+                if nextToken.id in ('(identifier)', '*'):
                     expressionToken = thisContext.contextManager.parser.parse(0)
                     self.identifierList.append(thisContext.getIdentifier(expressionToken))
                     self.expressionList.append(expressionToken)
                 elif nextToken.id in ('signed', 'unsigned'):
                     self.sign = nextToken.id
                     nextToken = thisContext.contextManager.parser.lexer.advance()
-                    if nextToken.id == '(identifier)':
+                    if nextToken.id in ('(identifier)', '*'):
                         expressionToken = thisContext.contextManager.parser.parse(0)
                         self.identifierList.append(thisContext.getIdentifier(expressionToken))
                         self.expressionList.append(expressionToken)
@@ -531,14 +555,14 @@ class DeclarationContext(Context):
             elif nextToken.id in ('signed', 'unsigned'):
                 self.sign = nextToken.id
                 nextToken = thisContext.contextManager.parser.lexer.advance()
-                if nextToken.id == '(identifier)':
+                if nextToken.id in ('(identifier)', '*'):
                     expressionToken = thisContext.contextManager.parser.parse(0)
                     self.identifierList.append(thisContext.getIdentifier(expressionToken))
                     self.expressionList.append(expressionToken)
                 elif nextToken.id == 'int':
                     self.primitive = nextToken.id
                     nextToken = thisContext.contextManager.parser.lexer.advance()
-                    if nextToken.id == '(identifier)':
+                    if nextToken.id in ('(identifier)', '*'):
                         expressionToken = thisContext.contextManager.parser.parse(0)
                         self.identifierList.append(thisContext.getIdentifier(expressionToken))
                         self.expressionList.append(expressionToken)
@@ -555,7 +579,7 @@ class DeclarationContext(Context):
                 if nextToken.id != ',':
                     break
                 nextToken = thisContext.contextManager.parser.lexer.advance()
-                if nextToken.id == '(identifier)':
+                if nextToken.id in ('(identifier)', '*'):
                     expressionToken = thisContext.contextManager.parser.parse(0)
                     self.identifierList.append(thisContext.getIdentifier(expressionToken))
                     self.expressionList.append(expressionToken)
@@ -581,7 +605,6 @@ class DeclarationContext(Context):
                     return token
             return None  # no identifier found
 
-
     def handleError(self, token):
         if token.errorToken.id in (';', '(systemToken)'):
             raise SyntaxError('Expecting (identifier) before ' + token.errorToken.id)
@@ -603,12 +626,12 @@ class DeclarationContext(Context):
             primitiveToken.modifier = []
             primitiveToken.sign = token.sign
             primitiveToken.modifier = token.modifier
-            primitiveToken.data.append(identifier)
             ddToken.data.append(primitiveToken)
             if expression.id == '=':
+                primitiveToken.data.append(identifier)
                 ddToken.data.append(expression)
-            elif expression.id == '(identifier)':
-                pass
+            elif expression.id in ('(identifier)', '*'):
+                primitiveToken.data.append(expression)
             else:
                 raise SyntaxError
         return ddToken
@@ -636,7 +659,6 @@ class DeclarationContext(Context):
         def led(self):
             pass
         symClass = self.symbol(id, bindingPower)
-        symClass.type = 'primitive'
         symClass.nud = nud
         symClass.led = led
         return symClass
@@ -649,7 +671,6 @@ class DeclarationContext(Context):
         def led(self):
             pass
         symClass = self.symbol(id, bindingPower)
-        symClass.type = 'modifier'
         symClass.nud = nud
         symClass.led = led
         return symClass

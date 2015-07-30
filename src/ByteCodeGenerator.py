@@ -26,6 +26,7 @@ class ByteCodeGenerator:
 
     def dumpRegisterHex(self, GPR=[]):
         number = 0x01 | GPR[0] << 8
+        return number
 
     def compareIsLessThan(self, GPR=[]):
         number = 0xf2 | GPR[0] << 8 | GPR[1] << 11
@@ -43,7 +44,7 @@ class ByteCodeGenerator:
         number = 0x04 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 17
         return number
 
-    def assignRegister(self, GPR=[]):
+    def storeRegister(self, GPR=[]):
         number = 0x06 | GPR[0] << 8 | GPR[1] << 11
         return number
 
@@ -73,6 +74,9 @@ class ByteCodeGenerator:
 
     def divideRegister(self):
         pass
+
+    def halt(self):
+        return 0xffffffff
 
     def generateRightCodeFirst(self, token):
         secondTime = 0
@@ -156,11 +160,11 @@ class ByteCodeGenerator:
                 thisGenerator.variablesInThisAST[token.data[0].data[0]] = thisGenerator.byteRequired[token.id]
                 thisGenerator.memorySize += thisGenerator.byteRequired[token.id]
 
-        respectiveByteCodeFunction = {'=': self.assignRegister, '+': self.addRegister, '==':self.compareRegister,'<':self.compareIsLessThan, \
+        respectiveByteCodeFunction = {'=': self.storeRegister, '+': self.addRegister, '==':self.compareRegister,'<':self.compareIsLessThan, \
                                             '-': self.subRegister, '*': self.multiplyRegister, '/': self.divideRegister, \
                                             '(systemToken)': self.nothing, ';': self.nothing, ',': self.nothing, '}': self.nothing, '{': self.nothing}
 
-        self.twoParamFunctions =[self.assignRegister, self.compareRegister, self.compareIsLessThan]
+        self.twoParamFunctions =[self.storeRegister, self.compareRegister, self.compareIsLessThan]
 
         def generateByteCode(self, sequenceCheck=None):
             if thisGenerator.isADeclaration(self.id):

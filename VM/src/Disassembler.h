@@ -20,6 +20,7 @@ void disassembleStm(char *strBuffer, int bytecode);
 void disassembleLdms(char *strBuffer, int bytecode);
 void disassembleStms(char *strBuffer, int bytecode);
 
+void disassembleSubImm(char *strBuffer, int bytecode);
 void disassembleAdd(char *strBuffer, int bytecode);
 void disassembleSub(char *strBuffer, int bytecode);
 void disassembleMul(char *strBuffer, int bytecode);

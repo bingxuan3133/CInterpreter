@@ -513,6 +513,7 @@ void test_subtractRegisters_should_subtract_reg1_from_reg0(void) {
 void test_subtractRegisterWithImmediate_should_subtract_reg_from_imm(void) {
   reg[7].data = 0;
   subtractRegisterWithImmediate(subImm(REG_7, 4));
+  
   TEST_ASSERT_EQUAL(-4, reg[7].data);
 }
 

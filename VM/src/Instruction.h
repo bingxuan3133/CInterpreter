@@ -118,7 +118,7 @@ typedef enum {
   HALT = 0xff,
 } Instruction;
 
-#define MAX_INSTRUCTION LDR_MEM
+#define MAX_INSTRUCTION XOR
 
 // main function
 void execute(int bytecode);
