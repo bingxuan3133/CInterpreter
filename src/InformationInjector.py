@@ -3,13 +3,26 @@ from ByteCodeGenerator import *
 from FlowControlContext import *
 class InformationInjector:
     def injectRegisterRequired(self, tokenToInject):
-        tempToken = None
         if(self.bypassTheInjection(tokenToInject)):
-            return 0
+            return
         elif tokenToInject.id == 'if':
             token = tokenToInject.data[0].data[0]
+            self.injectRegisterRequired(token)
+            for token in tokenToInject.data[1][0].data:
+                self.injectRegisterRequired(token)
+            if tokenToInject.data.__len__() == 3:
+                for token in tokenToInject.data[2].data[0][0].data:
+                    self.injectRegisterRequired(token)
+            return
+        elif tokenToInject.id == 'while':
+            token = tokenToInject.data[0]
+            self.injectRegisterRequired(token)
+            for token in tokenToInject.data[1][0].data:
+                self.injectRegisterRequired(token)
+            return
         elif tokenToInject.id == '(':
             token = tokenToInject.data[0]
+
         else:
             token = tokenToInject
         registerNumber =[]
@@ -55,25 +68,54 @@ class InformationInjector:
 
     def getTheWeightFromChild(self,token,weightIndex):
         for data in token.data :
+            if data.id == "(":
+                data = data.data[0]
             token.weight.insert(weightIndex, data.weight[0])
             weightIndex += 1
 
     def findOutTheHeavierSide(self,token):
-        if (token.data[0].weight[0]>token.data[1].weight[0]):
-            token.weight.insert(0, token.data[0].weight[0]+1)
+        firstToken = token.data[0]
+        secondToken = token.data[1]
+        if firstToken.id == '(':
+            firstToken = firstToken.data[0]
+        elif secondToken.id == '(':
+            secondToken = secondToken.data[0]
+
+
+
+        if (firstToken.weight[0]>secondToken.weight[0]):
+            token.weight.insert(0, firstToken.weight[0]+1)
         else:
-            token.weight.insert(0, token.data[1].weight[0]+1)
+            token.weight.insert(0, secondToken.weight[0]+1)
 
     def determineTheMaxRequiredRegister(self, token):
-        return token.data[0].maxRequiredRegister+token.data[1].maxRequiredRegister
+        firstToken = token.data[0]
+        secondToken = token.data[1]
+        if firstToken.id == '(':
+            firstToken = firstToken.data[0]
+        elif secondToken.id == '(':
+            secondToken = secondToken.data[0]
+        if token.id == '(':
+            return firstToken.maxRequiredRegister
+        else:
+            return firstToken.maxRequiredRegister+secondToken.maxRequiredRegister
 
     def determineTheMinRequiredRegister(self, token):
-        if token.data[0].minRequiredRegister > token.data[1].minRequiredRegister:
-            return token.data[0].minRequiredRegister
-        elif token.data[0].minRequiredRegister < token.data[1].minRequiredRegister:
-            return token.data[1].minRequiredRegister
-        elif token.data[0].minRequiredRegister == token.data[1].minRequiredRegister:
-            return token.data[0].minRequiredRegister + token.data[1].minRequiredRegister
+        firstToken = token.data[0]
+        secondToken = token.data[1]
+        if firstToken.id == '(':
+            firstToken = firstToken.data[0]
+        elif secondToken.id == '(':
+            secondToken = secondToken.data[0]
+
+        if token.id == '(':
+            return firstToken.minRequiredRegister
+        elif firstToken.minRequiredRegister > secondToken.minRequiredRegister:
+            return firstToken.minRequiredRegister
+        elif firstToken.minRequiredRegister < secondToken.minRequiredRegister:
+            return secondToken.minRequiredRegister
+        elif firstToken.minRequiredRegister == secondToken.minRequiredRegister:
+            return firstToken.minRequiredRegister + secondToken.minRequiredRegister
 
     def getSuitableRegisterFromTheChild(self,registerNumber):
         if abs(registerNumber[0]) == abs(registerNumber[1]):

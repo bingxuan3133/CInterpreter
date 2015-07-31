@@ -63,8 +63,6 @@ class Mapping:
             self.smallerRegisterUsed -= 1
             self.getAFreeWorkingRegister()
 
-    def ifLabel(self):
-        return "IF1"
 """
     def getSpecificWorkingRegister(self, numberOfRegister):
         if self.registerStatus[numberOfRegister] == 0:

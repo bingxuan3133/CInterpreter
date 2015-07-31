@@ -102,9 +102,9 @@ class TestByteCodeGenerator(unittest.TestCase):
 
         self.byteCodeGenerator.initGeneration()
         byteCodes = token.generateByteCode()
-        self.assertEqual(self.byteCodeGenerator.loadValue([0, 5]), byteCodes[0])
-        self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.assignRegister([0, 5]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 4]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 5]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([5, 0]), byteCodes[2])
 
     def test_generateByteCode_will_generate_code_to_initialize_the_(self):
         lexer = LexerStateMachine('int x = 2;', self.context)
@@ -120,12 +120,12 @@ class TestByteCodeGenerator(unittest.TestCase):
         byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
         self.assertEqual(self.byteCodeGenerator.loadValue([0, 4]),byteCodes[0])
         self.assertEqual(self.byteCodeGenerator.subRegister([7, 7, 0]), byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.loadValue([0, 2]), byteCodes[2])
-        self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[3])
-        self.assertEqual(self.byteCodeGenerator.assignRegister([0, 5]), byteCodes[4])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 4]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 2]), byteCodes[3])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([5, 0]), byteCodes[4])
 
 
-    def xtest_generateByteCode_will_generate_code_for_multiple_initialization(self):
+    def test_generateByteCode_will_generate_code_for_multiple_initialization(self):
         lexer = LexerStateMachine('int x = 3 , y = 5 , z = 10 ;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
@@ -135,13 +135,20 @@ class TestByteCodeGenerator(unittest.TestCase):
         for subTree in token:
             self.informationInjector.injectRegisterRequired(subTree)
             byteCodes = subTree.generateByteCode()
+            self.byteCodeGenerator.mapping.reset()
 
         byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
-        self.assertEqual(self.byteCodeGenerator.subFrameRegister([7, 12]), byteCodes[0])
-        self.assertEqual(self.byteCodeGenerator.loadValue([0, 3]), byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[2])
-        self.assertEqual(self.byteCodeGenerator.assignRegister([0, 5]), byteCodes[3])
-        self.assertEqual(self.byteCodeGenerator.loadValue([0, 5]), byteCodes[4])
+        self.assertEqual(self.byteCodeGenerator.loadValue([0, 12]),byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.subRegister([7, 7, 0]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 4]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 3]), byteCodes[3])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([5, 0]), byteCodes[4])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 8]), byteCodes[5])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 5]), byteCodes[6])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([5, 0]), byteCodes[7])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 12]), byteCodes[8])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 10]), byteCodes[9])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([5, 0]), byteCodes[10])
 
     def test_generateByteCode_will_return_the_byteCode_in_a_list_for_a_multiply_expression(self):
         lexer = LexerStateMachine('3 * 4 + 2 ', self.context)
@@ -153,8 +160,8 @@ class TestByteCodeGenerator(unittest.TestCase):
 
         self.byteCodeGenerator.initGeneration()
         byteCodes = token.generateByteCode()
-        self.assertEqual(self.byteCodeGenerator.loadValue([0, 4]), byteCodes[0])
-        self.assertEqual(self.byteCodeGenerator.loadValue([5, 3]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.loadValue([0, 3]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 4]), byteCodes[1])
         self.assertEqual(self.byteCodeGenerator.multiplyRegister([0, 0, 5]), byteCodes[2])
         self.assertEqual(self.byteCodeGenerator.loadValue([5, 2]), byteCodes[3])
         self.assertEqual(self.byteCodeGenerator.addRegister([0, 0, 5]), byteCodes[4])
@@ -174,8 +181,8 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.byteCodeGenerator.initGeneration()
         byteCodes = token.generateByteCode()
         self.assertEqual(self.byteCodeGenerator.storeMultiple([7, 0b011100]), byteCodes[0])
-        self.assertEqual(self.byteCodeGenerator.loadValue([2, 4]), byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.loadValue([5, 3]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.loadValue([2, 3]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 4]), byteCodes[2])
         self.assertEqual(self.byteCodeGenerator.multiplyRegister([2, 2, 5]), byteCodes[3])
         self.assertEqual(self.byteCodeGenerator.loadValue([5, 2]), byteCodes[4])
         self.assertEqual(self.byteCodeGenerator.addRegister([2, 2, 5]), byteCodes[5])
@@ -211,14 +218,14 @@ class TestByteCodeGenerator(unittest.TestCase):
         byteCodes = token.generateByteCode()
         self.assertEqual(self.byteCodeGenerator.storeMultiple([7, 0b011100]), byteCodes[0])
         self.assertEqual(self.byteCodeGenerator.storeMultiple([7, 0b000011]), byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.loadValue([0, 9]), byteCodes[2])
-        self.assertEqual(self.byteCodeGenerator.loadValue([5, 8]), byteCodes[3])
+        self.assertEqual(self.byteCodeGenerator.loadValue([0, 8]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 9]), byteCodes[3])
         self.assertEqual(self.byteCodeGenerator.multiplyRegister([0, 0, 5]), byteCodes[4])
         self.assertEqual(self.byteCodeGenerator.loadValue([5, 10]), byteCodes[5])
         self.assertEqual(self.byteCodeGenerator.multiplyRegister([2, 0, 5]), byteCodes[6])
         self.assertEqual(self.byteCodeGenerator.loadMultiple([7, 0b000011]), byteCodes[7])
         self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[8])
-        self.assertEqual(self.byteCodeGenerator.assignRegister([2, 5]), byteCodes[9])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([2, 5]), byteCodes[9])
         self.assertEqual(self.byteCodeGenerator.loadMultiple([7, 0b011100]), byteCodes[10])
 
 
@@ -317,9 +324,9 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.byteCodeGenerator.initGeneration()
         byteCodes = token.generateByteCode()
         self.assertEqual(self.byteCodeGenerator.storeMultiple([7, 0b010000]), byteCodes[0])
-        self.assertEqual(self.byteCodeGenerator.loadValue([4, 5]), byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[2])
-        self.assertEqual(self.byteCodeGenerator.assignRegister([4, 5]), byteCodes[3])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([4, 7, 4]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 5]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([5, 4]), byteCodes[3])
         self.assertEqual(self.byteCodeGenerator.loadMultiple([7, 0b010000]), byteCodes[4])
 
     def test_generateByteCode_will_push_the_register_at_the_second_token(self):
@@ -345,13 +352,13 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.byteCodeGenerator.initGeneration()
         byteCodes = token.generateByteCode()
         self.assertEqual(self.byteCodeGenerator.storeMultiple([7, 0b011100]), byteCodes[0])
-        self.assertEqual(self.byteCodeGenerator.loadValue([2, 10]), byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.loadValue([5, 5]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.loadValue([2, 5]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 10]), byteCodes[2])
         self.assertEqual(self.byteCodeGenerator.addRegister([2, 2, 5]), byteCodes[3])
         self.assertEqual(self.byteCodeGenerator.loadValue([5, 20]), byteCodes[4])
         self.assertEqual(self.byteCodeGenerator.addRegister([2, 2, 5]), byteCodes[5])
         self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[6])
-        self.assertEqual(self.byteCodeGenerator.assignRegister([2, 5]), byteCodes[7])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([2, 5]), byteCodes[7])
         self.assertEqual(self.byteCodeGenerator.loadMultiple([7, 0b011100]), byteCodes[8])
 
     def test_generateByteCode_will_push_the_register_when_the_registers_available_is_not_enough_at_the_begining(self):
@@ -377,13 +384,13 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.byteCodeGenerator.initGeneration()
         byteCodes = token.generateByteCode()
         self.assertEqual(self.byteCodeGenerator.storeMultiple([7, 0b011100]), byteCodes[0])
-        self.assertEqual(self.byteCodeGenerator.loadValue([2, 9]), byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.loadValue([5, 8]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.loadValue([2, 8]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 9]), byteCodes[2])
         self.assertEqual(self.byteCodeGenerator.multiplyRegister([2, 2, 5]), byteCodes[3])
         self.assertEqual(self.byteCodeGenerator.loadValue([5, 10]), byteCodes[4])
         self.assertEqual(self.byteCodeGenerator.multiplyRegister([2, 2, 5]), byteCodes[5])
         self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[6])
-        self.assertEqual(self.byteCodeGenerator.assignRegister([2, 5]), byteCodes[7])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([2, 5]), byteCodes[7])
         self.assertEqual(self.byteCodeGenerator.loadMultiple([7, 0b011100]), byteCodes[8])
 
     def test_generateByteCode_will_push_the_register_two_times_with_multiply(self):
@@ -413,14 +420,14 @@ class TestByteCodeGenerator(unittest.TestCase):
         byteCodes = token.generateByteCode()
         self.assertEqual(self.byteCodeGenerator.storeMultiple([7, 0b011100]), byteCodes[0])
         self.assertEqual(self.byteCodeGenerator.storeMultiple([7, 0b000011]), byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.loadValue([0, 9]), byteCodes[2])
-        self.assertEqual(self.byteCodeGenerator.loadValue([5, 8]), byteCodes[3])
+        self.assertEqual(self.byteCodeGenerator.loadValue([0, 8]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 9]), byteCodes[3])
         self.assertEqual(self.byteCodeGenerator.multiplyRegister([0, 0, 5]), byteCodes[4])
         self.assertEqual(self.byteCodeGenerator.loadValue([5, 10]), byteCodes[5])
         self.assertEqual(self.byteCodeGenerator.multiplyRegister([2, 0, 5]), byteCodes[6])
         self.assertEqual(self.byteCodeGenerator.loadMultiple([7, 0b000011]), byteCodes[7])
         self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[8])
-        self.assertEqual(self.byteCodeGenerator.assignRegister([2, 5]), byteCodes[9])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([2, 5]), byteCodes[9])
         self.assertEqual(self.byteCodeGenerator.loadMultiple([7, 0b011100]), byteCodes[10])
 
     def test_generateByteCode_will_make_byteCode_for_comparison(self):
@@ -434,9 +441,9 @@ class TestByteCodeGenerator(unittest.TestCase):
 
         self.byteCodeGenerator.initGeneration()
         byteCodes = token.generateByteCode()
-        self.assertEqual(self.byteCodeGenerator.loadValue([0, 3]), byteCodes[0])
-        self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.compareRegister([0, 5]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 4]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 3]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.compareRegister([5, 0]), byteCodes[2])
 
     def test_generateByteCode_will_create_byteCode_for_comparison_with_expression_on_right_side(self):
         lexer = LexerStateMachine(' x == 3 - 12', self.context)
@@ -449,8 +456,8 @@ class TestByteCodeGenerator(unittest.TestCase):
 
         self.byteCodeGenerator.initGeneration()
         byteCodes = token.generateByteCode()
-        self.assertEqual(self.byteCodeGenerator.loadValue([0, 12]), byteCodes[0])
-        self.assertEqual(self.byteCodeGenerator.loadValue([5, 3]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.loadValue([0, 3]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 12]), byteCodes[1])
         self.assertEqual(self.byteCodeGenerator.subRegister([0, 0, 5]), byteCodes[2])
         self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[3])
         self.assertEqual(self.byteCodeGenerator.compareRegister([0, 5]), byteCodes[4])
@@ -466,13 +473,13 @@ class TestByteCodeGenerator(unittest.TestCase):
 
         self.byteCodeGenerator.initGeneration()
         byteCodes = token.generateByteCode()
-        self.assertEqual(self.byteCodeGenerator.loadValue([0, 12]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7,4]), byteCodes[0])
         self.assertEqual(self.byteCodeGenerator.loadValue([5, 3]), byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.divideRegister([0, 0, 5]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.multiplyRegister([0, 0, 5]), byteCodes[2])
         self.assertEqual(self.byteCodeGenerator.loadValue([1, 3]), byteCodes[3])
-        self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[4])
-        self.assertEqual(self.byteCodeGenerator.multiplyRegister([5, 1, 5]), byteCodes[5])
-        self.assertEqual(self.byteCodeGenerator.compareRegister([0, 5]), byteCodes[6])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 12]), byteCodes[4])
+        self.assertEqual(self.byteCodeGenerator.divideRegister([5, 1, 5]), byteCodes[5])
+        self.assertEqual(self.byteCodeGenerator.compareRegister([5, 0]), byteCodes[6])
 
     def test_generateByteCode_will_make_byteCode_for_identifier_comparison(self):
         lexer = LexerStateMachine(' x == y', self.context)
@@ -486,8 +493,8 @@ class TestByteCodeGenerator(unittest.TestCase):
 
         self.byteCodeGenerator.initGeneration()
         byteCodes = token.generateByteCode()
-        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 8]), byteCodes[0])
-        self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 4]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 8]), byteCodes[1])
         self.assertEqual(self.byteCodeGenerator.compareRegister([0, 5]), byteCodes[2])
 
     def test_generateByteCode_will_make_byteCode_for_less_than_expression(self):
@@ -501,9 +508,9 @@ class TestByteCodeGenerator(unittest.TestCase):
 
         self.byteCodeGenerator.initGeneration()
         byteCodes = token.generateByteCode()
-        self.assertEqual(self.byteCodeGenerator.loadValue([0, 3]), byteCodes[0])
-        self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.compareIsLessThan([0, 5]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 4]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 3]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.compareIsLessThan([5, 0]), byteCodes[2])
 
     def test_generateByteCode_will_make_byteCode_for_this_simple_equation(self):
         lexer = LexerStateMachine(' x = 2 + 3 * 4 / 5', self.context)
@@ -516,17 +523,17 @@ class TestByteCodeGenerator(unittest.TestCase):
 
         self.byteCodeGenerator.initGeneration()
         byteCodes = token.generateByteCode()
-        self.assertEqual(self.byteCodeGenerator.loadValue([0, 4]), byteCodes[0])
-        self.assertEqual(self.byteCodeGenerator.loadValue([5, 3]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.loadValue([0, 3]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 4]), byteCodes[1])
         self.assertEqual(self.byteCodeGenerator.multiplyRegister([0, 0, 5]), byteCodes[2])
-        self.assertEqual(self.byteCodeGenerator.loadValue([5,5]), byteCodes[3])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 5]), byteCodes[3])
         self.assertEqual(self.byteCodeGenerator.divideRegister([0, 0, 5]), byteCodes[4])
         self.assertEqual(self.byteCodeGenerator.loadValue([5, 2]), byteCodes[5])
         self.assertEqual(self.byteCodeGenerator.addRegister([0, 0, 5]), byteCodes[6])
         self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[7])
-        self.assertEqual(self.byteCodeGenerator.assignRegister([0, 5]), byteCodes[8])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([0, 5]), byteCodes[8])
 
-    def xtest_generateByteCode_will_make_byteCode_for_this_simple_equation_with_braces(self):
+    def test_generateByteCode_will_make_byteCode_for_this_simple_equation_with_braces(self):
         lexer = LexerStateMachine(' x = 2 + 3 * (4 / 5)', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
@@ -534,7 +541,6 @@ class TestByteCodeGenerator(unittest.TestCase):
         token = parser.parse(0)
         self.informationInjector.injectRegisterRequired(token)
         self.byteCodeGenerator.variablesInThisAST['x'] = 4
-
         self.byteCodeGenerator.initGeneration()
         byteCodes = token.generateByteCode()
         self.assertEqual(self.byteCodeGenerator.loadValue([0, 4]), byteCodes[0])
@@ -545,7 +551,30 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.loadValue([5, 2]), byteCodes[5])
         self.assertEqual(self.byteCodeGenerator.addRegister([0, 0, 5]), byteCodes[6])
         self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[7])
-        self.assertEqual(self.byteCodeGenerator.assignRegister([0, 5]), byteCodes[8])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([0, 5]), byteCodes[8])
+
+
+    def test_generateByteCode_will_make_byteCode_for_the_expression_that_contain_braces_in_the_middle_of_the_expression(self):
+        lexer = LexerStateMachine(' x = 123 * (456 + 145) / (150- 200)', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parse(0)
+        self.informationInjector.injectRegisterRequired(token)
+        self.byteCodeGenerator.variablesInThisAST['x'] = 4
+        self.byteCodeGenerator.initGeneration()
+        byteCodes = token.generateByteCode()
+        self.assertEqual(self.byteCodeGenerator.loadValue([0, 456]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 145]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.addRegister([0, 0, 5]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 123]), byteCodes[3])
+        self.assertEqual(self.byteCodeGenerator.multiplyRegister([0, 0, 5]),byteCodes[4])
+        self.assertEqual(self.byteCodeGenerator.loadValue([1, 150]), byteCodes[5])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 200]), byteCodes[6])
+        self.assertEqual(self.byteCodeGenerator.subRegister([5, 1, 5]), byteCodes[7])
+        self.assertEqual(self.byteCodeGenerator.divideRegister([0, 0, 5]), byteCodes[8])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[9])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([0, 5]), byteCodes[10])
         
 
 if __name__ == '__main__':

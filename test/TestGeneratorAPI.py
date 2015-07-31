@@ -49,8 +49,8 @@ class TestGeneratorAPI(unittest.TestCase):
         token = parser.parse(0)
 
         byteCodes = self.generatorAPI.generateCode(token)
-        self.assertEqual(self.byteCodeGenerator.loadValue([0, 4]), byteCodes[0])
-        self.assertEqual(self.byteCodeGenerator.loadValue([5, 3]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.loadValue([0, 3]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 4]), byteCodes[1])
         self.assertEqual(self.byteCodeGenerator.multiplyRegister([0, 0, 5]), byteCodes[2])
         self.assertEqual(self.byteCodeGenerator.loadValue([5, 2]), byteCodes[3])
         self.assertEqual(self.byteCodeGenerator.addRegister([0, 0, 5]), byteCodes[4])
@@ -67,15 +67,15 @@ class TestGeneratorAPI(unittest.TestCase):
         self.byteCodeGenerator.variablesInThisAST['z'] = 12
 
         byteCodes = self.generatorAPI.generateCode(token)
-        self.assertEqual(self.byteCodeGenerator.loadValue([0, 3]), byteCodes[0])
-        self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 4]), byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.assignRegister([0, 5]), byteCodes[2])
-        self.assertEqual(self.byteCodeGenerator.loadValue([0, 4]), byteCodes[3])
-        self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 8]), byteCodes[4])
-        self.assertEqual(self.byteCodeGenerator.assignRegister([0, 5]), byteCodes[5])
-        self.assertEqual(self.byteCodeGenerator.loadValue([0, 10]), byteCodes[6])
-        self.assertEqual(self.byteCodeGenerator.loadRegister([5, 7, 12]), byteCodes[7])
-        self.assertEqual(self.byteCodeGenerator.assignRegister([0, 5]), byteCodes[8])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 4]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 3]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([5, 0]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 8]), byteCodes[3])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 4]), byteCodes[4])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([5, 0]), byteCodes[5])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 12]), byteCodes[6])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 10]), byteCodes[7])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([5, 0]), byteCodes[8])
 
 
 if __name__ == '__main__':
