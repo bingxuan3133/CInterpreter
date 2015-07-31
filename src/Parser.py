@@ -20,7 +20,7 @@ class Parser:
             return token  # number token: come in first time, else operator token: after rolling in the while loop
         except SyntaxError as e:
             errorMSG = self.processException(e)
-            raise SyntaxError(errorMSG )
+            raise SyntaxError(errorMSG)
 
     def parseStatement(self, bindingPower):
         try:
@@ -50,7 +50,7 @@ class Parser:
                     return list
         except SyntaxError as e:
             errorMSG  = self.processException(e)
-            raise SyntaxError (errorMSG )
+            raise SyntaxError (errorMSG)
         #self.scopeBuilder.buildScope(returnedToken)
         self.lexer.peep(';')
         self.lexer.advance()

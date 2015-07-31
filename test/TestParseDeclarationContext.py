@@ -1045,7 +1045,7 @@ class TestPointerDeclaration(unittest.TestCase):
         self.manager.setCurrentContexts(self.contexts)
 
     def test_pointer_to_int(self):
-        lexer = LexerStateMachine('int *ptr ;', self.context)
+        lexer = LexerStateMachine('int *ptr;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -1055,17 +1055,18 @@ class TestPointerDeclaration(unittest.TestCase):
         self.assertEqual('ptr', token[0].data[0].data[0].data[0])
 
     def test_bracket_pointer_to_int(self):
-        lexer = LexerStateMachine('int (*ptr) ;', self.context)
+        lexer = LexerStateMachine('int (*ptr);', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parseStatement(0)
         self.assertEqual('int', token[0].id)
-        self.assertEqual('*', token[0].data[0].id)
-        self.assertEqual('ptr', token[0].data[0].data[0].data[0])
+        self.assertEqual('(', token[0].data[0].id)
+        self.assertEqual('*', token[0].data[0].data[0].id)
+        self.assertEqual('ptr', token[0].data[0].data[0].data[0].data[0])
 
-    def test_int_pointer_array(self):
-        lexer = LexerStateMachine('int *ptr [ 10 ] ;', self.context)
+    def test_array_of_pointers_to_int(self):
+        lexer = LexerStateMachine('int *ptr[10];', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
@@ -1076,8 +1077,47 @@ class TestPointerDeclaration(unittest.TestCase):
         self.assertEqual('ptr', token[0].data[0].data[0].data[0].data[0])
         self.assertEqual(10, token[0].data[0].data[0].data[1].data[0])
 
-    def xtest_int_pointer_equal_3(self):
-        lexer = Lexer('int * ptr = 3 ;', self.context)
+    def test_pointer_to_array_of_ints(self):
+        lexer = LexerStateMachine('int (*ptr)[10];', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('[', token[0].data[0].id)
+        self.assertEqual('(', token[0].data[0].data[0].id)
+        self.assertEqual(10, token[0].data[0].data[1].data[0])
+        self.assertEqual('*', token[0].data[0].data[0].data[0].id)
+        self.assertEqual('ptr', token[0].data[0].data[0].data[0].data[0].data[0])
+
+    def test_pointer_with_literal_value_should_fail(self):
+        lexer = LexerStateMachine('int *10;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('[', token[0].data[0].id)
+        self.assertEqual('(', token[0].data[0].data[0].id)
+        self.assertEqual(10, token[0].data[0].data[1].data[0])
+        self.assertEqual('*', token[0].data[0].data[0].data[0].id)
+        self.assertEqual(10, token[0].data[0].data[0].data[0].data[0].data[0])
+
+    def test_no_identifier_should_fail(self):
+        lexer = LexerStateMachine('int (*10)[10];', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        self.assertEqual('int', token[0].id)
+        self.assertEqual('[', token[0].data[0].id)
+        self.assertEqual('(', token[0].data[0].data[0].id)
+        self.assertEqual(10, token[0].data[0].data[1].data[0])
+        self.assertEqual('*', token[0].data[0].data[0].data[0].id)
+        self.assertEqual(10, token[0].data[0].data[0].data[0].data[0].data[0])
+
+    def xtest_int_pointer_equal_3(self):  # check if the left token of '=', (identifier) will contain the *, [] or not
+        lexer = LexerStateMachine('int *ptr = 3;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 

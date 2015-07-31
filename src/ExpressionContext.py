@@ -63,7 +63,7 @@ class ExpressionContext(Context):
     def addGroupOperator(self, id, bindingPower = 0):
         thisContext = self
         def nud(self):
-            thisContext.contextManager.parser.lexer.peep('(')
+            thisContext.contextManager.parser.lexer.peep('(')  # can be deleted
             thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
             self.data.append(returnedToken)
