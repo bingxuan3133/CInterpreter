@@ -234,11 +234,23 @@ class ByteCodeGenerator:
             thisGenerator.byteCodeList.insert(tempLocation, thisGenerator.branch([branchSize]))
             thisGenerator.byteCodeList.append(thisGenerator.branch([-branchSize]))
             return thisGenerator.byteCodeList
+
+        def doByteCode(self):
+            tempLocation = thisGenerator.byteCodeList.__len__()
+            for statement in self.data[1][0].data:
+                statement.generateByteCode()
+                thisGenerator.mapping.reset()
+            self.data[0].generateByteCode()
+            thisGenerator.byteCodeList.append(thisGenerator.branch([1]))
+            branchSize = thisGenerator.byteCodeList.__len__()-tempLocation+1
+            thisGenerator.byteCodeList.append(thisGenerator.branch([-branchSize]))
+
+            return thisGenerator.byteCodeList
         generationFunction = {'(literal)':([None],[generalByteCode]), '(identifier)':([None],[generalByteCode]), '+':([None],[generalByteCode]),
                               '-':([None],[generalByteCode],), '*':([None],[generalByteCode]), '/':([None],[generalByteCode]),'==':([None],[generalByteCode]),
                             '=':([None],[generalByteCode]),'<':([None],[generalByteCode]),
                               'int':([None],[generalByteCode]),'long':([None],[generalByteCode]), 'short':([None],[generalByteCode]),
-                              'if':([None],[ifByteCode]),'while':([None],[whileByteCode]),'else':([None],[noByteCode]),
+                              'if':([None],[ifByteCode]),'while':([None],[whileByteCode]),'do':([None],[doByteCode]),'else':([None],[noByteCode]),
                               ',':([None],[noByteCode]),'(declaration&definition)':([None],[noByteCode]),
                               'unsigned':([None],[noByteCode]),'signed':([None],[noByteCode]),'>':([None],[noByteCode]),'<=':([None],[noByteCode]),'>=':([None],[noByteCode]),
                               '(':([None],[noByteCode]),';':([None],[noByteCode]),')':([None],[noByteCode]),'{':([None],[noByteCode]),'}':([None],[noByteCode]),

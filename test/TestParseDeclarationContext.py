@@ -1094,27 +1094,25 @@ class TestPointerDeclaration(unittest.TestCase):
         lexer = LexerStateMachine('int *10;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-
-        token = parser.parseStatement(0)
-        self.assertEqual('int', token[0].id)
-        self.assertEqual('[', token[0].data[0].id)
-        self.assertEqual('(', token[0].data[0].data[0].id)
-        self.assertEqual(10, token[0].data[0].data[1].data[0])
-        self.assertEqual('*', token[0].data[0].data[0].data[0].id)
-        self.assertEqual(10, token[0].data[0].data[0].data[0].data[0].data[0])
+        try:
+            parser.parseStatement(0)
+        except SyntaxError as e:
+            self.assertEqual("Error[1][6]:Expecting (identifier) before (literal)"+ '\n' +
+                               'int *10;'+ '\n' +
+                               '     ^',e.msg)
 
     def test_no_identifier_should_fail(self):
         lexer = LexerStateMachine('int (*10)[10];', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
-        token = parser.parseStatement(0)
-        self.assertEqual('int', token[0].id)
-        self.assertEqual('[', token[0].data[0].id)
-        self.assertEqual('(', token[0].data[0].data[0].id)
-        self.assertEqual(10, token[0].data[0].data[1].data[0])
-        self.assertEqual('*', token[0].data[0].data[0].data[0].id)
-        self.assertEqual(10, token[0].data[0].data[0].data[0].data[0].data[0])
+        try:
+            parser.parseStatement(0)
+        except SyntaxError as e:
+            self.assertEqual("Error[1][7]:Expecting (identifier) before (literal)"+ '\n' +
+                               'int (*10)[10];'+ '\n' +
+                               '      ^',e.msg)
+
 
     def xtest_int_pointer_equal_3(self):  # check if the left token of '=', (identifier) will contain the *, [] or not
         lexer = LexerStateMachine('int *ptr = 3;', self.context)

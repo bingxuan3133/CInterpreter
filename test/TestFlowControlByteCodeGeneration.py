@@ -51,6 +51,7 @@ class TestFlowControlByteCodeGeneration(unittest.TestCase):
         self.expressionContext.addOperator(')', 0)
         self.flowControlContext.addIfControl('if', 0)
         self.flowControlContext.addWhileControl('while', 0)
+        self.flowControlContext.addDoWhileControl('do', 0)
         #self.defaultContext.addKeyword('while')
 
 
@@ -202,6 +203,56 @@ class TestFlowControlByteCodeGeneration(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.loadValue([5, 2000]),byteCodes[12])
         self.assertEqual(self.byteCodeGenerator.storeRegister([5, 0]),byteCodes[13])
         self.assertEqual(self.byteCodeGenerator.branch([-10]),byteCodes[14])
+
+    def test_generateByteCode_will_generate_code_for_do_while_loop(self):
+        lexer = LexerStateMachine('do{ }while(x == 321); ', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parse(0)
+        self.byteCodeGenerator.variablesInThisAST['x'] = 4
+        self.byteCodeGenerator.variablesInThisAST['y'] = 8
+        self.byteCodeGenerator.variablesInThisAST['z'] = 12
+
+        self.informationInjector.injectRegisterRequired(token)
+        self.byteCodeGenerator.initGeneration()
+        byteCodes = token.generateByteCode()
+        byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 4]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 321]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.compareRegister([5, 0]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.branchIfTrue([1]), byteCodes[3])
+        self.assertEqual(self.byteCodeGenerator.branch([-5]), byteCodes[4])
+
+    def test_generateByteCode_will_generate_code_for_do_while_loop_with_statements_inside(self):
+        lexer = LexerStateMachine('do{x = 1500;\
+                                    y = 2500;\
+                                    z = 5500;\
+                                    }while(x == 321); ', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parse(0)
+        self.byteCodeGenerator.variablesInThisAST['x'] = 4
+        self.byteCodeGenerator.variablesInThisAST['y'] = 8
+        self.byteCodeGenerator.variablesInThisAST['z'] = 12
+
+        self.informationInjector.injectRegisterRequired(token)
+        self.byteCodeGenerator.initGeneration()
+        byteCodes = token.generateByteCode()
+        byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 4]),byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 1500]),byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([5, 0]),byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 8]),byteCodes[3])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 2500]),byteCodes[4])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([5, 0]),byteCodes[5])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 12]),byteCodes[6])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 5500]),byteCodes[7])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([5, 0]),byteCodes[8])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 4]), byteCodes[9])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 321]), byteCodes[10])
+        self.assertEqual(self.byteCodeGenerator.compareRegister([5, 0]), byteCodes[11])
+        self.assertEqual(self.byteCodeGenerator.branchIfTrue([1]), byteCodes[12])
+        self.assertEqual(self.byteCodeGenerator.branch([-14]), byteCodes[13])
 
 if __name__ == '__main__':
     unittest.main()

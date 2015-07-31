@@ -589,6 +589,6 @@ class TestLexer(unittest.TestCase):
             lexer.peep('(literal)')
             raise SyntaxError("Exception test failed!")
         except SyntaxError as e:
-            self.assertEqual("Error[1][3]:Expecting (literal) before (identifier)"+'\n'+
+            self.assertEqual("Error[1][0]:Expecting (literal) before (identifier)"+'\n'+
                              'x =myVar +'+'\n'+
-                             '  ^', e.msg)
+                             '^', e.msg)
