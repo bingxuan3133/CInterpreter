@@ -449,6 +449,31 @@ class TestParseIfFlowControl(unittest.TestCase):
         self.assertEqual('else', token.data[2].id)
         self.assertEqual('{', token.data[2].data[0][0].id)
 
+    def test_parse_will_build_an_if_else_AST_with_statements(self):
+        lexer = LexerStateMachine(' if ( x == 3 ) { x = 6 + 3 ;}\nelse \n { x = 123456;} ', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parse(0)
+
+
+        self.assertEqual('if', token.id)
+        self.assertEqual('(', token.data[0].id)
+        self.assertEqual('==', token.data[0].data[0].id)
+        self.assertEqual('x', token.data[0].data[0].data[0].data[0])
+        self.assertEqual(3, token.data[0].data[0].data[1].data[0])
+        self.assertEqual('{', token.data[1][0].id)
+        self.assertEqual('=', token.data[1][0].data[0].id)
+        self.assertEqual('x', token.data[1][0].data[0].data[0].data[0])
+        self.assertEqual('+', token.data[1][0].data[0].data[1].id)
+        self.assertEqual(6, token.data[1][0].data[0].data[1].data[0].data[0])
+        self.assertEqual(3, token.data[1][0].data[0].data[1].data[1].data[0])
+        self.assertEqual('else', token.data[2].id)
+        self.assertEqual('{', token.data[2].data[0][0].id)
+        self.assertEqual('=', token.data[2].data[0][0].data[0].id)
+        self.assertEqual('x', token.data[2].data[0][0].data[0].data[0].data[0])
+        self.assertEqual(123456, token.data[2].data[0][0].data[0].data[1].data[0])
+
     def test_parse_will_raise_error_if_the_if_statement_contain_no_condition(self):
 
         lexer = LexerStateMachine(' if ( ) ', self.context)

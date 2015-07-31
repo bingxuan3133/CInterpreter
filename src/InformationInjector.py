@@ -10,10 +10,15 @@ class InformationInjector:
             self.injectRegisterRequired(token)
             for token in tokenToInject.data[1][0].data:
                 self.injectRegisterRequired(token)
+            if tokenToInject.data.__len__() == 3:
+                for token in tokenToInject.data[2].data[0][0].data:
+                    self.injectRegisterRequired(token)
             return
         elif tokenToInject.id == 'while':
             token = tokenToInject.data[0]
             self.injectRegisterRequired(token)
+            for token in tokenToInject.data[1][0].data:
+                self.injectRegisterRequired(token)
             return
         elif tokenToInject.id == '(':
             token = tokenToInject.data[0]

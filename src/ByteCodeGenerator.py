@@ -214,17 +214,31 @@ class ByteCodeGenerator:
                 statement.generateByteCode()
                 thisGenerator.mapping.reset()
             thisGenerator.byteCodeList.insert(tempLocation, thisGenerator.branch([thisGenerator.byteCodeList.__len__()-tempLocation]))
+            if self.data.__len__() == 3:
+                for statement in self.data[2].data[0][0].data:
+                    statement.generateByteCode()
+                    thisGenerator.mapping.reset()
             return thisGenerator.byteCodeList
 
         def whileByteCode(self):
             self.data[0].generateByteCode()
             thisGenerator.mapping.reset()
+            thisGenerator.byteCodeList.append(thisGenerator.branchIfTrue([1]))
+            tempLocation = thisGenerator.byteCodeList.__len__()
+            for statement in self.data[1][0].data:
+                statement.generateByteCode()
+                thisGenerator.mapping.reset()
+            branchSize = thisGenerator.byteCodeList.__len__()-tempLocation
+            if branchSize != 0:
+                branchSize += 1
+            thisGenerator.byteCodeList.insert(tempLocation, thisGenerator.branch([branchSize]))
+            thisGenerator.byteCodeList.append(thisGenerator.branch([-branchSize]))
             return thisGenerator.byteCodeList
         generationFunction = {'(literal)':([None],[generalByteCode]), '(identifier)':([None],[generalByteCode]), '+':([None],[generalByteCode]),
                               '-':([None],[generalByteCode],), '*':([None],[generalByteCode]), '/':([None],[generalByteCode]),'==':([None],[generalByteCode]),
                             '=':([None],[generalByteCode]),'<':([None],[generalByteCode]),
                               'int':([None],[generalByteCode]),'long':([None],[generalByteCode]), 'short':([None],[generalByteCode]),
-                              'if':([None],[ifByteCode]),'while':([None],[whileByteCode]),
+                              'if':([None],[ifByteCode]),'while':([None],[whileByteCode]),'else':([None],[noByteCode]),
                               ',':([None],[noByteCode]),'(declaration&definition)':([None],[noByteCode]),
                               'unsigned':([None],[noByteCode]),'signed':([None],[noByteCode]),'>':([None],[noByteCode]),'<=':([None],[noByteCode]),'>=':([None],[noByteCode]),
                               '(':([None],[noByteCode]),';':([None],[noByteCode]),')':([None],[noByteCode]),'{':([None],[noByteCode]),'}':([None],[noByteCode]),
