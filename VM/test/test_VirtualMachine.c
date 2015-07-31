@@ -5,17 +5,11 @@
 #include "Exception.h"
 
 void setUp(void) {
-  int i;
-  for(i = 0; i < MAX_REG; i ++) {
-    reg[i].data = 0;
-    reg[i].base = 0;
-    reg[i].limit = 0;
-  }
+  initVM();
 }
 
-void tearDown(void)
-{
-  clearProgramCounter();
+void tearDown(void) {
+
 }
 /*
 void xtest_explore_function_pointer_array(void) {
@@ -70,12 +64,8 @@ void test_VMRun(void) {
 void test_VMStep_test(void) {
   int bytecodes[10] = {0};
   char strBuffer[300] = {0};
-  bytecodes[0] = 0x270c;
-  bytecodes[1] = halt();
+  bytecodes[0] = halt();
 
-  VMStep(bytecodes);
-  dumpBytecode(0x270c);
-  TEST_ASSERT_EQUAL(-4, reg[REG_7].data);
   VMStep(bytecodes);
 }
 

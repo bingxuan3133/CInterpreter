@@ -59,10 +59,6 @@ class ByteCodeGenerator:
         number = 0x0a | GPR[0] << 8 | GPR[1] << 11
         return number
 
-    def subFrameRegister(self, GPR=[]):
-        number = 0x0c | GPR[0] << 8 | GPR[1] << 11
-        return number
-
     def addRegister(self,GPR =[]):
         number = 0x0d | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number

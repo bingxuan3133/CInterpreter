@@ -1112,7 +1112,7 @@ class TestPointerDeclaration(unittest.TestCase):
         except SyntaxError as e:
             self.assertEqual('', e.msg)
 
-    def xtest_int_pointer_equal_3(self):  # check if the left token of '=', (identifier) will contain the *, [] or not
+    def test_int_pointer_equal_3(self):  # check if the left token of '=', (identifier) will contain the *, [] or not
         lexer = LexerStateMachine('int *ptr = 3;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)

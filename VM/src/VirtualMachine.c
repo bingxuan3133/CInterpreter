@@ -5,13 +5,60 @@
 
 unsigned int programCounter = 0;
 Register reg[MAX_REG];
+Status statusReg;
+
+void initVM() {
+  clearRegisters();
+  clearProgramCounter();
+  clearStatus();
+}
+
+// Register
+void clearRegisters() {
+  int i;
+  for(i = 0; i < MAX_REG; i ++) {
+    reg[i].data = 0;
+    reg[i].base = 0;
+    reg[i].limit = 0;
+  }
+}
+
+// Status Register
+void clearStatus() {
+  statusReg.B = 0;
+}
+
+void setStatusBit(char bit) {
+  switch(bit) {
+  case 'B':
+    statusReg.B = 1;
+    break;
+  default:
+    break;
+  }
+}
+
+void clearStatusBit(char bit) {
+  switch(bit) {
+  case 'B':
+    statusReg.B = 0;
+    break;
+  default:
+    break;
+  }
+}
+
+// Program Counter
+void clearProgramCounter() {
+  programCounter = 0;
+}
+
+void moveProgramCounter(int relativeAddress) {
+  programCounter = programCounter + relativeAddress;
+}
 
 unsigned int getProgramCounter() {
   return programCounter;
-}
-
-void clearProgramCounter() {
-  programCounter = 0;
 }
 
 int getBytecode(FILE *file) {
