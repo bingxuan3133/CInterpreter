@@ -107,14 +107,16 @@ class MyTestCase(unittest.TestCase):
         vm.VMStep(cbytecodes)
 
     def test_VMStep_should_raise_RuntimeError_given_invalid_bytecode(self):
-        byteCodes = [0xfff12314]
+        bytecodes = [0xfff12314]
 
         vm = VirtualMachine()
 
         try:
-            vm.VMStep(byteCodes)
-        except e as RuntimeError:
-            self.assertEqual('ERROR: invalid bytecode (0xfff12314, pc = 2).', e.errMsg)
+            cbytecodes = vm.convertToCArray(bytecodes)
+            vm.VMStep(cbytecodes)
+        except RuntimeError as e:
+            self.assertEqual('ERROR: invalid bytecode (0xfff12314, pc = 2).', e.args)
+            #self.assertEqual('ERROR: invalid bytecode (0xfff12314, pc = 2).', e.errMsg)
 
     def xtest_call_directly_to_dll_VMRun(self):
         lexer = LexerStateMachine('int x;', self.context)

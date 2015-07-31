@@ -1,5 +1,6 @@
 # Pratt's parser implementation
 
+import os,sys
 from LexerStateMachine import *
 from Scope import ScopeBuilder
 
@@ -50,7 +51,7 @@ class Parser:
                     return list
         except SyntaxError as e:
             errorMSG  = self.processException(e)
-            raise SyntaxError (errorMSG)
+            raise SyntaxError(errorMSG)
         #self.scopeBuilder.buildScope(returnedToken)
         self.lexer.peep(';')
         self.lexer.advance()
@@ -67,9 +68,12 @@ class Parser:
             token = self.lexer.peep()
         return list
 
-    def processException(self, e):
+    def processException(self, e, errorToken = None):
+        if errorToken is None:
+            tempToken = self.lexer.peep()
+        else:
+            tempToken = errorToken
         temp = e.msg.split('\n')
-        tempToken = self.lexer.peep()
         caretMessage = ' '*(tempToken.column-1)+'^'
         if temp.__len__() == 1:
             MSG="Error[{}][{}]:{}\n{}\n{}".format(tempToken.line,tempToken.column,temp[0],tempToken.oriString,caretMessage)

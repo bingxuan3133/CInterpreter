@@ -76,5 +76,6 @@ class TestFlowControlByteCodeGeneration(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.branchIfFalse(), byteCodes[3])
         self.assertEqual('IF1', byteCodes[4])
         self.assertEqual('IF1', byteCodes[5])
+
 if __name__ == '__main__':
     unittest.main()

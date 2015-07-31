@@ -26,7 +26,9 @@ class DeclarationContext(Context):
             thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.contextManager.parser.parse(bindingPower)
             if thisContext.getIdentifier(returnedToken) is None:
-                raise SyntaxError('expect identifier before here')
+                error = SyntaxError('expect identifier before ' + returnedToken.id)
+                MSG = thisContext.contextManager.parser.processException(error, returnedToken)
+                raise SyntaxError(MSG)
             self.data.append(returnedToken)
             return self
         def led(self):
