@@ -9,7 +9,7 @@ from DefaultContext import *
 from DeclarationContext import *
 from ExpressionContext import *
 from FlowControlContext import *
-from InformationInjector import *
+from GeneratorAPI import *
 from VirtualMachine import *
 
 class MyTestCase(unittest.TestCase):
@@ -40,6 +40,7 @@ class MyTestCase(unittest.TestCase):
         self.manager.addContext('FlowControl', self.flowControlContext)
         self.manager.setCurrentContexts(self.contexts)
 
+        self.generator = GeneratorAPI(self.context, self.manager)
         self.byteCodeGenerator = ByteCodeGenerator(self.context, self.manager)
         self.informationInjector = InformationInjector()
 
@@ -48,10 +49,7 @@ class MyTestCase(unittest.TestCase):
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatement(0)
-        self.informationInjector.injectRegisterRequired(token[0])
-        self.byteCodeGenerator.initGeneration()
-        byteCodes = token[0].generateByteCode()
-        byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
+        byteCodes =self.generator.generateCode(token)
         byteCodes.insert(0, self.byteCodeGenerator.dumpRegisterHex([7]))  # hacked bytecode to display r7 value
         byteCodes.insert(2, self.byteCodeGenerator.dumpRegisterHex([7]))  #
 
@@ -74,16 +72,13 @@ class MyTestCase(unittest.TestCase):
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatement(0)
-        self.informationInjector.injectRegisterRequired(token[0])
-        self.byteCodeGenerator.initGeneration()
-        bytecodes = token[0].generateByteCode()
-        bytecodes = self.byteCodeGenerator.injectPrologue(byteCodes)
+        byteCodes =self.generator.generateCode(token)
         vmdll = cdll.LoadLibrary('../VM/build/release/out/c/VirtualMachine.dll')
 
-        bytecodes.append(0xffffffff)  # to halt the VM
-        bytecodesSize = len(bytecodes)
+        byteCodes.append(0xffffffff)  # to halt the VM
+        bytecodesSize = len(byteCodes)
         cByteCodes_t = c_uint * bytecodesSize
-        cByteCodes = cByteCodes_t(*bytecodes)
+        cByteCodes = cByteCodes_t(*byteCodes)
         vmdll._VMRun(cByteCodes)
 
     def test_VMStep(self):
@@ -91,16 +86,13 @@ class MyTestCase(unittest.TestCase):
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatement(0)
-        self.informationInjector.injectRegisterRequired(token[0])
-        self.byteCodeGenerator.initGeneration()
-        bytecodes = token[0].generateByteCode()
-        bytecodes = self.byteCodeGenerator.injectPrologue(bytecodes)
-        bytecodes.insert(0, self.byteCodeGenerator.dumpRegisterHex([7]))  # hacked bytecode to display r7 value
-        bytecodes.insert(2, self.byteCodeGenerator.dumpRegisterHex([7]))  #
-        bytecodes.append(self.byteCodeGenerator.halt())
+        byteCodes =self.generator.generateCode(token)
+        byteCodes.insert(0, self.byteCodeGenerator.dumpRegisterHex([7]))  # hacked bytecode to display r7 value
+        byteCodes.insert(2, self.byteCodeGenerator.dumpRegisterHex([7]))  #
+        byteCodes.append(self.byteCodeGenerator.halt())
 
         vm = VirtualMachine()
-        cbytecodes = vm.convertToCArray(bytecodes)
+        cbytecodes = vm.convertToCArray(byteCodes)
         vm.VMStep(cbytecodes)
         vm.VMStep(cbytecodes)
         vm.VMStep(cbytecodes)
@@ -123,16 +115,13 @@ class MyTestCase(unittest.TestCase):
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parseStatement(0)
-        self.informationInjector.injectRegisterRequired(token[0])
-        self.byteCodeGenerator.initGeneration()
-        bytecodes = token[0].generateByteCode()
-        bytecodes = self.byteCodeGenerator.injectPrologue(byteCodes)
+        byteCodes =self.generator.generateCode(token)
         vmdll = cdll.LoadLibrary('../VM/build/release/out/c/VirtualMachine.dll')
 
-        bytecodes.append(0xffffffff)  # to halt the VM
-        bytecodesSize = len(byteCodes)
+        byteCodes.append(0xffffffff)  # to halt the VM
+        byteCodesSize = len(byteCodes)
         cByteCodes_t = c_uint * byteCodesSize
-        cByteCodes = cByteCodes_t(*bytecodes)
+        cByteCodes = cByteCodes_t(*byteCodes)
         vmdll._VMRun(cByteCodes)
 
 if __name__ == '__main__':
