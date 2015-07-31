@@ -27,9 +27,9 @@ class LexerStateMachine:
     def peep(self, expectedSymbol = None):
         if expectedSymbol is not None and self.currentToken.id != expectedSymbol:
             self.byPassTheSpace()
-            caretMessage = ' '*(self.inStream.column-1)+'^'
+            caretMessage = ' '*(self.currentToken.column-1)+'^'
             raise SyntaxError("Error[{}][{}]:Expecting {} before {}\n{}\n{}"\
-                             .format(self.inStream.line,self.inStream.column,expectedSymbol,self.currentToken.id,self.inStream.oriString,caretMessage))
+                             .format(self.currentToken.line,self.currentToken.column,expectedSymbol,self.currentToken.id,self.currentToken.oriString,caretMessage))
         return self.currentToken
     #End API
 
