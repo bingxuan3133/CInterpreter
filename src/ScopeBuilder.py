@@ -15,7 +15,6 @@ class ScopeBuilder:
     def __init__(self):  # closing brace is used for implementation of buildScope
         self.scope = Scope()
         self.currentScope = copy.copy(self.scope)
-        self.interestedTokens = []
         self.scopeHistory = []
 
     def addScope(self):

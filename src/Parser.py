@@ -2,7 +2,7 @@
 
 import os,sys
 from LexerStateMachine import *
-from Scope import ScopeBuilder
+from ScopeBuilder import ScopeBuilder
 
 class Parser:
     def __init__(self, lexer, contextManager):
