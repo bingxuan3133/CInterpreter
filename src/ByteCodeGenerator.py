@@ -205,6 +205,7 @@ class ByteCodeGenerator:
 
         respectiveByteCodeFunction = {'=': self.storeRegister, '+': self.addRegister,'-': self.subRegister, '*': self.multiplyRegister, '/': self.divideRegister,'|': self.orRegister,'%':self.modulusRegister,
                                       '==':self.compareRegister,'<':self.compareIsLessThan,'<=':self.compareIsLessThanOrEqual,'>':self.compareIsGreaterThan,'>=':self.compareIsGreaterThanOrEqual,
+                                      '&&':self.orRegister,
                                             '(systemToken)': self.nothing, ';': self.nothing, ',': self.nothing, '}': self.nothing, '{': self.nothing}
 
 
