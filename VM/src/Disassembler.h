@@ -6,6 +6,7 @@ extern void (*disassemble[256])(char*, int);
 int disassembleBytecodes(char *strBuffer, int *bytecode);
 int disassembleBytecode(char *strBuffer, int bytecode);
 void dumpBytecode(int bytecode);
+void __declspec(dllexport) dumpBytecodes(int *bytecode);
 
 void disassembleDumpr(char *strBuffer, int bytecode);
 void disassembleDumprHex(char *strBuffer, int bytecode);

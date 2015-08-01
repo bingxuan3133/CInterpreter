@@ -43,9 +43,26 @@ class TestScope(unittest.TestCase):
         intToken = self.context.createToken('int')
         xToken = self.context.createToken('x')
         intToken.data.append(xToken)
+        scopeBuilder.addType('int')
+
         scopeBuilder.buildScope(intToken)
         self.assertEqual(['x'], scopeBuilder.scope.list)
-        
+
+    def test_buildScope_(self):
+        scopeBuilder = ScopeBuilder()
+        intToken = self.context.createToken('int')
+        xToken = self.context.createToken('x')
+        intToken.data.append(xToken)
+        braceToken = self.context.createToken('{')
+        scopeBuilder.addType('int')
+
+        scopeBuilder.buildScope(intToken)
+        self.assertEqual(['x'], scopeBuilder.scope.list)
+        scopeBuilder.buildScope(braceToken)
+        self.assertEqual(['x', []], scopeBuilder.scope.list)
+        scopeBuilder.buildScope(intToken)
+        self.assertEqual(['x', ['x']], scopeBuilder.scope.list)
+
 """
     def test_buildScope_will_only_care_declaration_but_not_expression(self):
         lexer = LexerStateMachine('int x ;\

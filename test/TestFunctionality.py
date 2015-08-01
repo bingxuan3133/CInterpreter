@@ -149,5 +149,19 @@ class MyTestCase(unittest.TestCase):
         vm.VMStep(cbytecodes)
         vm.VMStep(cbytecodes)
 
+    def test_dumpBytecodes(self):
+        lexer = LexerStateMachine('while( x == 2) {x = 100;\n y = 1000;\n z=2000;} ', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+        self.byteCodeGenerator.variablesInThisAST['x'] = 4
+        self.byteCodeGenerator.variablesInThisAST['y'] = 8
+        self.byteCodeGenerator.variablesInThisAST['z'] = 12
+        bytecodes = self.generator.generateCode(token)
+
+        vm = VirtualMachine()
+        cbytecodes = vm.convertToCArray(bytecodes)
+        vm.dumpBytecodes(cbytecodes)
+
 if __name__ == '__main__':
     unittest.main()

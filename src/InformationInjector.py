@@ -20,6 +20,12 @@ class InformationInjector:
             for token in tokenToInject.data[1][0].data:
                 self.injectRegisterRequired(token)
             return
+        elif tokenToInject.id == 'do':
+            token = tokenToInject.data[0]
+            self.injectRegisterRequired(token)
+            for token in tokenToInject.data[1][0].data:
+                self.injectRegisterRequired(token)
+            return
         elif tokenToInject.id == '(':
             token = tokenToInject.data[0]
 

@@ -65,10 +65,23 @@ int disassembleBytecode(char *strBuffer, int bytecode) {
 }
 
 /**
+ *  Simpler version of disassembleBytecodes
+ */
+void dumpBytecodes(int *bytecode) {
+  char dumpBuffer[100] = {0};
+  unsigned char command = *bytecode;
+  while(*bytecode != halt()) {
+    dumpBytecode(*bytecode);
+    printf("%s\n", dumpBuffer);
+    bytecode++;
+  }
+}
+
+/**
  *  Simpler version of disassembleBytecode
  */
 void dumpBytecode(int bytecode) {
-  char dumpBuffer[300] = {0};
+  char dumpBuffer[100] = {0};
   unsigned char command = bytecode;
   disassembleBytecode(dumpBuffer, bytecode);
   printf("%s", dumpBuffer);

@@ -3,6 +3,7 @@
 import os,sys
 from LexerStateMachine import *
 from ScopeBuilder import ScopeBuilder
+from Context import *
 
 class Parser:
     def __init__(self, lexer, contextManager):
@@ -11,7 +12,6 @@ class Parser:
         self.scopeBuilder = ScopeBuilder()
 
     def parse(self, bindingPower):
-        try:
             token = self.lexer.peep()        # token = leftToken
             token = token.nud()
             token2 = self.lexer.peep()     # token2 = rightToken
@@ -19,40 +19,34 @@ class Parser:
                 token = token2.led(token)
                 token2 = self.lexer.peep()
             return token  # number token: come in first time, else operator token: after rolling in the while loop
-        except SyntaxError as e:
-            errorMSG = self.processException(e)
-            raise SyntaxError(errorMSG)
 
     def parseStatement(self, bindingPower):
-        try:
-            list = []
-            firstToken = self.lexer.peep()
-            if firstToken.id == ';':
-                self.lexer.advance()
-                return None
-            elif firstToken.id == '{':            # For one block of statements
-                #self.scopeBuilder.buildScope(firstToken)
-                returnedToken = self.parse(bindingPower)
-                flowControlContext = self.contextManager.getContext('FlowControl')
-                #self.scopeBuilder.buildScope(Context.createToken(flowControlContext, '}'))  # Create '}' token for scopeBuilder
-                list.append(returnedToken)
+        list = []
+        firstToken = self.lexer.peep()
+        if firstToken.id == ';':
+            self.lexer.advance()
+            return None
+        elif firstToken.id == '{':            # For one block of statements
+            self.scopeBuilder.buildScope(firstToken)
+            returnedToken = self.parse(bindingPower)
+            flowControlContext = self.contextManager.getContext('FlowControl')
+            self.scopeBuilder.buildScope(Context.createToken(flowControlContext, '}'))  # Create '}' token for scopeBuilder
+            list.append(returnedToken)
+            return list
+        elif firstToken.id in self.contextManager.getContext('FlowControl').symbolTable:  # For some context that do not need ';'
+            returnedToken = self.parse(bindingPower)
+            self.scopeBuilder.buildScope(returnedToken)
+            list.append(returnedToken)
+            return list
+        else:                               # For one statement
+            returnedToken = self.parse(bindingPower)
+            if returnedToken.id == '(declaration&definition)':  # For declaration & definition
+                list.extend(returnedToken.data)
+                self.scopeBuilder.buildScope(returnedToken.data[0])
+                self.lexer.peep(';')
                 return list
-            elif firstToken.id in self.contextManager.getContext('FlowControl').symbolTable:  # For some context that do not need ';'
-                returnedToken = self.parse(bindingPower)
-                #self.scopeBuilder.buildScope(returnedToken)
-                list.append(returnedToken)
-                return list
-            else:                               # For one statement
-                returnedToken = self.parse(bindingPower)
-                if returnedToken.id == '(declaration&definition)':  # For declaration & definition
-                    list.extend(returnedToken.data)
-                    #self.scopeBuilder.buildScope(returnedToken.data[0])
-                    self.lexer.peep(';')
-                    return list
-        except SyntaxError as e:
-            errorMSG  = self.processException(e)
-            raise SyntaxError(errorMSG)
-        #self.scopeBuilder.buildScope(returnedToken)
+
+        self.scopeBuilder.buildScope(returnedToken)
         self.lexer.peep(';')
         self.lexer.advance()
         list.append(returnedToken)
@@ -67,22 +61,3 @@ class Parser:
                 list.extend(returnedToken)
             token = self.lexer.peep()
         return list
-
-    def processException(self, e, errorToken = None):
-        if errorToken is None:
-            tempToken = self.lexer.peep()
-        else:
-            tempToken = errorToken
-        temp = e.msg.split('\n')
-        caretMessage = ' '*(tempToken.column-1)+'^'
-        if temp.__len__() == 1:
-            MSG="Error[{}][{}]:{}\n{}\n{}".format(tempToken.line,tempToken.column,temp[0],tempToken.oriString,caretMessage)
-        else:
-            splittedTemp = temp[0].split(':')
-            if splittedTemp[0] == "Ignore":
-                MSG=splittedTemp[1]+':'+splittedTemp[2] + '\n'+ temp[1] + '\n'+temp[2]
-            else:
-                splittedTemp[0]="Error[{}][{}]".format(tempToken.line,tempToken.column)
-                splittedTemp[0]=splittedTemp[0]+':'+splittedTemp[1]
-                MSG = splittedTemp[0] + '\n' + tempToken.oriString + '\n' + caretMessage
-        return MSG

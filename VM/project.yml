@@ -48,6 +48,7 @@
      :executable: gcc
      :arguments:
         - -c src/VirtualMachine.c
+        - -c src/Disassembler.c
         - -c src/Exception.c
         - -c src/Instruction.c
         - -c vendor/ceedling/vendor/c_exception/lib/CException.c
@@ -57,7 +58,7 @@
      :arguments:
         - -shared
         - -o build/release/out/c/VirtualMachine.dll
-        - VirtualMachine.o Exception.o Instruction.o CException.o
+        - VirtualMachine.o Disassembler.o Exception.o Instruction.o CException.o
 
 :cmock:
   :mock_prefix: mock_

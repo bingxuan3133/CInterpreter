@@ -38,9 +38,13 @@ class Context:
     def addOperator(self, id, bindingPower = 0, nud = None, led = None):
         thisContext = self
         def nud2(self):
-            raise SyntaxError("Expected a declaration")
+            caretMessage = ' '*(self.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:Expected a declaration\n{}\n{}"\
+                             .format(self.line,self.column,self.oriString,caretMessage))
         def led2(self):
-            raise SyntaxError("Expected a declaration")
+            caretMessage = ' '*(self.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:Expected a declaration\n{}\n{}"\
+                             .format(self.line,self.column,self.oriString,caretMessage))
         symClass = self.symbol(id, bindingPower)
         if nud == None and led == None:
             symClass.nud = nud2
@@ -130,7 +134,7 @@ class Context:
             newToken = self.createFloatingPoint(word)
         else:
             caretMessage = ' '*(column - length-1)+ '^'
-            raise SyntaxError('Ignore:Error[{}][{}]:{} is an unknown token\n{}\n{}'.format(line,column-length,word,originalString,caretMessage))
+            raise SyntaxError('Error[{}][{}]:{} is an unknown token\n{}\n{}'.format(line,column-length,word,originalString,caretMessage))
         newToken.line = line
         newToken.column = column - length
         newToken.length = length

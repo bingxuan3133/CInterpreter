@@ -26,9 +26,9 @@ class DeclarationContext(Context):
             thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.contextManager.parser.parse(bindingPower)
             if thisContext.getIdentifier(returnedToken) is None:
-                error = SyntaxError('expect identifier before ' + returnedToken.id)
-                MSG = thisContext.contextManager.parser.processException(error, returnedToken)
-                raise SyntaxError(MSG)
+                caretMessage = ' '*(returnedToken.column-1)+'^'
+                raise SyntaxError("Error[{}][{}]:Expecting (identifier) before {}\n{}\n{}"\
+                             .format(returnedToken.line,returnedToken.column,returnedToken.id,returnedToken.oriString,caretMessage))
             self.data.append(returnedToken)
             return self
         def led(self):
@@ -41,7 +41,9 @@ class DeclarationContext(Context):
     def addSubscript(self, id, bindingPower):  # []
         thisContext = self
         def nud(self):
-            raise SyntaxError("expected expression before '[' token")  # error handling
+            caretMessage = ' '*(self.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:Expecting (identifier) before {}\n{}\n{}"\
+                             .format(self.line,self.column,self.id,self.oriString,caretMessage))
         def led(self, leftToken):
             self.data.append(leftToken)
             thisContext.contextManager.parser.lexer.advance()
@@ -610,16 +612,22 @@ class DeclarationContext(Context):
             return None  # no identifier found
 
     def handleError(self, token):
+        caretMessage = ' '*(token.errorToken.column-1)+'^'
         if token.errorToken.id in (';', '(systemToken)'):
-            raise SyntaxError('Expecting (identifier) before ' + token.errorToken.id)
+            raise SyntaxError("Error[{}][{}]:Expecting (identifier) before {}\n{}\n{}"\
+                             .format(token.errorToken.line,token.errorToken.column,token.errorToken.id,token.errorToken.oriString,caretMessage))
         elif token.errorToken.id in (token.sign, token.modifier, token.primitive):
-            raise SyntaxError('Duplication of ' + "'" + token.errorToken.id + "'" + ' in declaration statement')
+            raise SyntaxError("Error[{}][{}]:Duplication of '{}' in declaration statement\n{}\n{}"\
+                             .format(token.errorToken.line,token.errorToken.column,token.errorToken.id,token.errorToken.oriString,caretMessage))
         elif token.errorToken.id in ('short', 'long'):
-            raise SyntaxError("Cannot have both 'short' and 'long' in declaration statement")
+            raise SyntaxError("Error[{}][{}]:Cannot have both 'short' and 'long' in declaration statement\n{}\n{}"\
+                             .format(token.errorToken.line,token.errorToken.column,token.errorToken.oriString,caretMessage))
         elif token.errorToken.id in ('unsigned', 'signed'):
-            raise SyntaxError("Cannot have both 'signed' and 'unsigned' in this declaration statement")
+            raise SyntaxError("Error[{}][{}]:Cannot have both 'signed' and 'unsigned' in this declaration statement\n{}\n{}"\
+                             .format(token.errorToken.line,token.errorToken.column,token.errorToken.oriString,caretMessage))
         else:
-            raise SyntaxError(token.errorToken.id + " causes error")
+            raise SyntaxError("Error[{}][{}]:{} causes error\n{}\n{}"\
+                             .format(token.errorToken.line,token.errorToken.column,token.errorToken.id,token.errorToken.oriString,caretMessage))
 
     def buildToken(self, token):
         if token.errorToken is not None:
