@@ -253,7 +253,7 @@ class LexerStateMachine:
         return self.inStream.currentChar == 'e' or self.inStream.currentChar == 'E'
 
     def isMultipleSymbolOperator(self):
-        potentialSymbol = ['+','-','=']
+        potentialSymbol = ['+','-','=','&']
         return self.inStream.currentChar in potentialSymbol
 
     def isEnd(self):

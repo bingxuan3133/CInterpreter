@@ -84,7 +84,7 @@ class InformationInjector:
         secondToken = token.data[1]
         if firstToken.id == '(':
             firstToken = firstToken.data[0]
-        elif secondToken.id == '(':
+        if secondToken.id == '(':
             secondToken = secondToken.data[0]
 
 
@@ -99,7 +99,7 @@ class InformationInjector:
         secondToken = token.data[1]
         if firstToken.id == '(':
             firstToken = firstToken.data[0]
-        elif secondToken.id == '(':
+        if secondToken.id == '(':
             secondToken = secondToken.data[0]
         if token.id == '(':
             return firstToken.maxRequiredRegister
@@ -111,7 +111,7 @@ class InformationInjector:
         secondToken = token.data[1]
         if firstToken.id == '(':
             firstToken = firstToken.data[0]
-        elif secondToken.id == '(':
+        if secondToken.id == '(':
             secondToken = secondToken.data[0]
 
         if token.id == '(':
