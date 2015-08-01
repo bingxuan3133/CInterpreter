@@ -317,47 +317,5 @@ class TestParseStatementWithBraces(unittest.TestCase):
                              '2 + 3 ; }'+'\n'+
                              '        ^', e.msg)
 
-from unittest.mock import Mock
-from unittest.mock import MagicMock
-
-class TestParseStatementToMockBuildScope(unittest.TestCase):
-    def setUp(self):
-        self.manager = ContextManager()
-        self.context = Context(self.manager)
-        self.declarationContext = DeclarationContext(self.manager)
-        self.expressionContext = ExpressionContext(self.manager)
-        self.flowControlContext = FlowControlContext(self.manager)
-        self.contexts = [self.declarationContext, self.expressionContext, self.flowControlContext]
-
-        self.flowControlContext.addBlockOperator('{', 0)
-        self.flowControlContext.addOperator('}', 0)
-        self.expressionContext.addPrefixInfixOperator('+', 70)
-        self.expressionContext.addPrefixInfixOperator('-', 70)
-        self.expressionContext.addInfixOperator('*', 100)
-        self.expressionContext.addInfixOperator('/', 100)
-        self.expressionContext.addInfixOperator('==', 20)
-        self.expressionContext.addInfixOperator('=', 20)
-        self.expressionContext.addOperator(';')
-        self.declarationContext.addInt('int', 0)
-        self.flowControlContext.addIfControl('if', 0)
-        self.expressionContext.addGroupOperator('(', 0)
-        self.expressionContext.addGroupOperator(')', 0)
-
-        self.manager.addContext('Declaration', self.declarationContext)
-        self.manager.addContext('Expression', self.expressionContext)
-        self.manager.addContext('FlowControl', self.flowControlContext)
-        self.manager.setCurrentContexts(self.contexts)
-
-    def test_parseStatement_call_buildScope_whenever_need(self):
-        lexer = LexerStateMachine('int x;', self.context)
-        parser = Parser(lexer, self.manager)
-        self.manager.setParser(parser)
-        token = parser.parseStatement(0)
-        scopeBuilder = ScopeBuilder()
-        mock = MagicMock(wraps=scopeBuilder.buildScope)
-        print(mock.call_count)
-        mock.assert_called_once_with(token[0])
-
-
 if __name__ == '__main__':
     unittest.main()

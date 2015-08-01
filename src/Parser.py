@@ -10,6 +10,7 @@ class Parser:
         self.lexer = lexer
         self.contextManager = contextManager
         self.scopeBuilder = ScopeBuilder()
+        self.closingBrace = Context.symbol(Context(self.contextManager), '}')  # does this count as hack?
 
     def parse(self, bindingPower):
             token = self.lexer.peep()        # token = leftToken
@@ -29,8 +30,7 @@ class Parser:
         elif firstToken.id == '{':            # For one block of statements
             self.scopeBuilder.buildScope(firstToken)
             returnedToken = self.parse(bindingPower)
-            flowControlContext = self.contextManager.getContext('FlowControl')
-            self.scopeBuilder.buildScope(Context.createToken(flowControlContext, '}'))  # Create '}' token for scopeBuilder
+            self.scopeBuilder.buildScope(self.closingBrace)  # parse '}' to tell ScopeBuilder now leaving the scope
             list.append(returnedToken)
             return list
         elif firstToken.id in self.contextManager.getContext('FlowControl').symbolTable:  # For some context that do not need ';'
