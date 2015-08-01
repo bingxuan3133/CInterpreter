@@ -592,3 +592,11 @@ class TestLexer(unittest.TestCase):
             self.assertEqual("Error[1][0]:Expecting (literal) before (identifier)"+'\n'+
                              'x =myVar +'+'\n'+
                              '^', e.msg)
+
+    def xtest_lexer_will_recognize_logical_AND(self):
+        lexer = LexerStateMachine('x && 0', self.context)
+        testToken = lexer.advance()
+        self.assertEqual(testToken.id, '&&')
+        testToken = lexer.advance()
+        self.assertEqual(testToken.id, '(literal)')
+        self.assertEqual(testToken.data[0],0)

@@ -32,23 +32,23 @@ class ByteCodeGenerator:
         return number
 
     def compareIsLessThan(self, GPR=[]):
-        number = 0xf2 | GPR[0] << 8 | GPR[1] << 11
+        number = 0xf2 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def compareRegister(self,GPR=[]):
-        number = 0xf3 | GPR[0] << 8 | GPR[1] << 11
+        number = 0xf3 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def compareIsLessThanOrEqual(self,GPR=[]):
-        number = 0xf4 | GPR[0] << 8 | GPR[1] << 11
+        number = 0xf4 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def compareIsGreaterThan(self, GPR=[]):
-        number = 0xf5 | GPR[0] << 8 | GPR[1] << 11
+        number = 0xf5 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def compareIsGreaterThanOrEqual(self, GPR=[]):
-        number = 0xf6 | GPR[0] << 8 | GPR[1] << 11
+        number = 0xf6 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def loadValue(self, GPR=[]):
@@ -100,7 +100,9 @@ class ByteCodeGenerator:
         return number
 
     def branchIfTrue(self, GPR = []):
-        number = 0x14 | GPR[0] << 8
+        #GPR[0] == The number that needed to be branch
+        #GPR[1] == The register number that refers to
+        number = 0x14 | GPR[0] << 8 | GPR[1] << 11
         return number
 
     def branch(self, GPR =[]):
@@ -183,7 +185,7 @@ class ByteCodeGenerator:
                 self.mapping.getALargestWorkingRegister()
 
         if self.isTwoParameters(generateByteCode):
-            if self.lastUseInstruction == self.loadRegister or generateByteCode in self.compareTypeFunctions:
+            if self.lastUseInstruction == self.loadRegister:
                 GPR[0] = secondRegister
                 GPR[1] = firstRegister
             else:
@@ -206,7 +208,7 @@ class ByteCodeGenerator:
                                             '(systemToken)': self.nothing, ';': self.nothing, ',': self.nothing, '}': self.nothing, '{': self.nothing}
 
 
-        self.twoParamFunctions =[self.storeRegister, self.compareRegister, self.compareIsLessThan, self.compareIsLessThanOrEqual, self.compareIsGreaterThan,self.compareIsGreaterThanOrEqual]
+        self.twoParamFunctions =[self.storeRegister]
         self.compareTypeFunctions = [self.compareIsLessThanOrEqual, self.compareIsLessThan, self.compareRegister,self.compareIsGreaterThan, self.compareIsGreaterThanOrEqual]
 
         def noByteCode(self, sequenceCheck=None):
@@ -229,8 +231,8 @@ class ByteCodeGenerator:
 
         def ifByteCode(self):
             self.data[0].data[0].generateByteCode()
+            thisGenerator.byteCodeList.append(thisGenerator.branchIfTrue([1,thisGenerator.mapping.releaseAWorkingRegister()]))
             thisGenerator.mapping.reset()
-            thisGenerator.byteCodeList.append(thisGenerator.branchIfTrue([1]))
             tempLocation = thisGenerator.byteCodeList.__len__()
             for statement in self.data[1][0].data:
                 statement.generateByteCode()
@@ -244,8 +246,8 @@ class ByteCodeGenerator:
 
         def whileByteCode(self):
             self.data[0].generateByteCode()
+            thisGenerator.byteCodeList.append(thisGenerator.branchIfTrue([1,thisGenerator.mapping.releaseAWorkingRegister()]))
             thisGenerator.mapping.reset()
-            thisGenerator.byteCodeList.append(thisGenerator.branchIfTrue([1]))
             tempLocation = thisGenerator.byteCodeList.__len__()
             for statement in self.data[1][0].data:
                 statement.generateByteCode()
@@ -263,14 +265,14 @@ class ByteCodeGenerator:
                 statement.generateByteCode()
                 thisGenerator.mapping.reset()
             self.data[0].generateByteCode()
-            thisGenerator.byteCodeList.append(thisGenerator.branchIfTrue([1]))
+            thisGenerator.byteCodeList.append(thisGenerator.branchIfTrue([1,thisGenerator.mapping.releaseAWorkingRegister()]))
             branchSize = thisGenerator.byteCodeList.__len__()-tempLocation+1
             thisGenerator.byteCodeList.append(thisGenerator.branch([-branchSize]))
 
             return thisGenerator.byteCodeList
         generationFunction = {'(literal)':([None],[generalByteCode]), '(identifier)':([None],[generalByteCode]), '+':([None],[generalByteCode]),
                               '-':([None],[generalByteCode],), '*':([None],[generalByteCode]), '/':([None],[generalByteCode]),'==':([None],[generalByteCode]),'|':([None],[generalByteCode]),'%':([None],[generalByteCode]),
-                            '=':([None],[generalByteCode]),'<':([None],[generalByteCode]),'<=':([None],[generalByteCode]),'>':([None],[generalByteCode]),'>=':([None],[generalByteCode]),
+                            '=':([None],[generalByteCode]),'<':([None],[generalByteCode]),'<=':([None],[generalByteCode]),'>':([None],[generalByteCode]),'>=':([None],[generalByteCode]),'&&':([None],[generalByteCode]),
                               'int':([None],[generalByteCode]),'long':([None],[generalByteCode]), 'short':([None],[generalByteCode]),
                               'if':([None],[ifByteCode]),'while':([None],[whileByteCode]),'do':([None],[doByteCode]),'else':([None],[noByteCode]),
                               ',':([None],[noByteCode]),'(declaration&definition)':([None],[noByteCode]),
