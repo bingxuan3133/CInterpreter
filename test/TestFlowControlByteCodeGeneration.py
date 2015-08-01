@@ -76,7 +76,7 @@ class TestFlowControlByteCodeGeneration(unittest.TestCase):
         byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
         self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 16]), byteCodes[0])
         self.assertEqual(self.byteCodeGenerator.loadValue([5, 2]), byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.compareRegister([5, 0]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.compareRegister([0, 5]), byteCodes[2])
         self.assertEqual(self.byteCodeGenerator.branchIfTrue([1]), byteCodes[3])
         self.assertEqual(self.byteCodeGenerator.branch([0]), byteCodes[4])
 
@@ -94,7 +94,7 @@ class TestFlowControlByteCodeGeneration(unittest.TestCase):
         byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
         self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 16]), byteCodes[0])
         self.assertEqual(self.byteCodeGenerator.loadValue([5, 2]), byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.compareRegister([5, 0]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.compareRegister([0, 5]), byteCodes[2])
 
         self.assertEqual(self.byteCodeGenerator.branchIfTrue([1]), byteCodes[3])
         self.assertEqual(self.byteCodeGenerator.branch([19]), byteCodes[4])
@@ -133,7 +133,7 @@ class TestFlowControlByteCodeGeneration(unittest.TestCase):
         byteCodes = token.generateByteCode()
         self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 4]),byteCodes[0])
         self.assertEqual(self.byteCodeGenerator.loadValue([5,100]),byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.compareRegister([5, 0]),byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.compareRegister([0, 5]),byteCodes[2])
         self.assertEqual(self.byteCodeGenerator.branchIfTrue([1]),byteCodes[3])
         self.assertEqual(self.byteCodeGenerator.branch([3]),byteCodes[4])
         self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 4]),byteCodes[5])
@@ -171,7 +171,7 @@ class TestFlowControlByteCodeGeneration(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.multiplyRegister([1, 1, 5]),byteCodes[13])
         self.assertEqual(self.byteCodeGenerator.loadValue([5, 120]),byteCodes[14])
         self.assertEqual(self.byteCodeGenerator.addRegister([5, 1, 5]),byteCodes[15])
-        self.assertEqual(self.byteCodeGenerator.compareRegister([5, 0]),byteCodes[16])
+        self.assertEqual(self.byteCodeGenerator.compareRegister([0, 5]),byteCodes[16])
         self.assertEqual(self.byteCodeGenerator.branchIfTrue([1]),byteCodes[17])
         self.assertEqual(self.byteCodeGenerator.branch([0]),byteCodes[18])
 
@@ -190,7 +190,7 @@ class TestFlowControlByteCodeGeneration(unittest.TestCase):
         byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
         self.assertEqual(self.byteCodeGenerator.loadRegister([0,7,4]),byteCodes[0])
         self.assertEqual(self.byteCodeGenerator.loadValue([5, 2]),byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.compareRegister([5, 0]),byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.compareRegister([0, 5]),byteCodes[2])
         self.assertEqual(self.byteCodeGenerator.branchIfTrue([1]),byteCodes[3])
         self.assertEqual(self.byteCodeGenerator.branch([10]),byteCodes[4])
         self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 4]),byteCodes[5])
@@ -219,7 +219,7 @@ class TestFlowControlByteCodeGeneration(unittest.TestCase):
         byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
         self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 4]), byteCodes[0])
         self.assertEqual(self.byteCodeGenerator.loadValue([5, 321]), byteCodes[1])
-        self.assertEqual(self.byteCodeGenerator.compareRegister([5, 0]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.compareRegister([0, 5]), byteCodes[2])
         self.assertEqual(self.byteCodeGenerator.branchIfTrue([1]), byteCodes[3])
         self.assertEqual(self.byteCodeGenerator.branch([-5]), byteCodes[4])
 
@@ -250,7 +250,7 @@ class TestFlowControlByteCodeGeneration(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.storeRegister([5, 0]),byteCodes[8])
         self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 4]), byteCodes[9])
         self.assertEqual(self.byteCodeGenerator.loadValue([5, 321]), byteCodes[10])
-        self.assertEqual(self.byteCodeGenerator.compareRegister([5, 0]), byteCodes[11])
+        self.assertEqual(self.byteCodeGenerator.compareRegister([0, 5]), byteCodes[11])
         self.assertEqual(self.byteCodeGenerator.branchIfTrue([1]), byteCodes[12])
         self.assertEqual(self.byteCodeGenerator.branch([-14]), byteCodes[13])
 
