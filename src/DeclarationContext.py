@@ -5,7 +5,7 @@ lib_path = os.path.abspath('\..\src')
 sys.path.append(lib_path)
 
 from Context import *
-
+import Error
 class DeclarationContext(Context):
     def __init__(self, *args, **kwargs):
         super(DeclarationContext, self).__init__(*args, **kwargs)
@@ -26,9 +26,7 @@ class DeclarationContext(Context):
             thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.contextManager.parser.parse(bindingPower)
             if thisContext.getIdentifier(returnedToken) is None:
-                caretMessage = ' '*(returnedToken.column-1)+'^'
-                raise SyntaxError("Error[{}][{}]:Expecting (identifier) before {}\n{}\n{}"\
-                             .format(returnedToken.line,returnedToken.column,returnedToken.id,returnedToken.oriString,caretMessage))
+                Error.generateErrorMessageWithOneArguement("Expecting (identifier) before {}", returnedToken,returnedToken.id)
             self.data.append(returnedToken)
             return self
         def led(self):

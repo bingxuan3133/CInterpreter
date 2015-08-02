@@ -8,6 +8,8 @@ from FlowControlContext import *
 from DeclarationContext import *
 from DeclarationContext import *
 from DefaultContext import *
+import struct
+
 class ByteCodeGenerator:
     byteCodeList = []
     byteRequired = {'char': 1, 'short': 1, 'int': 4, 'long': 4, 'float': 4, 'double': 8}
@@ -110,6 +112,10 @@ class ByteCodeGenerator:
         number = 0x15 | GPR[0] << 8
         return number
 
+    def loadFloatingPoint(self,GPR = []):
+        number = 0x15 | GPR[0] << 8 | GPR[1] << 16
+        return number
+
     def halt(self):
         return 0xffffffff
 
@@ -181,16 +187,33 @@ class ByteCodeGenerator:
         def generateLiteralCode(self,sequenceCheck = None, token = None, index = -1):
             thisGenerator.lastUseInstruction = thisGenerator.loadValue
             if sequenceCheck == 0:
-                Code = thisGenerator.loadValue([thisGenerator.mapping.getAFreeWorkingRegister(), token.data[index].data[0]])
+                destinationRegister = thisGenerator.mapping.getAFreeWorkingRegister()
             else:
-                Code = thisGenerator.loadValue([thisGenerator.mapping.getALargestWorkingRegister(), token.data[index].data[0]])
+                destinationRegister = thisGenerator.mapping.getALargestWorkingRegister()
+            Code = thisGenerator.loadValue([destinationRegister, token.data[index].data[0]])
             thisGenerator.byteCodeList.append(Code)
+
         def generateIdentifierCode(self,sequenceCheck = None, token = None, index = -1):
             thisGenerator.lastUseInstruction = thisGenerator.loadRegister
             if sequenceCheck == 0:
-                Code = thisGenerator.loadRegister([thisGenerator.mapping.getAFreeWorkingRegister(), thisGenerator.mapping.framePointerRegister, thisGenerator.variablesInThisAST[token.data[index].data[0]]])
+                destinationRegister = thisGenerator.mapping.getAFreeWorkingRegister()
             else:
-                Code = thisGenerator.loadRegister([thisGenerator.mapping.getALargestWorkingRegister(), thisGenerator.mapping.framePointerRegister, thisGenerator.variablesInThisAST[token.data[index].data[0]]])
+                destinationRegister = thisGenerator.mapping.getALargestWorkingRegister()
+            Code = thisGenerator.loadRegister([destinationRegister, thisGenerator.mapping.framePointerRegister, thisGenerator.variablesInThisAST[token.data[index].data[0]]])
+            thisGenerator.byteCodeList.append(Code)
+
+        def generateFloatingPointCode (self,sequenceCheck = None, token = None, index = -1):
+            thisGenerator.lastUseInstruction = thisGenerator.loadFloatingPoint
+            floatPack = struct.pack('!f', token.data[index].data[0])
+            if sequenceCheck == 0:
+                destinationRegister1 = thisGenerator.mapping.getAFreeWorkingRegister()
+                destinationRegister2 = thisGenerator.mapping.getAFreeWorkingRegister()
+            else:
+                destinationRegister1 = thisGenerator.mapping.getALargestWorkingRegister()
+                destinationRegister2 = thisGenerator.mapping.getALargestWorkingRegister()
+            Code = thisGenerator.loadFloatingPoint([destinationRegister1,floatPack[0],floatPack[1] ])
+            thisGenerator.byteCodeList.append(Code)
+            Code = thisGenerator.loadFloatingPoint([destinationRegister2,floatPack[2],floatPack[3] ])
             thisGenerator.byteCodeList.append(Code)
 
         def generalByteCode(self,sequenceCheck = None, token = None, index = -1):
@@ -249,7 +272,7 @@ class ByteCodeGenerator:
 
             return thisGenerator.byteCodeList
 
-        generationFunction = { '(literal)':([None], [generateLiteralCode]), '(identifier)':([None], [generateIdentifierCode]), '(systemToken)':([None], [noByteCode]),'(floating)':([None], [noByteCode]),
+        generationFunction = { '(literal)':([None], [generateLiteralCode]), '(identifier)':([None], [generateIdentifierCode]), '(systemToken)':([None], [noByteCode]),'(floating)':([None], [generateFloatingPointCode]),
                             '+':([None],[generalByteCode]),'-':([None],[generalByteCode],), '*':([None],[generalByteCode]), '/':([None],[generalByteCode]),'==':([None],[generalByteCode]),'|':([None],[generalByteCode]),'%':([None],[generalByteCode]),
                             '=':([None],[generalByteCode]),'<':([None],[generalByteCode]),'<=':([None],[generalByteCode]),'>':([None],[generalByteCode]),'>=':([None],[generalByteCode]),'&&':([None],[generalByteCode]),
                             'int':([None],[generalByteCode]),'long':([None],[generalByteCode]), 'short':([None],[generalByteCode]),

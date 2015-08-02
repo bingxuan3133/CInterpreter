@@ -685,7 +685,7 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.loadFloatingPoint([1, float1[2],float1[3]]),byteCodes[1])
         self.assertEqual(self.byteCodeGenerator.loadFloatingPoint([5, float2[0],float2[1]]),byteCodes[2])
         self.assertEqual(self.byteCodeGenerator.loadFloatingPoint([4, float2[2],float2[3]]),byteCodes[3])
-        #self.assertEqual(self.byteCodeGenerator.addRegister())
+        self.assertEqual(self.byteCodeGenerator.addFloatingRegister([1,2,3,4]),byteCodes[4])
 
 
 if __name__ == '__main__':
