@@ -28,7 +28,6 @@ class InformationInjector:
             return
         elif tokenToInject.id == '(':
             token = tokenToInject.data[0]
-
         else:
             token = tokenToInject
         registerNumber =[]
@@ -43,7 +42,9 @@ class InformationInjector:
         for element in token.data:
             element.weight = []
             if element.id == '(identifier)' or element.id == '(literal)':
-                tempRegisterRequired = self.insertBasicInformationForAChildToken(element)
+                tempRegisterRequired = self.insertBasicInformationForLiteral(element)
+            elif element.id == '(floating)':
+                tempRegisterRequired = self.insertBasicInformationForFloat(element)
             else:
                 tempRegisterRequired = self.injectRegisterRequired(element)
             registerNumber.append(tempRegisterRequired)
@@ -63,13 +64,22 @@ class InformationInjector:
     def bypassTheInjection(self,token):
         return ByteCodeGenerator.isADeclaration(self, token.id)
 
-    def insertBasicInformationForAChildToken(self, token):
+    def insertBasicInformationForLiteral(self, token):
         token.weight = []
         token.registerRequired = 1
         token.maxRequiredRegister = 1
         token.minRequiredRegister = 1
         token.weight.insert(0, 0)
         tempRegisterRequiredAtThatLevel = 1
+        return tempRegisterRequiredAtThatLevel
+
+    def insertBasicInformationForFloat(self,token):
+        token.weight = []
+        token.registerRequired = 2
+        token.maxRequiredRegister = 2
+        token.minRequiredRegister = 2
+        token.weight.insert(0, 0)
+        tempRegisterRequiredAtThatLevel = 2
         return tempRegisterRequiredAtThatLevel
 
     def getTheWeightFromChild(self,token,weightIndex):

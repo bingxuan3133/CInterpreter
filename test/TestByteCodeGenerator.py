@@ -18,6 +18,7 @@ from RegisterAllocator import *
 from InformationInjector import *
 from ByteCodeGenerator import *
 
+import struct
 class TestByteCodeGenerator(unittest.TestCase):
     def setUp(self):
         self.manager = ContextManager()
@@ -29,7 +30,7 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.expressionContext = ExpressionContext(self.manager)
         self.expressionContext.addOperator(',', 0)
 
-        self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext, self.flowControlContext]
+        self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext, self.flowControlContext,self.context]
         self.expressionContext.addInfixOperator('=', 20)
 
         self.expressionContext.addInfixOperator('==', 10)
@@ -37,7 +38,7 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.expressionContext.addInfixOperator('<=', 10)
         self.expressionContext.addInfixOperator('>', 10)
         self.expressionContext.addInfixOperator('>=', 10)
-        self.expressionContext.addInfixOperator('&&', 10)
+        self.expressionContext.addInfixOperator('&&', 5)
 
         self.expressionContext.addInfixOperator('|',40)
         self.expressionContext.addInfixOperator('%',40)
@@ -560,17 +561,26 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.loadValue([5, 300]), byteCodes[1])
         self.assertEqual(self.byteCodeGenerator.compareIsGreaterThanOrEqual([0, 0, 5]), byteCodes[2])
 
-    def xtest_generateByteCode_will_produce_byteCode_for_a_complex_comparison_expression(self):
+    def test_generateByteCode_will_produce_byteCode_for_a_complex_comparison_expression(self):
         lexer = LexerStateMachine(' y >=  300 && x == 100', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         token = parser.parse(0)
         self.informationInjector.injectRegisterRequired(token)
+        self.byteCodeGenerator.variablesInThisAST['x'] = 25
         self.byteCodeGenerator.variablesInThisAST['y'] = 16
 
         self.byteCodeGenerator.initGeneration()
         byteCodes = token.generateByteCode()
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 16]),byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 300]),byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.compareIsGreaterThanOrEqual([0, 0, 5]),byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([1, 7, 25]),byteCodes[3])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 100]),byteCodes[4])
+        self.assertEqual(self.byteCodeGenerator.compareRegister([5, 1, 5]),byteCodes[5])
+        self.assertEqual(self.byteCodeGenerator.orRegister([0, 0, 5]),byteCodes[6])
+
 
 
     def test_generateByteCode_will_make_byteCode_for_this_simple_equation(self):
@@ -638,7 +648,7 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.storeRegister([0, 5]), byteCodes[10])
         
     def test_generateByteCode_for_this_long_expression(self):
-        lexer = LexerStateMachine('2 + ((((3|4)%5)*(6/7)) -8)', self.context)
+        lexer = LexerStateMachine('2+((((3|4)%5)*(6/7))-8)', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         token = parser.parse(0)
@@ -659,6 +669,23 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.subRegister([0, 0, 5]), byteCodes[10])
         self.assertEqual(self.byteCodeGenerator.loadValue([5, 2]), byteCodes[11])
         self.assertEqual(self.byteCodeGenerator.addRegister([0, 0, 5]), byteCodes[12])
+
+    def test_generateByteCode_for_the_equation_that_contain_floating_point(self):
+        lexer = LexerStateMachine('x = 2.3 + 27.5', self.context)
+        float1 = struct.pack('!f', 2.3)
+        float2 = struct.pack('!f', 27.5)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parse(0)
+        self.informationInjector.injectRegisterRequired(token)
+        self.byteCodeGenerator.variablesInThisAST['x'] = 8
+        self.byteCodeGenerator.initGeneration()
+        byteCodes = token.generateByteCode()
+        self.assertEqual(self.byteCodeGenerator.loadFloatingPoint([0, float1[0],float1[1]]),byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadFloatingPoint([1, float1[2],float1[3]]),byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.loadFloatingPoint([5, float2[0],float2[1]]),byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.loadFloatingPoint([4, float2[2],float2[3]]),byteCodes[3])
+        #self.assertEqual(self.byteCodeGenerator.addRegister())
 
 
 if __name__ == '__main__':
