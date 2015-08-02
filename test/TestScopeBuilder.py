@@ -40,28 +40,83 @@ class TestScope(unittest.TestCase):
 
     def test_buildScope(self):
         scopeBuilder = ScopeBuilder()
+        declToken = self.declarationContext.createDeclarationOrDefinitionToken('(decl)')
         intToken = self.context.createToken('int')
         xToken = self.context.createToken('x')
+        declToken.data.append(intToken)
         intToken.data.append(xToken)
         scopeBuilder.addType('int')
+        scopeBuilder.buildScope(declToken)
+        self.assertEqual([declToken], scopeBuilder.scope.list)
+        self.assertEqual(['x'], scopeBuilder.scope.displayList)
 
-        scopeBuilder.buildScope(intToken)
-        self.assertEqual(['x'], scopeBuilder.scope.list)
-
-    def test_buildScope_(self):
+    def test_buildScope_nested_brace(self):
         scopeBuilder = ScopeBuilder()
+        declToken = self.declarationContext.createDeclarationOrDefinitionToken('(decl)')
         intToken = self.context.createToken('int')
         xToken = self.context.createToken('x')
+        declToken.data.append(intToken)
         intToken.data.append(xToken)
         braceToken = self.context.createToken('{')
         scopeBuilder.addType('int')
 
-        scopeBuilder.buildScope(intToken)
-        self.assertEqual(['x'], scopeBuilder.scope.list)
+        scopeBuilder.buildScope(declToken)
+        self.assertEqual(['x'], scopeBuilder.scope.displayList)
         scopeBuilder.buildScope(braceToken)
-        self.assertEqual(['x', []], scopeBuilder.scope.list)
-        scopeBuilder.buildScope(intToken)
-        self.assertEqual(['x', ['x']], scopeBuilder.scope.list)
+        self.assertEqual(['x', []], scopeBuilder.scope.displayList)
+        scopeBuilder.buildScope(declToken)
+        self.assertEqual(['x', ['x']], scopeBuilder.scope.displayList)
+
+    def test_buildScope_findLocal(self):
+        scopeBuilder = ScopeBuilder()
+        declToken1 = self.declarationContext.createDeclarationOrDefinitionToken('(decl)')
+        declToken2 = self.declarationContext.createDeclarationOrDefinitionToken('(decl)')
+        intToken = self.context.createToken('int')
+        xToken = self.context.createToken('x')
+        declToken1.data.append(intToken)
+        declToken2.data.append(intToken)
+        intToken.data.append(xToken)
+        braceToken = self.context.createToken('{')
+        scopeBuilder.addType('int')
+
+        scopeBuilder.buildScope(declToken1)
+        localToken = scopeBuilder.findLocal('x')
+        self.assertEqual(declToken1, localToken)
+
+        scopeBuilder.buildScope(braceToken)
+        localToken = scopeBuilder.findLocal('x')
+        self.assertEqual(None, localToken)
+
+        scopeBuilder.buildScope(declToken2)
+        localToken = scopeBuilder.findLocal('x')
+        self.assertEqual(declToken2, localToken)
+        self.assertNotEqual(declToken1, localToken)
+
+    def test_buildScope_(self):
+        scopeBuilder = ScopeBuilder()
+        declToken1 = self.declarationContext.createDeclarationOrDefinitionToken('(decl)')
+        intToken1 = self.context.createToken('int')
+        xToken = self.context.createToken('x')
+        declToken2 = self.declarationContext.createDeclarationOrDefinitionToken('(decl)')
+        intToken2 = self.context.createToken('int')
+        yToken = self.context.createToken('y')
+        declToken1.data.append(intToken1)
+        intToken1.data.append(xToken)
+        declToken2.data.append(intToken2)
+        intToken2.data.append(yToken)
+        braceToken = self.context.createToken('{')
+        scopeBuilder.addType('int')
+
+        scopeBuilder.buildScope(declToken1)
+        scopeBuilder.buildScope(braceToken)
+        scopeBuilder.buildScope(declToken2)
+        localToken = scopeBuilder.findLocal('x')
+        self.assertEqual(None, localToken)
+        localToken = scopeBuilder.findLocal('y')
+        self.assertEqual(declToken2, localToken)
+        localToken = scopeBuilder.xfindGlobal('x')
+        self.assertEqual(declToken1, localToken)
+
 
 """
     def test_buildScope_will_only_care_declaration_but_not_expression(self):
