@@ -40,7 +40,7 @@ class Parser:
             return list
         else:                               # For one statement
             returnedToken = self.parse(bindingPower)
-            if returnedToken.id == '(declaration&definition)':  # For declaration & definition
+            if returnedToken.id == '(multiple)':  # For declaration & definition
                 list.extend(returnedToken.data)
                 self.scopeBuilder.buildScope(returnedToken.data[0])
                 self.lexer.peep(';')
