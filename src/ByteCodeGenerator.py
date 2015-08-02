@@ -6,6 +6,8 @@ from Context import *
 from ExpressionContext import *
 from FlowControlContext import *
 from DeclarationContext import *
+from DeclarationContext import *
+from DefaultContext import *
 class ByteCodeGenerator:
     byteCodeList = []
     byteRequired = {'char': 1, 'short': 1, 'int': 4, 'long': 4, 'float': 4, 'double': 8}
@@ -13,12 +15,15 @@ class ByteCodeGenerator:
     variableCounter = 0
     memorySize = 0
 
+
     def __init__(self, context, contextManager):
         self.context = context
         self.contextManager = contextManager
         self.mapping = Mapping()
         self.registerAllocator = RegisterAllocator(self)
         self.lastUseInstruction =None
+        self.contextManager.addContext('Base', self.context)
+
 
     def nothing(self):
         pass
@@ -115,43 +120,13 @@ class ByteCodeGenerator:
     def generateRightCodeFirst(self, token):
         secondTime = 0
         for index in range(len(token.data)-1, -1, -1):
-            if token.data[index].id == '(identifier)':
-                self.lastUseInstruction = self.loadRegister
-                if secondTime == 0:
-                    Code = self.loadRegister([self.mapping.getAFreeWorkingRegister(), self.mapping.framePointerRegister, self.variablesInThisAST[token.data[index].data[0]]])
-                else:
-                    Code = self.loadRegister([self.mapping.getALargestWorkingRegister(), self.mapping.framePointerRegister, self.variablesInThisAST[token.data[index].data[0]]])
-                self.byteCodeList.append(Code)
-            elif token.data[index].id == '(literal)':
-                self.lastUseInstruction = self.loadValue
-                if secondTime == 0:
-                    Code = self.loadValue([self.mapping.getAFreeWorkingRegister(), token.data[index].data[0]])
-                else:
-                    Code = self.loadValue([self.mapping.getALargestWorkingRegister(), token.data[index].data[0]])
-                self.byteCodeList.append(Code)
-            else:
-                token.data[index].generateByteCode(secondTime)
+            token.data[index].generateByteCode(secondTime,token,index)
             secondTime += 1
 
     def generateLeftCodeFirst(self, token):
         secondTime = 0
         for index in range(0, len(token.data)):
-            if token.data[index].id == '(identifier)':
-                self.lastUseInstruction = self.loadRegister
-                if secondTime == 0:
-                    Code = self.loadRegister([self.mapping.getAFreeWorkingRegister(), self.mapping.framePointerRegister, self.variablesInThisAST[token.data[index].data[0]]])
-                else:
-                    Code = self.loadRegister([self.mapping.getALargestWorkingRegister(), self.mapping.framePointerRegister, self.variablesInThisAST[token.data[index].data[0]]])
-                self.byteCodeList.append(Code)
-            elif token.data[index].id == '(literal)':
-                self.lastUseInstruction = self.loadValue
-                if secondTime == 0:
-                    Code = self.loadValue([self.mapping.getAFreeWorkingRegister(), token.data[index].data[0]])
-                else:
-                    Code = self.loadValue([self.mapping.getALargestWorkingRegister(), token.data[index].data[0]])
-                self.byteCodeList.append(Code)
-            else:
-                token.data[index].generateByteCode(secondTime)
+            token.data[index].generateByteCode(secondTime,token,index)
             secondTime += 1
 
 
@@ -203,20 +178,26 @@ class ByteCodeGenerator:
                 thisGenerator.memorySize += thisGenerator.byteRequired[token.id]
                 thisGenerator.variablesInThisAST[token.data[0].data[0]] = thisGenerator.memorySize
 
-        respectiveByteCodeFunction = {'=': self.storeRegister, '+': self.addRegister,'-': self.subRegister, '*': self.multiplyRegister, '/': self.divideRegister,'|': self.orRegister,'%':self.modulusRegister,
-                                      '==':self.compareRegister,'<':self.compareIsLessThan,'<=':self.compareIsLessThanOrEqual,'>':self.compareIsGreaterThan,'>=':self.compareIsGreaterThanOrEqual,
-                                      '&&':self.orRegister,
-                                            '(systemToken)': self.nothing, ';': self.nothing, ',': self.nothing, '}': self.nothing, '{': self.nothing}
-
-
-        self.twoParamFunctions =[self.storeRegister]
-        self.compareTypeFunctions = [self.compareIsLessThanOrEqual, self.compareIsLessThan, self.compareRegister,self.compareIsGreaterThan, self.compareIsGreaterThanOrEqual]
-
-        def noByteCode(self, sequenceCheck=None):
+        def noByteCode(self,sequenceCheck = None, token = None, index = -1):
             if self.id == "(":
                 self.data[0].generateByteCode(sequenceCheck)
 
-        def generalByteCode(self, sequenceCheck=None):
+        def generateLiteralCode(self,sequenceCheck = None, token = None, index = -1):
+            thisGenerator.lastUseInstruction = thisGenerator.loadValue
+            if sequenceCheck == 0:
+                Code = thisGenerator.loadValue([thisGenerator.mapping.getAFreeWorkingRegister(), token.data[index].data[0]])
+            else:
+                Code = thisGenerator.loadValue([thisGenerator.mapping.getALargestWorkingRegister(), token.data[index].data[0]])
+            thisGenerator.byteCodeList.append(Code)
+        def generateIdentifierCode(self,sequenceCheck = None, token = None, index = -1):
+            thisGenerator.lastUseInstruction = thisGenerator.loadRegister
+            if sequenceCheck == 0:
+                Code = thisGenerator.loadRegister([thisGenerator.mapping.getAFreeWorkingRegister(), thisGenerator.mapping.framePointerRegister, thisGenerator.variablesInThisAST[token.data[index].data[0]]])
+            else:
+                Code = thisGenerator.loadRegister([thisGenerator.mapping.getALargestWorkingRegister(), thisGenerator.mapping.framePointerRegister, thisGenerator.variablesInThisAST[token.data[index].data[0]]])
+            thisGenerator.byteCodeList.append(Code)
+
+        def generalByteCode(self,sequenceCheck = None, token = None, index = -1):
             if thisGenerator.isADeclaration(self.id):
                 recordTheVariable(None, self)
             else:
@@ -230,7 +211,7 @@ class ByteCodeGenerator:
                 thisGenerator.registerAllocator.decideWhetherToPop(pushed)
             return thisGenerator.byteCodeList
 
-        def ifByteCode(self):
+        def ifByteCode(self,sequenceCheck = None, token = None, index = -1):
             self.data[0].data[0].generateByteCode()
             thisGenerator.byteCodeList.append(thisGenerator.branchIfTrue([1,thisGenerator.mapping.releaseAWorkingRegister()]))
             thisGenerator.mapping.reset()
@@ -245,7 +226,7 @@ class ByteCodeGenerator:
                     thisGenerator.mapping.reset()
             return thisGenerator.byteCodeList
 
-        def whileByteCode(self):
+        def whileByteCode(self,sequenceCheck = None, token = None, index = -1):
             self.data[0].generateByteCode()
             thisGenerator.byteCodeList.append(thisGenerator.branchIfTrue([1,thisGenerator.mapping.releaseAWorkingRegister()]))
             thisGenerator.mapping.reset()
@@ -260,7 +241,7 @@ class ByteCodeGenerator:
             thisGenerator.byteCodeList.append(thisGenerator.branch([-branchSize]))
             return thisGenerator.byteCodeList
 
-        def doByteCode(self):
+        def doByteCode(self,sequenceCheck = None, token = None, index = -1):
             tempLocation = thisGenerator.byteCodeList.__len__()
             for statement in self.data[1][0].data:
                 statement.generateByteCode()
@@ -271,20 +252,31 @@ class ByteCodeGenerator:
             thisGenerator.byteCodeList.append(thisGenerator.branch([-branchSize]))
 
             return thisGenerator.byteCodeList
-        generationFunction = {'(literal)':([None],[generalByteCode]), '(identifier)':([None],[generalByteCode]), '+':([None],[generalByteCode]),
-                              '-':([None],[generalByteCode],), '*':([None],[generalByteCode]), '/':([None],[generalByteCode]),'==':([None],[generalByteCode]),'|':([None],[generalByteCode]),'%':([None],[generalByteCode]),
+
+        generationFunction = { '(literal)':([None], [generateLiteralCode]), '(identifier)':([None], [generateIdentifierCode]), '(systemToken)':([None], [noByteCode]),'(floating)':([None], [noByteCode]),
+                            '+':([None],[generalByteCode]),'-':([None],[generalByteCode],), '*':([None],[generalByteCode]), '/':([None],[generalByteCode]),'==':([None],[generalByteCode]),'|':([None],[generalByteCode]),'%':([None],[generalByteCode]),
                             '=':([None],[generalByteCode]),'<':([None],[generalByteCode]),'<=':([None],[generalByteCode]),'>':([None],[generalByteCode]),'>=':([None],[generalByteCode]),'&&':([None],[generalByteCode]),
-                              'int':([None],[generalByteCode]),'long':([None],[generalByteCode]), 'short':([None],[generalByteCode]),
-                              'if':([None],[ifByteCode]),'while':([None],[whileByteCode]),'do':([None],[doByteCode]),'else':([None],[noByteCode]),
-                              ',':([None],[noByteCode]),'(declaration&definition)':([None],[noByteCode]),
+                            'int':([None],[generalByteCode]),'long':([None],[generalByteCode]), 'short':([None],[generalByteCode]),
+                             'if':([None],[ifByteCode]),'while':([None],[whileByteCode]),'do':([None],[doByteCode]),'else':([None],[noByteCode]),
+                             ',':([None],[noByteCode]),'(declaration&definition)':([None],[noByteCode]),
                               'unsigned':([None],[noByteCode]),'signed':([None],[noByteCode]),
                               '(':([None],[noByteCode]),';':([None],[noByteCode]),')':([None],[noByteCode]),'{':([None],[noByteCode]),'}':([None],[noByteCode]),
                               }
+
+        respectiveByteCodeFunction = {
+                                    '=': self.storeRegister, '+': self.addRegister,'-': self.subRegister, '*': self.multiplyRegister, '/': self.divideRegister,'|': self.orRegister,'%':self.modulusRegister,
+                                    '==':self.compareRegister,'<':self.compareIsLessThan,'<=':self.compareIsLessThanOrEqual,'>':self.compareIsGreaterThan,'>=':self.compareIsGreaterThanOrEqual,
+                                    '&&':self.orRegister,
+                                    '(systemToken)': self.nothing, ';': self.nothing, ',': self.nothing, '}': self.nothing, '{': self.nothing}
+
+
+        self.twoParamFunctions =[self.storeRegister]
+
         #Start the initialization
         self.byteCodeList = []
-        for context in self.contextManager.currentContexts:
-                for token in context.symbolTable:
-                    context.symbolTable[token].generateByteCode = generationFunction[token][1][0]
+        for context in self.contextManager.allContexts:
+            for token in context.symbolTable:
+                context.symbolTable[token].generateByteCode = generationFunction[token][1][0]
 
 
     def isADeclaration(self, unknownToken):
