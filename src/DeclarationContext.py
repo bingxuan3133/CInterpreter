@@ -7,14 +7,8 @@ sys.path.append(lib_path)
 from Context import *
 import Error
 class DeclarationContext(Context):
-    def __init__(self, *args, **kwargs):
-        super(DeclarationContext, self).__init__(*args, **kwargs)
-        self.modifier = []
-        self.modifierCount = 0
-        self.primitiveCount = 0
-
-    def createDeclarationAndDefinitionToken(self):
-        sym = self.symbol('(declaration&definition)')
+    def createDeclarationOrDefinitionToken(self, word):
+        sym = self.symbol(word)
         sym.arity = None
         sym.__repr__ = revealSelf
         symObj = sym()
@@ -29,8 +23,10 @@ class DeclarationContext(Context):
                 Error.generateErrorMessageWithOneArguement("Expecting (identifier) before {}", returnedToken,returnedToken.id)
             self.data.append(returnedToken)
             return self
-        def led(self):
-            pass
+        def led(self, token):
+            caretMessage = ' '*(self.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:Expecting ; before {}\n{}\n{}"\
+                             .format(self.line,self.column,self.id,self.oriString,caretMessage))
         symClass = self.symbol(id, bindingPower)
         symClass.nud = nud
         symClass.led = led
@@ -60,7 +56,7 @@ class DeclarationContext(Context):
         def nud(self):
             self.primitive = 'int'
             self.modifier = None
-            self.sign = None
+            self.sign = 'signed'
             self.identifierList = []
             self.expressionList = []
             self.errorToken = None  # token that causes error
@@ -342,7 +338,7 @@ class DeclarationContext(Context):
         def nud(self):
             self.primitive = 'int'
             self.modifier = 'long'
-            self.sign = None
+            self.sign = 'signed'
             self.identifierList = []
             self.expressionList = []
             self.errorToken = None  # token that causes error
@@ -527,7 +523,7 @@ class DeclarationContext(Context):
         def nud(self):
             self.primitive = 'int'
             self.modifier = 'short'
-            self.sign = None
+            self.sign = 'signed'
             self.identifierList = []
             self.expressionList = []
             self.errorToken = None  # token that causes error
@@ -600,14 +596,17 @@ class DeclarationContext(Context):
         return symClass
 
     def getIdentifier(self, token):
-        if token.id == '(identifier)':
-            return token
+        while hasattr(token, 'data') and token.data[0] is not None:
+            if hasattr(token, 'id') and token.id == '(identifier)':  # check does token.id exists
+                return token
+            token = token.data[0]
+        return None  # no identifier found
+
+    def removeIdentifier(self, token):
+        if token.data[0].id == '(identifier)':
+            token.data.remove(token.data[0])
         else:
-            while hasattr(token, 'data') and token.data[0] is not False:
-                token = token.data[0]
-                if hasattr(token, 'id') and token.id == '(identifier)':  # check does token.id exists
-                    return token
-            return None  # no identifier found
+            self.removeIdentifier(token.data[0])
 
     def handleError(self, token):
         caretMessage = ' '*(token.errorToken.column-1)+'^'
@@ -630,22 +629,29 @@ class DeclarationContext(Context):
     def buildToken(self, token):
         if token.errorToken is not None:
             self.handleError(token)
-        ddToken = self.createDeclarationAndDefinitionToken()
+        multiple = self.createDeclarationOrDefinitionToken('(multiple)')  # (multiple) carry multiple tokens
         for identifier, expression in zip(token.identifierList, token.expressionList):  # zip used to loop 2 list in one time
             primitiveToken = self.createToken(token.primitive)
-            primitiveToken.modifier = []
             primitiveToken.sign = token.sign
             primitiveToken.modifier = token.modifier
-            ddToken.data.append(primitiveToken)
-            if expression.id == '=':
-                primitiveToken.data.append(identifier)
-                ddToken.data.append(expression)
-            elif expression.id in ('(identifier)', '*', '(', '['):
+            declToken = self.createDeclarationOrDefinitionToken('(decl)')  # declaration token
+            declToken.data.append(primitiveToken)
+            if expression is None or expression.id in ('(identifier)', '*', '(', '['):
                 primitiveToken.data.append(expression)
+                self.removeIdentifier(primitiveToken)
+                declToken.data.append(identifier)
+                multiple.data.append(declToken)
+            elif expression.id == '=':
+                primitiveToken.data.append(expression.data[0])
+                self.removeIdentifier(primitiveToken)
+                declToken.data.append(identifier)
+                defToken = self.createDeclarationOrDefinitionToken('(def)')  # definition token
+                defToken.data.append(declToken)
+                defToken.data.append(expression.data[1])  # get definition
+                multiple.data.append(defToken)
             else:
                 raise SyntaxError
-        return ddToken
-
+        return multiple
 """
     def addPointerDeclaration(self, id, bindingPower):
         thisContext = self
