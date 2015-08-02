@@ -1179,25 +1179,50 @@ class TestPointerDeclaration(unittest.TestCase):
                                'int *ptr[10]*x[10];'+ '\n' +
                                '            ^',e.msg)
 
+    def test_positive_sign_ptr_should_fail(self):
+        lexer = LexerStateMachine('int +ptr;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        try:
+            token = parser.parseStatement(0)
+            self.fail()
+        except SyntaxError as e:
+            self.assertEqual("Error[1][5]:Expecting (identifier) before +"+ '\n' +
+                               'int +ptr;'+ '\n' +
+                               '    ^',e.msg)
+
+    def test_ptr_post_decrement_should_fail(self):
+        lexer = LexerStateMachine('int ptr--;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        try:
+            token = parser.parseStatement(0)
+            self.fail()
+        except SyntaxError as e:
+            self.assertEqual("Error[1][8]:Expecting ; before --"+ '\n' +
+                               'int ptr--;'+ '\n' +
+                               '       ^',e.msg)
+
     def test_pointer_positive_sign_ptr_should_fail(self):
         lexer = LexerStateMachine('int *+ptr;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-
         try:
-            parser.parseStatement(0)
+            token = parser.parseStatement(0)
+            self.fail()
         except SyntaxError as e:
             self.assertEqual("Error[1][5]:Expecting ; before +"+ '\n' +
                                'int *+ptr;'+ '\n' +
                                '     ^',e.msg)
 
-    def test_pointer__ptr_postdec_should_fail(self):
+    def test_pointer_ptr_postdec_should_fail(self):
         lexer = LexerStateMachine('int *ptr--;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
 
         try:
             parser.parseStatement(0)
+            self.fail()
         except SyntaxError as e:
             self.assertEqual("Error[1][9]:Expecting ; before --"+ '\n' +
                                'int *ptr--;'+ '\n' +
