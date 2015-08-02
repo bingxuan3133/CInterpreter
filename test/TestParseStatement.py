@@ -7,6 +7,7 @@ sys.path.append(lib_path)
 from ContextManager import *
 from Context import *
 from LexerStateMachine import *
+from DeclarationContext import *
 from ExpressionContext import *
 from FlowControlContext import *
 from Parser import *

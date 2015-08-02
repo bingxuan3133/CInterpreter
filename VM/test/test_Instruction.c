@@ -8,16 +8,11 @@
 #define merge2Registers(regHigh, regLow) (unsigned long long)reg[regHigh].data << 32 | (unsigned)reg[regLow].data
 
 void setUp(void) {
-  int i;
-  for(i = 0; i < MAX_REG; i ++) {
-    reg[i].data = 0;
-    reg[i].base = 0;
-    reg[i].limit = 0;
-  }
+  initVM();
 }
 
-void tearDown(void)
-{
+void tearDown(void) {
+
 }
 
 void test_getBits(void) {
@@ -510,12 +505,12 @@ void test_subtractRegisters_should_subtract_reg1_from_reg0(void) {
   TEST_ASSERT_EQUAL(-30, reg[0].data);
 }
 
-void test_subtractRegisterWithImmediate_should_subtract_reg_from_imm(void) {
-  reg[7].data = 0;
-  subtractRegisterWithImmediate(subImm(REG_7, 4));
+// void test_subtractRegisterWithImmediate_should_subtract_reg_from_imm(void) {
+  // reg[7].data = 0;
+  // subtractRegisterWithImmediate(subImm(REG_7, 4));
   
-  TEST_ASSERT_EQUAL(-4, reg[7].data);
-}
+  // TEST_ASSERT_EQUAL(-4, reg[7].data);
+// }
 
 void test_multiplyRegisters_should_multiply_2_registers(void) {
   reg[0].data = 10;
@@ -562,4 +557,19 @@ void test_xorRegisters_should_bitwise_xor_2_registers(void) {
   reg[1].data = 0x0ff00ff0;
   xorRegisters(xor(REG_0, REG_0, REG_1));
   TEST_ASSERT_EQUAL_HEX(0x0f0f0f0f, reg[0].data);
+}
+
+void test_branch(void) {
+  moveProgramCounter(0x40);
+  branch(bra(-0x10));
+  TEST_ASSERT_EQUAL_HEX(0x30, getProgramCounter());
+}
+
+void test_branchIfTrue(void) {
+  moveProgramCounter(0x40);
+  branchIfTrue(bit(-0x10));
+  TEST_ASSERT_EQUAL_HEX(0x40, getProgramCounter());
+  setStatusBit('B');
+  branchIfTrue(bit(-0x10));
+  TEST_ASSERT_EQUAL_HEX(0x30, getProgramCounter());
 }

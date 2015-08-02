@@ -12,7 +12,6 @@ from FlowControlContext import *
 from GeneratorAPI import *
 from VirtualMachine import *
 
-
 class MyTestCase(unittest.TestCase):
     def setUp(self):
         self.manager = ContextManager()
@@ -24,10 +23,14 @@ class MyTestCase(unittest.TestCase):
         self.expressionContext = ExpressionContext(self.manager)
         self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext, self.flowControlContext]
         self.expressionContext.addInfixOperator('=', 20)
+        self.expressionContext.addInfixOperator('==', 20)
         self.expressionContext.addPrefixInfixOperator('+', 70)
         self.expressionContext.addPrefixInfixOperator('-', 70)
         self.expressionContext.addOperator(',', 0)
         self.expressionContext.addOperator(';', 0)
+        self.expressionContext.addGroupOperator('(', 0)
+        self.expressionContext.addOperator(')', 0)
+        self.flowControlContext.addWhileControl('while', 0)
         self.flowControlContext.addBlockOperator('{', 0)
         self.flowControlContext.addOperator('}', 0)
         self.declarationContext.addInt('int', 0)
@@ -100,14 +103,16 @@ class MyTestCase(unittest.TestCase):
         vm.VMStep(cbytecodes)
 
     def test_VMStep_should_raise_RuntimeError_given_invalid_bytecode(self):
-        byteCodes = [0xfff12314]
+        bytecodes = [0xfff12314]
 
         vm = VirtualMachine()
 
         try:
-            vm.VMStep(byteCodes)
-        except  RuntimeError as e:
-            self.assertEqual('ERROR: invalid bytecode (0xfff12314, pc = 2).', e.errMsg)
+            cbytecodes = vm.convertToCArray(bytecodes)
+            vm.VMStep(cbytecodes)
+        except RuntimeError as e:
+            self.assertEqual('ERROR: invalid bytecode (0xfff12314, pc = 2).', e.args)
+            #self.assertEqual('ERROR: invalid bytecode (0xfff12314, pc = 2).', e.errMsg)
 
     def xtest_call_directly_to_dll_VMRun(self):
         lexer = LexerStateMachine('int x;', self.context)
@@ -122,6 +127,41 @@ class MyTestCase(unittest.TestCase):
         cByteCodes_t = c_uint * byteCodesSize
         cByteCodes = cByteCodes_t(*byteCodes)
         vmdll._VMRun(cByteCodes)
+
+    def test_VMStep_while_loop(self):
+        lexer = LexerStateMachine('while( x == 2) {x = 100;\n y = 1000;\n z=2000;} ', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+        self.byteCodeGenerator.variablesInThisAST['x'] = 4
+        self.byteCodeGenerator.variablesInThisAST['y'] = 8
+        self.byteCodeGenerator.variablesInThisAST['z'] = 12
+        bytecodes = self.generator.generateCode(token)
+
+        vm = VirtualMachine()
+        cbytecodes = vm.convertToCArray(bytecodes)
+
+        vm.VMStep(cbytecodes)
+        vm.VMStep(cbytecodes)
+        vm.VMStep(cbytecodes)
+        vm.VMStep(cbytecodes)
+        vm.VMStep(cbytecodes)
+        vm.VMStep(cbytecodes)
+        vm.VMStep(cbytecodes)
+
+    def test_dumpBytecodes(self):
+        lexer = LexerStateMachine('while( x == 2) {x = 100;\n y = 1000;\n z=2000;} ', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatement(0)
+        self.byteCodeGenerator.variablesInThisAST['x'] = 4
+        self.byteCodeGenerator.variablesInThisAST['y'] = 8
+        self.byteCodeGenerator.variablesInThisAST['z'] = 12
+        bytecodes = self.generator.generateCode(token)
+
+        vm = VirtualMachine()
+        cbytecodes = vm.convertToCArray(bytecodes)
+        vm.dumpBytecodes(cbytecodes)
 
 if __name__ == '__main__':
     unittest.main()

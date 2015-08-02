@@ -14,15 +14,16 @@ class Scope:
 class ScopeBuilder:
     def __init__(self):  # closing brace is used for implementation of buildScope
         self.scope = Scope()
+        self.types = []
         self.currentScope = copy.copy(self.scope)
-        self.interestedTokens = []
         self.scopeHistory = []
 
-    def addScope(self):
-        pass
+    def addType(self, *typeTokens):
+        for typeToken in typeTokens:
+            self.types.append(typeToken)
 
     def buildScope(self, token):
-        if token.id is 'int':
+        if token.id in self.types:
             self.currentScope.list.append(token.data[0].data[0])
         elif token.id is '{':
             self.currentScope.parentScope = copy.copy(self.currentScope)

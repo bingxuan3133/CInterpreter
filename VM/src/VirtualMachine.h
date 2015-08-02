@@ -15,13 +15,25 @@ struct Register {
   int limit;
 };
 
+typedef struct Status Status;
+
+struct Status {
+  int B; // Boolean Flag
+};
+
+extern Status statusReg;
 extern Register reg[MAX_REG];
 
-extern void (*instruction[256])(int);
-
-unsigned int getProgramCounter();
+void initVM();
+void clearRegisters();
 void clearProgramCounter();
+void moveProgramCounter(int relativeAddress);
+unsigned int getProgramCounter();
+void clearStatus();
+void setStatusBit(char bit);
+void clearStatusBit(char bit);
 int getBytecode(FILE *file);
+
 void VMLoad(char* filepath, int *bytecode);
 void VMRun(int *bytecode);
 void VMStep(int *bytecode);

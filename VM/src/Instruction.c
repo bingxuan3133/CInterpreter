@@ -18,7 +18,7 @@ void (*instruction[256])(int)  = {[DUMPR] = dumpRegister,
                                   [STMS] = storeMultipleRegistersIntoMemorySafe,
                                   [ADD] = addRegisters,
                                   [SUB] = subtractRegisters,
-                                  [SUB_IMM] = subtractRegisterWithImmediate,
+                                  // [SUB_IMM] = subtractRegisterWithImmediate,
                                   [MUL] = multiplyRegisters,
                                   [DIV] = divideRegisters,
                                   [AND] = andRegisters,
@@ -26,6 +26,83 @@ void (*instruction[256])(int)  = {[DUMPR] = dumpRegister,
                                   [XOR] = xorRegisters
                                   };
 //
+
+//========================
+//    Helper Functions
+//========================
+
+//-----------------------
+//    Bytecode Format
+//-----------------------
+
+//  COMMAND | Rd | R1 | imm
+//  ldr Rd, [R1 + imm]
+
+//  COMMAND | Rd | R1 | R2
+//  add Rd, R1, R2
+
+//  COMMAND | Rd | R1 | R2 | R3
+//  mul Rhigh, Rlow, R1, R2
+
+//  COMMAND | Rd | R1 | Rd.attribute
+//  mov Rd, R1, R2
+
+//  COMMAND | Rd | Rlist
+//  ldm Rd, [Rlist]
+
+/**
+ *  This is a helper function to get a specific range of bits from a 32-bit data
+ *  Input:  data    original 32-bit data
+ *          start   the start bit index of the returning bits (MSB)
+ *          length  the length of returning bits
+ *  Return: result  returning bits
+ */
+int getBits(int data, unsigned char start, unsigned char length) {
+  int result;
+  result = data >> (start - length + 1);
+  result = result & (0xFFFFFFFF >> (32 - length));
+  return result;
+}
+
+/**
+ *  This is a helper function to get the destination register
+ *  Input:  
+ */
+int getRd(int bytecode) {
+  return getBits(bytecode, 7 + MAX_REG_BIT, MAX_REG_BIT);
+}
+
+/**
+ *  This is a helper function to get the destination register
+ *  Input:  
+ */
+int getR1(int bytecode) {
+  return getBits(bytecode, 7 + (2 * MAX_REG_BIT), MAX_REG_BIT);
+}
+
+/**
+ *  This is a helper function to get the destination register
+ *  Input:  
+ */
+int getR2(int bytecode) {
+  return getBits(bytecode, 7 + (3 * MAX_REG_BIT), MAX_REG_BIT);
+}
+
+/**
+ *  This is a helper function to get the destination register
+ *  Input:  
+ */
+int getR3(int bytecode) {
+  return getBits(bytecode, 7 + (4 * MAX_REG_BIT), MAX_REG_BIT);
+}
+
+/**
+ *  This is a helper function to get the register list (used in ldm and stm)
+ *  Input:  
+ */
+int getRlist(int bytecode) {
+  return getBits(bytecode, 7 + MAX_REG_BIT + MAX_REG, MAX_REG);
+}
 
 //======================
 //    Main Function
@@ -46,6 +123,10 @@ void execute(int bytecode) {
 //======================
 //    Instructions
 //======================
+
+//----------------------
+//    Register-associated
+//----------------------
 
 void dumpRegister(int bytecode) {
   int regIndex = getRd(bytecode);
@@ -290,6 +371,10 @@ void storeMultipleRegistersIntoMemorySafe(int bytecode) {
     reg[referenceRegister].data = (int)ref;
 }
 
+//----------------------
+//    Arithmetic
+//----------------------
+
 void addRegisters(int bytecode) {
   int resultReg = getRd(bytecode);
   int reg1 = getR1(bytecode);
@@ -304,12 +389,12 @@ void subtractRegisters(int bytecode) {
   reg[resultReg].data = reg[reg1].data - reg[reg2].data;
 }
 
-void subtractRegisterWithImmediate(int bytecode) {
-  int regIndex = getRd(bytecode);
-  unsigned int value = bytecode >> (8 + MAX_REG_BIT);
+// void subtractRegisterWithImmediate(int bytecode) {
+  // int regIndex = getRd(bytecode);
+  // unsigned int value = bytecode >> (8 + MAX_REG_BIT);
   
-  reg[regIndex].data = reg[regIndex].data - value;
-}
+  // reg[regIndex].data = reg[regIndex].data - value;
+// }
 
 void multiplyRegisters(int bytecode) {
   unsigned long long result;
@@ -354,81 +439,20 @@ void xorRegisters(int bytecode) {
   reg[resultReg].data = reg[reg1].data ^ reg[reg2].data;
 }
 
+//----------------------
+//    Branch
+//----------------------
 
-//========================
-//    Helper Functions
-//========================
-
-//-----------------------
-//    Bytecode Format
-//-----------------------
-
-//  COMMAND | Rd | R1 | imm
-//  ldr Rd, [R1 + imm]
-
-//  COMMAND | Rd | R1 | R2
-//  add Rd, R1, R2
-
-//  COMMAND | Rd | R1 | R2 | R3
-//  mul Rhigh, Rlow, R1, R2
-
-//  COMMAND | Rd | R1 | Rd.attribute
-//  mov Rd, R1, R2
-
-//  COMMAND | Rd | Rlist
-//  ldm Rd, [Rlist]
-
-/**
- *  This is a helper function to get a specific range of bits from a 32-bit data
- *  Input:  data    original 32-bit data
- *          start   the start bit index of the returning bits (MSB)
- *          length  the length of returning bits
- *  Return: result  returning bits
- */
-int getBits(int data, unsigned char start, unsigned char length) {
-  int result;
-  result = data >> (start - length + 1);
-  result = result & (0xFFFFFFFF >> (32 - length));
-  return result;
+void branch(int bytecode) {
+  int resultReg = getRd(bytecode);
+  int relativeAddress = bytecode >> 8;
+  moveProgramCounter(relativeAddress);
 }
 
-/**
- *  This is a helper function to get the destination register
- *  Input:  
- */
-int getRd(int bytecode) {
-  return getBits(bytecode, 7 + MAX_REG_BIT, MAX_REG_BIT);
+void branchIfTrue(int bytecode) {
+  int resultReg = getRd(bytecode);
+  int relativeAddress = bytecode >> 8;
+  if(statusReg.B) {
+    moveProgramCounter(relativeAddress);
+  }
 }
-
-/**
- *  This is a helper function to get the destination register
- *  Input:  
- */
-int getR1(int bytecode) {
-  return getBits(bytecode, 7 + (2 * MAX_REG_BIT), MAX_REG_BIT);
-}
-
-/**
- *  This is a helper function to get the destination register
- *  Input:  
- */
-int getR2(int bytecode) {
-  return getBits(bytecode, 7 + (3 * MAX_REG_BIT), MAX_REG_BIT);
-}
-
-/**
- *  This is a helper function to get the destination register
- *  Input:  
- */
-int getR3(int bytecode) {
-  return getBits(bytecode, 7 + (4 * MAX_REG_BIT), MAX_REG_BIT);
-}
-
-/**
- *  This is a helper function to get the register list (used in ldm and stm)
- *  Input:  
- */
-int getRlist(int bytecode) {
-  return getBits(bytecode, 7 + MAX_REG_BIT + MAX_REG, MAX_REG);
-}
-

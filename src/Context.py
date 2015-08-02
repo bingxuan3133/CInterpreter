@@ -1,7 +1,6 @@
 def revealSelf(self):
     return '{0} {1}'.format(self.id, self.data)
 
-
 class SymbolBase:
     def led(self):
         raise SyntaxError('No led(.) function defined!')
@@ -11,7 +10,6 @@ class SymbolBase:
 
     def generateByteCode(self):
         raise SyntaxError('No generation function defined!')
-
 
 class Context:
     PREFIX_UNARY = 1

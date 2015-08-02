@@ -1,13 +1,16 @@
 # Pratt's parser implementation
 
+import os,sys
 from LexerStateMachine import *
-from Scope import ScopeBuilder
+from ScopeBuilder import ScopeBuilder
+from Context import *
 
 class Parser:
     def __init__(self, lexer, contextManager):
         self.lexer = lexer
         self.contextManager = contextManager
         self.scopeBuilder = ScopeBuilder()
+        self.closingBrace = Context.symbol(Context(self.contextManager), '}')  # does this count as hack?
 
     def parse(self, bindingPower):
             token = self.lexer.peep()        # token = leftToken
@@ -18,7 +21,6 @@ class Parser:
                 token2 = self.lexer.peep()
             return token  # number token: come in first time, else operator token: after rolling in the while loop
 
-
     def parseStatement(self, bindingPower):
         list = []
         firstToken = self.lexer.peep()
@@ -26,25 +28,25 @@ class Parser:
             self.lexer.advance()
             return None
         elif firstToken.id == '{':            # For one block of statements
-            #self.scopeBuilder.buildScope(firstToken)
+            self.scopeBuilder.buildScope(firstToken)
             returnedToken = self.parse(bindingPower)
-            flowControlContext = self.contextManager.getContext('FlowControl')
-            #self.scopeBuilder.buildScope(Context.createToken(flowControlContext, '}'))  # Create '}' token for scopeBuilder
+            self.scopeBuilder.buildScope(self.closingBrace)  # parse '}' to tell ScopeBuilder now leaving the scope
             list.append(returnedToken)
             return list
         elif firstToken.id in self.contextManager.getContext('FlowControl').symbolTable:  # For some context that do not need ';'
             returnedToken = self.parse(bindingPower)
-            #self.scopeBuilder.buildScope(returnedToken)
+            self.scopeBuilder.buildScope(returnedToken)
             list.append(returnedToken)
             return list
         else:                               # For one statement
             returnedToken = self.parse(bindingPower)
             if returnedToken.id == '(declaration&definition)':  # For declaration & definition
                 list.extend(returnedToken.data)
-                #self.scopeBuilder.buildScope(returnedToken.data[0])
+                self.scopeBuilder.buildScope(returnedToken.data[0])
                 self.lexer.peep(';')
                 return list
-        #self.scopeBuilder.buildScope(returnedToken)
+
+        self.scopeBuilder.buildScope(returnedToken)
         self.lexer.peep(';')
         self.lexer.advance()
         list.append(returnedToken)
@@ -59,4 +61,3 @@ class Parser:
                 list.extend(returnedToken)
             token = self.lexer.peep()
         return list
-
