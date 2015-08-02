@@ -22,6 +22,7 @@ class TestLexer(unittest.TestCase):
         self.context.addOperator('*')
         self.context.addOperator('=')
         self.context.addOperator('==')
+        self.context.addOperator('&&')
 
     def testAdvance(self):
         lexer = LexerStateMachine(""" hi krizz
@@ -593,7 +594,7 @@ class TestLexer(unittest.TestCase):
                              'x =myVar +'+'\n'+
                              '^', e.msg)
 
-    def xtest_lexer_will_recognize_logical_AND(self):
+    def test_lexer_will_recognize_logical_AND(self):
         lexer = LexerStateMachine('x && 0', self.context)
         testToken = lexer.advance()
         self.assertEqual(testToken.id, '&&')

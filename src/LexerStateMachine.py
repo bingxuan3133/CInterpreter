@@ -61,7 +61,6 @@ class LexerStateMachine:
             self.identifier()
 
         elif self.isOperator():
-            self.capture()
             self.operator()
 
         elif self.isEnd():
@@ -199,9 +198,87 @@ class LexerStateMachine:
         self.end()
 
     def operator(self):
-        if self.isMultipleSymbolOperator():
+        nextState = None
+        dummyOperator = ['(', ')', '{', '}', '[', ']', ',', ';']
+        if self.inStream.currentChar == '+':
+            nextState = self.addOperator
+        elif self.inStream.currentChar == '-':
+            nextState = self.minusOperator
+        elif self.inStream.currentChar == '*':
+            nextState = self.multiplyOperator
+        elif self.inStream.currentChar == '/':
+            nextState = self.divideOperator
+        elif self.inStream.currentChar == '%':
+            nextState = self.divideOperator
+        elif self.inStream.currentChar == '=':
+            nextState = self.equal
+        elif self.inStream.currentChar == '&':
+            nextState = self.AND
+        elif self.inStream.currentChar == '|':
+            nextState = self.OR
+        elif self.inStream.currentChar == '>':
+            nextState = self.greaterThan
+        elif self.inStream.currentChar == '<':
+            nextState = self.lessThan
+        elif self.inStream.currentChar == '!':
+            nextState = self.logicalNOT
+        elif self.inStream.currentChar in dummyOperator:
+            nextState = self.end
+        else:
+            caretMessage = ' '*(self.inStream.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:{} is an unknown token\n{}\n{}"\
+                              .format(self.inStream.line,self.inStream.column,self.inStream.currentChar,self.inStream.oriString,caretMessage))
+        self.capture()
+        nextState()
+
+    def addOperator(self):
+        if self.inStream.currentChar == '+':
             self.capture()
-        self.end()
+        elif self.inStream.currentChar == '=':
+            self.capture()
+
+    def minusOperator(self):
+        if self.inStream.currentChar == '-':
+            self.capture()
+        elif self.inStream.currentChar == '=':
+            self.capture()
+
+    def multiplyOperator(self):
+        if self.inStream.currentChar == '=':
+            self.capture()
+
+    def divideOperator(self):
+        if self.inStream.currentChar == '=':
+            self.capture()
+
+    def equal(self):
+        if self.inStream.currentChar == '=':
+            self.capture()
+
+    def AND(self):
+        if self.inStream.currentChar == '=':
+            self.capture()
+        elif self.inStream.currentChar == '&':
+            self.capture()
+
+    def OR(self):
+        if self.inStream.currentChar == '=':
+            self.capture()
+        elif self.inStream.currentChar == '|':
+            self.capture()
+
+    def greaterThan(self):
+        if self.inStream.currentChar == '=':
+            self.capture()
+
+    def lessThan(self):
+        if self.inStream.currentChar == '=':
+            self.capture()
+
+    def logicalNOT(self):
+        if self.inStream.currentChar == '=':
+            self.capture()
+
 
     def end(self):
         pass
@@ -251,10 +328,6 @@ class LexerStateMachine:
 
     def isE(self):
         return self.inStream.currentChar == 'e' or self.inStream.currentChar == 'E'
-
-    def isMultipleSymbolOperator(self):
-        potentialSymbol = ['+','-','=','&']
-        return self.inStream.currentChar in potentialSymbol
 
     def isEnd(self):
         return self.inStream.currentChar is None
