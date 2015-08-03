@@ -26,8 +26,14 @@ class InformationInjector:
             for token in tokenToInject.data[1][0].data:
                 self.injectRegisterRequired(token)
             return
-        elif tokenToInject.id == '(':
+        elif self.canIgnore(tokenToInject.id):
             token = tokenToInject.data[0]
+        elif tokenToInject.id == '(def)':
+            token = tokenToInject.data[1]
+            self.insertBasicInformationForLiteral(token)
+            return
+        elif tokenToInject.id == '(decl)':
+            return
         else:
             token = tokenToInject
         registerNumber =[]
@@ -84,7 +90,7 @@ class InformationInjector:
 
     def getTheWeightFromChild(self,token,weightIndex):
         for data in token.data :
-            if data.id == "(":
+            if self.canIgnore(data.id):
                 data = data.data[0]
             token.weight.insert(weightIndex, data.weight[0])
             weightIndex += 1
@@ -92,9 +98,9 @@ class InformationInjector:
     def findOutTheHeavierSide(self,token):
         firstToken = token.data[0]
         secondToken = token.data[1]
-        if firstToken.id == '(':
+        if self.canIgnore(firstToken.id):
             firstToken = firstToken.data[0]
-        if secondToken.id == '(':
+        if self.canIgnore(secondToken.id):
             secondToken = secondToken.data[0]
 
 
@@ -107,11 +113,11 @@ class InformationInjector:
     def determineTheMaxRequiredRegister(self, token):
         firstToken = token.data[0]
         secondToken = token.data[1]
-        if firstToken.id == '(':
+        if self.canIgnore(firstToken.id):
             firstToken = firstToken.data[0]
-        if secondToken.id == '(':
+        if self.canIgnore(secondToken.id):
             secondToken = secondToken.data[0]
-        if token.id == '(':
+        if self.canIgnore(token.id):
             return firstToken.maxRequiredRegister
         else:
             return firstToken.maxRequiredRegister+secondToken.maxRequiredRegister
@@ -119,12 +125,12 @@ class InformationInjector:
     def determineTheMinRequiredRegister(self, token):
         firstToken = token.data[0]
         secondToken = token.data[1]
-        if firstToken.id == '(':
+        if self.canIgnore(firstToken.id):
             firstToken = firstToken.data[0]
-        if secondToken.id == '(':
+        if self.canIgnore(secondToken.id):
             secondToken = secondToken.data[0]
 
-        if token.id == '(':
+        if self.canIgnore(token.id):
             return firstToken.minRequiredRegister
         elif firstToken.minRequiredRegister > secondToken.minRequiredRegister:
             return firstToken.minRequiredRegister
@@ -143,3 +149,6 @@ class InformationInjector:
 
         return suitableRegister
 
+    def canIgnore(self, name):
+        ignoreList = ['(']
+        return name in ignoreList

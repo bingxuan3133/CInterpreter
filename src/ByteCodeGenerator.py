@@ -218,10 +218,10 @@ class ByteCodeGenerator:
         thisGenerator = self
 
         def recordTheVariable(self,token):
-            if token.id in thisGenerator.byteRequired:
+            if token.data[0].id in thisGenerator.byteRequired:
                 thisGenerator.variableCounter += 1
-                thisGenerator.memorySize += thisGenerator.byteRequired[token.id]
-                thisGenerator.variablesInThisAST[token.data[0].data[0]] = thisGenerator.memorySize
+                thisGenerator.memorySize += thisGenerator.byteRequired[token.data[0].id]
+                thisGenerator.variablesInThisAST[token.data[1].data[0]] = thisGenerator.memorySize
 
         def noByteCode(self,sequenceCheck = None, token = None, index = -1):
             if self.id == "(":
@@ -282,17 +282,14 @@ class ByteCodeGenerator:
             thisGenerator.floatingFlag = 1
 
         def generalByteCode(self,sequenceCheck = None, token = None, index = -1):
-            if thisGenerator.isADeclaration(self.id):
-                recordTheVariable(None, self)
-            else:
-                if self.id == '(':
-                    self = self.data[0]
-                pushed = thisGenerator.registerAllocator.decideWhetherToPush(self)
-                thisGenerator.findOutAndGenerateCorrectSideCode(self, respectiveByteCodeFunction[self.id])
+            if self.id == '(':
+                self = self.data[0]
+            pushed = thisGenerator.registerAllocator.decideWhetherToPush(self)
+            thisGenerator.findOutAndGenerateCorrectSideCode(self, respectiveByteCodeFunction[self.id])
 
-                thisGenerator.decideWhetherToSaveSlotForPopValue(pushed, sequenceCheck, respectiveByteCodeFunction[self.id], token)
+            thisGenerator.decideWhetherToSaveSlotForPopValue(pushed, sequenceCheck, respectiveByteCodeFunction[self.id], token)
 
-                thisGenerator.registerAllocator.decideWhetherToPop(pushed)
+            thisGenerator.registerAllocator.decideWhetherToPop(pushed)
             return thisGenerator.byteCodeList
 
         def ifByteCode(self,sequenceCheck = None, token = None, index = -1):
@@ -334,15 +331,29 @@ class ByteCodeGenerator:
             thisGenerator.byteCodeList.append(thisGenerator.branchIfTrue([1,thisGenerator.mapping.releaseAWorkingRegister()]))
             branchSize = thisGenerator.byteCodeList.__len__()-tempLocation+1
             thisGenerator.byteCodeList.append(thisGenerator.branch([-branchSize]))
+            return thisGenerator.byteCodeList
+
+        def defByteCode(self,sequenceCheck = None, token = None, index = -1):
+            recordTheVariable(None, self.data[0])
+            sequenceCheck = 0
+            self.data[0].data[1].generateByteCode(sequenceCheck, self.data[0], index = 1)
+            sequenceCheck = 1
+            self.data[1].generateByteCode(sequenceCheck, self, index = 1)
+            Code = thisGenerator.storeRegister([thisGenerator.mapping.releaseALargestWorkingRegister(),thisGenerator.mapping.releaseAWorkingRegister()])
+            thisGenerator.byteCodeList.append(Code)
 
             return thisGenerator.byteCodeList
 
+        def declByteCode(self,sequenceCheck = None, token = None, index = -1):
+            recordTheVariable(None, self)
+            return thisGenerator.byteCodeList
         generationFunction = { '(literal)':([None], [generateLiteralCode]), '(identifier)':([None], [generateIdentifierCode]), '(systemToken)':([None], [noByteCode]),'(floating)':([None], [generateFloatingPointLoad]),
                             '+':([None],[generalByteCode]),'-':([None],[generalByteCode],), '*':([None],[generalByteCode]), '/':([None],[generalByteCode]),'==':([None],[generalByteCode]),'|':([None],[generalByteCode]),'%':([None],[generalByteCode]),
                             '=':([None],[generalByteCode]),'<':([None],[generalByteCode]),'<=':([None],[generalByteCode]),'>':([None],[generalByteCode]),'>=':([None],[generalByteCode]),'&&':([None],[generalByteCode]),
                             'int':([None],[generalByteCode]),'long':([None],[generalByteCode]), 'short':([None],[generalByteCode]),
+                               '(def)':([None],[defByteCode]),'(decl)':([None],[declByteCode]),
                              'if':([None],[ifByteCode]),'while':([None],[whileByteCode]),'do':([None],[doByteCode]),'else':([None],[noByteCode]),
-                             ',':([None],[noByteCode]),'(declaration&definition)':([None],[noByteCode]),
+                             ',':([None],[noByteCode]),'(multiple)':([None],[noByteCode]),
                               'unsigned':([None],[noByteCode]),'signed':([None],[noByteCode]),
                               '(':([None],[noByteCode]),';':([None],[noByteCode]),')':([None],[noByteCode]),'{':([None],[noByteCode]),'}':([None],[noByteCode]),
                               }
