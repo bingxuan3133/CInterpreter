@@ -44,7 +44,7 @@ class TestScope(unittest.TestCase):
         intToken = self.context.createToken('int')
         xToken = self.context.createToken('x')
         declToken.data.append(intToken)
-        intToken.data.append(xToken)
+        declToken.data.append(xToken)
         scopeBuilder.addType('int')
         scopeBuilder.buildScope(declToken)
         self.assertEqual([declToken], scopeBuilder.scope.list)
@@ -56,7 +56,7 @@ class TestScope(unittest.TestCase):
         intToken = self.context.createToken('int')
         xToken = self.context.createToken('x')
         declToken.data.append(intToken)
-        intToken.data.append(xToken)
+        declToken.data.append(xToken)
         braceToken = self.context.createToken('{')
         scopeBuilder.addType('int')
 
@@ -74,8 +74,9 @@ class TestScope(unittest.TestCase):
         intToken = self.context.createToken('int')
         xToken = self.context.createToken('x')
         declToken1.data.append(intToken)
+        declToken1.data.append(xToken)
         declToken2.data.append(intToken)
-        intToken.data.append(xToken)
+        declToken2.data.append(xToken)
         braceToken = self.context.createToken('{')
         scopeBuilder.addType('int')
 
@@ -101,9 +102,9 @@ class TestScope(unittest.TestCase):
         intToken2 = self.context.createToken('int')
         yToken = self.context.createToken('y')
         declToken1.data.append(intToken1)
-        intToken1.data.append(xToken)
+        declToken1.data.append(xToken)
         declToken2.data.append(intToken2)
-        intToken2.data.append(yToken)
+        declToken2.data.append(yToken)
         braceToken = self.context.createToken('{')
         scopeBuilder.addType('int')
 
@@ -114,8 +115,12 @@ class TestScope(unittest.TestCase):
         self.assertEqual(None, localToken)
         localToken = scopeBuilder.findLocal('y')
         self.assertEqual(declToken2, localToken)
-        localToken = scopeBuilder.xfindGlobal('x')
+        localToken = scopeBuilder.findGlobal('y')
+        self.assertEqual(declToken2, localToken)
+        localToken = scopeBuilder.findGlobal('x')
         self.assertEqual(declToken1, localToken)
+        localToken = scopeBuilder.findGlobal('z')
+        self.assertEqual(None, localToken)
 
 
 """
