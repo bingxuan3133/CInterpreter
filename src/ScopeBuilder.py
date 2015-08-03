@@ -56,29 +56,19 @@ class ScopeBuilder:
 
     def findLocal(self, identifierName):
         for declToken in self.currentScope.list:
-            if declToken.data[0].data[0].data[0] == identifierName:
+            if isinstance(declToken, list):
+                break
+            elif declToken.data[1].data[0] == identifierName:
                 return declToken
         return None
 
     def findGlobal(self, identifierName):
-        savedScope = self.currentScope
-        while self.currentScope.parentScope is not None:
-            for identifierToken in self.currentScope.list:
-                if isinstance(identifierToken, list):  # is list object
-                    break
-                elif identifierToken.data[0].data[0] is identifierName:
-                    self.currentScope = savedScope
-                    return identifierToken
-            self.currentScope = self.currentScope.parentScope
-        self.currentScope = savedScope
-        return None
-
-    def xfindGlobal(self, identifierName):
         token = self.findLocal(identifierName)
         if token is None and self.currentScope.parentScope is not None:
             savedScope = self.currentScope
             self.currentScope = self.currentScope.parentScope
-            token = self.xfindGlobal(self.currentScope)
+            token = self.findGlobal(identifierName)
             self.currentScope = savedScope
             return token
-        return None
+        else:
+            return token
