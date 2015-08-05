@@ -41,7 +41,7 @@ class Context:
             caretMessage = ' '*(self.column-1)+'^'
             raise SyntaxError("Error[{}][{}]:Expected a declaration\n{}\n{}"\
                              .format(self.line,self.column,self.oriString,caretMessage))
-        def led2(self):
+        def led2(self, token):
             caretMessage = ' '*(self.column-1)+'^'
             raise SyntaxError("Error[{}][{}]:Expected a declaration\n{}\n{}"\
                              .format(self.line,self.column,self.oriString,caretMessage))

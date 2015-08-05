@@ -5,6 +5,8 @@ lib_path = os.path.abspath('../src')
 sys.path.append(lib_path)
 
 from ContextManager import *
+from DefaultContext import *
+from DeclarationContext import *
 from ExpressionContext import *
 from FlowControlContext import *
 
@@ -28,17 +30,31 @@ class TestContextManager(unittest.TestCase):
         self.manager.setCurrentContexts([self.expression, self.flowControl])
         self.assertEqual([self.expression, self.flowControl], self.manager.getCurrentContexts())
 
-    def test_popContext_into_contextsStack(self):
+    def test_setCurrentContexts_should_take_in_contextName_and_add_into_currentContexts(self):
+        self.manager.addContext('Expression', self.expression)
+        self.manager.addContext('FlowControl', self.flowControl)
+        self.manager.setCurrentContextsByName('Expression', 'FlowControl')
+        self.assertEqual([self.expression, self.flowControl], self.manager.currentContexts)
+        self.manager.setCurrentContextsByName('Expression')
+        self.assertEqual([self.expression], self.manager.currentContexts)
+
+    def test_popContexts_from_contextsStack(self):
         self.manager.contextsStack = [[self.expression, self.flowControl], [self.expression]]
         returnedContext = self.manager.popContexts()
         self.assertEqual([self.expression], returnedContext)
 
-    def test_pushContext_from_contextsStack(self):
+    def test_pushContexts_into_contextsStack(self):
         self.manager.contextsStack = [[self.expression]]
         self.manager.pushContexts([self.expression, self.flowControl])
         self.assertEqual([[self.expression], [self.expression, self.flowControl]], self.manager.contextsStack)
 
-    def test_popContext_should_raise_overflow_error_given_contextsStack_is_empty(self):
+    def test_pushCurrentContexts_into_contextsStack(self):
+        self.manager.contextsStack = [[self.expression]]
+        self.manager.currentContexts = [self.expression, self.flowControl]
+        self.manager.pushCurrentContexts()
+        self.assertEqual([[self.expression], [self.expression, self.flowControl]], self.manager.contextsStack)
+
+    def test_popContexts_should_raise_overflow_error_given_contextsStack_is_empty(self):
         self.manager.contextsStack = []
         self.assertRaises(RuntimeError, self.manager.popContexts)
 

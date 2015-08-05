@@ -19,13 +19,24 @@ class ContextManager:
     def setCurrentContexts(self, contexts):
         self.currentContexts = contexts
 
+    def setCurrentContextsByName(self, *contextNames):
+        if len(contextNames) > 1:
+            self.currentContexts = []
+            for contextName in contextNames:
+                self.currentContexts.append(self.getContext(contextName))
+        else:
+            self.currentContexts = [self.getContext(contextNames[0])]
+
     def getCurrentContexts(self):
         return self.currentContexts
 
     def popContexts(self):
         if self.contextsStack.__len__() is 0:
-            raise RuntimeError("No contexts is inside the stack.Please contact service person.")
+            raise RuntimeError("No contexts is inside the stack. Please contact service person.")
         return self.contextsStack.pop()
 
     def pushContexts(self, contexts):
-        return self.contextsStack.append(contexts)
+        self.contextsStack.append(contexts)
+
+    def pushCurrentContexts(self):
+        self.contextsStack.append(self.currentContexts)

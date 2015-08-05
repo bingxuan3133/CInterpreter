@@ -23,13 +23,16 @@ class TestDeclarationContextStartingWithShort(unittest.TestCase):
         self.defaultContext.addKeyword('int')
         self.declarationContext = DeclarationContext(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
-        self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext, self.flowControlContext]
+        self.contexts = [self.expressionContext, self.declarationContext, self.defaultContext, self.flowControlContext]
         self.expressionContext.addInfixOperator('=', 20)
         self.expressionContext.addPrefixInfixOperator('+', 70)
         self.expressionContext.addOperator(',', 0)
+        self.declarationContext.addOperator(',', 0)
         self.expressionContext.addOperator(';', 0)
         self.flowControlContext.addBlockOperator('{', 0)
         self.flowControlContext.addOperator('}', 0)
+        self.declarationContext.addOperator('=', 20)  # for declaration context to recognise '='
+        self.declarationContext.addOperator(';', 0)  # for declaration context to recognise ';'
         self.declarationContext.addInt('int', 0)
         self.declarationContext.addShort('short', 0)
         self.declarationContext.addLong('long', 0)
@@ -201,13 +204,15 @@ class TestDeclarationContextStartingWithLong(unittest.TestCase):
         self.defaultContext.addKeyword('int')
         self.declarationContext = DeclarationContext(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
-        self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext, self.flowControlContext]
+        self.contexts = [self.expressionContext, self.declarationContext, self.defaultContext, self.flowControlContext]
         self.expressionContext.addInfixOperator('=', 20)
         self.expressionContext.addPrefixInfixOperator('+', 70)
-        self.expressionContext.addOperator(',', 0)
+        self.declarationContext.addOperator(',', 0)
         self.expressionContext.addOperator(';', 0)
         self.flowControlContext.addBlockOperator('{', 0)
         self.flowControlContext.addOperator('}', 0)
+        self.declarationContext.addOperator('=', 20)  # for declaration context to recognise '='
+        self.declarationContext.addOperator(';', 0)  # for declaration context to recognise ';'
         self.declarationContext.addInt('int', 0)
         self.declarationContext.addShort('short', 0)
         self.declarationContext.addLong('long', 0)
@@ -421,13 +426,16 @@ class TestDeclarationContextStartingWithSignedOrUnsigned(unittest.TestCase):
         self.defaultContext.addKeyword('int')
         self.declarationContext = DeclarationContext(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
-        self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext, self.flowControlContext]
+        self.contexts = [self.expressionContext, self.declarationContext, self.defaultContext, self.flowControlContext]
         self.expressionContext.addInfixOperator('=', 20)
         self.expressionContext.addPrefixInfixOperator('+', 70)
         self.expressionContext.addOperator(',', 0)
+        self.declarationContext.addOperator(',', 0)
         self.expressionContext.addOperator(';', 0)
         self.flowControlContext.addBlockOperator('{', 0)
         self.flowControlContext.addOperator('}', 0)
+        self.declarationContext.addOperator('=', 20)  # for declaration context to recognise '='
+        self.declarationContext.addOperator(';', 0)  # for declaration context to recognise ';'
         self.declarationContext.addInt('int', 0)
         self.declarationContext.addShort('short', 0)
         self.declarationContext.addLong('long', 0)
@@ -592,13 +600,16 @@ class TestDeclarationContextStartingWithInt(unittest.TestCase):
         self.defaultContext.addKeyword('int')
         self.declarationContext = DeclarationContext(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
-        self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext, self.flowControlContext]
+        self.contexts = [self.expressionContext, self.declarationContext, self.defaultContext, self.flowControlContext]
         self.expressionContext.addInfixOperator('=', 20)
         self.expressionContext.addPrefixInfixOperator('+', 70)
         self.expressionContext.addOperator(',', 0)
+        self.declarationContext.addOperator(',', 0)
         self.expressionContext.addOperator(';', 0)
         self.flowControlContext.addBlockOperator('{', 0)
         self.flowControlContext.addOperator('}', 0)
+        self.declarationContext.addOperator('=', 20)  # for declaration context to recognise '='
+        self.declarationContext.addOperator(';', 0)  # for declaration context to recognise ';'
         self.declarationContext.addInt('int', 0)
         self.declarationContext.addShort('short', 0)
         self.declarationContext.addLong('long', 0)
@@ -740,14 +751,17 @@ class TestDeclarationContextWithAssignmentAndComa(unittest.TestCase):
         self.defaultContext.addKeyword('int')
         self.declarationContext = DeclarationContext(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
-        self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext, self.flowControlContext]
+        self.contexts = [self.expressionContext, self.declarationContext, self.defaultContext, self.flowControlContext]
         self.expressionContext.addInfixOperator('=', 20)
         self.expressionContext.addPrefixInfixOperator('+', 70)
         self.expressionContext.addPrefixInfixOperator('-', 70)
         self.expressionContext.addOperator(',', 0)
+        self.declarationContext.addOperator(',', 0)
         self.expressionContext.addOperator(';', 0)
         self.flowControlContext.addBlockOperator('{', 0)
         self.flowControlContext.addOperator('}', 0)
+        self.declarationContext.addOperator('=', 20)  # for declaration context to recognise '='
+        self.declarationContext.addOperator(';', 0)  # for declaration context to recognise ';'
         self.declarationContext.addInt('int', 0)
         self.declarationContext.addShort('short', 0)
         self.declarationContext.addLong('long', 0)
@@ -1085,19 +1099,25 @@ class TestPointerDeclaration(unittest.TestCase):
         self.defaultContext.addKeyword('int')
         self.declarationContext = DeclarationContext(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
-        self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext, self.flowControlContext]
+        self.contexts = [self.expressionContext, self.declarationContext, self.defaultContext, self.flowControlContext]
         self.expressionContext.addInfixOperator('=', 20)
         self.expressionContext.addPrefixInfixOperator('+', 70)
         self.expressionContext.addPrefixInfixOperator('-', 70)
         self.expressionContext.addPostfixOperator('++', 120)
         self.expressionContext.addPostfixOperator('--', 120)
+        self.declarationContext.addOperator('=', 20)  # for declaration context to recognise '='
+        self.declarationContext.addOperator(';', 0)  # for declaration context to recognise ';'
         self.declarationContext.addInt('int', 0)
+        self.declarationContext.addShort('short', 0)
         self.declarationContext.addPointer('*', 120)
         self.declarationContext.addSubscript('[', 150)
         self.declarationContext.addOperator(']', 0)
+        self.declarationContext.addGroupOperator('(', 0)
+        self.declarationContext.addOperator(')', 0)
         self.expressionContext.addGroupOperator('(', 0)
         self.expressionContext.addOperator(')', 0)
         self.expressionContext.addOperator(',', 0)
+        self.declarationContext.addOperator(',', 0)
         self.expressionContext.addOperator(';', 0)
         self.flowControlContext.addBlockOperator('{', 0)
         self.flowControlContext.addOperator('}', 0)
@@ -1155,6 +1175,32 @@ class TestPointerDeclaration(unittest.TestCase):
         self.assertEqual('ptr', token[0].data[0].data[1].data[0])
         self.assertEqual(3, token[0].data[1].data[0])
 
+    def test_int_ptr_int_should_fail(self):
+        lexer = LexerStateMachine('int *int x;;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        try:
+            parser.parseStatement(0)
+            self.fail()
+        except SyntaxError as e:
+            self.assertEqual("Error[1][6]:Expecting (identifier) before int"+ '\n' +
+                               'int *int x;;'+ '\n' +
+                               '     ^',e.msg)
+
+    def test_int_ptr_short_should_fail(self):
+        lexer = LexerStateMachine('int *short x;;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        try:
+            parser.parseStatement(0)
+            self.fail()
+        except SyntaxError as e:
+            self.assertEqual("Error[1][6]:Expecting (identifier) before short"+ '\n' +
+                               'int *short x;;'+ '\n' +
+                               '     ^',e.msg)
+
     def test_ptr_pointer_array_10_should_fail(self):
         lexer = LexerStateMachine('int ptr*[10];', self.context)
         parser = Parser(lexer, self.manager)
@@ -1162,6 +1208,7 @@ class TestPointerDeclaration(unittest.TestCase):
 
         try:
             parser.parseStatement(0)
+            self.fail()
         except SyntaxError as e:
             self.assertEqual("Error[1][8]:Expecting ; before *"+ '\n' +
                                'int ptr*[10];'+ '\n' +
@@ -1174,6 +1221,7 @@ class TestPointerDeclaration(unittest.TestCase):
 
         try:
             parser.parseStatement(0)
+            self.fail()
         except SyntaxError as e:
             self.assertEqual("Error[1][13]:Expecting ; before *"+ '\n' +
                                'int *ptr[10]*x[10];'+ '\n' +
@@ -1184,12 +1232,13 @@ class TestPointerDeclaration(unittest.TestCase):
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
         try:
+
             token = parser.parseStatement(0)
             self.fail()
         except SyntaxError as e:
             self.assertEqual("Error[1][5]:Expecting (identifier) before +"+ '\n' +
-                               'int +ptr;'+ '\n' +
-                               '    ^',e.msg)
+                             'int +ptr;' + '\n' +
+                             '    ^', e.msg)
 
     def test_ptr_post_decrement_should_fail(self):
         lexer = LexerStateMachine('int ptr--;', self.context)
@@ -1199,9 +1248,9 @@ class TestPointerDeclaration(unittest.TestCase):
             token = parser.parseStatement(0)
             self.fail()
         except SyntaxError as e:
-            self.assertEqual("Error[1][8]:Expecting ; before --"+ '\n' +
-                               'int ptr--;'+ '\n' +
-                               '       ^',e.msg)
+            self.assertEqual("Error[1][8]:Expecting ; before --" + '\n' +
+                             'int ptr--;' + '\n' +
+                             '       ^', e.msg)
 
     def test_pointer_positive_sign_ptr_should_fail(self):
         lexer = LexerStateMachine('int *+ptr;', self.context)
@@ -1211,7 +1260,7 @@ class TestPointerDeclaration(unittest.TestCase):
             token = parser.parseStatement(0)
             self.fail()
         except SyntaxError as e:
-            self.assertEqual("Error[1][5]:Expecting ; before +"+ '\n' +
+            self.assertEqual("Error[1][5]:Expecting ; before +" + '\n' +
                                'int *+ptr;'+ '\n' +
                                '     ^',e.msg)
 
@@ -1224,9 +1273,9 @@ class TestPointerDeclaration(unittest.TestCase):
             parser.parseStatement(0)
             self.fail()
         except SyntaxError as e:
-            self.assertEqual("Error[1][9]:Expecting ; before --"+ '\n' +
-                               'int *ptr--;'+ '\n' +
-                               '        ^',e.msg)
+            self.assertEqual("Error[1][9]:Expecting ; before --" + '\n' +
+                               'int *ptr--;' + '\n' +
+                               '        ^', e.msg)
 
     def test_pointer_array_10_should_fail(self):
         lexer = LexerStateMachine('int *[10];', self.context)
@@ -1235,10 +1284,11 @@ class TestPointerDeclaration(unittest.TestCase):
 
         try:
             parser.parseStatement(0)
+            self.fail()
         except SyntaxError as e:
-            self.assertEqual("Error[1][6]:Expecting (identifier) before ["+ '\n' +
-                               'int *[10];'+ '\n' +
-                               '     ^',e.msg)
+            self.assertEqual("Error[1][6]:Expecting (identifier) before [" + '\n' +
+                               'int *[10];' + '\n' +
+                               '     ^', e.msg)
 
     def test_pointer_10_should_fail(self):
         lexer = LexerStateMachine('int *10;', self.context)
@@ -1246,10 +1296,11 @@ class TestPointerDeclaration(unittest.TestCase):
         self.manager.setParser(parser)
         try:
             parser.parseStatement(0)
+            self.fail()
         except SyntaxError as e:
-            self.assertEqual("Error[1][6]:Expecting (identifier) before (literal)"+ '\n' +
-                               'int *10;'+ '\n' +
-                               '     ^',e.msg)
+            self.assertEqual("Error[1][6]:Expecting (identifier) before (literal)" + '\n' +
+                               'int *10;' + '\n' +
+                               '     ^', e.msg)
 
     def test_pointer_to_10_array_10_fail(self):
         lexer = LexerStateMachine('int (*10)[10];', self.context)
@@ -1257,12 +1308,11 @@ class TestPointerDeclaration(unittest.TestCase):
         self.manager.setParser(parser)
         try:
             parser.parseStatement(0)
+            self.fail()
         except SyntaxError as e:
-            self.assertEqual("Error[1][7]:Expecting (identifier) before (literal)"+ '\n' +
+            self.assertEqual("Error[1][7]:Expecting (identifier) before (literal)" + '\n' +
                                'int (*10)[10];'+ '\n' +
-                               '      ^',e.msg)
-
-
+                               '      ^', e.msg)
 
 if __name__ == '__main__':
     unittest.main()
