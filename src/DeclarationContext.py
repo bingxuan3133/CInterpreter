@@ -5,7 +5,7 @@ lib_path = os.path.abspath('\..\src')
 sys.path.append(lib_path)
 
 from Context import *
-
+import Error
 class DeclarationContext(Context):
     def createDeclarationOrDefinitionToken(self, word):
         sym = self.symbol(word)

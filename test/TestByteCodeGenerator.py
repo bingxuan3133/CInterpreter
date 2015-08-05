@@ -118,9 +118,7 @@ class TestByteCodeGenerator(unittest.TestCase):
         token = parser.parseStatement(0)
         self.byteCodeGenerator.initGeneration()
         self.informationInjector.injectRegisterRequired(token[0])
-        token[0].generateByteCode()
-        self.informationInjector.injectRegisterRequired(token[1])
-        byteCodes = token[1].generateByteCode()
+        byteCodes = token[0].generateByteCode()
         byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
         self.assertEqual(self.byteCodeGenerator.loadValue([0, 4]),byteCodes[0])
         self.assertEqual(self.byteCodeGenerator.subRegister([7, 7, 0]), byteCodes[1])
@@ -671,6 +669,23 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.addRegister([0, 0, 5]), byteCodes[12])
 
     def test_generateByteCode_for_the_equation_that_contain_floating_point(self):
+        lexer = LexerStateMachine('2.3 + 27.5', self.context)
+        float1 = struct.pack('!f', 2.3)
+        float2 = struct.pack('!f', 27.5)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parse(0)
+        self.informationInjector.injectRegisterRequired(token)
+        self.byteCodeGenerator.variablesInThisAST['x'] = 8
+        self.byteCodeGenerator.initGeneration()
+        byteCodes = token.generateByteCode()
+        self.assertEqual(self.byteCodeGenerator.loadFloatingPoint([0, float1[0],float1[1]]),byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.loadFloatingPoint([1, float1[2],float1[3]]),byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.loadFloatingPoint([5, float2[0],float2[1]]),byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.loadFloatingPoint([4, float2[2],float2[3]]),byteCodes[3])
+        self.assertEqual(self.byteCodeGenerator.addFloatingRegister([0, 1, 0, 1, 5, 4]),byteCodes[4])
+
+    def test_generateByteCode_for_the_equation_that_contain_floating_point_with_equal_sign(self):
         lexer = LexerStateMachine('x = 2.3 + 27.5', self.context)
         float1 = struct.pack('!f', 2.3)
         float2 = struct.pack('!f', 27.5)
@@ -685,8 +700,9 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.loadFloatingPoint([1, float1[2],float1[3]]),byteCodes[1])
         self.assertEqual(self.byteCodeGenerator.loadFloatingPoint([5, float2[0],float2[1]]),byteCodes[2])
         self.assertEqual(self.byteCodeGenerator.loadFloatingPoint([4, float2[2],float2[3]]),byteCodes[3])
-        #self.assertEqual(self.byteCodeGenerator.addRegister())
-
+        self.assertEqual(self.byteCodeGenerator.addFloatingRegister([0, 1, 0, 1, 5, 4]),byteCodes[4])
+        self.assertEqual(self.byteCodeGenerator.loadFloatingPointRegister([4, 5, 7, 4, 7, 8]),byteCodes[5])
+        self.assertEqual(self.byteCodeGenerator.storeFloatingPointRegister([0, 1, 5, 4]),byteCodes[6])
 
 if __name__ == '__main__':
     unittest.main()
