@@ -23,6 +23,7 @@ class Context:
         self.symbolTable = {}
         self.contextManager = contextManager
 
+
     def symbol(self, id, bindingPower = 0, Type = True):
         if id not in self.symbolTable:
             class Symbol(SymbolBase):
