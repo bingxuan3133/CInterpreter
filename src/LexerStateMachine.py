@@ -93,7 +93,7 @@ class LexerStateMachine:
         elif self.isDot():
             self.capture()
             self.floatingPointDot()
-        elif self.isSpace() or self.isEnd():
+        elif self.isSpace() or self.isEnd() or self.isDummySymbol():
             self.value()
         else:
             caretMessage = ' '*(self.inStream.column-1)+'^'
@@ -331,6 +331,10 @@ class LexerStateMachine:
 
     def isEnd(self):
         return self.inStream.currentChar is None
+
+    def isDummySymbol(self):
+        Dummy = [ ';', ')']
+        return self.inStream.currentChar in Dummy
 
     def isZero(self):
         return self.inStream.currentChar == '0'

@@ -44,6 +44,7 @@ class Parser:
                 list.extend(returnedToken.data)
                 self.scopeBuilder.buildScope(returnedToken.data[0])
                 self.lexer.peep(';')
+                self.lexer.advance()
                 return list
 
         self.scopeBuilder.buildScope(returnedToken)

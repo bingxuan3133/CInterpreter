@@ -28,6 +28,7 @@ class ByteCodeGenerator:
         self.floatingFlag = 0
 
 
+
     def nothing(self):
         pass
 
@@ -144,6 +145,7 @@ class ByteCodeGenerator:
     def generateLeftCodeFirst(self, token,generateByteCode):
         secondTime = 0
         for index in range(0, len(token.data)):
+
             token.data[index].generateByteCode(secondTime,token,index)
             secondTime += 1
 
@@ -216,7 +218,7 @@ class ByteCodeGenerator:
 
     def initGeneration(self):
         thisGenerator = self
-
+        thisGenerator.byteCodeList =[]
         def recordTheVariable(self,token):
             if token.data[0].id in thisGenerator.byteRequired:
                 thisGenerator.variableCounter += 1
@@ -372,7 +374,6 @@ class ByteCodeGenerator:
         self.storeFunction =[self.storeRegister, self.storeFloatingPointRegister]
 
         #Start the initialization
-        self.byteCodeList = []
         for context in self.contextManager.allContexts:
             for token in context.symbolTable:
                 context.symbolTable[token].generateByteCode = generationFunction[token][1][0]

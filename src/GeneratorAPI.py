@@ -6,10 +6,11 @@ class GeneratorAPI:
         self.byteCodeGenerator = ByteCodeGenerator(context, contextManager)
         self.informationInjector = InformationInjector()
 
+
     #An API adapter for connecting the others module
     def generateCode(self, tokens):
         Code = None
-
+        self.byteCodeGenerator.byteCodeList = []
         self.byteCodeGenerator.initGeneration()
         if isinstance(tokens, list):
             for token in tokens:
