@@ -19,23 +19,9 @@ class TestParseStatement(unittest.TestCase):
         self.expressionContext = ExpressionContext(self.manager)
         self.flowControlContext = FlowControlContext(self.manager)
         self.contexts = [self.expressionContext, self.flowControlContext]
-
-        self.flowControlContext.addBlockOperator('{', 0)
-        self.flowControlContext.addOperator('}', 0)
-        self.expressionContext.addPrefixInfixOperator('+', 70)
-        self.expressionContext.addPrefixInfixOperator('-', 70)
-        self.expressionContext.addInfixOperator('*', 100)
-        self.expressionContext.addInfixOperator('/', 100)
-        self.expressionContext.addInfixOperator('=', 20)
-        self.expressionContext.addOperator(';')
-        self.flowControlContext.addIfControl('if', 0)
-        self.expressionContext.addGroupOperator('(', 0)
-        self.expressionContext.addGroupOperator(')', 0)
-
         self.manager.addContext('Expression', self.expressionContext)
         self.manager.addContext('FlowControl', self.flowControlContext)
         self.manager.setCurrentContexts(self.contexts)
-
 
     def test_without_expression_after_equal(self):
         lexer = LexerStateMachine('x = ;', self.context)
@@ -115,19 +101,6 @@ class TestParseStatementWithBraces(unittest.TestCase):
         self.expressionContext = ExpressionContext(self.manager)
         self.flowControlContext = FlowControlContext(self.manager)
         self.contexts = [self.expressionContext, self.flowControlContext]
-
-        self.flowControlContext.addBlockOperator('{', 0)
-        self.flowControlContext.addOperator('}', 0)
-        self.expressionContext.addPrefixInfixOperator('+', 70)
-        self.expressionContext.addPrefixInfixOperator('-', 70)
-        self.expressionContext.addInfixOperator('*', 100)
-        self.expressionContext.addInfixOperator('/', 100)
-        self.expressionContext.addInfixOperator('==', 20)
-        self.expressionContext.addInfixOperator('=', 20)
-        self.expressionContext.addOperator(';')
-        self.flowControlContext.addIfControl('if', 0)
-        self.expressionContext.addGroupOperator('(', 0)
-        self.expressionContext.addGroupOperator(')', 0)
 
         self.manager.addContext('Expression', self.expressionContext)
         self.manager.addContext('FlowControl', self.flowControlContext)

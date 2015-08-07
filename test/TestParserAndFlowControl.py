@@ -20,16 +20,6 @@ class TestParseWhileFlowControl(unittest.TestCase):
         self.expressionContext = ExpressionContext(self.manager)
         self.contexts = [self.expressionContext, self.flowControlContext, self.defaultContext]
 
-        self.flowControlContext.addWhileControl('while', 0)
-        self.flowControlContext.addBlockOperator('{', 0)
-        self.flowControlContext.addOperator('}', 0)
-        self.expressionContext.addOperator(';', 0)
-        self.expressionContext.addGroupOperator('(', 0)
-        self.expressionContext.addOperator(')', 0)
-        self.expressionContext.addPostfixOperator('++', 150)
-        self.expressionContext.addPrefixInfixOperator('+', 70)
-        self.defaultContext.addKeyword('while')
-
         self.manager.addContext('Default', self.defaultContext)
         self.manager.addContext('FlowControl', self.flowControlContext)
         self.manager.addContext('Expression', self.expressionContext)
@@ -102,7 +92,6 @@ class TestParseWhileFlowControl(unittest.TestCase):
            1     {
         :return:
         """
-        self.flowControlContext.addBlockOperator('{', 0)
         lexer = LexerStateMachine('while ( 1 ) { }', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
@@ -201,21 +190,6 @@ class TestParseDoWhileFlowControl(unittest.TestCase):
         self.flowControlContext = FlowControlContext(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
         self.contexts = [self.expressionContext, self.flowControlContext, self.defaultContext]
-
-        self.flowControlContext.addDoWhileControl('do', 0)
-        self.flowControlContext.addWhileControl('while', 0)
-        #self.flowControlContext.addOperator('while', 0)
-        self.flowControlContext.addBlockOperator('{', 0)
-        self.flowControlContext.addOperator('}', 0)
-        self.expressionContext.addOperator(';', 0)
-        self.expressionContext.addGroupOperator('(', 0)
-        self.expressionContext.addOperator(')', 0)
-        self.expressionContext.addPostfixOperator('++', 150)
-        self.expressionContext.addPrefixInfixOperator('+', 70)
-        self.expressionContext.addPrefixInfixOperator('-', 70)
-        self.expressionContext.addPrefixInfixOperator('=', 20)
-        self.defaultContext.addKeyword('do')
-        #self.defaultContext.addKeyword('while')
 
         self.manager.addContext('Default', self.defaultContext)
         self.manager.addContext('FlowControl', self.flowControlContext)
@@ -344,25 +318,6 @@ class TestParseIfFlowControl(unittest.TestCase):
         self.flowControlContext = FlowControlContext(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
         self.contexts = [self.expressionContext, self.flowControlContext, self.defaultContext]
-
-        self.flowControlContext.addDoWhileControl('do', 0)
-        self.flowControlContext.addOperator('while', 0)
-        self.flowControlContext.addOperator('else',0)
-        self.flowControlContext.addBlockOperator('{', 0)
-        self.flowControlContext.addOperator('}', 0)
-        self.expressionContext.addOperator(';', 0)
-        self.expressionContext.addGroupOperator('(', 0)
-        self.expressionContext.addOperator(')', 0)
-        self.expressionContext.addPostfixOperator('++', 150)
-        self.expressionContext.addPrefixInfixOperator('+', 70)
-
-        self.flowControlContext.addIfControl('if', 0)
-        self.expressionContext.addInfixOperator('==', 10)
-        self.expressionContext.addInfixOperator('=', 20)
-        self.expressionContext.addInfixOperator('*', 100)
-        self.defaultContext.addKeyword('while')
-
-        self.defaultContext.addKeyword('if')
 
         self.manager.addContext('Default', self.defaultContext)
         self.manager.addContext('FlowControl', self.flowControlContext)

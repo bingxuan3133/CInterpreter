@@ -25,36 +25,11 @@ class TestFlowControlByteCodeGeneration(unittest.TestCase):
         self.flowControlContext = FlowControlContext(self.manager)
         self.declarationContext = DeclarationContext(self.manager)
         self.defaultContext = DefaultContext(self.manager)
-        self.defaultContext.addKeyword('int')
+
         self.expressionContext = ExpressionContext(self.manager)
         self.expressionContext.addOperator(',', 0)
-
-        self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext, self.flowControlContext]
-        self.expressionContext.addInfixOperator('=', 20)
-
-        self.expressionContext.addInfixOperator('==', 10)
-        self.expressionContext.addInfixOperator('<', 10)
-        self.expressionContext.addInfixOperator('<=', 10)
-        self.expressionContext.addInfixOperator('>', 10)
-        self.expressionContext.addInfixOperator('>=', 10)
-
-        self.expressionContext.addPrefixInfixOperator('+', 70)
-        self.expressionContext.addPrefixInfixOperator('-', 70)
-        self.expressionContext.addGroupOperator('(', 0)
-        self.expressionContext.addInfixOperator('*', 100)
-        self.expressionContext.addInfixOperator('/', 100)
-        self.declarationContext.addInt('int', 0)
-        self.expressionContext.addOperator(';', 0)
-        self.flowControlContext.addOperator('else',0)
-        self.flowControlContext.addBlockOperator('{', 0)
-        self.expressionContext.addOperator('}', 0)
-        self.expressionContext.addOperator(')', 0)
-        self.flowControlContext.addIfControl('if', 0)
-        self.flowControlContext.addWhileControl('while', 0)
-        self.flowControlContext.addDoWhileControl('do', 0)
+        self.contexts = [self.expressionContext, self.declarationContext, self.defaultContext, self.flowControlContext]
         #self.defaultContext.addKeyword('while')
-
-
         self.manager.addContext('Default', self.defaultContext)
         self.manager.addContext('Declaration', self.declarationContext)
         self.manager.addContext('Expression', self.expressionContext)

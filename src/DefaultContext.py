@@ -2,8 +2,10 @@ from Context import *
 from ContextManager import *
 
 class DefaultContext(Context):
-    def addAllOperators(self):
-        self.addOperator(';', 200)
+    def __init__(self, contextManager):
+        Context.__init__(self, contextManager)
+        self.addOperator(',', 0)
+        self.addOperator('*', 200)
         self.addOperator('+', 200)
         self.addOperator('-', 200)
         self.addOperator('++', 200)

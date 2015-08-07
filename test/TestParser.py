@@ -15,9 +15,6 @@ class TestParseInfix(unittest.TestCase):
         self.context = Context(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
         self.contexts = [self.expressionContext]
-        self.expressionContext.addInfixOperator('+', 70)
-        self.expressionContext.addInfixOperator('-', 70)
-        self.expressionContext.addInfixOperator('*', 100)
         self.manager.addContext('Expression', self.expressionContext)
         self.manager.setCurrentContexts(self.contexts)
 
@@ -516,9 +513,6 @@ class TestParsePrefixGroup(unittest.TestCase):
         self.assertEqual('(literal)', token.data[1].data[0].data[1].id)
         self.assertEqual(3, token.data[1].data[0].data[0].data[0])
         self.assertEqual(4, token.data[1].data[0].data[1].data[0])
-        
-
-
 
 if __name__ == '__main__':
     unittest.main()

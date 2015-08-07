@@ -24,21 +24,6 @@ class TestDeclarationContextStartingWithShort(unittest.TestCase):
         self.declarationContext = DeclarationContext(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
         self.contexts = [self.expressionContext, self.declarationContext, self.flowControlContext, self.defaultContext]
-        self.expressionContext.addInfixOperator('=', 20)
-        self.expressionContext.addPrefixInfixOperator('+', 70)
-        self.expressionContext.addOperator(',', 0)
-        self.expressionContext.addOperator(';', 0)
-        self.flowControlContext.addBlockOperator('{', 0)
-        self.flowControlContext.addOperator('}', 0)
-        self.declarationContext.addOperator(',', 0)
-        self.declarationContext.addOperator('=', 0)  # for declaration context to recognise '='
-        self.declarationContext.addOperator(';', 0)  # for declaration context to recognise ';'
-        self.declarationContext.addInt('int', 0)
-        self.declarationContext.addShort('short', 0)
-        self.declarationContext.addLong('long', 0)
-        self.declarationContext.addSignedAndUnsigned('signed', 0)
-        self.declarationContext.addSignedAndUnsigned('unsigned', 0)
-        self.defaultContext.addAllOperators()
 
         self.manager.addContext('Default', self.defaultContext)
         self.manager.addContext('Declaration', self.declarationContext)
@@ -195,7 +180,6 @@ class TestDeclarationContextStartingWithShort(unittest.TestCase):
                              "short short x ;"+'\n'
                              '      ^', e.msg)
 
-
 class TestDeclarationContextStartingWithLong(unittest.TestCase):
     def setUp(self):
         self.manager = ContextManager()
@@ -206,19 +190,6 @@ class TestDeclarationContextStartingWithLong(unittest.TestCase):
         self.declarationContext = DeclarationContext(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
         self.contexts = [self.expressionContext, self.declarationContext, self.flowControlContext, self.defaultContext]
-        self.expressionContext.addInfixOperator('=', 20)
-        self.expressionContext.addPrefixInfixOperator('+', 70)
-        self.declarationContext.addOperator(',', 0)
-        self.expressionContext.addOperator(';', 0)
-        self.flowControlContext.addBlockOperator('{', 0)
-        self.flowControlContext.addOperator('}', 0)
-        self.declarationContext.addOperator('=', 0)  # for declaration context to recognise '='
-        self.declarationContext.addOperator(';', 0)  # for declaration context to recognise ';'
-        self.declarationContext.addInt('int', 0)
-        self.declarationContext.addShort('short', 0)
-        self.declarationContext.addLong('long', 0)
-        self.declarationContext.addSignedAndUnsigned('signed', 0)
-        self.declarationContext.addSignedAndUnsigned('unsigned', 0)
 
         self.manager.addContext('Default', self.defaultContext)
         self.manager.addContext('Declaration', self.declarationContext)
@@ -428,21 +399,6 @@ class TestDeclarationContextStartingWithSignedOrUnsigned(unittest.TestCase):
         self.declarationContext = DeclarationContext(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
         self.contexts = [self.expressionContext, self.declarationContext, self.flowControlContext, self.defaultContext]
-        self.expressionContext.addInfixOperator('=', 20)
-        self.expressionContext.addPrefixInfixOperator('+', 70)
-        self.expressionContext.addOperator(',', 0)
-        self.declarationContext.addOperator(',', 0)
-        self.expressionContext.addOperator(';', 0)
-        self.flowControlContext.addBlockOperator('{', 0)
-        self.flowControlContext.addOperator('}', 0)
-        self.declarationContext.addOperator('=', 0)  # for declaration context to recognise '='
-        self.declarationContext.addOperator(';', 0)  # for declaration context to recognise ';'
-        self.declarationContext.addInt('int', 0)
-        self.declarationContext.addShort('short', 0)
-        self.declarationContext.addLong('long', 0)
-        self.declarationContext.addSignedAndUnsigned('signed', 0)
-        self.declarationContext.addSignedAndUnsigned('unsigned', 0)
-        self.defaultContext.addAllOperators()
 
         self.manager.addContext('Default', self.defaultContext)
         self.manager.addContext('Declaration', self.declarationContext)
@@ -604,21 +560,6 @@ class TestDeclarationContextStartingWithInt(unittest.TestCase):
         self.declarationContext = DeclarationContext(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
         self.contexts = [self.expressionContext, self.declarationContext, self.flowControlContext, self.defaultContext]
-        self.expressionContext.addInfixOperator('=', 20)
-        self.expressionContext.addPrefixInfixOperator('+', 70)
-        self.expressionContext.addOperator(',', 0)
-        self.declarationContext.addOperator(',', 0)
-        self.expressionContext.addOperator(';', 0)
-        self.flowControlContext.addBlockOperator('{', 0)
-        self.flowControlContext.addOperator('}', 0)
-        self.declarationContext.addOperator('=', 0)  # for declaration context to recognise '='
-        self.declarationContext.addOperator(';', 0)  # for declaration context to recognise ';'
-        self.declarationContext.addInt('int', 0)
-        self.declarationContext.addShort('short', 0)
-        self.declarationContext.addLong('long', 0)
-        self.declarationContext.addSignedAndUnsigned('signed', 0)
-        self.declarationContext.addSignedAndUnsigned('unsigned', 0)
-        self.defaultContext.addAllOperators()
 
         self.manager.addContext('Default', self.defaultContext)
         self.manager.addContext('Declaration', self.declarationContext)
@@ -756,22 +697,6 @@ class TestDeclarationContextWithAssignmentAndComa(unittest.TestCase):
         self.declarationContext = DeclarationContext(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
         self.contexts = [self.expressionContext, self.declarationContext, self.flowControlContext, self.defaultContext]
-        self.expressionContext.addInfixOperator('=', 20)
-        self.expressionContext.addPrefixInfixOperator('+', 70)
-        self.expressionContext.addPrefixInfixOperator('-', 70)
-        self.expressionContext.addOperator(',', 0)
-        self.declarationContext.addOperator(',', 0)
-        self.expressionContext.addOperator(';', 0)
-        self.flowControlContext.addBlockOperator('{', 0)
-        self.flowControlContext.addOperator('}', 0)
-        self.declarationContext.addOperator('=', 0)  # for declaration context to recognise '='
-        self.declarationContext.addOperator(';', 0)  # for declaration context to recognise ';'
-        self.declarationContext.addInt('int', 0)
-        self.declarationContext.addShort('short', 0)
-        self.declarationContext.addLong('long', 0)
-        self.declarationContext.addSignedAndUnsigned('signed', 0)
-        self.declarationContext.addSignedAndUnsigned('unsigned', 0)
-        self.defaultContext.addAllOperators()
 
         self.manager.addContext('Default', self.defaultContext)
         self.manager.addContext('Declaration', self.declarationContext)
@@ -1106,28 +1031,6 @@ class TestPointerDeclaration(unittest.TestCase):
         self.declarationContext = DeclarationContext(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
         self.contexts = [self.expressionContext, self.declarationContext, self.flowControlContext, self.defaultContext]
-        self.expressionContext.addInfixOperator('=', 20)
-        self.expressionContext.addPrefixInfixOperator('+', 70)
-        self.expressionContext.addPrefixInfixOperator('-', 70)
-        self.expressionContext.addPostfixOperator('++', 120)
-        self.expressionContext.addPostfixOperator('--', 120)
-        self.declarationContext.addOperator('=', 0)  # for declaration context to recognise '='
-        self.declarationContext.addOperator(';', 0)  # for declaration context to recognise ';'
-        self.declarationContext.addInt('int', 0)
-        self.declarationContext.addShort('short', 0)
-        self.declarationContext.addPointer('*', 120)
-        self.declarationContext.addSubscript('[', 150)
-        self.declarationContext.addOperator(']', 0)
-        self.declarationContext.addGroupOperator('(', 0)
-        self.declarationContext.addOperator(')', 0)
-        self.expressionContext.addGroupOperator('(', 0)
-        self.expressionContext.addOperator(')', 0)
-        self.expressionContext.addOperator(',', 0)
-        self.declarationContext.addOperator(',', 0)
-        self.expressionContext.addOperator(';', 0)
-        self.flowControlContext.addBlockOperator('{', 0)
-        self.flowControlContext.addOperator('}', 0)
-        self.defaultContext.addAllOperators()
 
         self.manager.addContext('Default', self.defaultContext)
         self.manager.addContext('Declaration', self.declarationContext)

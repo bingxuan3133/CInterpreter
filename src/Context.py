@@ -3,10 +3,13 @@ def revealSelf(self):
 
 class SymbolBase:
     def led(self):
-        raise SyntaxError('No led(.) function defined!')
-
+        caretMessage = ' '*(self.column-1)+'^'
+        raise SyntaxError("Error[{}][{}]:{} has no led(.) function defined!'\n{}\n{}"\
+                         .format(self.line,self.column,self.id,self.oriString,caretMessage))
     def nud(self):
-        raise SyntaxError('No nud(.) function defined!')
+        caretMessage = ' '*(self.column-1)+'^'
+        raise SyntaxError("Error[{}][{}]:{} has no nud(.) function defined!'\n{}\n{}"\
+                         .format(self.line,self.column,self.id,self.oriString,caretMessage))
 
     def generateByteCode(self):
         raise SyntaxError('No generation function defined!')

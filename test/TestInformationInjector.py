@@ -27,17 +27,7 @@ class TestInformationInjector(unittest.TestCase):
         self.expressionContext = ExpressionContext(self.manager)
         self.expressionContext.addOperator(',', 0)
 
-        self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext, self.flowControlContext]
-        self.expressionContext.addInfixOperator('=', 20)
-        self.expressionContext.addPrefixInfixOperator('+', 70)
-        self.expressionContext.addPrefixInfixOperator('-', 70)
-        self.expressionContext.addInfixOperator('*', 100)
-        self.expressionContext.addInfixOperator('/', 100)
-        self.declarationContext.addInt('int', 0)
-        self.expressionContext.addOperator(';', 0)
-        self.flowControlContext.addBlockOperator('{', 0)
-        self.flowControlContext.addOperator('}', 0)
-
+        self.contexts = [self.expressionContext, self.declarationContext, self.defaultContext, self.flowControlContext]
 
         self.manager.addContext('Default', self.defaultContext)
         self.manager.addContext('Declaration', self.declarationContext)

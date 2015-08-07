@@ -2,6 +2,31 @@ from Context import *
 from ContextManager import *
 
 class ExpressionContext(Context):
+    def __init__(self, contextManeger):
+        Context.__init__(self, contextManeger)
+        self.addPrefixInfixOperator('+', 70)
+        self.addPrefixInfixOperator('-', 70)
+        self.addInfixOperator('*', 100)
+        self.addInfixOperator('/', 100)
+        self.addInfixOperator('%', 100)
+        self.addInfixOperator('=', 1)
+        self.addInfixOperator('|', 15)
+        self.addInfixOperator('||', 5)
+        self.addInfixOperator('&', 20)
+        self.addInfixOperator('&&', 10)
+        self.addInfixOperator('==', 10)
+        self.addInfixOperator('<', 10)
+        self.addInfixOperator('<=', 10)
+        self.addInfixOperator('>', 10)
+        self.addInfixOperator('>=', 10)
+        self.addPostfixOperator('++', 150)
+
+        self.addGroupOperator('(', 0)
+        self.addBlockOperator('{', 0)
+        self.addOperator(';', 0)
+        self.addOperator('}', 0)
+        self.addOperator(')', 0)
+
     def addInfixOperator(self, id, bindingPower = 0):
         """
         Add Infix operator into symbol table
@@ -75,3 +100,19 @@ class ExpressionContext(Context):
             return self
         sym = self.addOperator(id, bindingPower, nud, led)
         return sym
+
+    def addBlockOperator(self, id, bindingPower = 0 ):
+        thisContext = self
+        def led(self):
+            return self
+        def nud(self):
+            thisContext.contextManager.parser.lexer.advance()
+            returnedList = thisContext.contextManager.parser.parseStatements(bindingPower)
+            self.data = returnedList
+            thisContext.contextManager.parser.lexer.peep('}')
+            thisContext.contextManager.parser.lexer.advance()
+            return self
+        symClass = self.addOperator(id, bindingPower)  # removed the nud and led
+        symClass.nud = nud
+        symClass.led = led
+        return symClass
