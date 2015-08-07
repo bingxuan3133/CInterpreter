@@ -88,6 +88,55 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.loadValue([0, 12]),byteCodes[0])
         self.assertEqual(self.byteCodeGenerator.subRegister([7, 7, 0]), byteCodes[1])
 
+    def test_generateByteCode_will_generate_multiple_initialization_byteCode(self):
+        lexer = LexerStateMachine('int x = 100 , y = 2000 , z = 15000;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        self.byteCodeGenerator.initGeneration()
+        token[0].generateByteCode()
+        token[1].generateByteCode()
+        byteCodes = token[2].generateByteCode()
+        byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
+        self.assertEqual(self.byteCodeGenerator.loadValue([0, 12]),byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.subRegister([7, 7, 0]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 4]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 100]), byteCodes[3])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([5, 0]),byteCodes[4])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 8]), byteCodes[5])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 2000]), byteCodes[6])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([5, 0]),byteCodes[7])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 12]), byteCodes[8])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 15000]), byteCodes[9])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([5, 0]),byteCodes[10])
+
+
+    def test_generateByteCode_will_generate_multiple_initialization_byteCode_is_the_same_if_newline_is_added(self):
+        lexer = LexerStateMachine('int x = 100;\
+                                    int y = 2000;\
+                                     int z = 15000;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        token = parser.parseStatement(0)
+        self.byteCodeGenerator.initGeneration()
+        token[0].generateByteCode()
+        token[1].generateByteCode()
+        byteCodes = token[2].generateByteCode()
+        byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
+        self.assertEqual(self.byteCodeGenerator.loadValue([0, 12]),byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.subRegister([7, 7, 0]), byteCodes[1])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 4]), byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 100]), byteCodes[3])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([5, 0]),byteCodes[4])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 8]), byteCodes[5])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 2000]), byteCodes[6])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([5, 0]),byteCodes[7])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 12]), byteCodes[8])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 15000]), byteCodes[9])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([5, 0]),byteCodes[10])
+
     def test_generateByteCode_will_generate_code_in_the_list_form(self):
         """
                     =(max=2,min=2)
