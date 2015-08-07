@@ -28,7 +28,7 @@ class TestFlowControlByteCodeGeneration(unittest.TestCase):
 
         self.expressionContext = ExpressionContext(self.manager)
         self.expressionContext.addOperator(',', 0)
-        self.contexts = [self.expressionContext, self.declarationContext, self.defaultContext, self.flowControlContext]
+        self.contexts = [self.expressionContext, self.declarationContext, self.flowControlContext, self.defaultContext]
         #self.defaultContext.addKeyword('while')
         self.manager.addContext('Default', self.defaultContext)
         self.manager.addContext('Declaration', self.declarationContext)
