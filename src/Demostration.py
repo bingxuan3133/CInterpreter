@@ -70,7 +70,7 @@ while(1):
     vmdll.restype = POINTER(C_Exception)
 
     exception = vmdll._VMStep(cByteCodes)
-    vm.dumpBytecodes(cbytecodes)
+    vmdll._VMRun(cByteCodes)
 
 
 
