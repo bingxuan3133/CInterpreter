@@ -66,6 +66,11 @@ class DeclarationContext(Context):
             self.data.append(leftToken)
             thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
+            if returnedToken.id == '(multiple)':
+                returnedToken = thisContext.getReference(returnedToken)
+                caretMessage = ' '*(returnedToken.column-1)+'^'
+                raise SyntaxError("Error[{}][{}]:Expecting expression before {}\n{}\n{}"\
+                            .format(returnedToken.line,returnedToken.column,returnedToken.id,returnedToken.oriString,caretMessage))
             self.data.append(returnedToken)
             thisContext.contextManager.parser.lexer.peep(']')
             thisContext.contextManager.parser.lexer.advance()
@@ -76,7 +81,7 @@ class DeclarationContext(Context):
         return symClass
 
     def parseIdentifierToken(self):
-        identifierToken = self.contextManager.parser.parse(20)  # parser stops when meet '=' or ';'
+        identifierToken = self.contextManager.parser.parse(0)  # parser stops when meet '=' or ';'
         return identifierToken
 
     def parseDefToken(self):
@@ -843,7 +848,7 @@ class DeclarationContext(Context):
         if hasattr(token, 'id') and token.id == '(identifier)':
             return token
         else:
-            if len(token.data) > 0:
+            if hasattr(token, 'data') and len(token.data) > 0:
                 token = self.getIdentifier(token.data[0])
                 return token
             else:
@@ -853,7 +858,7 @@ class DeclarationContext(Context):
         if hasattr(token, 'id') and token.id == '(decl)':
             return token.data[0].reference
         else:
-            if len(token.data) > 0:
+            if hasattr(token, 'data') and len(token.data) > 0:
                 token = self.getReference(token.data[0])
                 return token
             else:
@@ -880,7 +885,7 @@ class DeclarationContext(Context):
             raise SyntaxError("Error[{}][{}]:Cannot have both 'signed' and 'unsigned' in this declaration statement\n{}\n{}"\
                              .format(token.errorToken.line,token.errorToken.column,token.errorToken.oriString,caretMessage))
         else:
-            raise SyntaxError("Error[{}][{}]:{} causes error\n{}\n{}"\
+            raise SyntaxError("Error[{}][{}]:Expecting (identifier) before {}\n{}\n{}"\
                              .format(token.errorToken.line,token.errorToken.column,token.errorToken.id,token.errorToken.oriString,caretMessage))
 
     def buildToken(self, token):

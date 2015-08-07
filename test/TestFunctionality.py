@@ -21,7 +21,7 @@ class MyTestCase(unittest.TestCase):
         self.defaultContext.addKeyword('int')
         self.declarationContext = DeclarationContext(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
-        self.contexts = [self.declarationContext, self.expressionContext, self.defaultContext, self.flowControlContext]
+        self.contexts = [self.expressionContext, self.declarationContext, self.defaultContext, self.flowControlContext]
         self.expressionContext.addInfixOperator('=', 20)
         self.expressionContext.addInfixOperator('==', 20)
         self.expressionContext.addPrefixInfixOperator('+', 70)
@@ -33,11 +33,15 @@ class MyTestCase(unittest.TestCase):
         self.flowControlContext.addWhileControl('while', 0)
         self.flowControlContext.addBlockOperator('{', 0)
         self.flowControlContext.addOperator('}', 0)
+        self.declarationContext.addOperator(';', 0)
+        self.declarationContext.addOperator('=', 0)
         self.declarationContext.addInt('int', 0)
         self.declarationContext.addShort('short', 0)
         self.declarationContext.addLong('long', 0)
         self.declarationContext.addSignedAndUnsigned('signed', 0)
         self.declarationContext.addSignedAndUnsigned('unsigned', 0)
+        self.defaultContext.addAllOperators()
+
         self.manager.addContext('Default', self.defaultContext)
         self.manager.addContext('Declaration', self.declarationContext)
         self.manager.addContext('Expression', self.expressionContext)

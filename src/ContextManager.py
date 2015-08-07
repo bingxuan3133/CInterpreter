@@ -14,7 +14,10 @@ class ContextManager:
             self.allContexts.append(context)
 
     def getContext(self, contextName):
+        #try:
         return self.contexts[contextName]
+        #except KeyError as keyError:
+            #return None
 
     def setCurrentContexts(self, contexts):
         self.currentContexts = contexts

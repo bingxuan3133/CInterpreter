@@ -52,7 +52,7 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.expressionContext.addOperator(';', 0)
         self.flowControlContext.addBlockOperator('{', 0)
         self.flowControlContext.addOperator('}', 0)
-
+        self.defaultContext.addAllOperators()
 
         self.manager.addContext('Default', self.defaultContext)
         self.manager.addContext('Declaration', self.declarationContext)
