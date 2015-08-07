@@ -19,9 +19,24 @@ class MyTestCase(unittest.TestCase):
         default.addKeyword('if')
         default.addKeyword('while')
         manager.setCurrentContexts([default])
-        self.assertRaises(SyntaxError, LexerStateMachine, 'if', context)  # lexer = LexerStateMachine('if', context)
+        lexer = LexerStateMachine('if', context)
+        parser = Parser(lexer, manager)
+        manager.setParser(parser)
+        try:
+            token = parser.parseStatement(0)
+            self.fail()
+        except SyntaxError as e:
+            pass
+
         lexer = LexerStateMachine('123 if', context)
-        self.assertRaises(SyntaxError, lexer.advance)   # lexer.advance()
+        parser = Parser(lexer, manager)
+        manager.setParser(parser)
+        self.assertRaises(SyntaxError, parser.parse, 0)   # lexer.advance()
+        try:
+            token = parser.parseStatement(0)
+            self.fail()
+        except SyntaxError as e:
+            pass
 
 if __name__ == '__main__':
     unittest.main()

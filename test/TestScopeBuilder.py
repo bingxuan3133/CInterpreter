@@ -108,19 +108,26 @@ class TestScope(unittest.TestCase):
         braceToken = self.context.createToken('{')
         scopeBuilder.addType('int')
 
-        scopeBuilder.buildScope(declToken1)
-        scopeBuilder.buildScope(braceToken)
-        scopeBuilder.buildScope(declToken2)
+        scopeBuilder.buildScope(declToken1)  # scope = [x]
+        scopeBuilder.buildScope(braceToken)  # scope = [x, []]
+        localToken = scopeBuilder.findLocal('x')
+        self.assertEqual(None, localToken)
+        globalToken = scopeBuilder.findGlobal('x')
+        self.assertEqual(declToken1, globalToken)
+        globalToken = scopeBuilder.findGlobal('y')
+        self.assertEqual(None, globalToken)
+
+        scopeBuilder.buildScope(declToken2)  # scope = [x, [y]]
         localToken = scopeBuilder.findLocal('x')
         self.assertEqual(None, localToken)
         localToken = scopeBuilder.findLocal('y')
         self.assertEqual(declToken2, localToken)
-        localToken = scopeBuilder.findGlobal('y')
-        self.assertEqual(declToken2, localToken)
-        localToken = scopeBuilder.findGlobal('x')
-        self.assertEqual(declToken1, localToken)
-        localToken = scopeBuilder.findGlobal('z')
-        self.assertEqual(None, localToken)
+        globalToken = scopeBuilder.findGlobal('x')
+        self.assertEqual(declToken1, globalToken)
+        globalToken = scopeBuilder.findGlobal('y')
+        self.assertEqual(declToken2, globalToken)
+        globalToken = scopeBuilder.findGlobal('z')
+        self.assertEqual(None, globalToken)
 
 
 """

@@ -15,6 +15,7 @@ class TestParseStatementToMockBuildScope(unittest.TestCase):
     def setUp(self):
         self.manager = ContextManager()
         self.context = Context(self.manager)
+        self.defaultContext = DefaultContext(self.manager)
         self.declarationContext = DeclarationContext(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
         self.flowControlContext = FlowControlContext(self.manager)
@@ -29,14 +30,18 @@ class TestParseStatementToMockBuildScope(unittest.TestCase):
         self.expressionContext.addInfixOperator('==', 20)
         self.expressionContext.addInfixOperator('=', 20)
         self.expressionContext.addOperator(';')
+        self.declarationContext.addOperator(';')
+        self.declarationContext.addOperator('=')
         self.declarationContext.addInt('int', 0)
         self.flowControlContext.addIfControl('if', 0)
         self.expressionContext.addGroupOperator('(', 0)
         self.expressionContext.addGroupOperator(')', 0)
+        self.defaultContext.addAllOperators()
 
         self.manager.addContext('Declaration', self.declarationContext)
         self.manager.addContext('Expression', self.expressionContext)
         self.manager.addContext('FlowControl', self.flowControlContext)
+        self.manager.addContext('Default', self.flowControlContext)
         self.manager.setCurrentContexts(self.contexts)
 
     def test_parseStatement_call_buildScope_when_declaration(self):
