@@ -14,7 +14,6 @@ class DefaultContext(Context):
         self.addOperator('while', 0)
 
     def addOperator(self, id, bindingPower = 0, nud = None, led = None):
-        thisContext = self
         def nud(self):
             caretMessage = ' '*(self.column-1)+'^'
             raise SyntaxError("Error[{}][{}]:Do not expect {} here\n{}\n{}"\

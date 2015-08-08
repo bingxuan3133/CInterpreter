@@ -15,6 +15,14 @@ struct Register {
   int limit;
 };
 
+typedef struct DoubleRegister DoubleRegister;
+
+struct DoubleRegister {
+  double data;
+  int base;
+  int limit;
+};
+
 typedef struct Status Status;
 
 struct Status {

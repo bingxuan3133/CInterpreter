@@ -3,8 +3,8 @@
 
 extern void (*disassemble[256])(char*, int);
 
-int disassembleBytecodes(char *strBuffer, int *bytecode);
-int disassembleBytecode(char *strBuffer, int bytecode);
+int __declspec(dllexport) disassembleBytecodes(char *strBuffer, int *bytecode);
+int __declspec(dllexport) disassembleBytecode(char *strBuffer, int bytecode);
 void dumpBytecode(int bytecode);
 void __declspec(dllexport) dumpBytecodes(int *bytecode);
 

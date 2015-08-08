@@ -20,11 +20,25 @@ class VirtualMachine:
         vmstep = self.vmdll._VMStep
         #vmstep.argtypes = [POINTER(c_int)]
         vmstep.restype = POINTER(C_Exception)
-
         exception = vmstep(cBytecodeList)
+        if bool(exception):
+            raise RuntimeError(exception.contents.errMsg)
+
+    def VMRun(self, cBytecodeList):  # proxy function to interact with real VM
+        vmrun = self.vmdll._VMRun
+        #vmstep.argtypes = [POINTER(c_int)]
+        vmrun.restype = POINTER(C_Exception)
+        exception = vmrun(cBytecodeList)
         if bool(exception):
             raise RuntimeError(exception.contents.errMsg)
 
     def dumpBytecodes(self, cBytecodeList):  # proxy function to interact with real VM
         self.vmdll.dumpBytecodes(cBytecodeList)
+
+    def disassembleBytecodes(self, cBuffer, cBytecodeList):  # proxy function to interact with real VM
+        getBytecode = self.vmdll.disassembleBytecode
+        getBytecode.restype = c_char_p
+        getBytecode(cBuffer, cBytecodeList)
+        pass
+
 
