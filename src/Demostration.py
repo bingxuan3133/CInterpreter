@@ -23,7 +23,7 @@ while(1):
     for statement in iter(input, stopSymbol):
         StringCode = StringCode + '\n' +statement
         print('>', end="")
-
+    StingList = StringCode.split('\n')
     lexer = LexerStateMachine(StringCode, context)
     parser = Parser(lexer, manager)
     manager.setParser(parser)
@@ -36,14 +36,9 @@ while(1):
 
     print (byteCodes)
     byteCodes.append(0xffffffff)  # to halt the VM
-    byteCodesSize = len(byteCodes)
-    cByteCodes_t = c_uint * byteCodesSize
-    cByteCodes = cByteCodes_t(*byteCodes)
 
-    vmdll.restype = POINTER(C_Exception)
-
-    exception = vmdll._VMStep(cByteCodes)
-    vmdll._VMRun(cByteCodes)
+    for str in StingList:
+        print(str)
 
 
 
