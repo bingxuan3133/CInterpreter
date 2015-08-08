@@ -5,11 +5,13 @@ class DefaultContext(Context):
     def __init__(self, contextManager):
         Context.__init__(self, contextManager)
         self.addOperator(',', 0)
-        self.addOperator('*', 200)
-        self.addOperator('+', 200)
-        self.addOperator('-', 200)
-        self.addOperator('++', 200)
-        self.addOperator('--', 200)
+        self.addOperator('*', 0)
+        self.addOperator('+', 0)
+        self.addOperator('-', 0)
+        self.addOperator('++', 0)
+        self.addOperator('--', 0)
+        self.addOperator('if', 0)
+        self.addOperator('while', 0)
 
     def addOperator(self, id, bindingPower = 0, nud = None, led = None):
         thisContext = self

@@ -33,7 +33,7 @@ class Parser:
             self.scopeBuilder.buildScope(self.closingBrace)  # parse '}' to tell ScopeBuilder now leaving the scope
             list.append(returnedToken)
             return list
-        elif firstToken.id in self.contextManager.getContext('FlowControl').symbolTable:  # For some context that do not need ';'
+        elif firstToken and firstToken.id in self.contextManager.getContext('FlowControl').symbolTable:  # For some context that do not need ';'
             returnedToken = self.parse(bindingPower)
             self.scopeBuilder.buildScope(returnedToken)
             list.append(returnedToken)

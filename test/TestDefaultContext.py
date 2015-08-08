@@ -15,10 +15,16 @@ class MyTestCase(unittest.TestCase):
     def test_default_context(self):
         manager = ContextManager()
         context = Context(manager)
-        default = DefaultContext(manager)
-        default.addKeyword('if')
-        default.addKeyword('while')
-        manager.setCurrentContexts([default])
+        defaultContext = DefaultContext(manager)
+        flowControlContext = FlowControlContext(manager)
+        expressionContext = ExpressionContext(manager)
+
+        manager.addContext('Default', defaultContext)
+        manager.addContext('FlowControl', flowControlContext)
+        manager.addContext('Expression', expressionContext)
+        defaultContext.addKeyword('if')
+        defaultContext.addKeyword('while')
+        manager.setCurrentContexts([defaultContext])
         lexer = LexerStateMachine('if', context)
         parser = Parser(lexer, manager)
         manager.setParser(parser)
@@ -27,11 +33,9 @@ class MyTestCase(unittest.TestCase):
             self.fail()
         except SyntaxError as e:
             pass
-
         lexer = LexerStateMachine('123 if', context)
         parser = Parser(lexer, manager)
         manager.setParser(parser)
-        self.assertRaises(SyntaxError, parser.parse, 0)   # lexer.advance()
         try:
             token = parser.parseStatement(0)
             self.fail()

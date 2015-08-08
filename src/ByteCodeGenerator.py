@@ -356,9 +356,10 @@ class ByteCodeGenerator:
                             '(def)':([None],[defByteCode]),'(decl)':([None],[declByteCode]),
                             'if':([None],[ifByteCode]),'while':([None],[whileByteCode]),'do':([None],[doByteCode]),'else':([None],[noByteCode]),
                             ',':([None],[noByteCode]),'(multiple)':([None],[noByteCode]),'--':([None],[noByteCode]),'++':([None],[noByteCode]),
+                            '||':([None],[noByteCode]),'&':([None],[noByteCode]),
                             'unsigned':([None],[noByteCode]),'signed':([None],[noByteCode]),
-                            '(':([None],[noByteCode]),';':([None],[noByteCode]),')':([None],[noByteCode]),'{':([None],[noByteCode]),'}':([None],[noByteCode]),'[':([None],[noByteCode]),']':([None],[noByteCode]),
-                            '&':([None],[noByteCode]),'||':([None],[noByteCode]),
+                            '(':([None],[noByteCode]),';':([None],[noByteCode]),')':([None],[noByteCode]),'{':([None],[noByteCode]),'}':([None],[noByteCode]),
+                            ']':([None],[noByteCode]),'[':([None],[noByteCode]),
                             }
 
         respectiveByteCodeFunction = {
