@@ -46,7 +46,7 @@ class MyTestCase(unittest.TestCase):
 
         byteCodes.append(0xffffffff)  # to halt the VM
         byteCodesSize = len(byteCodes)
-        cByteCodes_t = c_uint * byteCodesSize
+        cByteCodes_t = c_int * byteCodesSize
         cByteCodes = cByteCodes_t(*byteCodes)
 
         vmdll.restype = POINTER(C_Exception)
@@ -66,7 +66,7 @@ class MyTestCase(unittest.TestCase):
 
         byteCodes.append(0xffffffff)  # to halt the VM
         bytecodesSize = len(byteCodes)
-        cByteCodes_t = c_uint * bytecodesSize
+        cByteCodes_t = c_int * bytecodesSize
         cByteCodes = cByteCodes_t(*byteCodes)
         vmdll._VMRun(cByteCodes)
 
@@ -112,7 +112,7 @@ class MyTestCase(unittest.TestCase):
 
         byteCodes.append(0xffffffff)  # to halt the VM
         byteCodesSize = len(byteCodes)
-        cByteCodes_t = c_uint * byteCodesSize
+        cByteCodes_t = c_int * byteCodesSize
         cByteCodes = cByteCodes_t(*byteCodes)
         vmdll._VMRun(cByteCodes)
 
@@ -146,7 +146,7 @@ class MyTestCase(unittest.TestCase):
         self.byteCodeGenerator.variablesInThisAST['y'] = 8
         self.byteCodeGenerator.variablesInThisAST['z'] = 12
         bytecodes = self.generator.generateCode(token)
-
+        print(bytecodes)
         vm = VirtualMachine()
         cbytecodes = vm.convertToCArray(bytecodes)
         vm.dumpBytecodes(cbytecodes)

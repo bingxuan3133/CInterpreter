@@ -44,4 +44,3 @@ while(1):
 
     cbytecode = vm.convertToCArray(byteCodes)
     vm.dumpBytecodes(cbytecode)
-    vm.disassembleBytecodes(cbytecode)

@@ -134,7 +134,7 @@ class ByteCodeGenerator:
         return number
 
     def halt(self):
-        return 0xffffffff
+        return 0xff
 
     def generateRightCodeFirst(self, token,generateByteCode):
         secondTime = 0

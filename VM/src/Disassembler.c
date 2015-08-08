@@ -24,7 +24,10 @@ void (*disassemble[256])(char*, int)  = { [DUMPR] = disassembleDumpr,
                                           [DIV] = disassembleDiv,
                                           [AND] = disassembleAnd,
                                           [OR] = disassembleOr,
-                                          [XOR] = disassembleXor
+                                          [XOR] = disassembleXor,
+                                          [BRA] = disassembleBra,
+                                          [BRA_IF_TRUE] = disassembleBit,
+                                          [HALT] = disassembleHalt
                                           };
 //
 
@@ -36,16 +39,17 @@ void (*disassemble[256])(char*, int)  = { [DUMPR] = disassembleDumpr,
  *            0   bytecode cannot be disassembled
  */
 int __declspec(dllexport) disassembleBytecodes(char *strBuffer, int *bytecode) {
-  while(*bytecode != 0xFFFFFFFF) {
+  int i = 0;
+  while((unsigned char)bytecode[i] != halt()) {
+    disassembleBytecode(strBuffer, bytecode[i]);
+    while(*strBuffer != '\0')  // Find \0 to write and add newline
+      strBuffer++;
+    sprintf(strBuffer, "\n");
+    i++;
     while(*strBuffer != '\0')  // Find \0 to write
       strBuffer++;
-    disassembleBytecode(strBuffer, *bytecode);
-    while(*strBuffer != '\0')  // Find \0 to write
-      strBuffer++;
-    bytecode++;
-    if(*bytecode != 0xFFFFFFFF)   // remove \n for last line
-      sprintf(strBuffer, "\n");   // add \n for each disassembled bytecode
   }
+  disassembleHalt(strBuffer, bytecode[i]);
 }
 
 /**
@@ -56,11 +60,13 @@ int __declspec(dllexport) disassembleBytecodes(char *strBuffer, int *bytecode) {
  *            0   bytecode cannot be disassembled
  */
 int __declspec(dllexport) disassembleBytecode(char *strBuffer, int bytecode) {
-  unsigned char command = bytecode;
-  if(command < 256 && command >= 0) {
-    disassemble[command](strBuffer, bytecode);
+  unsigned char opcode = bytecode;
+  if(opcode == halt()) {
+    disassembleHalt(strBuffer, bytecode);
+  } else if(opcode > MAX_INSTRUCTION) {
+    disassembleDefault(strBuffer, bytecode);
   } else {
-    printf("Invalid bytecode");
+    disassemble[opcode](strBuffer, bytecode);
   }
 }
 
@@ -68,23 +74,27 @@ int __declspec(dllexport) disassembleBytecode(char *strBuffer, int bytecode) {
  *  Simpler version of disassembleBytecodes
  */
 void dumpBytecodes(int *bytecode) {
-  char dumpBuffer[100] = {0};
-  unsigned char command = *bytecode;
-  while(*bytecode != halt()) {
-    dumpBytecode(*bytecode);
-    printf("%s\n", dumpBuffer);
-    bytecode++;
-  }
+  char dumpBuffer[1000] = {0};
+  disassembleBytecodes(dumpBuffer, bytecode);
+  printf("%s", dumpBuffer);
 }
 
 /**
  *  Simpler version of disassembleBytecode
  */
 void dumpBytecode(int bytecode) {
-  char dumpBuffer[100] = {0};
-  unsigned char command = bytecode;
+  char dumpBuffer[500] = {0};
+  unsigned char opcode = bytecode;
   disassembleBytecode(dumpBuffer, bytecode);
   printf("%s", dumpBuffer);
+}
+
+void disassembleHalt(char *strBuffer, int bytecode) {
+  sprintf(strBuffer, "halt");
+}
+
+void disassembleDefault(char *strBuffer, int bytecode) {
+  sprintf(strBuffer, "Invalid Bytecode!");
 }
 
 // Disassemble Functions
@@ -314,4 +324,16 @@ void disassembleXor(char *strBuffer, int bytecode) {
   int reg1 = getR1(bytecode);
   int reg2 = getR2(bytecode);
   sprintf(strBuffer, "xor r%d r%d r%d", resultReg, reg1, reg2);
+}
+
+void disassembleBra(char *strBuffer, int bytecode) {
+  int resultReg = getRd(bytecode);
+  int relativeAddress = bytecode >> 8;
+  sprintf(strBuffer, "bra r%d #%d", resultReg, relativeAddress);
+}
+
+void disassembleBit(char *strBuffer, int bytecode) {
+  int resultReg = getRd(bytecode);
+  int relativeAddress = bytecode >> 8;
+  sprintf(strBuffer, "bit r%d #%d", resultReg, relativeAddress);
 }

@@ -88,16 +88,14 @@ void VMLoad(char* filepath, int *bytecode) {
 }
 
 void VMRun(int *bytecode) {
-  unsigned char opcode = bytecode[programCounter];
-  while(bytecode[programCounter] != halt()) {
+  while((unsigned char)bytecode[programCounter] != halt()) {
     execute(bytecode[programCounter]);
     programCounter++;
   }
 }
 
 void VMStep(int *bytecode) {
-  unsigned char opcode = bytecode[programCounter];
-  if(bytecode[programCounter] != halt()) {
+  if((unsigned char)bytecode[programCounter] != halt()) {
     execute(bytecode[programCounter]);
     programCounter++;
   }

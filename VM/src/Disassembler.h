@@ -6,7 +6,10 @@ extern void (*disassemble[256])(char*, int);
 int __declspec(dllexport) disassembleBytecodes(char *strBuffer, int *bytecode);
 int __declspec(dllexport) disassembleBytecode(char *strBuffer, int bytecode);
 void dumpBytecode(int bytecode);
-void __declspec(dllexport) dumpBytecodes(int *bytecode);
+void dumpBytecodes(int *bytecode);
+
+void disassembleDefault(char *strBuffer, int bytecode);
+void disassembleHalt(char *strBuffer, int bytecode);
 
 void disassembleDumpr(char *strBuffer, int bytecode);
 void disassembleDumprHex(char *strBuffer, int bytecode);
@@ -29,5 +32,7 @@ void disassembleDiv(char *strBuffer, int bytecode);
 void disassembleAnd(char *strBuffer, int bytecode);
 void disassembleOr(char *strBuffer, int bytecode);
 void disassembleXor(char *strBuffer, int bytecode);
+void disassembleBra(char *strBuffer, int bytecode);
+void disassembleBit(char *strBuffer, int bytecode);
 
 #endif // Disassembler_H
