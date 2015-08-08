@@ -86,6 +86,9 @@ class MyTestCase(unittest.TestCase):
         vm.VMStep(cbytecodes)
         vm.VMStep(cbytecodes)
         vm.VMStep(cbytecodes)
+        cCharArray_t = c_char * 300
+        cCharArray = cCharArray_t(0)
+        vm.disassembleBytecodes(cCharArray, cbytecodes)
 
     def test_VMStep_should_raise_RuntimeError_given_invalid_bytecode(self):
         bytecodes = [0xfff12314]

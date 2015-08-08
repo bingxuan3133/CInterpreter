@@ -5,6 +5,7 @@
 
 unsigned int programCounter = 0;
 Register reg[MAX_REG];
+DoubleRegister dReg[MAX_REG];
 Status statusReg;
 
 void initVM() {

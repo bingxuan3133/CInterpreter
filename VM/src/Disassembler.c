@@ -35,7 +35,7 @@ void (*disassemble[256])(char*, int)  = { [DUMPR] = disassembleDumpr,
  *  Return:   1   bytecode can be disassembled
  *            0   bytecode cannot be disassembled
  */
-int disassembleBytecodes(char *strBuffer, int *bytecode) {
+int __declspec(dllexport) disassembleBytecodes(char *strBuffer, int *bytecode) {
   while(*bytecode != 0xFFFFFFFF) {
     while(*strBuffer != '\0')  // Find \0 to write
       strBuffer++;
@@ -55,7 +55,7 @@ int disassembleBytecodes(char *strBuffer, int *bytecode) {
  *  Return:   1   bytecode can be disassembled
  *            0   bytecode cannot be disassembled
  */
-int disassembleBytecode(char *strBuffer, int bytecode) {
+int __declspec(dllexport) disassembleBytecode(char *strBuffer, int bytecode) {
   unsigned char command = bytecode;
   if(command < 256 && command >= 0) {
     disassemble[command](strBuffer, bytecode);

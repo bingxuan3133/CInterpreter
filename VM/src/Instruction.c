@@ -3,6 +3,7 @@
 #include "Exception.h"
 #include <stdio.h>
 
+
 // Instruction Entry
 void (*instruction[256])(int)  = {[DUMPR] = dumpRegister,
                                   [DUMPR_HEX] = dumpRegisterHex,
@@ -438,6 +439,11 @@ void xorRegisters(int bytecode) {
   int reg2 = getR2(bytecode);
   reg[resultReg].data = reg[reg1].data ^ reg[reg2].data;
 }
+
+//----------------------
+//    Floating Point
+//----------------------
+
 
 //----------------------
 //    Branch
