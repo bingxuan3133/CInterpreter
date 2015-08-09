@@ -32,7 +32,7 @@ class TestSemanticCheckerAssignmentCheck(unittest.TestCase):
         declToken.data.append(xToken)
 
         semanticChecker = SemanticChecker()
-        types = semanticChecker.getIdentifierType(declToken)
+        types = semanticChecker.getIdentifierDeclarationType(declToken)
         self.assertEqual(['int'], types)
 
     def test_getIdentifierType_return_a_list_of_types_of_an_identifier(self):
@@ -45,7 +45,7 @@ class TestSemanticCheckerAssignmentCheck(unittest.TestCase):
         declToken.data.append(xToken)
 
         semanticChecker = SemanticChecker()
-        types = semanticChecker.getIdentifierType(declToken)
+        types = semanticChecker.getIdentifierDeclarationType(declToken)
         self.assertEqual(['int', '*'], types)
 
     def test_isDefined_return_True_when_x_is_defined(self):
@@ -158,12 +158,43 @@ class TestSemanticCheckerDeclarationCheck(unittest.TestCase):
             token = parser.parseStatement(0)
             semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
             token = parser.parseStatement(0)
-            semanticChecker.checkIfAllIdentifiersAreDefined(token[1])
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
             self.fail('Should raise')
         except SyntaxError as e:
             self.assertEqual("Error[1][9]:Undefined reference 'y'" + '\n' +
                              'int x = y;' + '\n' +
                              '        ^', e.msg)
+
+    def test_isAllDefined_should_raise_given_x_has_invalid_type(self):
+        lexer = LexerStateMachine('int x; *x;', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        semanticChecker = SemanticChecker(parser.scopeBuilder)
+        try:
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            semanticChecker.checkIfTypeValid(token[0])
+            self.fail('Should raise')
+        except SyntaxError as e:
+            self.assertEqual("Error[1][9]:Invalid type of 'x'" + '\n' +
+                             'int x; *x;' + '\n' +
+                             '       ^', e.msg)
+
+    def test_isAllDefined_should_not_raise_given_x_has_valid_type(self):
+        lexer = LexerStateMachine('int *x; *x;', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        semanticChecker = SemanticChecker(parser.scopeBuilder)
+        try:
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            semanticChecker.checkIfTypeValid(token[0])
+        except SyntaxError as e:
+            self.fail('Should not raise')
 
 if __name__ == '__main__':
     unittest.main()

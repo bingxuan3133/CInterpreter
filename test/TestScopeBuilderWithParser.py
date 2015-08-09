@@ -13,24 +13,24 @@ from FlowControlContext import *
 
 class TestParseStatementToMockBuildScope(unittest.TestCase):
     def setUp(self):
-        self.manager = ContextManager()
-        self.context = Context(self.manager)
-        self.defaultContext = DefaultContext(self.manager)
-        self.declarationContext = DeclarationContext(self.manager)
-        self.expressionContext = ExpressionContext(self.manager)
-        self.flowControlContext = FlowControlContext(self.manager)
+        self.contextManager = ContextManager()
+        self.context = Context(self.contextManager)
+        self.defaultContext = DefaultContext(self.contextManager)
+        self.declarationContext = DeclarationContext(self.contextManager)
+        self.expressionContext = ExpressionContext(self.contextManager)
+        self.flowControlContext = FlowControlContext(self.contextManager)
         self.contexts = [self.declarationContext, self.expressionContext, self.flowControlContext]
 
-        self.manager.addContext('Declaration', self.declarationContext)
-        self.manager.addContext('Expression', self.expressionContext)
-        self.manager.addContext('FlowControl', self.flowControlContext)
-        self.manager.addContext('Default', self.flowControlContext)
-        self.manager.setCurrentContexts(self.contexts)
+        self.contextManager.addContext('Declaration', self.declarationContext)
+        self.contextManager.addContext('Expression', self.expressionContext)
+        self.contextManager.addContext('FlowControl', self.flowControlContext)
+        self.contextManager.addContext('Default', self.flowControlContext)
+        self.contextManager.setCurrentContexts(self.contexts)
 
     def test_parseStatement_call_buildScope_when_declaration(self):
         lexer = LexerStateMachine('int x;', self.context)
-        parser = Parser(lexer, self.manager)
-        self.manager.setParser(parser)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
         mockScopeBuilder = MagicMock(wraps=ScopeBuilder())
         parser.scopeBuilder = mockScopeBuilder
         token = parser.parseStatement(0)
@@ -38,8 +38,8 @@ class TestParseStatementToMockBuildScope(unittest.TestCase):
 
     def test_parseStatements_should_call_buildScope_properly(self):
         lexer = LexerStateMachine('int x; { int y;};', self.context)
-        parser = Parser(lexer, self.manager)
-        self.manager.setParser(parser)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
         mockScopeBuilder = MagicMock(wraps=ScopeBuilder())
         scopeBuilder = ScopeBuilder()
         parser.scopeBuilder = mockScopeBuilder
@@ -52,8 +52,8 @@ class TestParseStatementToMockBuildScope(unittest.TestCase):
 
     def test_parseStatements_complex_nested_brace_should_call_buildScope_properly(self):
         lexer = LexerStateMachine('int x; {int y; {int z; {int a;} int b; }};', self.context)
-        parser = Parser(lexer, self.manager)
-        self.manager.setParser(parser)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
         mockScopeBuilder = MagicMock(wraps=ScopeBuilder())
         scopeBuilder = ScopeBuilder()
         parser.scopeBuilder = mockScopeBuilder
@@ -68,16 +68,51 @@ class TestParseStatementToMockBuildScope(unittest.TestCase):
         mockScopeBuilder.destroyScope.assert_has_calls(calls, any_order=False)
         self.assertEqual(3, mockScopeBuilder.destroyScope.call_count)
 
-    def test_buildScope_should_raise_when_redeclaration(self):
+    def test_buildScope_should_raise_given_redeclaration_of_x(self):
         lexer = LexerStateMachine('int x; int x;', self.context)
-        parser = Parser(lexer, self.manager)
-        self.manager.setParser(parser)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
         try:
             parser.parseStatement(0)
         except SyntaxError as e:
             self.assertEqual("Error[1][9]:Redeclaration of 'x'" + '\n' +
                              'nt x; int x;' + '\n' +
                              '          ^', e.msg)
+
+    def test_buildScope_should_raise_given_redeclaration_of_x_3xpointer(self):
+        lexer = LexerStateMachine('int x; int ***x;', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        try:
+            parser.parseStatement(0)
+        except SyntaxError as e:
+            self.assertEqual("Error[1][11]:Redeclaration of 'x'" + '\n' +
+                             'nt x; int ***x;' + '\n' +
+                             '             ^', e.msg)
+
+    def test_buildScope_should_raise_given_redeclaration_of_x_in_single_statement(self):
+        lexer = LexerStateMachine('int x, x;', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        try:
+            parser.parseStatement(0)
+            self.fail()
+        except SyntaxError as e:
+            self.assertEqual("Error[1][8]:Redeclaration of 'x'"+ '\n' +
+                               'int x, x;'+ '\n' +
+                               '       ^',e.msg)
+
+    def test_redeclaration_of_x_given_second_x_is_pointer_in_single_statement(self):
+        lexer = LexerStateMachine('int x, *x;', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        try:
+            parser.parseStatement(0)
+            self.fail()
+        except SyntaxError as e:
+            self.assertEqual("Error[1][9]:Redeclaration of 'x'"+ '\n' +
+                               'int x, *x;'+ '\n' +
+                               '        ^',e.msg)
 
 if __name__ == '__main__':
     unittest.main()
