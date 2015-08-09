@@ -1,27 +1,28 @@
 __author__ = 'admin'
 
 import unittest
+from Parser import *
 from SemanticChecker import *
 from DefaultContext import *
 from DeclarationContext import *
 from ExpressionContext import *
 from FlowControlContext import *
 
-class MyTestCase(unittest.TestCase):
+class TestSemanticCheckerAssignmentCheck(unittest.TestCase):
     def setUp(self):
-        self.manager = ContextManager()
-        self.context = Context(self.manager)
-        self.defaultContext = DefaultContext(self.manager)
+        self.contextManager = ContextManager()
+        self.context = Context(self.contextManager)
+        self.defaultContext = DefaultContext(self.contextManager)
         self.defaultContext.addKeyword('int')
-        self.declarationContext = DeclarationContext(self.manager)
-        self.expressionContext = ExpressionContext(self.manager)
-        self.flowControlContext = FlowControlContext(self.manager)
-        self.contexts = [self.declarationContext, self.expressionContext, self.flowControlContext, self.defaultContext]
-        self.manager.addContext('Default', self.defaultContext)
-        self.manager.addContext('Declaration', self.declarationContext)
-        self.manager.addContext('Expression', self.expressionContext)
-        self.manager.addContext('FlowControl', self.flowControlContext)
-        self.manager.setCurrentContexts(self.contexts)
+        self.declarationContext = DeclarationContext(self.contextManager)
+        self.expressionContext = ExpressionContext(self.contextManager)
+        self.flowControlContext = FlowControlContext(self.contextManager)
+        self.contexts = [self.expressionContext, self.declarationContext, self.flowControlContext, self.defaultContext]
+        self.contextManager.addContext('Default', self.defaultContext)
+        self.contextManager.addContext('Declaration', self.declarationContext)
+        self.contextManager.addContext('Expression', self.expressionContext)
+        self.contextManager.addContext('FlowControl', self.flowControlContext)
+        self.contextManager.setCurrentContexts(self.contexts)
 
     def test_getIdentifierType(self):
         declToken = self.declarationContext.createDeclarationOrDefinitionToken('(decl)')
@@ -32,7 +33,6 @@ class MyTestCase(unittest.TestCase):
 
         semanticChecker = SemanticChecker()
         types = semanticChecker.getIdentifierType(declToken)
-
         self.assertEqual(['int'], types)
 
     def test_getIdentifierType_return_a_list_of_types_of_an_identifier(self):
@@ -46,9 +46,124 @@ class MyTestCase(unittest.TestCase):
 
         semanticChecker = SemanticChecker()
         types = semanticChecker.getIdentifierType(declToken)
-
         self.assertEqual(['int', '*'], types)
 
+    def test_isDefined_return_True_when_x_is_defined(self):
+        lexer = LexerStateMachine('int x; x = 0;', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        semanticChecker = SemanticChecker(parser.scopeBuilder)
+        try:
+            token = parser.parseStatements(0)
+            semanticChecker.checkIfIdentifierIsDefined(token[1].data[0])
+        except SyntaxError as e:
+            self.fail(e.msg)
+
+class TestSemanticCheckerDeclarationCheck(unittest.TestCase):
+    def setUp(self):
+        self.contextManager = ContextManager()
+        self.context = Context(self.contextManager)
+        self.defaultContext = DefaultContext(self.contextManager)
+        self.defaultContext.addKeyword('int')
+        self.declarationContext = DeclarationContext(self.contextManager)
+        self.expressionContext = ExpressionContext(self.contextManager)
+        self.flowControlContext = FlowControlContext(self.contextManager)
+        self.contexts = [self.expressionContext, self.declarationContext, self.flowControlContext, self.defaultContext]
+        self.contextManager.addContext('Default', self.defaultContext)
+        self.contextManager.addContext('Declaration', self.declarationContext)
+        self.contextManager.addContext('Expression', self.expressionContext)
+        self.contextManager.addContext('FlowControl', self.flowControlContext)
+        self.contextManager.setCurrentContexts(self.contexts)
+
+    def test_isDefined_return_True_when_x_is_defined(self):
+        lexer = LexerStateMachine('int x; x = 0;', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        semanticChecker = SemanticChecker(parser.scopeBuilder)
+        try:
+            token = parser.parseStatements(0)
+            semanticChecker.checkIfIdentifierIsDefined(token[1].data[0])
+        except SyntaxError as e:
+            self.fail(e.msg)
+
+    def test_isAllDefined_should_not_raise_given_x_y_z_is_defined(self):
+        lexer = LexerStateMachine('int x; int y; int z; x = y + z;', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        semanticChecker = SemanticChecker(parser.scopeBuilder)
+        try:
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+        except SyntaxError as e:
+            self.fail(e.msg)
+
+    def test_isDefined_will_raise_when_x_is_not_defined(self):
+        lexer = LexerStateMachine('x = 0;', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        semanticChecker = SemanticChecker(parser.scopeBuilder)
+        try:
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfIdentifierIsDefined(token[0].data[0])
+            self.fail('Should raise')
+        except SyntaxError as e:
+            self.assertEqual("Error[1][1]:Undefined reference 'x'" + '\n' +
+                             'x = 0;' + '\n' +
+                             '^', e.msg)
+
+    def test_isAllDefined_should_not_raise_given_x_is_defined(self):
+        lexer = LexerStateMachine('int x;\nint y = x;', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        semanticChecker = SemanticChecker(parser.scopeBuilder)
+        try:
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+        except SyntaxError as e:
+            self.assertEqual("Error[3][9]:Undefined reference 'y'" + '\n' +
+                             'x = 2 + y;' + '\n' +
+                             '        ^', e.msg)
+
+    def test_isAllDefined_should_raise_given_y_is_not_defined(self):
+        lexer = LexerStateMachine('int x;\nx = 0;\nx = 2 + y;', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        semanticChecker = SemanticChecker(parser.scopeBuilder)
+        try:
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+        except SyntaxError as e:
+            self.assertEqual("Error[3][9]:Undefined reference 'y'" + '\n' +
+                             'x = 2 + y;' + '\n' +
+                             '        ^', e.msg)
+
+    def test_isAllDefined_should_raise_given_y_is_not_defined_before_its_declaration(self):
+        lexer = LexerStateMachine('int x = y;\nint y;', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        semanticChecker = SemanticChecker(parser.scopeBuilder)
+        try:
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[1])
+            self.fail('Should raise')
+        except SyntaxError as e:
+            self.assertEqual("Error[1][9]:Undefined reference 'y'" + '\n' +
+                             'int x = y;' + '\n' +
+                             '        ^', e.msg)
 
 if __name__ == '__main__':
     unittest.main()

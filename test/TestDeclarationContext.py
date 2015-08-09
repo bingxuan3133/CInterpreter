@@ -1124,6 +1124,19 @@ class TestPointerDeclaration(unittest.TestCase):
                                'int ptr*[10];'+ '\n' +
                                '       ^',e.msg)
 
+    def test_array_10_ptr_should_fail(self):
+        lexer = LexerStateMachine('int [10]ptr;', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+
+        try:
+            parser.parseStatement(0)
+            self.fail()
+        except SyntaxError as e:
+            self.assertEqual("Error[1][5]:Expecting (identifier) before ["+ '\n' +
+                               'int [10]ptr;'+ '\n' +
+                               '    ^',e.msg)
+
     def test_pointer_ptr_array_10_pointer_x_array_10_should_fail(self):
         lexer = LexerStateMachine('int *ptr[10]*x[10];', self.context)
         parser = Parser(lexer, self.manager)

@@ -2,6 +2,7 @@
 
 import os,sys
 from LexerStateMachine import *
+from SemanticChecker import *
 from ScopeBuilder import ScopeBuilder
 from Context import *
 
@@ -10,7 +11,7 @@ class Parser:
         self.lexer = lexer
         self.contextManager = contextManager
         self.scopeBuilder = ScopeBuilder()
-        self.closingBrace = Context.symbol(Context(self.contextManager), '}')  # does this count as hack?
+        self.semanticChecker = SemanticChecker(self.scopeBuilder)
 
     def parse(self, bindingPower):
             token = self.lexer.peep()        # token = leftToken
@@ -30,7 +31,8 @@ class Parser:
         elif firstToken.id == '{':            # For one block of statements
             self.scopeBuilder.buildScope(firstToken)
             returnedToken = self.parse(bindingPower)
-            self.scopeBuilder.buildScope(self.closingBrace)  # parse '}' to tell ScopeBuilder now leaving the scope
+            self.semanticChecker.semanticCheck(returnedToken)
+            self.scopeBuilder.destroyScope()
             list.append(returnedToken)
             return list
         elif firstToken and firstToken.id in self.contextManager.getContext('FlowControl').symbolTable:  # For some context that do not need ';'

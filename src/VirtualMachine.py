@@ -12,7 +12,7 @@ class VirtualMachine:
 
     def convertToCArray(self, bytecodeList):
         size = len(bytecodeList)
-        cBytecodeList_t = c_uint * size
+        cBytecodeList_t = c_int * size
         cBytecodeList = cBytecodeList_t(*bytecodeList)
         return cBytecodeList
 
@@ -32,13 +32,15 @@ class VirtualMachine:
         if bool(exception):
             raise RuntimeError(exception.contents.errMsg)
 
-    def dumpBytecodes(self, cBytecodeList):  # proxy function to interact with real VM
-        self.vmdll.dumpBytecodes(cBytecodeList)
+    def dumpBytecodes(self, bytecodeList):  # proxy function to interact with real VM
+        for bytecode in bytecodeList:
+            self.dumpBytecode(bytecode)
 
-    def disassembleBytecodes(self, cBuffer, cBytecodeList):  # proxy function to interact with real VM
-        getBytecode = self.vmdll.disassembleBytecode
-        getBytecode.restype = c_char_p
-        getBytecode(cBuffer, cBytecodeList)
-        pass
-
+    def dumpBytecode(self, bytecode):  # proxy function to interact with real VM
+        cCharArray100_t = c_char * 100
+        cBuffer = cCharArray100_t(0)
+        cPtr = c_char_p(None)
+        cPtr = cBuffer
+        self.vmdll.disassembleBytecode(cPtr, c_int(bytecode))
+        print(cPtr.value.decode('ascii'))
 

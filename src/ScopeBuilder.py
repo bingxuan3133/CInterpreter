@@ -15,21 +15,19 @@ class Scope:
 class ScopeBuilder:
     def __init__(self):  # closing brace is used for implementation of buildScope
         self.scope = Scope()
-        self.types = []
+        self.types = []  # not implemented (int, char, double, user defined, etc)
         self.currentScope = copy.copy(self.scope)
         self.scopeHistory = []
 
-    def addType(self, *typeTokens):
+    def addType(self, *typeTokens):  # not implemented (use for int, char, double, user defined, etc)
         for typeToken in typeTokens:
             self.types.append(typeToken)
 
     def buildScope(self, token):
         if token.id == '(decl)':
-            self.currentScope.list.append(token)
-            self.currentScope.displayList.append(token.data[1].data[0])
+            self.addToCurrentScope(token)
         elif token.id == '(def)':
-            self.currentScope.list.append(token.data[0])
-            self.currentScope.displayList.append(token.data[0].data[1].data[0])
+            self.addToCurrentScope(token.data[0])
         elif token.id == '{':
             self.currentScope.parentScope = copy.copy(self.currentScope)
             newScopeList = []
@@ -38,21 +36,26 @@ class ScopeBuilder:
             newScopeDisplayList = []
             self.currentScope.displayList.append(newScopeDisplayList)
             self.currentScope.displayList = newScopeDisplayList
-        elif token.id == '}':
-            self.currentScope = self.currentScope.parentScope
-            self.currentScope.list.pop()
-            self.currentScope.displayList.pop()
         else:
             pass
         self.scopeHistory.append(copy.deepcopy(self.scope.list))
         return
 
-    def removeSubToken(self, token):
-        subToken = None
-        if token.id == '{':
-            subToken = token.data
-            token.data = []
-        return subToken
+    def destroyScope(self):
+        self.currentScope = self.currentScope.parentScope
+        self.currentScope.list.pop()
+        self.currentScope.displayList.pop()
+        self.scopeHistory.append(copy.deepcopy(self.scope.list))
+
+    def addToCurrentScope(self, declToken):
+        if self.findLocal(declToken.data[1].data[0]) is None:
+            self.currentScope.list.append(declToken)
+            self.currentScope.displayList.append(declToken.data[1].data[0])
+        else:
+            token = declToken.reference
+            caretMessage = ' '*(token.column-1)+'^'
+            raise SyntaxError("Error[{}][{}]:Redeclaration of '{}'\n{}\n{}"\
+                             .format(token.line,token.column,token.data[0],token.oriString,caretMessage))
 
     def findLocal(self, identifierName):
         for declToken in self.currentScope.list:

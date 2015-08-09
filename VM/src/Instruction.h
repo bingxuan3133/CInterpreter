@@ -51,7 +51,7 @@
 
 // Bytecode Macros
 #define halt() \
-                0xffffffff
+                HALT
 #define dumpr(reg) \
                 DUMPR | (reg)<<8
 #define dumprHex(reg) \
@@ -119,12 +119,12 @@ typedef enum {
   AND = 0x11,
   OR = 0x12,
   XOR = 0x13,
-  BRA = 0x13,
-  BRA_IF_TRUE = 0x13,
+  BRA = 0x14,
+  BRA_IF_TRUE = 0x15,
   HALT = 0xff,
 } Instruction;
 
-#define MAX_INSTRUCTION XOR
+#define MAX_INSTRUCTION BRA_IF_TRUE
 
 // main function
 void execute(int bytecode);
