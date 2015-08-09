@@ -126,6 +126,8 @@ class Context:
                     newToken.column = column - length
                     newToken.length = length
                     newToken.oriString = originalString
+                    if newToken.column == 0:
+                        newToken.column = 1
                     return newToken
 
         if word is None:
@@ -143,6 +145,8 @@ class Context:
         newToken.column = column - length
         newToken.length = length
         newToken.oriString = originalString
+        if newToken.column == 0:
+                        newToken.column = 1
         return newToken
 
     def isFloat(self, Unknown):
