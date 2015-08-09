@@ -60,7 +60,6 @@ class DeclarationContext(Context):
             self.data.append(returnedToken)
             return self
         def led(self, token):
-            pass
             caretMessage = ' '*(self.column-1)+'^'
             raise SyntaxError("Error[{}][{}]:Expecting ; before {}\n{}\n{}"\
                              .format(self.line,self.column,self.id,self.oriString,caretMessage))
@@ -72,12 +71,9 @@ class DeclarationContext(Context):
     def addSubscriptOperator(self, id, bindingPower):  # []
         thisContext = self
         def nud(self):
-            pass
-            """
             caretMessage = ' '*(self.column-1)+'^'
             raise SyntaxError("Error[{}][{}]:Expecting (identifier) before {}\n{}\n{}"\
                              .format(self.line,self.column,self.id,self.oriString,caretMessage))
-            """
         def led(self, leftToken):
             self.data.append(leftToken)
             thisContext.contextManager.parser.lexer.advance()

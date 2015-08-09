@@ -20,7 +20,6 @@ class TestScope(unittest.TestCase):
         self.manager = ContextManager()
         self.context = Context(self.manager)
         self.defaultContext = DefaultContext(self.manager)
-        self.defaultContext.addKeyword('int')
         self.declarationContext = DeclarationContext(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
         self.flowControlContext = FlowControlContext(self.manager)
@@ -38,7 +37,7 @@ class TestScope(unittest.TestCase):
         xToken = self.context.createToken('x')
         declToken.data.append(intToken)
         declToken.data.append(xToken)
-        scopeBuilder.addType('int')
+        
         scopeBuilder.buildScope(declToken)
         self.assertEqual([declToken], scopeBuilder.scope.list)
         self.assertEqual(['x'], scopeBuilder.scope.displayList)
@@ -51,7 +50,6 @@ class TestScope(unittest.TestCase):
         declToken.data.append(intToken)
         declToken.data.append(xToken)
         braceToken = self.context.createToken('{')
-        scopeBuilder.addType('int')
 
         scopeBuilder.buildScope(declToken)
         self.assertEqual(['x'], scopeBuilder.scope.displayList)
@@ -71,7 +69,6 @@ class TestScope(unittest.TestCase):
         declToken2.data.append(intToken)
         declToken2.data.append(xToken)
         braceToken = self.context.createToken('{')
-        scopeBuilder.addType('int')
 
         scopeBuilder.buildScope(declToken1)
         localToken = scopeBuilder.findLocal('x')
@@ -99,7 +96,6 @@ class TestScope(unittest.TestCase):
         declToken2.data.append(intToken2)
         declToken2.data.append(yToken)
         braceToken = self.context.createToken('{')
-        scopeBuilder.addType('int')
 
         scopeBuilder.buildScope(declToken1)  # scope = [x]
         scopeBuilder.buildScope(braceToken)  # scope = [x, []]
