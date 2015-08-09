@@ -13,7 +13,7 @@ class ExpressionContext(Context):
         self.addInfixOperator('|', 15)
         self.addInfixOperator('||', 5)
         self.addInfixOperator('&', 20)
-        self.addInfixOperator('&&', 10)
+        self.addInfixOperator('&&', 6)
         self.addInfixOperator('==', 10)
         self.addInfixOperator('<', 10)
         self.addInfixOperator('<=', 10)
