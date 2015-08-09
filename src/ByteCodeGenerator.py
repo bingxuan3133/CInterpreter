@@ -41,96 +41,97 @@ class ByteCodeGenerator:
         return number
 
     def compareIsLessThan(self, GPR=[]):
-        number = 0xf2 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        number = 0x02 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def compareRegister(self,GPR=[]):
-        number = 0xf3 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        number = 0x03 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def compareIsLessThanOrEqual(self,GPR=[]):
-        number = 0xf4 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        number = 0x04 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def compareIsGreaterThan(self, GPR=[]):
-        number = 0xf5 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        number = 0x05 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def compareIsGreaterThanOrEqual(self, GPR=[]):
-        number = 0xf6 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        number = 0x06 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def loadValue(self, GPR=[]):
-        number = 0x02 | GPR[0] << 8 | GPR[1] << 11
+        number = 0x07 | GPR[0] << 8 | GPR[1] << 11
         return number
 
     def loadRegister(self, GPR=[]):
-        number = 0x04 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 17
+        number = 0x08 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 17
         return number
 
     def storeRegister(self, GPR=[]):
-        number = 0x06 | GPR[0] << 8 | GPR[1] << 11
+        number = 0x09 | GPR[0] << 8 | GPR[1] << 11
         return number
 
     def loadMultiple(self, GPR=[]):
-        number = 0x08 | GPR[0] << 8 | GPR[1] << 11
-        return number
-
-    def storeMultiple(self, GPR=[]):
         number = 0x0a | GPR[0] << 8 | GPR[1] << 11
         return number
 
+    def storeMultiple(self, GPR=[]):
+        number = 0x0b | GPR[0] << 8 | GPR[1] << 11
+        return number
+
     def addRegister(self,GPR =[]):
-        number = 0x0d | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        number = 0x0c | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def subRegister(self,GPR=[]):
-        number = 0x0e | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        number = 0x0d | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def multiplyRegister(self, GPR=[]):
-        number = 0x0f | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        number = 0x0e | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def divideRegister(self,GPR=[]):
-        number = 0x10 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        number = 0x0f | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def orRegister(self, GPR =[]):
-        number = 0x11 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        number = 0x10 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def modulusRegister(self,GPR=[]):
-        number = 0x12 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        number = 0x11 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def branchIfTrue(self, GPR = []):
         #GPR[0] == The number that needed to be branch
         #GPR[1] == The register number that refers to
-        number = 0x14 | GPR[0] << 8 | GPR[1] << 11
+        number = 0x12 | GPR[0] << 8 | GPR[1] << 11
         return number
 
     def branch(self, GPR =[]):
-        number = 0x15 | GPR[0] << 8
+        number = 0x13 | GPR[0] << 8
         return number
 
     def loadFloatingPoint(self,GPR = []):
-        number = 0x15 | GPR[0] << 8 | GPR[1] << 16
+        number = 0x14 | GPR[0] << 8
+        return number
+
+    def immediateFloatingPoint(self, GPR=[]):
+        number = GPR[0] | GPR[1] << 8 | GPR[2] << 16 | GPR[3] << 24
         return number
 
     def addFloatingRegister(self, GPR = []):
-        #GPR[0] and GPR[1] => the destination registers to store the answer
-        #GPR[2] and GPR[3] => the registers that stored the register number
-        #GPR[4] and GPR[5] => the registers that stored the register number
-        number = 0x15 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14 | GPR[3] << 17 | GPR[4] << 20 | GPR[5] << 23
+        number = 0x15 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def storeFloatingPointRegister(self, GPR =[]):
-        number = 0x15 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14 | GPR[3] << 17
+        number = 0x11 | GPR[0] << 8 | GPR[1] << 11
         return number
 
     def loadFloatingPointRegister(self, GPR = []):
-        number = 0x15 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14 | GPR[3] << 17
+        number = 0x11 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def halt(self):
@@ -157,33 +158,7 @@ class ByteCodeGenerator:
 
     def decideWhetherToSaveSlotForPopValue(self, status, sequence, generateByteCode, token):
         if self.floatingFlag == 1:
-            self.floatingPointRegisterSaving(status, sequence, self.relativeFunction[generateByteCode])
-        else:
-            self.literalRegisterSaving( status, sequence, generateByteCode)
-
-    def floatingPointRegisterSaving(self, status, sequence, generateByteCode):
-        GPR = []
-        secondRegister = self.mapping.releaseAWorkingRegister()
-        firstRegister = self.mapping.releaseAWorkingRegister()
-        thirdRegister = self.mapping.releaseALargestWorkingRegister()
-        fourthRegister = self.mapping.releaseALargestWorkingRegister()
-        GPR.insert(0,self.mapping.getAFreeWorkingRegister())
-        GPR.insert(1, self.mapping.getAFreeWorkingRegister())
-        GPR.insert(2, firstRegister)
-        GPR.insert(3, secondRegister)
-        GPR.insert(4, fourthRegister)
-        GPR.insert(5, thirdRegister)
-
-        if self.isStoreFunction(generateByteCode):
-            GPR[0]= firstRegister
-            GPR[1] =secondRegister
-            GPR[2] = fourthRegister
-            GPR[3]= thirdRegister
-            pass
-        Code = generateByteCode(GPR)
-        self.byteCodeList.append(Code)
-
-    def literalRegisterSaving(self, status, sequence, generateByteCode):
+            generateByteCode=self.relativeFunction[generateByteCode]
         GPR=[]
         firstRegister = self.mapping.releaseALargestWorkingRegister()
         secondRegister = self.mapping.releaseAWorkingRegister()
@@ -240,48 +215,33 @@ class ByteCodeGenerator:
 
         def generateFloatingPointLoad (self,sequenceCheck = None, token = None, index = -1):
             thisGenerator.lastUseInstruction = thisGenerator.loadFloatingPoint
-            floatPack = struct.pack('!f', token.data[index].data[0])
+            floatPack = struct.pack('!d', token.data[index].data[0])
             if sequenceCheck == 0:
                 destinationRegister1 = thisGenerator.mapping.getAFreeWorkingRegister()
-                destinationRegister2 = thisGenerator.mapping.getAFreeWorkingRegister()
             else:
                 destinationRegister1 = thisGenerator.mapping.getALargestWorkingRegister()
-                destinationRegister2 = thisGenerator.mapping.getALargestWorkingRegister()
-            Code = thisGenerator.loadFloatingPoint([destinationRegister1,floatPack[0],floatPack[1] ])
+            Code = thisGenerator.loadFloatingPoint([destinationRegister1])
             thisGenerator.byteCodeList.append(Code)
-            Code = thisGenerator.loadFloatingPoint([destinationRegister2,floatPack[2],floatPack[3] ])
+            Code = thisGenerator.immediateFloatingPoint([floatPack[0],floatPack[1],floatPack[2],floatPack[3]])
             thisGenerator.byteCodeList.append(Code)
+            Code = thisGenerator.immediateFloatingPoint([floatPack[4],floatPack[5],floatPack[6],floatPack[7]])
+            thisGenerator.byteCodeList.append(Code)
+
             thisGenerator.floatingFlag = 1
 
         def generateIdentifierCode(self,sequenceCheck = None, token = None, index = -1):
-            if thisGenerator.floatingFlag == 1:
-                generateFloatingPointIdentifierCode(self, sequenceCheck, token, index)
-            else:
-                generateLiteralIdentifierLoad(self, sequenceCheck, token, index)
-
-        def generateLiteralIdentifierLoad(self,sequenceCheck = None, token = None, index = -1):
             thisGenerator.lastUseInstruction = thisGenerator.loadRegister
             if sequenceCheck == 0:
                 destinationRegister = thisGenerator.mapping.getAFreeWorkingRegister()
             else:
                 destinationRegister = thisGenerator.mapping.getALargestWorkingRegister()
-            Code = thisGenerator.loadRegister([destinationRegister, thisGenerator.mapping.framePointerRegister, thisGenerator.variablesInThisAST[token.data[index].data[0]]])
+
+            if thisGenerator.floatingFlag ==1:
+                Code = thisGenerator.loadFloatingPointRegister([destinationRegister, thisGenerator.mapping.framePointerRegister, thisGenerator.variablesInThisAST[token.data[index].data[0]]])
+            else:
+                Code = thisGenerator.loadRegister([destinationRegister, thisGenerator.mapping.framePointerRegister, thisGenerator.variablesInThisAST[token.data[index].data[0]]])
             thisGenerator.byteCodeList.append(Code)
 
-        def generateFloatingPointIdentifierCode(self,sequenceCheck = None, token = None, index = -1):
-            thisGenerator.lastUseInstruction = thisGenerator.loadFloatingPointRegister
-            if sequenceCheck == 0:
-                destinationRegister1 = thisGenerator.mapping.getAFreeWorkingRegister()
-                destinationRegister2 = thisGenerator.mapping.getAFreeWorkingRegister()
-            else:
-                destinationRegister1 = thisGenerator.mapping.getALargestWorkingRegister()
-                destinationRegister2 = thisGenerator.mapping.getALargestWorkingRegister()
-            Code = thisGenerator.loadFloatingPointRegister([destinationRegister2,destinationRegister1,
-                                                            thisGenerator.mapping.framePointerRegister,int(thisGenerator.variablesInThisAST[token.data[index].data[0]]/2),
-                                                            thisGenerator.mapping.framePointerRegister,thisGenerator.variablesInThisAST[token.data[index].data[0]]
-                                                            ] )
-            thisGenerator.byteCodeList.append(Code)
-            thisGenerator.floatingFlag = 1
 
         def generalByteCode(self,sequenceCheck = None, token = None, index = -1):
             if self.id == '(':
