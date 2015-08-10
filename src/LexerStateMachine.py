@@ -14,9 +14,9 @@ class LexerStateMachine:
 
     #API for application
     def advance(self, expectedSymbol = None):
-
+        line = self.inStream.line
         self.start()
-        self.currentToken = self.context.createToken(self.currentString,self.inStream.line,self.inStream.column,self.length,self.inStream.oriString)
+        self.currentToken = self.context.createToken(self.currentString,line,self.inStream.column,self.length,self.inStream.oriString)
         if expectedSymbol is not None and self.currentToken.id != expectedSymbol:
             caretMessage = ' '*(self.inStream.column-1)+'^'
             raise SyntaxError("Error[{}][{}]:Expecting {} before {}\n{}\n{}"\
