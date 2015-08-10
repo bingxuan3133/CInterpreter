@@ -32,7 +32,7 @@ class TestSemanticCheckerAssignmentCheck(unittest.TestCase):
         declToken.data.append(xToken)
 
         semanticChecker = SemanticChecker()
-        types = semanticChecker.getIdentifierType(declToken)
+        types = semanticChecker.getIdentifierDeclarationTypeList(declToken)
         self.assertEqual(['int'], types)
 
     def test_getIdentifierType_return_a_list_of_types_of_an_identifier(self):
@@ -45,7 +45,7 @@ class TestSemanticCheckerAssignmentCheck(unittest.TestCase):
         declToken.data.append(xToken)
 
         semanticChecker = SemanticChecker()
-        types = semanticChecker.getIdentifierType(declToken)
+        types = semanticChecker.getIdentifierDeclarationTypeList(declToken)
         self.assertEqual(['int', '*'], types)
 
     def test_isDefined_return_True_when_x_is_defined(self):
@@ -113,7 +113,7 @@ class TestSemanticCheckerDeclarationCheck(unittest.TestCase):
             semanticChecker.checkIfIdentifierIsDefined(token[0].data[0])
             self.fail('Should raise')
         except SyntaxError as e:
-            self.assertEqual("Error[1][1]:Undefined reference 'x'" + '\n' +
+            self.assertEqual("Error[1][1]:'x' is not declared" + '\n' +
                              'x = 0;' + '\n' +
                              '^', e.msg)
 
@@ -128,7 +128,7 @@ class TestSemanticCheckerDeclarationCheck(unittest.TestCase):
             token = parser.parseStatement(0)
             semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
         except SyntaxError as e:
-            self.assertEqual("Error[3][9]:Undefined reference 'y'" + '\n' +
+            self.assertEqual("Error[3][9]:'y' is not declared" + '\n' +
                              'x = 2 + y;' + '\n' +
                              '        ^', e.msg)
 
@@ -145,7 +145,7 @@ class TestSemanticCheckerDeclarationCheck(unittest.TestCase):
             token = parser.parseStatement(0)
             semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
         except SyntaxError as e:
-            self.assertEqual("Error[3][9]:Undefined reference 'y'" + '\n' +
+            self.assertEqual("Error[3][9]:'y' is not declared" + '\n' +
                              'x = 2 + y;' + '\n' +
                              '        ^', e.msg)
 
@@ -158,12 +158,78 @@ class TestSemanticCheckerDeclarationCheck(unittest.TestCase):
             token = parser.parseStatement(0)
             semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
             token = parser.parseStatement(0)
-            semanticChecker.checkIfAllIdentifiersAreDefined(token[1])
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
             self.fail('Should raise')
         except SyntaxError as e:
-            self.assertEqual("Error[1][9]:Undefined reference 'y'" + '\n' +
+            self.assertEqual("Error[1][9]:'y' is not declared" + '\n' +
                              'int x = y;' + '\n' +
                              '        ^', e.msg)
+
+    def test_isAllDefined_should_raise_given_x_has_invalid_type(self):
+        lexer = LexerStateMachine('int x; *x;', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        semanticChecker = SemanticChecker(parser.scopeBuilder)
+        try:
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            semanticChecker.checkIfTokenTypeValid(token[0])
+            self.fail('Should raise')
+        except SyntaxError as e:
+            self.assertEqual("Error[1][9]:Invalid type of 'x'" + '\n' +
+                             'int x; *x;' + '\n' +
+                             '        ^', e.msg)
+
+    def test_isAllDefined_should_not_raise_given_x_is_compatible_to_y_plus_z(self):
+        lexer = LexerStateMachine('int *x, *y, *z; x = y + z;', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        semanticChecker = SemanticChecker(parser.scopeBuilder)
+        try:
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            semanticChecker.checkIfAllTokenTypeValid(token[0])
+        except SyntaxError as e:
+            self.fail('Should not raise')
+
+    def test_isAllDefined_should_raise_given_z_has_invalid_type_in_a_statement(self):
+        lexer = LexerStateMachine('int *x, *y, *z;\nx = y + **z;', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        semanticChecker = SemanticChecker(parser.scopeBuilder)
+        try:
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            semanticChecker.checkIfAllTokenTypeValid(token[0])
+            self.fail('Should raise')
+        except SyntaxError as e:
+            self.assertEqual("Error[2][11]:Invalid type of 'z'" + '\n' +
+                             'x = y + **z;' + '\n' +
+                             '          ^', e.msg)
+
+    def test_isAllDefined_should_raise_given_x_is_not_compatible_to_y_plus_z(self):
+        lexer = LexerStateMachine('int *x, *y, *z;\n*x = y + z;', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        semanticChecker = SemanticChecker(parser.scopeBuilder)
+        try:
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            semanticChecker.checkIfAllTokenTypeValid(token[0])
+            semanticChecker.checkIfAssignmentValid(token[0])
+            self.fail('Should raise')
+        except SyntaxError as e:
+            self.assertEqual("Error[2][4]:Incompatible assignment" + '\n' +
+                             '*x = y + z;' + '\n' +
+                             '   ^', e.msg)
 
 if __name__ == '__main__':
     unittest.main()

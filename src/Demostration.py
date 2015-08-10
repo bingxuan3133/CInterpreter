@@ -4,46 +4,44 @@ from GeneratorAPI import *
 from Parser import *
 from VirtualMachine import *
 
-manager = ContextManager()
-context = Context(manager)
-flowControlContext = FlowControlContext(manager)
-defaultContext = DefaultContext(manager)
-declarationContext = DeclarationContext(manager)
-expressionContext = ExpressionContext(manager)
+contextManager = ContextManager()
+context = Context(contextManager)
+flowControlContext = FlowControlContext(contextManager)
+defaultContext = DefaultContext(contextManager)
+declarationContext = DeclarationContext(contextManager)
+expressionContext = ExpressionContext(contextManager)
 contexts = [expressionContext, declarationContext, flowControlContext, defaultContext]
 
-manager.addContext('Default', defaultContext)
-manager.addContext('Declaration', declarationContext)
-manager.addContext('Expression', expressionContext)
-manager.addContext('FlowControl', flowControlContext)
-manager.setCurrentContexts(contexts)
+contextManager.addContext('Default', defaultContext)
+contextManager.addContext('Declaration', declarationContext)
+contextManager.addContext('Expression', expressionContext)
+contextManager.addContext('FlowControl', flowControlContext)
+contextManager.setCurrentContexts(contexts)
 
-generator = GeneratorAPI(context, manager)
-byteCodeGenerator = ByteCodeGenerator(context, manager)
+generator = GeneratorAPI(context, contextManager)
+byteCodeGenerator = ByteCodeGenerator(context, contextManager)
 informationInjector = InformationInjector()
 vm = VirtualMachine()
+parser = Parser(None, contextManager)
+contextManager.setParser(parser)
 
 while(1):
-    print("Please insert an equation to continue:")
     stopSymbol = ' '
     StringCode = ''
-    print('>', end="")
+    print('> ', end="")
     for statement in iter(input, stopSymbol):
         StringCode = StringCode + '\n' +statement
-        print('>', end="")
+        print('> ', end="")
     StringList = StringCode.split('\n')
     lexer = LexerStateMachine(StringCode, context)
-    parser = Parser(lexer, manager)
-    manager.setParser(parser)
+    parser.lexer = lexer
+    
     tokenList = []
-    while lexer.currentToken.id != '(systemToken)':
+    try:
         token = parser.parseStatements(0)
-    byteCodes = generator.generateCode(token)
-
-    byteCodes.append(0xffffffff)  # to halt the VM
-
-    cbytecode = vm.convertToCArray(byteCodes)
-    vm.dumpBytecodes(cbytecode)
-
-    vm.disassembleBytecodes(cbytecode)
-
+        byteCodes = generator.generateCode(token)
+        byteCodes.append(0xffffffff)  # to halt the VM
+        cbytecode = vm.convertToCArray(byteCodes)
+        vm.dumpBytecodes(cbytecode)
+    except SyntaxError as e:
+        print(e.msg)

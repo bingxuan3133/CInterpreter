@@ -31,7 +31,6 @@ class Parser:
         elif firstToken.id == '{':            # For one block of statements
             self.scopeBuilder.buildScope(firstToken)
             returnedToken = self.parse(bindingPower)
-            self.semanticChecker.semanticCheck(returnedToken)
             self.scopeBuilder.destroyScope()
             list.append(returnedToken)
             return list
@@ -44,16 +43,16 @@ class Parser:
             returnedToken = self.parse(bindingPower)
             if returnedToken.id == '(multiple)':  # For declaration & definition
                 list.extend(returnedToken.data)
-                self.scopeBuilder.buildScope(returnedToken.data[0])
                 self.lexer.peep(';')
                 self.lexer.advance()
                 return list
-
-        self.scopeBuilder.buildScope(returnedToken)
-        self.lexer.peep(';')
-        self.lexer.advance()
-        list.append(returnedToken)
-        return list
+            else:
+                self.scopeBuilder.buildScope(returnedToken)
+                self.semanticChecker.semanticCheck(returnedToken)
+                self.lexer.peep(';')
+                self.lexer.advance()
+                list.append(returnedToken)
+                return list
 
     def parseStatements(self, bindingPower):
         list = []

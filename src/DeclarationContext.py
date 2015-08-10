@@ -30,12 +30,43 @@ class DeclarationContext(Context):
         symObj = sym()
         return symObj
 
+    def getIdentifier(self, token):
+        """
+        This is a helper function used to retrieve the identifier on the left most of an token tree
+        :param token:
+        :return: token  - identifier is found and return
+                 None   - no identifier is found
+        """
+        if hasattr(token, 'id') and token.id == '(identifier)':
+            return token
+        else:
+            if hasattr(token, 'data') and len(token.data) > 0:
+                token = self.getIdentifier(token.data[0])
+                return token
+            else:
+                return None
+
+    def removeIdentifier(self, token):
+        """
+        This is a helper function used to remove the identifier on the left most of an token tree
+        :return:
+        """
+        if token.data[0].id == '(identifier)':
+            token.data.remove(token.data[0])
+        else:
+            self.removeIdentifier(token.data[0])
+
     def addGroupOperator(self, id, bindingPower = 0):
         thisContext = self
         def nud(self):
             thisContext.contextManager.parser.lexer.peep('(')  # can be deleted
             thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
+            if returnedToken.id == '(multiple)':
+                returnedToken = thisContext.getTokenReference(returnedToken)
+                caretMessage = ' '*(returnedToken.column-1)+'^'
+                raise SyntaxError("Error[{}][{}]:Expecting (identifier) before {}\n{}\n{}"\
+                             .format(returnedToken.line,returnedToken.column,returnedToken.id,returnedToken.oriString,caretMessage))
             self.data.append(returnedToken)
             thisContext.contextManager.parser.lexer.peep(')')
             thisContext.contextManager.parser.lexer.advance()
@@ -53,7 +84,7 @@ class DeclarationContext(Context):
             returnedToken = thisContext.contextManager.parser.parse(bindingPower)
             if thisContext.getIdentifier(returnedToken) is None:
                 if returnedToken.id == '(multiple)':
-                    returnedToken = thisContext.getReference(returnedToken)
+                    returnedToken = thisContext.getTokenReference(returnedToken)
                 caretMessage = ' '*(returnedToken.column-1)+'^'
                 raise SyntaxError("Error[{}][{}]:Expecting (identifier) before {}\n{}\n{}"\
                              .format(returnedToken.line,returnedToken.column,returnedToken.id,returnedToken.oriString,caretMessage))
@@ -79,7 +110,7 @@ class DeclarationContext(Context):
             thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
             if returnedToken.id == '(multiple)':
-                returnedToken = thisContext.getReference(returnedToken)
+                returnedToken = thisContext.getTokenReference(returnedToken)
                 caretMessage = ' '*(returnedToken.column-1)+'^'
                 raise SyntaxError("Error[{}][{}]:Expecting expression before {}\n{}\n{}"\
                             .format(returnedToken.line,returnedToken.column,returnedToken.id,returnedToken.oriString,caretMessage))
@@ -196,8 +227,6 @@ class DeclarationContext(Context):
                         self.modifier = 'long long'
                         nextToken = thisContext.contextManager.parser.lexer.advance()
                         if nextToken.id in ('(identifier)', '*', '('):
-                            
-                            
                             identifierToken = thisContext.parseIdentifierToken()
                             thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                             expressionToken = thisContext.parseDefToken()
@@ -214,8 +243,6 @@ class DeclarationContext(Context):
                 self.sign = nextToken.id
                 nextToken = thisContext.contextManager.parser.lexer.advance()
                 if nextToken.id in ('(identifier)', '*', '('):
-                    
-                    
                     identifierToken = thisContext.parseIdentifierToken()
                     thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                     expressionToken = thisContext.parseDefToken()
@@ -225,8 +252,6 @@ class DeclarationContext(Context):
                     self.modifier = 'short'
                     nextToken = thisContext.contextManager.parser.lexer.advance()
                     if nextToken.id in ('(identifier)', '*', '('):
-                        
-                        
                         identifierToken = thisContext.parseIdentifierToken()
                         thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                         expressionToken = thisContext.parseDefToken()
@@ -238,8 +263,6 @@ class DeclarationContext(Context):
                     self.modifier = 'long'
                     nextToken = thisContext.contextManager.parser.lexer.advance()
                     if nextToken.id in ('(identifier)', '*', '('):
-                        
-                        
                         identifierToken = thisContext.parseIdentifierToken()
                         thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                         expressionToken = thisContext.parseDefToken()
@@ -249,8 +272,6 @@ class DeclarationContext(Context):
                         self.modifier = 'long long'
                         nextToken = thisContext.contextManager.parser.lexer.advance()
                         if nextToken.id in ('(identifier)', '*', '('):
-                            
-                            
                             identifierToken = thisContext.parseIdentifierToken()
                             thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                             expressionToken = thisContext.parseDefToken()
@@ -281,7 +302,7 @@ class DeclarationContext(Context):
                     self.expressionList.append(expressionToken)
                 else:
                     self.errorToken = nextToken
-            ddToken = thisContext.buildToken(self)
+            ddToken = thisContext.buildDeclAndDefToken(self)
             return ddToken
         def led(self, token):
             raise SyntaxError
@@ -305,8 +326,6 @@ class DeclarationContext(Context):
             thisContext.contextManager.setCurrentContextsByName('Declaration', 'Default')
             nextToken = thisContext.contextManager.parser.lexer.advance()
             if nextToken.id in ('(identifier)', '*', '('):
-                
-                
                 identifierToken = thisContext.parseIdentifierToken()
                 thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                 expressionToken = thisContext.parseDefToken()
@@ -317,8 +336,6 @@ class DeclarationContext(Context):
                 self.primitive = nextToken.id
                 nextToken = thisContext.contextManager.parser.lexer.advance()
                 if nextToken.id in ('(identifier)', '*', '('):
-                    
-                    
                     identifierToken = thisContext.parseIdentifierToken()
                     thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                     expressionToken = thisContext.parseDefToken()
@@ -328,8 +345,6 @@ class DeclarationContext(Context):
                     self.modifier = 'short'
                     nextToken = thisContext.contextManager.parser.lexer.advance()
                     if nextToken.id in ('(identifier)', '*', '('):
-                        
-                        
                         identifierToken = thisContext.parseIdentifierToken()
                         thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                         expressionToken = thisContext.parseDefToken()
@@ -341,8 +356,6 @@ class DeclarationContext(Context):
                     self.modifier = 'long'
                     nextToken = thisContext.contextManager.parser.lexer.advance()
                     if nextToken.id in ('(identifier)', '*', '('):
-                        
-                        
                         identifierToken = thisContext.parseIdentifierToken()
                         thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                         expressionToken = thisContext.parseDefToken()
@@ -352,8 +365,6 @@ class DeclarationContext(Context):
                         self.modifier = 'long long'
                         nextToken = thisContext.contextManager.parser.lexer.advance()
                         if nextToken.id in ('(identifier)', '*', '('):
-                            
-                            
                             identifierToken = thisContext.parseIdentifierToken()
                             thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                             expressionToken = thisContext.parseDefToken()
@@ -370,8 +381,6 @@ class DeclarationContext(Context):
                 self.modifier = 'long'
                 nextToken = thisContext.contextManager.parser.lexer.advance()
                 if nextToken.id in ('(identifier)', '*', '('):
-                    
-                    
                     identifierToken = thisContext.parseIdentifierToken()
                     thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                     expressionToken = thisContext.parseDefToken()
@@ -381,8 +390,6 @@ class DeclarationContext(Context):
                     self.modifier = 'long long'
                     nextToken = thisContext.contextManager.parser.lexer.advance()
                     if nextToken.id in ('(identifier)', '*', '('):
-                        
-                        
                         identifierToken = thisContext.parseIdentifierToken()
                         thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                         expressionToken = thisContext.parseDefToken()
@@ -392,8 +399,6 @@ class DeclarationContext(Context):
                         self.primitive = nextToken.id
                         nextToken = thisContext.contextManager.parser.lexer.advance()
                         if nextToken.id in ('(identifier)', '*', '('):
-                            
-                            
                             identifierToken = thisContext.parseIdentifierToken()
                             thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                             expressionToken = thisContext.parseDefToken()
@@ -407,8 +412,6 @@ class DeclarationContext(Context):
                     self.primitive = nextToken.id
                     nextToken = thisContext.contextManager.parser.lexer.advance()
                     if nextToken.id in ('(identifier)', '*', '('):
-                        
-                        
                         identifierToken = thisContext.parseIdentifierToken()
                         thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                         expressionToken = thisContext.parseDefToken()
@@ -418,8 +421,6 @@ class DeclarationContext(Context):
                         self.modifier = 'long long'
                         nextToken = thisContext.contextManager.parser.lexer.advance()
                         if nextToken.id in ('(identifier)', '*', '('):
-                            
-                            
                             identifierToken = thisContext.parseIdentifierToken()
                             thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                             expressionToken = thisContext.parseDefToken()
@@ -436,8 +437,6 @@ class DeclarationContext(Context):
                 self.modifier = 'short'
                 nextToken = thisContext.contextManager.parser.lexer.advance()
                 if nextToken.id in ('(identifier)', '*', '('):
-                    
-                    
                     identifierToken = thisContext.parseIdentifierToken()
                     thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                     expressionToken = thisContext.parseDefToken()
@@ -447,8 +446,6 @@ class DeclarationContext(Context):
                     self.primitive = nextToken.id
                     nextToken = thisContext.contextManager.parser.lexer.advance()
                     if nextToken.id in ('(identifier)', '*', '('):
-                        
-                        
                         identifierToken = thisContext.parseIdentifierToken()
                         thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                         expressionToken = thisContext.parseDefToken()
@@ -470,8 +467,6 @@ class DeclarationContext(Context):
                 thisContext.contextManager.setCurrentContextsByName('Declaration', 'Default')
                 nextToken = thisContext.contextManager.parser.lexer.advance()
                 if nextToken.id in ('(identifier)', '*', '('):
-                    
-                    
                     identifierToken = thisContext.parseIdentifierToken()
                     thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                     expressionToken = thisContext.parseDefToken()
@@ -479,7 +474,7 @@ class DeclarationContext(Context):
                     self.expressionList.append(expressionToken)
                 else:
                     self.errorToken = nextToken
-            ddToken = thisContext.buildToken(self)
+            ddToken = thisContext.buildDeclAndDefToken(self)
             return ddToken
         def led(self, token):
             raise SyntaxError
@@ -502,10 +497,7 @@ class DeclarationContext(Context):
             thisContext.contextManager.pushCurrentContexts()
             thisContext.contextManager.setCurrentContextsByName('Declaration', 'Default')
             nextToken = thisContext.contextManager.parser.lexer.advance()
-
             if nextToken.id in ('(identifier)', '*', '('):
-                
-                
                 identifierToken = thisContext.parseIdentifierToken()
                 thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                 expressionToken = thisContext.parseDefToken()
@@ -515,8 +507,6 @@ class DeclarationContext(Context):
                 self.modifier = 'long long'
                 nextToken = thisContext.contextManager.parser.lexer.advance()
                 if nextToken.id in ('(identifier)', '*', '('):
-                    
-                    
                     identifierToken = thisContext.parseIdentifierToken()
                     thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                     expressionToken = thisContext.parseDefToken()
@@ -526,8 +516,6 @@ class DeclarationContext(Context):
                     self.primitive = nextToken.id
                     nextToken = thisContext.contextManager.parser.lexer.advance()
                     if nextToken.id in ('(identifier)', '*', '('):
-                        
-                        
                         identifierToken = thisContext.parseIdentifierToken()
                         thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                         expressionToken = thisContext.parseDefToken()
@@ -537,8 +525,6 @@ class DeclarationContext(Context):
                         self.sign = nextToken.id
                         nextToken = thisContext.contextManager.parser.lexer.advance()
                         if nextToken.id in ('(identifier)', '*', '('):
-                            
-                            
                             identifierToken = thisContext.parseIdentifierToken()
                             thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                             expressionToken = thisContext.parseDefToken()
@@ -552,8 +538,6 @@ class DeclarationContext(Context):
                     self.sign = nextToken.id
                     nextToken = thisContext.contextManager.parser.lexer.advance()
                     if nextToken.id in ('(identifier)', '*', '('):
-                        
-                        
                         identifierToken = thisContext.parseIdentifierToken()
                         thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                         expressionToken = thisContext.parseDefToken()
@@ -563,8 +547,6 @@ class DeclarationContext(Context):
                         self.primitive = nextToken.id
                         nextToken = thisContext.contextManager.parser.lexer.advance()
                         if nextToken.id in ('(identifier)', '*', '('):
-                            
-                            
                             identifierToken = thisContext.parseIdentifierToken()
                             thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                             expressionToken = thisContext.parseDefToken()
@@ -579,8 +561,6 @@ class DeclarationContext(Context):
                 self.primitive = nextToken.id
                 nextToken = thisContext.contextManager.parser.lexer.advance()
                 if nextToken.id in ('(identifier)', '*', '('):
-                    
-                    
                     identifierToken = thisContext.parseIdentifierToken()
                     thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                     expressionToken = thisContext.parseDefToken()
@@ -590,8 +570,6 @@ class DeclarationContext(Context):
                     self.modifier = 'long long'
                     nextToken = thisContext.contextManager.parser.lexer.advance()
                     if nextToken.id in ('(identifier)', '*', '('):
-                        
-                        
                         identifierToken = thisContext.parseIdentifierToken()
                         thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                         expressionToken = thisContext.parseDefToken()
@@ -601,8 +579,6 @@ class DeclarationContext(Context):
                         self.sign = nextToken.id
                         nextToken = thisContext.contextManager.parser.lexer.advance()
                         if nextToken.id in ('(identifier)', '*', '('):
-                            
-                            
                             identifierToken = thisContext.parseIdentifierToken()
                             thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                             expressionToken = thisContext.parseDefToken()
@@ -616,8 +592,6 @@ class DeclarationContext(Context):
                     self.sign = nextToken.id
                     nextToken = thisContext.contextManager.parser.lexer.advance()
                     if nextToken.id in ('(identifier)', '*', '('):
-                        
-                        
                         identifierToken = thisContext.parseIdentifierToken()
                         thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                         expressionToken = thisContext.parseDefToken()
@@ -627,8 +601,6 @@ class DeclarationContext(Context):
                         self.modifier = 'long long'
                         nextToken = thisContext.contextManager.parser.lexer.advance()
                         if nextToken.id in ('(identifier)', '*', '('):
-                            
-                            
                             identifierToken = thisContext.parseIdentifierToken()
                             thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                             expressionToken = thisContext.parseDefToken()
@@ -645,8 +617,6 @@ class DeclarationContext(Context):
                 self.sign = nextToken.id
                 nextToken = thisContext.contextManager.parser.lexer.advance()
                 if nextToken.id in ('(identifier)', '*', '('):
-                    
-                    
                     identifierToken = thisContext.parseIdentifierToken()
                     thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                     expressionToken = thisContext.parseDefToken()
@@ -656,8 +626,6 @@ class DeclarationContext(Context):
                     self.modifier = 'long long'
                     nextToken = thisContext.contextManager.parser.lexer.advance()
                     if nextToken.id in ('(identifier)', '*', '('):
-                        
-                        
                         identifierToken = thisContext.parseIdentifierToken()
                         thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                         expressionToken = thisContext.parseDefToken()
@@ -667,8 +635,6 @@ class DeclarationContext(Context):
                         self.primitive = nextToken.id
                         nextToken = thisContext.contextManager.parser.lexer.advance()
                         if nextToken.id in ('(identifier)', '*', '('):
-                            
-                            
                             identifierToken = thisContext.parseIdentifierToken()
                             thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                             expressionToken = thisContext.parseDefToken()
@@ -682,8 +648,6 @@ class DeclarationContext(Context):
                     self.primitive = nextToken.id
                     nextToken = thisContext.contextManager.parser.lexer.advance()
                     if nextToken.id in ('(identifier)', '*', '('):
-                        
-                        
                         identifierToken = thisContext.parseIdentifierToken()
                         thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                         expressionToken = thisContext.parseDefToken()
@@ -693,8 +657,6 @@ class DeclarationContext(Context):
                         self.modifier = 'long long'
                         nextToken = thisContext.contextManager.parser.lexer.advance()
                         if nextToken.id in ('(identifier)', '*', '('):
-                            
-                            
                             identifierToken = thisContext.parseIdentifierToken()
                             thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                             expressionToken = thisContext.parseDefToken()
@@ -704,8 +666,6 @@ class DeclarationContext(Context):
                             self.sign = nextToken.id
                             nextToken = thisContext.contextManager.parser.lexer.advance()
                             if nextToken.id in ('(identifier)', '*', '('):
-                                
-                                
                                 identifierToken = thisContext.parseIdentifierToken()
                                 thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                                 expressionToken = thisContext.parseDefToken()
@@ -731,8 +691,6 @@ class DeclarationContext(Context):
                 thisContext.contextManager.setCurrentContextsByName('Declaration', 'Default')
                 nextToken = thisContext.contextManager.parser.lexer.advance()
                 if nextToken.id in ('(identifier)', '*', '('):
-                    
-                    
                     identifierToken = thisContext.parseIdentifierToken()
                     thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                     expressionToken = thisContext.parseDefToken()
@@ -740,7 +698,7 @@ class DeclarationContext(Context):
                     self.expressionList.append(expressionToken)
                 else:
                     self.errorToken = nextToken
-            ddToken = thisContext.buildToken(self)
+            ddToken = thisContext.buildDeclAndDefToken(self)
             return ddToken
 
         def led(self, token):
@@ -765,8 +723,6 @@ class DeclarationContext(Context):
             thisContext.contextManager.setCurrentContextsByName('Declaration', 'Default')
             nextToken = thisContext.contextManager.parser.lexer.advance()
             if nextToken.id in ('(identifier)', '*', '('):
-                
-                
                 identifierToken = thisContext.parseIdentifierToken()
                 thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                 expressionToken = thisContext.parseDefToken()
@@ -776,8 +732,6 @@ class DeclarationContext(Context):
                 self.primitive = nextToken.id
                 nextToken = thisContext.contextManager.parser.lexer.advance()
                 if nextToken.id in ('(identifier)', '*', '('):
-                    
-                    
                     identifierToken = thisContext.parseIdentifierToken()
                     thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                     expressionToken = thisContext.parseDefToken()
@@ -787,8 +741,6 @@ class DeclarationContext(Context):
                     self.sign = nextToken.id
                     nextToken = thisContext.contextManager.parser.lexer.advance()
                     if nextToken.id in ('(identifier)', '*', '('):
-                        
-                        
                         identifierToken = thisContext.parseIdentifierToken()
                         thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                         expressionToken = thisContext.parseDefToken()
@@ -803,8 +755,6 @@ class DeclarationContext(Context):
                 self.sign = nextToken.id
                 nextToken = thisContext.contextManager.parser.lexer.advance()
                 if nextToken.id in ('(identifier)', '*', '('):
-                    
-                    
                     identifierToken = thisContext.parseIdentifierToken()
                     thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                     expressionToken = thisContext.parseDefToken()
@@ -814,8 +764,6 @@ class DeclarationContext(Context):
                     self.primitive = nextToken.id
                     nextToken = thisContext.contextManager.parser.lexer.advance()
                     if nextToken.id in ('(identifier)', '*', '('):
-                        
-                        
                         identifierToken = thisContext.parseIdentifierToken()
                         thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                         expressionToken = thisContext.parseDefToken()
@@ -837,8 +785,6 @@ class DeclarationContext(Context):
                 thisContext.contextManager.setCurrentContextsByName('Declaration', 'Default')
                 nextToken = thisContext.contextManager.parser.lexer.advance()
                 if nextToken.id in ('(identifier)', '*', '('):
-                    
-                    
                     identifierToken = thisContext.parseIdentifierToken()
                     thisContext.contextManager.setCurrentContexts(thisContext.contextManager.popContexts())
                     expressionToken = thisContext.parseDefToken()
@@ -846,7 +792,7 @@ class DeclarationContext(Context):
                     self.expressionList.append(expressionToken)
                 else:
                     self.errorToken = nextToken
-            ddToken = thisContext.buildToken(self)
+            ddToken = thisContext.buildDeclAndDefToken(self)
             return ddToken
 
         def led(self, token):
@@ -856,31 +802,22 @@ class DeclarationContext(Context):
         symClass.led = led
         return symClass
 
-    def getIdentifier(self, token):
-        if hasattr(token, 'id') and token.id == '(identifier)':
-            return token
-        else:
-            if hasattr(token, 'data') and len(token.data) > 0:
-                token = self.getIdentifier(token.data[0])
-                return token
-            else:
-                return None
-
-    def getReference(self, token):
+    def getTokenReference(self, token):
+        """
+        - to get the reference of the first token in a declaration statement (line, column, id, etc)
+        - this is because some declaration do not start with primitive
+        - for example:
+            short x;    <- assume x is an invalid statement
+        - to point to the correct position when the statement goes wrong, the properties of 'short' is needed
+        """
         if hasattr(token, 'id') and token.id == '(decl)':
             return token.data[0].reference
         else:
             if hasattr(token, 'data') and len(token.data) > 0:
-                token = self.getReference(token.data[0])
+                token = self.getTokenReference(token.data[0])
                 return token
             else:
                 return None
-
-    def removeIdentifier(self, token):
-        if token.data[0].id == '(identifier)':
-            token.data.remove(token.data[0])
-        else:
-            self.removeIdentifier(token.data[0])
 
     def handleError(self, token):
         caretMessage = ' '*(token.errorToken.column-1)+'^'
@@ -900,7 +837,7 @@ class DeclarationContext(Context):
             raise SyntaxError("Error[{}][{}]:Expecting (identifier) before {}\n{}\n{}"\
                              .format(token.errorToken.line,token.errorToken.column,token.errorToken.id,token.errorToken.oriString,caretMessage))
 
-    def buildToken(self, token):
+    def buildDeclAndDefToken(self, token):
         if token.errorToken is not None:
             self.handleError(token)
         multiple = self.createDeclarationOrDefinitionToken('(multiple)')  # (multiple) carry multiple tokens
@@ -916,11 +853,14 @@ class DeclarationContext(Context):
             self.removeIdentifier(primitiveToken)
             if expression is None:
                 multiple.data.append(declToken)
+                self.contextManager.parser.scopeBuilder.buildScope(declToken)
             else:
                 defToken = self.createDeclarationOrDefinitionToken('(def)')  # definition token
                 defToken.data.append(declToken)
                 defToken.data.append(expression)  # get definition
                 multiple.data.append(defToken)
+                self.contextManager.parser.scopeBuilder.buildScope(declToken)
+                self.contextManager.parser.semanticChecker.semanticCheck(defToken)
         return multiple
 """
     def addPointerDeclaration(self, id, bindingPower):

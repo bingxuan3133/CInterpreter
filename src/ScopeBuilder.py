@@ -48,11 +48,11 @@ class ScopeBuilder:
         self.scopeHistory.append(copy.deepcopy(self.scope.list))
 
     def addToCurrentScope(self, declToken):
-        if self.findLocal(declToken.data[1].data[0]) is None:
+        if self.findLocal(declToken.data[1].data[0]) is None:   # identifier is not declared before in the same scope
             self.currentScope.list.append(declToken)
             self.currentScope.displayList.append(declToken.data[1].data[0])
-        else:
-            token = declToken.reference
+        else:                                                   # identifier redeclaration
+            token = declToken.data[1]
             caretMessage = ' '*(token.column-1)+'^'
             raise SyntaxError("Error[{}][{}]:Redeclaration of '{}'\n{}\n{}"\
                              .format(token.line,token.column,token.data[0],token.oriString,caretMessage))

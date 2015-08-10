@@ -1,12 +1,11 @@
 from Context import *
-from ContextManager import *
 
 class ExpressionContext(Context):
     def __init__(self, contextManeger):
         Context.__init__(self, contextManeger)
         self.addPrefixInfixOperator('+', 70)
         self.addPrefixInfixOperator('-', 70)
-        self.addInfixOperator('*', 100)
+        self.addPrefixInfixOperator('*', 100)
         self.addInfixOperator('/', 100)
         self.addInfixOperator('%', 100)
         self.addInfixOperator('=', 1)
@@ -20,9 +19,11 @@ class ExpressionContext(Context):
         self.addInfixOperator('>', 10)
         self.addInfixOperator('>=', 10)
         self.addPostfixOperator('++', 150)
+        self.addPostfixOperator('--', 150)
 
         self.addGroupOperator('(', 0)
         self.addBlockOperator('{', 0)
+        self.addOperator(',', 0)
         self.addOperator(';', 0)
         self.addOperator('}', 0)
         self.addOperator(')', 0)
@@ -36,6 +37,7 @@ class ExpressionContext(Context):
         """
         thisContext = self
         def led(self, leftToken):
+            self.arity = thisContext.BINARY  # some token has prefix and infix characteristic
             self.data.append(leftToken)
             thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
@@ -78,6 +80,7 @@ class ExpressionContext(Context):
         thisContext = self
         symClass = self.addInfixOperator(id, bindingPower)
         def nud(self):
+            self.arity = thisContext.PREFIX_UNARY
             thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.contextManager.parser.parse(120)
             self.data.append(returnedToken)
@@ -88,9 +91,11 @@ class ExpressionContext(Context):
     def addGroupOperator(self, id, bindingPower = 0):
         thisContext = self
         def nud(self):
-            thisContext.contextManager.parser.lexer.peep('(')  # can be deleted
+            thisContext.contextManager.pushCurrentContexts()
+            thisContext.contextManager.setCurrentContextsByName('Expression', 'Default')
             thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
+            thisContext.contextManager.popContexts()
             self.data.append(returnedToken)
             thisContext.contextManager.parser.lexer.peep(')')
             thisContext.contextManager.parser.lexer.advance()
@@ -115,4 +120,4 @@ class ExpressionContext(Context):
         symClass = self.addOperator(id, bindingPower)  # removed the nud and led
         symClass.nud = nud
         symClass.led = led
-        return symClass
+        return

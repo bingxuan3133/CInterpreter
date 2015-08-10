@@ -8,14 +8,17 @@ from Parser import *
 from ContextManager import *
 from Context import *
 from ExpressionContext import *
+from DefaultContext import *
 
 class TestParseInfix(unittest.TestCase):
     def setUp(self):
         self.manager = ContextManager()
         self.context = Context(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
-        self.contexts = [self.expressionContext]
+        self.defaultContext = DefaultContext(self.manager)
+        self.contexts = [self.expressionContext, self.defaultContext]
         self.manager.addContext('Expression', self.expressionContext)
+        self.manager.addContext('Default', self.expressionContext)
         self.manager.setCurrentContexts(self.contexts)
 
     def test_parse_2_plus_3(self):
@@ -186,12 +189,14 @@ class TestParsePrefix(unittest.TestCase):
         self.manager = ContextManager()
         self.context = Context(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
-        self.contexts = [self.expressionContext]
+        self.defaultContext = DefaultContext(self.manager)
+        self.contexts = [self.expressionContext, self.defaultContext]
+        self.manager.addContext('Expression', self.expressionContext)
+        self.manager.addContext('Default', self.expressionContext)
         self.expressionContext.addPrefixInfixOperator('+', 70)
         self.expressionContext.addPrefixInfixOperator('-', 70)
         self.expressionContext.addInfixOperator('*', 100)
         self.expressionContext.addPrefixOperator('!', 120)
-        self.manager.addContext('Expression', self.expressionContext)
         self.manager.setCurrentContexts(self.contexts)
 
     def test_parse_negative_2_plus_3(self):
@@ -289,6 +294,10 @@ class TestParsePostfix(unittest.TestCase):
         self.manager = ContextManager()
         self.context = Context(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
+        self.defaultContext = DefaultContext(self.manager)
+        self.contexts = [self.expressionContext, self.defaultContext]
+        self.manager.addContext('Expression', self.expressionContext)
+        self.manager.addContext('Default', self.expressionContext)
         self.contexts = [self.expressionContext]
         self.expressionContext.addPrefixInfixOperator('+', 70)
         self.expressionContext.addPrefixInfixOperator('-', 70)
@@ -297,7 +306,6 @@ class TestParsePostfix(unittest.TestCase):
         self.expressionContext.addPrefixOperator('--', 120)
         self.expressionContext.addPostfixOperator('++', 150)
         self.expressionContext.addPostfixOperator('--', 150)
-        self.manager.addContext('Expression', self.expressionContext)
         self.manager.setCurrentContexts(self.contexts)
 
     def test_parse_post_increment_i(self):
@@ -338,13 +346,16 @@ class TestParsePrefixGroup(unittest.TestCase):
         self.manager = ContextManager()
         self.context = Context(self.manager)
         self.expressionContext = ExpressionContext(self.manager)
+        self.defaultContext = DefaultContext(self.manager)
+        self.contexts = [self.expressionContext, self.defaultContext]
+        self.manager.addContext('Expression', self.expressionContext)
+        self.manager.addContext('Default', self.expressionContext)
         self.contexts = [self.expressionContext]
         self.expressionContext.addPrefixInfixOperator('+', 70)
         self.expressionContext.addPrefixInfixOperator('-', 70)
         self.expressionContext.addInfixOperator('*', 100)
         self.expressionContext.addGroupOperator('(', 0)
         self.expressionContext.addGroupOperator(')', 0)
-        self.manager.addContext('Expression', self.expressionContext)
         self.manager.setCurrentContexts(self.contexts)
 
     def test_parse_bracket_2_plus_3_mul_4(self):

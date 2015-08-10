@@ -5,6 +5,7 @@ lib_path = os.path.abspath('../src')
 sys.path.append(lib_path)
 
 import unittest
+from  ContextManager import *
 from LexerStateMachine import *
 from Context import *
 from ExpressionContext import *
@@ -71,7 +72,6 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(token.data[0], 13)
         token = lexer.advance()
         self.assertEqual(token.id, '+')
-
 
     def testAdvanceWillReturnAnEmptyTokenWhenItReachedTheEndOfTheStatement(self):
         manager = ContextManager()
