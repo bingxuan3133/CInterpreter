@@ -18,6 +18,7 @@ class ByteCodeGenerator:
     memorySize = 0
 
 
+
     def __init__(self, context, contextManager):
         self.context = context
         self.contextManager = contextManager
@@ -26,6 +27,7 @@ class ByteCodeGenerator:
         self.lastUseInstruction =None
         self.contextManager.addContext('Base', self.context)
         self.floatingFlag = 0
+        self.side = ""
 
 
 
@@ -146,15 +148,16 @@ class ByteCodeGenerator:
     def generateLeftCodeFirst(self, token,generateByteCode):
         secondTime = 0
         for index in range(0, len(token.data)):
-
             token.data[index].generateByteCode(secondTime,token,index)
             secondTime += 1
 
     def findOutAndGenerateCorrectSideCode(self, token, generateByteCode):
         if token.weight[2] > token.weight[1]:
             self.generateRightCodeFirst(token,generateByteCode)
+            return "RIGHT"
         else:
             self.generateLeftCodeFirst(token,generateByteCode)
+            return "LEFT"
 
     def decideWhetherToSaveSlotForPopValue(self, status, sequence, generateByteCode, token):
         if self.floatingFlag == 1:
@@ -168,7 +171,6 @@ class ByteCodeGenerator:
             GPR.insert(1,secondRegister)
             GPR.insert(2,firstRegister)
             #self.oracle.getALargestWorkingRegister()
-
         else:
             if sequence == 0 or sequence == None:
                 GPR.insert(0,secondRegister)
@@ -180,6 +182,10 @@ class ByteCodeGenerator:
                 GPR.insert(1,secondRegister)
                 GPR.insert(2,firstRegister)
                 self.mapping.getALargestWorkingRegister()
+            if self.side == "RIGHT":
+                temp = GPR[1]
+                GPR[1] =GPR[2]
+                GPR[2] = temp
 
         if self.isStoreFunction(generateByteCode):
             if self.lastUseInstruction == self.loadRegister:
@@ -188,6 +194,8 @@ class ByteCodeGenerator:
             else:
                 GPR[0] = firstRegister
                 GPR[1] = secondRegister
+
+
         Code = generateByteCode(GPR)
         self.byteCodeList.append(Code)
 
@@ -247,7 +255,8 @@ class ByteCodeGenerator:
             if self.id == '(':
                 self = self.data[0]
             pushed = thisGenerator.registerAllocator.decideWhetherToPush(self)
-            thisGenerator.findOutAndGenerateCorrectSideCode(self, respectiveByteCodeFunction[self.id])
+            side = thisGenerator.findOutAndGenerateCorrectSideCode(self, respectiveByteCodeFunction[self.id])
+            thisGenerator.side = side
 
             thisGenerator.decideWhetherToSaveSlotForPopValue(pushed, sequenceCheck, respectiveByteCodeFunction[self.id], token)
 
