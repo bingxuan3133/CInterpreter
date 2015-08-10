@@ -37,6 +37,7 @@ class ExpressionContext(Context):
         """
         thisContext = self
         def led(self, leftToken):
+            self.arity = thisContext.BINARY  # some token has prefix and infix characteristic
             self.data.append(leftToken)
             thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.contextManager.parser.parse(self.bindingPower)
@@ -79,6 +80,7 @@ class ExpressionContext(Context):
         thisContext = self
         symClass = self.addInfixOperator(id, bindingPower)
         def nud(self):
+            self.arity = thisContext.PREFIX_UNARY
             thisContext.contextManager.parser.lexer.advance()
             returnedToken = thisContext.contextManager.parser.parse(120)
             self.data.append(returnedToken)

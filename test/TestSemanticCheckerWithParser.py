@@ -62,5 +62,18 @@ class TestSemanticCheckerWithParserDeclarationCheck(unittest.TestCase):
                                'int x = y, y;'+ '\n' +
                                '        ^',e.msg)
 
+    def test_invalid_type_of_x_in_one_declaration_statement_should_raise(self):
+        lexer = LexerStateMachine('int x, y = *x;', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        parser.semanticChecker.isEnable = True
+        try:
+            token = parser.parseStatement(0)
+            self.fail()
+        except SyntaxError as e:
+            self.assertEqual("Error[1][13]:Invalid type of 'x'"+ '\n' +
+                             'int x, y = *x;'+ '\n' +
+                             '            ^',e.msg)
+
 if __name__ == '__main__':
     unittest.main()
