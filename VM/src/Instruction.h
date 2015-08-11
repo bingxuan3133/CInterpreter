@@ -80,11 +80,9 @@
                 ADD | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
 #define sub(resultReg, reg1, reg2) \
                 SUB | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
-// #define subImm(reg, imm) \
-                // SUB_IMM | (reg)<<8 | (imm)<<(8+MAX_REG_BIT)
 #define mul(resultRegH, resultRegL, reg1, reg2) \
                 MUL | (resultRegH)<<8 | (resultRegL)<<(8+MAX_REG_BIT) | (reg1)<<(8+2*MAX_REG_BIT) | (reg2)<<(8+3*MAX_REG_BIT)
-#define div(resultRegQ, resultRegR, reg1, reg2) \
+#define _div(resultRegQ, resultRegR, reg1, reg2) \
                 DIV | (resultRegQ)<<8 | (resultRegR)<<(8+MAX_REG_BIT) | (reg1)<<(8+2*MAX_REG_BIT) | (reg2)<<(8+3*MAX_REG_BIT)
 #define and(resultReg, reg1, reg2) \
                 AND | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
@@ -92,6 +90,17 @@
                 OR | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
 #define xor(resultReg, reg1, reg2) \
                 XOR | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
+// floating point
+#define fldrImm(reg) \
+                FLDR_IMM | (reg)<<8 
+#define fadd(resultReg, reg1, reg2) \
+                ADD | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
+#define fsub(resultReg, reg1, reg2) \
+                SUB | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
+#define fmul(resultRegH, resultRegL, reg1, reg2) \
+                MUL | (resultRegH)<<8 | (resultRegL)<<(8+MAX_REG_BIT) | (reg1)<<(8+2*MAX_REG_BIT) | (reg2)<<(8+3*MAX_REG_BIT)
+#define fdiv(resultRegQ, resultRegR, reg1, reg2) \
+                DIV | (resultRegQ)<<8 | (resultRegR)<<(8+MAX_REG_BIT) | (reg1)<<(8+2*MAX_REG_BIT) | (reg2)<<(8+3*MAX_REG_BIT)
 #define bra(refAddress) \
                 BRA | (refAddress)<<8
 #define bit(refAddress) \
@@ -111,16 +120,23 @@ typedef enum {
   LDM = 0x09,
   STMS = 0x0a,
   STM = 0x0b,
-  // SUB_IMM = 0x0c,
-  ADD = 0x0d,
-  SUB = 0x0e,
-  MUL = 0x0f,
-  DIV = 0x10,
-  AND = 0x11,
-  OR = 0x12,
-  XOR = 0x13,
-  BRA = 0x14,
-  BRA_IF_TRUE = 0x15,
+  ADD = 0x0c,
+  SUB = 0x0d,
+  MUL = 0x0e,
+  DIV = 0x0f,
+  AND = 0x10,
+  OR = 0x11,
+  XOR = 0x12,
+  FLDR_IMM = 0x13,
+  FADD ,
+  FSUB ,
+  FMUL ,
+  FDIV,
+  FAND ,
+  FOR ,
+  FXOR ,
+  BRA ,
+  BRA_IF_TRUE ,
   HALT = 0xff,
 } Instruction;
 
@@ -147,13 +163,24 @@ void storeMultipleRegistersIntoMemorySafe(int bytecode);
 
 // arithmetic
 void addRegisters(int bytecode);
-// void subtractRegisterWithImmediate(int bytecode);
 void subtractRegisters(int bytecode);
 void multiplyRegisters(int bytecode);
 void divideRegisters(int bytecode);
 void andRegisters(int bytecode);
 void orRegisters(int bytecode);
 void xorRegisters(int bytecode);
+
+// floating point
+void floadRegisterWithImmediate(int bytecode);
+void floadRegisterFromMemory(int bytecode);
+void fstoreRegisterIntoMemory(int bytecode);
+void faddRegisters(int bytecode);
+void fsubtractRegisters(int bytecode);
+void fmultiplyRegisters(int bytecode);
+void fdivideRegisters(int bytecode);
+void fandRegisters(int bytecode);
+void forRegisters(int bytecode);
+void fxorRegisters(int bytecode);
 
 // helper functions
 int getRd(int bytecode);

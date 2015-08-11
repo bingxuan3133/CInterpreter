@@ -31,8 +31,20 @@ struct Status {
 
 extern Status statusReg;
 extern Register reg[MAX_REG];
+extern DoubleRegister dReg[MAX_REG];
 
-void initVM();
+void VMinit();
+// Export Functions
+void __declspec(dllexport) VMConfig(int memorySize);
+Exception* __declspec(dllexport) VMRun(int *bytecode);
+Exception* __declspec(dllexport) VMStep(int *bytecode);
+
+void _VMLoad(char* filepath, int *bytecode);
+void _VMRun(int *bytecode);
+void _VMStep(int *bytecode);
+
+int getVMBytecode(int pc);
+void loadVMBytecode(int *bytecode);
 void clearRegisters();
 void clearProgramCounter();
 void moveProgramCounter(int relativeAddress);
@@ -42,13 +54,5 @@ void setStatusBit(char bit);
 void clearStatusBit(char bit);
 int getBytecode(FILE *file);
 
-void VMLoad(char* filepath, int *bytecode);
-void VMRun(int *bytecode);
-void VMStep(int *bytecode);
-
-// Proxy Functions
-Exception* __declspec(dllexport) _VMLoad(char* filepath, int *bytecode);
-Exception* __declspec(dllexport) _VMRun(int *bytecode);
-Exception* __declspec(dllexport) _VMStep(int *bytecode);
 
 #endif // VirtualMachine_H

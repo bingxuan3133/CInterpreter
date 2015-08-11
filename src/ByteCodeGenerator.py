@@ -40,44 +40,24 @@ class ByteCodeGenerator:
         number = 0x01 | GPR[0] << 8
         return number
 
-    def compareIsLessThan(self, GPR=[]):
-        number = 0x02 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
-        return number
-
-    def compareRegister(self,GPR=[]):
-        number = 0x03 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
-        return number
-
-    def compareIsLessThanOrEqual(self,GPR=[]):
-        number = 0x04 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
-        return number
-
-    def compareIsGreaterThan(self, GPR=[]):
-        number = 0x05 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
-        return number
-
-    def compareIsGreaterThanOrEqual(self, GPR=[]):
-        number = 0x06 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
-        return number
-
     def loadValue(self, GPR=[]):
-        number = 0x07 | GPR[0] << 8 | GPR[1] << 11
+        number = 0x02 | GPR[0] << 8 | GPR[1] << 11
         return number
 
     def loadRegister(self, GPR=[]):
-        number = 0x08 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 17
+        number = 0x04 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 17
         return number
 
     def storeRegister(self, GPR=[]):
-        number = 0x09 | GPR[0] << 8 | GPR[1] << 11
+        number = 0x06 | GPR[0] << 8 | GPR[1] << 11
         return number
 
     def loadMultiple(self, GPR=[]):
-        number = 0x0a | GPR[0] << 8 | GPR[1] << 11
+        number = 0x08 | GPR[0] << 8 | GPR[1] << 11
         return number
 
     def storeMultiple(self, GPR=[]):
-        number = 0x0b | GPR[0] << 8 | GPR[1] << 11
+        number = 0x0a | GPR[0] << 8 | GPR[1] << 11
         return number
 
     def addRegister(self,GPR =[]):
@@ -97,11 +77,11 @@ class ByteCodeGenerator:
         return number
 
     def orRegister(self, GPR =[]):
-        number = 0x10 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        number = 0x11 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def modulusRegister(self,GPR=[]):
-        number = 0x11 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        number = 0x12 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def branchIfTrue(self, GPR = []):
@@ -112,6 +92,26 @@ class ByteCodeGenerator:
 
     def branch(self, GPR =[]):
         number = 0x13 | GPR[0] << 8
+        return number
+
+    def compareIsLessThan(self, GPR=[]):
+        number = 0x02 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        return number
+
+    def compareRegister(self,GPR=[]):
+        number = 0x03 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        return number
+
+    def compareIsLessThanOrEqual(self,GPR=[]):
+        number = 0x04 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        return number
+
+    def compareIsGreaterThan(self, GPR=[]):
+        number = 0x05 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        return number
+
+    def compareIsGreaterThanOrEqual(self, GPR=[]):
+        number = 0x06 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def loadFloatingPoint(self,GPR = []):

@@ -8,7 +8,7 @@
 #define merge2Registers(regHigh, regLow) (unsigned long long)reg[regHigh].data << 32 | (unsigned)reg[regLow].data
 
 void setUp(void) {
-  initVM();
+  VMinit();
 }
 
 void tearDown(void) {
@@ -533,7 +533,7 @@ void test_multiplyRegisters_should_multiply_2_registers_without_overflow_issue(v
 void test_divideRegisters_should_divide_reg1_from_reg0_to_get_quotient_and_remainder(void) {
   reg[0].data = 20;
   reg[1].data = -10;
-  divideRegisters(div(REG_0, REG_1, REG_0, REG_1));
+  divideRegisters(_div(REG_0, REG_1, REG_0, REG_1));
   TEST_ASSERT_EQUAL(-2, reg[0].data); // quotient
   TEST_ASSERT_EQUAL(0, reg[1].data);  // remainder
 }
@@ -572,4 +572,12 @@ void test_branchIfTrue(void) {
   setStatusBit('B');
   branchIfTrue(bit(-0x10));
   TEST_ASSERT_EQUAL_HEX(0x30, getProgramCounter());
+}
+
+void test_fldrImm(void) {
+  int bytecode[4] = {fldrImm(1), 255, 5050, 0};
+  loadVMBytecode(bytecode);
+  floadRegisterWithImmediate(fldrImm(1));
+  TEST_ASSERT_EQUAL_HEX64(255| (((long long int)5050)<<32), dReg[1].data);
+  TEST_ASSERT_EQUAL_HEX(0x2, getProgramCounter());
 }

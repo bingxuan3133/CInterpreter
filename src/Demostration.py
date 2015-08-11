@@ -25,6 +25,7 @@ vm = VirtualMachine()
 parser = Parser(None, contextManager)
 contextManager.setParser(parser)
 
+print('Imba Cinterpreter')
 while(1):
     stopSymbol = ' '
     StringCode = ''
@@ -43,5 +44,6 @@ while(1):
         byteCodes.append(0xffffffff)  # to halt the VM
         cbytecode = vm.convertToCArray(byteCodes)
         vm.dumpBytecodes(cbytecode)
+        vm.VMRun(cbytecode)
     except SyntaxError as e:
         print(e.msg)

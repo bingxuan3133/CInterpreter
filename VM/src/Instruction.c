@@ -441,9 +441,87 @@ void xorRegisters(int bytecode) {
 }
 
 //----------------------
+//    Compare
+//----------------------
+
+void isEqual(int bytecode) {
+  int resultReg = getRd(bytecode);
+  int reg2 = getR1(bytecode);
+  int reg1 = getR2(bytecode);
+  reg[resultReg].data = reg[reg1].data == reg[reg2].data;
+}
+
+void isGreater(int bytecode) {
+  int resultReg = getRd(bytecode);
+  int reg2 = getR1(bytecode);
+  int reg1 = getR2(bytecode);
+  reg[resultReg].data = reg[reg1].data < reg[reg2].data;
+}
+
+//----------------------
 //    Floating Point
 //----------------------
 
+void floadRegisterWithImmediate(int bytecode) {
+  int regIndex = getRd(bytecode);
+  int pc = getProgramCounter();
+  long long high_unint32 = (unsigned long long)getVMBytecode(pc + 2)<<32;
+  long long low_unint32 = (unsigned long long)getVMBytecode(pc + 1);
+  dReg[regIndex].data = high_unint32 + low_unint32;
+  moveProgramCounter(2);
+}
+
+void floadRegisterFromMemory(int bytecode) {
+  int *ref;
+  int dRegisterToBeLoaded = getRd(bytecode);
+  int referenceRegister = getR1(bytecode);
+  int relativeAddress = bytecode >> (8 + 2 * MAX_REG_BIT);
+  ref = (int *)(reg[referenceRegister].data + relativeAddress);
+  dReg[dRegisterToBeLoaded].data = *ref;
+}
+
+void fstoreRegisterIntoMemory(int bytecode) {
+  int *ref;
+  int registerToBeStored = getRd(bytecode);
+  int referenceRegister = getR1(bytecode);
+  int relativeAddress = bytecode >> (8 + 2 * MAX_REG_BIT);
+  ref = (int *)(reg[referenceRegister].data + relativeAddress);
+  *ref = dReg[registerToBeStored].data;
+}
+
+void faddRegisters(int bytecode) {
+  int resultReg = getRd(bytecode);
+  int dReg1 = getR1(bytecode);
+  int dReg2 = getR2(bytecode);
+  dReg[resultReg].data = dReg[dReg1].data + dReg[dReg2].data;
+}
+
+void fsubtractRegisters(int bytecode) {
+  int resultReg = getRd(bytecode);
+  int dReg1 = getR1(bytecode);
+  int dReg2 = getR2(bytecode);
+  dReg[resultReg].data = dReg[dReg1].data - dReg[dReg2].data;
+}
+
+void fmultiplyRegisters(int bytecode) {
+  unsigned long long result;
+  int resultHighReg = getRd(bytecode);
+  int resultLowReg = getR1(bytecode);
+  int dReg1 = getR2(bytecode);
+  int dReg2 = getR3(bytecode);
+  result = (unsigned long long)dReg[dReg1].data * dReg[dReg2].data;
+  dReg[resultHighReg].data = result>>32;
+  dReg[resultLowReg].data = result;
+}
+
+void fdivideRegisters(int bytecode) {
+  int resultQuotientReg = getRd(bytecode);
+  int resultRemainderReg = getR1(bytecode);
+  int dReg1 = getR2(bytecode);
+  int dReg2 = getR3(bytecode);
+  int quotient = dReg[dReg1].data / dReg[dReg2].data;
+  dReg[resultQuotientReg].data = quotient;
+}
 
 //----------------------
 //    Branch
