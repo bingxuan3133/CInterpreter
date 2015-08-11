@@ -93,6 +93,10 @@
 // floating point
 #define fldrImm(reg) \
                 FLDR_IMM | (reg)<<8 
+#define fldr(reg, refReg, imm) \
+                LDR_MEM | (reg)<<8 | (refReg)<<(8+MAX_REG_BIT) | (imm)<<(8+2*MAX_REG_BIT)
+#define fstr(reg, refReg, imm) \
+                STR_MEM | (reg)<<8 | (refReg)<<(8+MAX_REG_BIT) | (imm)<<(8+2*MAX_REG_BIT)
 #define fadd(resultReg, reg1, reg2) \
                 ADD | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
 #define fsub(resultReg, reg1, reg2) \

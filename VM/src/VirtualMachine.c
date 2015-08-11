@@ -91,6 +91,9 @@ void clearRegisters() {
     reg[i].data = 0;
     reg[i].base = 0;
     reg[i].limit = 0;
+    dReg[i].data = 0;
+    dReg[i].base = 0;
+    dReg[i].limit = 0;
   }
 }
 

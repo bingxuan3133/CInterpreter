@@ -477,7 +477,7 @@ void floadRegisterFromMemory(int bytecode) {
   int referenceRegister = getR1(bytecode);
   int relativeAddress = bytecode >> (8 + 2 * MAX_REG_BIT);
   ref = (int *)(reg[referenceRegister].data + relativeAddress);
-  dReg[dRegisterToBeLoaded].data = *ref;
+  dReg[dRegisterToBeLoaded].data = (unsigned long long)*ref + ((unsigned long long)(*(ref+1))<<32);
 }
 
 void fstoreRegisterIntoMemory(int bytecode) {
@@ -486,7 +486,8 @@ void fstoreRegisterIntoMemory(int bytecode) {
   int referenceRegister = getR1(bytecode);
   int relativeAddress = bytecode >> (8 + 2 * MAX_REG_BIT);
   ref = (int *)(reg[referenceRegister].data + relativeAddress);
-  *ref = dReg[registerToBeStored].data;
+  *ref = (unsigned long long)dReg[registerToBeStored].data;
+  *(ref+1) = (unsigned long long)dReg[registerToBeStored].data>>32;
 }
 
 void faddRegisters(int bytecode) {

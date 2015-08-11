@@ -581,3 +581,33 @@ void test_fldrImm(void) {
   TEST_ASSERT_EQUAL_HEX64(255| (((long long int)5050)<<32), dReg[1].data);
   TEST_ASSERT_EQUAL_HEX(0x2, getProgramCounter());
 }
+
+void test_fldr(void) {
+  int bytecode[4] = {565, 7272, 5050, 1};
+  reg[7].data = (int)&bytecode[0];
+  floadRegisterFromMemory(fldr(1, REG_7, 0));
+  TEST_ASSERT_EQUAL_HEX64(565|(((long long int)7272)<<32), dReg[1].data);
+  floadRegisterFromMemory(fldr(1, REG_7, 4));
+  TEST_ASSERT_EQUAL_HEX64(7272|(((long long int)5050)<<32), dReg[1].data);
+  floadRegisterFromMemory(fldr(1, REG_7, 8));
+  TEST_ASSERT_EQUAL_HEX64(5050|(((long long int)1)<<32), dReg[1].data);
+}
+
+void test_fstr(void) {
+  int bytecode[4] = {0, 0, 0, 0};
+  reg[7].data = (int)&bytecode[0];
+  dReg[1].data = 0x12340000005A;
+  fstoreRegisterIntoMemory(fstr(1, REG_7, 0));
+  TEST_ASSERT_EQUAL_HEX(0x005A, bytecode[0]);
+  TEST_ASSERT_EQUAL_HEX(0x1234, bytecode[1]);
+  reg[7].data = (int)&bytecode[2];
+  dReg[1].data = 0x5A5A00004321;
+  fstoreRegisterIntoMemory(fstr(1, REG_7, 0));
+  TEST_ASSERT_EQUAL_HEX(0x4321, bytecode[2]);
+  TEST_ASSERT_EQUAL_HEX(0x5A5A, bytecode[3]);
+  reg[7].data = (int)&bytecode[1];
+  dReg[1].data = 0xAAAA0000BBBB;
+  fstoreRegisterIntoMemory(fstr(1, REG_7, 0));
+  TEST_ASSERT_EQUAL_HEX(0xBBBB, bytecode[1]);
+  TEST_ASSERT_EQUAL_HEX(0xAAAA, bytecode[2]);
+}
