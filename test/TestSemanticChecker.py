@@ -231,5 +231,23 @@ class TestSemanticCheckerDeclarationCheck(unittest.TestCase):
                              '*x = y + z;' + '\n' +
                              '   ^', e.msg)
 
+    def test_isAllDefined_should_raise_given_x_is_not_compatible_to_y_plus_z(self):
+        lexer = LexerStateMachine('int *x, *y, *z;\nx = y + *z;', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        semanticChecker = SemanticChecker(parser.scopeBuilder)
+        try:
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            semanticChecker.checkIfAllTokenTypeValid(token[0])
+            semanticChecker.checkIfAssignmentValid(token[0])
+            self.fail('Should raise')
+        except SyntaxError as e:
+            self.assertEqual("Error[2][3]:Incompatible assignment" + '\n' +
+                             'x = y + *z;' + '\n' +
+                             '  ^', e.msg)
+
 if __name__ == '__main__':
     unittest.main()

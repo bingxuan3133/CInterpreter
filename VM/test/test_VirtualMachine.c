@@ -43,6 +43,15 @@ void xtest_read_binary_file(void) {
 }
 */
 
+void test_VMinit(void) {
+  VMinit(100);
+  TEST_ASSERT_EQUAL((int)memoryStack, reg[7].data);
+  TEST_ASSERT_EQUAL((int)memoryStack, reg[7].base);
+  TEST_ASSERT_EQUAL(100, reg[7].limit);
+  VMinit(100);
+  TEST_ASSERT_EQUAL(100, reg[7].limit);
+}
+
 void test_VMRun(void) {
   int bytecodes[10] = {0};
   char strBuffer[300] = {0};
@@ -135,11 +144,11 @@ void test_Proxy_VMRun_should_return_INVALID_BYTECODE_exception(void) {
   freeException(exception);
 }
 
-void test_VMStep_test2(void) {
-  int bytecodes[10] = {1793, 8194, 1793, 16141, 538628, 11522, 1286, 4294967295, 0xffffffff};
-  char strBuffer[300] = {0};
-  Exception *exception;
+// void test_VMStep_test2(void) {
+  // int bytecodes[10] = {1793, 8194, 1793, 16141, 538628, 11522, 1286, 4294967295, 0xffffffff};
+  // char strBuffer[300] = {0};
+  // Exception *exception;
   
-  exception = VMRun(bytecodes);
-  freeException(exception);
-}
+  // exception = VMRun(bytecodes);
+  // freeException(exception);
+// }

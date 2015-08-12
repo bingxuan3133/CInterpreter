@@ -109,6 +109,17 @@
                 BRA | (refAddress)<<8
 #define bit(refAddress) \
                 BRA_IF_TRUE | (refAddress)<<8
+// compare
+#define cmpe \
+                CMPE | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
+#define cmplt \
+                CMPLT | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
+#define cmplte \
+                CMPLTE | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
+#define cmpgt \
+                CMPGT | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
+#define cmpgte \
+                CMPGTE | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
 //
 
 typedef enum {

@@ -18,6 +18,9 @@ class DeclarationContext(Context):
         self.addPointerOperator('*', 120)
         self.addSubscriptOperator('[', 150)
         self.addPrimitive('int', 0)
+        self.addPrimitive('char', 0)
+        self.addPrimitive('double', 0)
+        self.addPrimitive('float', 0)
         self.addShortType('short', 0)
         self.addLongType('long', 0)
         self.addSignedAndUnsignedType('signed', 0)
@@ -143,7 +146,7 @@ class DeclarationContext(Context):
     def addPrimitive(self, id, bindingPower):
         thisContext = self
         def nud(self):
-            self.primitive = 'int'
+            self.primitive = id
             self.modifier = None
             self.sign = 'signed'
             self.reference = self

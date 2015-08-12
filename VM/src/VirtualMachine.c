@@ -5,17 +5,19 @@
 #include <malloc.h>
 
 int *VMbytecode;
+int *memoryStack;
 unsigned int programCounter = 0;
 Register reg[MAX_REG];
 DoubleRegister dReg[MAX_REG];
 Status statusReg;
 
 void __declspec(dllexport) VMinit(int memorySize) {
+  free(memoryStack);
   VMbytecode = NULL;
-  VMConfig(memorySize);
   clearRegisters();
   clearProgramCounter();
   clearStatus();
+  VMConfig(memorySize);
 }
 
 // Export Functions
@@ -39,9 +41,11 @@ Exception* __declspec(dllexport) VMStep(int *bytecode) {
   }
 }
 
-void __declspec(dllexport) VMConfig(int memorySize) {
-  int *memoryStack = malloc(memorySize);
+void VMConfig(int memorySize) {
+  memoryStack = malloc(memorySize*4);
   reg[MAX_REG - 1].data = (int)memoryStack;
+  reg[MAX_REG - 1].base = (int)memoryStack;
+  reg[MAX_REG - 1].limit = memorySize;
 }
 
 // Inner Functions
