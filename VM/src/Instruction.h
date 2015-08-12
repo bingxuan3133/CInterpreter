@@ -103,8 +103,8 @@
                 SUB | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
 #define fmul(resultRegH, resultRegL, reg1, reg2) \
                 MUL | (resultRegH)<<8 | (resultRegL)<<(8+MAX_REG_BIT) | (reg1)<<(8+2*MAX_REG_BIT) | (reg2)<<(8+3*MAX_REG_BIT)
-#define fdiv(resultRegQ, resultRegR, reg1, reg2) \
-                DIV | (resultRegQ)<<8 | (resultRegR)<<(8+MAX_REG_BIT) | (reg1)<<(8+2*MAX_REG_BIT) | (reg2)<<(8+3*MAX_REG_BIT)
+#define fdiv(resultRegQ, reg1, reg2) \
+                DIV | (resultRegQ)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
 #define bra(refAddress) \
                 BRA | (refAddress)<<8
 #define bit(refAddress) \
@@ -132,13 +132,12 @@ typedef enum {
   OR = 0x11,
   XOR = 0x12,
   FLDR_IMM = 0x13,
+  FLDR ,
+  FSTR ,
   FADD ,
   FSUB ,
   FMUL ,
   FDIV,
-  FAND ,
-  FOR ,
-  FXOR ,
   BRA ,
   BRA_IF_TRUE ,
   HALT = 0xff,

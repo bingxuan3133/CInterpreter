@@ -25,6 +25,13 @@ void (*disassemble[256])(char*, int)  = { [DUMPR] = disassembleDumpr,
                                           [AND] = disassembleAnd,
                                           [OR] = disassembleOr,
                                           [XOR] = disassembleXor,
+                                          [FLDR_IMM] = disassembleFldrImm,
+                                          [FLDR] = disassembleFldr,
+                                          [FSTR] = disassembleFstr,
+                                          [FADD] = disassembleFadd,
+                                          [FSUB] = disassembleFsub,
+                                          [FMUL] = disassembleFmul,
+                                          [FDIV] = disassembleFdiv,
                                           [BRA] = disassembleBra,
                                           [BRA_IF_TRUE] = disassembleBit,
                                           [HALT] = disassembleHalt
@@ -324,6 +331,33 @@ void disassembleXor(char *strBuffer, int bytecode) {
   int reg1 = getR1(bytecode);
   int reg2 = getR2(bytecode);
   sprintf(strBuffer, "xor r%d r%d r%d", resultReg, reg1, reg2);
+}
+
+// floating point
+void disassembleFadd(char *strBuffer, int bytecode) {
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
+  sprintf(strBuffer, "fadd d%d d%d d%d", resultReg, reg1, reg2);
+}
+void disassembleFsub(char *strBuffer, int bytecode) {
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
+  sprintf(strBuffer, "fsub d%d d%d d%d", resultReg, reg1, reg2);
+}
+void disassembleFmul(char *strBuffer, int bytecode) {
+  int resultHighReg = getRd(bytecode);
+  int resultLowReg = getR1(bytecode);
+  int reg1 = getR2(bytecode);
+  int reg2 = getR3(bytecode);
+  sprintf(strBuffer, "fmul d%d:d%d d%d d%d", resultHighReg, resultLowReg, reg1, reg2);
+}
+void disassembleFdiv(char *strBuffer, int bytecode) {
+  int resultQuotientReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
+  sprintf(strBuffer, "fdiv d%d d%d d%d", resultQuotientReg, resultRemainderReg, reg1, reg2);
 }
 
 void disassembleBra(char *strBuffer, int bytecode) {

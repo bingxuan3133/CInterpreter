@@ -5,7 +5,7 @@
 #include "Exception.h"
 
 void setUp(void) {
-  initVM();
+  VMinit(10);
 }
 
 void tearDown(void) {
@@ -135,12 +135,11 @@ void test_Proxy_VMRun_should_return_INVALID_BYTECODE_exception(void) {
   freeException(exception);
 }
 
-void xtest_VMLoad(void) {
-  int bytecodes[10] = {0};
-  VMLoad("../myFirstByteCode", bytecodes);
+void test_VMStep_test2(void) {
+  int bytecodes[10] = {1793, 8194, 1793, 16141, 538628, 11522, 1286, 4294967295, 0xffffffff};
+  char strBuffer[300] = {0};
+  Exception *exception;
   
-  TEST_ASSERT_EQUAL_HEX(bytecodes[0], stm(REG_7, R3, DEC, NO_UPDATE));
-  TEST_ASSERT_EQUAL_HEX(bytecodes[1], ldrMem(REG_12, REG_3, 8));
-  TEST_ASSERT_EQUAL_HEX(bytecodes[2], ldrImm(REG_13, 2));
-  TEST_ASSERT_EQUAL_HEX(bytecodes[3], 0xffffffff);
+  exception = VMRun(bytecodes);
+  freeException(exception);
 }

@@ -8,7 +8,7 @@
 #define merge2Registers(regHigh, regLow) (unsigned long long)reg[regHigh].data << 32 | (unsigned)reg[regLow].data
 
 void setUp(void) {
-  VMinit();
+  VMinit(10);
 }
 
 void tearDown(void) {

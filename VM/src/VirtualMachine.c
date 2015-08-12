@@ -10,8 +10,9 @@ Register reg[MAX_REG];
 DoubleRegister dReg[MAX_REG];
 Status statusReg;
 
-void VMinit() {
+void __declspec(dllexport) VMinit(int memorySize) {
   VMbytecode = NULL;
+  VMConfig(memorySize);
   clearRegisters();
   clearProgramCounter();
   clearStatus();
@@ -21,7 +22,7 @@ void VMinit() {
 Exception* __declspec(dllexport) VMRun(int *bytecode) {
   Exception* exception;
   Try {
-    VMRun(bytecode);
+    _VMRun(bytecode);
     return NULL;
   } Catch (exception) {
     return exception;
@@ -31,7 +32,7 @@ Exception* __declspec(dllexport) VMRun(int *bytecode) {
 Exception* __declspec(dllexport) VMStep(int *bytecode) {
   Exception* exception;
   Try {
-    VMStep(bytecode);
+    _VMStep(bytecode);
     return NULL;
   } Catch (exception) {
     return exception;
@@ -43,7 +44,6 @@ void __declspec(dllexport) VMConfig(int memorySize) {
   reg[MAX_REG - 1].data = (int)memoryStack;
 }
 
-
 // Inner Functions
 void _VMRun(int *bytecode) {
   VMbytecode = bytecode;
@@ -54,6 +54,7 @@ void _VMRun(int *bytecode) {
 }
 
 void _VMStep(int *bytecode) {
+  VMbytecode = bytecode;
   if((unsigned char)bytecode[programCounter] != halt()) {
     execute(bytecode[programCounter]);
     programCounter++;

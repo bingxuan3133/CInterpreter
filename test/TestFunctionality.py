@@ -50,11 +50,10 @@ class MyTestCase(unittest.TestCase):
         cByteCodes = cByteCodes_t(*byteCodes)
 
         vmdll.restype = POINTER(C_Exception)
-
-        exception = vmdll._VMStep(cByteCodes)
-        exception = vmdll._VMStep(cByteCodes)
-        exception = vmdll._VMStep(cByteCodes)
-        exception = vmdll._VMStep(cByteCodes)
+        exception = vmdll.VMStep(cByteCodes)
+        exception = vmdll.VMStep(cByteCodes)
+        exception = vmdll.VMStep(cByteCodes)
+        exception = vmdll.VMStep(cByteCodes)
 
     def test_call_directly_to_dll_VMRun(self):
         lexer = LexerStateMachine('int x;', self.context)
@@ -68,7 +67,7 @@ class MyTestCase(unittest.TestCase):
         bytecodesSize = len(byteCodes)
         cByteCodes_t = c_int * bytecodesSize
         cByteCodes = cByteCodes_t(*byteCodes)
-        vmdll._VMRun(cByteCodes)
+        vmdll.VMRun(cByteCodes)
 
     def test_VMStep(self):
         lexer = LexerStateMachine('int x = 5;', self.context)
@@ -86,12 +85,10 @@ class MyTestCase(unittest.TestCase):
         vm.VMStep(cbytecodes)
         vm.VMStep(cbytecodes)
         vm.VMStep(cbytecodes)
-        cCharArray_t = c_char * 300
-        cCharArray = cCharArray_t(0)
-        vm.disassembleBytecodes(cCharArray, cbytecodes)
+        vm.dumpBytecodes(cbytecodes)
 
     def test_VMStep_should_raise_RuntimeError_given_invalid_bytecode(self):
-        bytecodes = [0xfff12314]
+        bytecodes = [0xfff12380]
 
         vm = VirtualMachine()
 
@@ -99,7 +96,7 @@ class MyTestCase(unittest.TestCase):
             cbytecodes = vm.convertToCArray(bytecodes)
             vm.VMStep(cbytecodes)
         except RuntimeError as e:
-            self.assertEqual('ERROR: invalid bytecode (0xfff12314, pc = 2).', e.args)
+            self.assertEqual('ERROR: invalid bytecode (0xfff12380, pc = 0).', e.args[0])
             #self.assertEqual('ERROR: invalid bytecode (0xfff12314, pc = 2).', e.errMsg)
 
     def xtest_call_directly_to_dll_VMRun(self):
@@ -128,7 +125,7 @@ class MyTestCase(unittest.TestCase):
 
         vm = VirtualMachine()
         cbytecodes = vm.convertToCArray(bytecodes)
-
+        vm.dumpBytecodes(cbytecodes)
         vm.VMStep(cbytecodes)
         vm.VMStep(cbytecodes)
         vm.VMStep(cbytecodes)

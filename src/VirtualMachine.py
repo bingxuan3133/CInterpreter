@@ -8,7 +8,7 @@ class C_Exception(Structure):
 class VirtualMachine:
     def __init__(self):
         self.vmdll = cdll.LoadLibrary('../VM/build/release/out/c/VirtualMachine.dll')
-        pass
+        self.vmdll.VMinit(100)
 
     def convertToCArray(self, bytecodeList):
         size = len(bytecodeList)
@@ -17,20 +17,18 @@ class VirtualMachine:
         return cBytecodeList
 
     def VMStep(self, cBytecodeList):  # proxy function to interact with real VM
-        vmstep = self.vmdll._VMStep
         #vmstep.argtypes = [POINTER(c_int)]
-        vmstep.restype = POINTER(C_Exception)
-        exception = vmstep(cBytecodeList)
+        self.vmdll.VMStep.restype = POINTER(C_Exception)
+        exception = self.vmdll.VMStep(cBytecodeList)
         if bool(exception):
-            raise RuntimeError(exception.contents.errMsg)
+            raise RuntimeError(exception.contents.errMsg.decode('ASCII'))
 
     def VMRun(self, cBytecodeList):  # proxy function to interact with real VM
-        vmrun = self.vmdll._VMRun
         #vmstep.argtypes = [POINTER(c_int)]
-        vmrun.restype = POINTER(C_Exception)
-        exception = vmrun(cBytecodeList)
+        self.vmdll.VMRun.restype = POINTER(C_Exception)
+        exception = self.vmdll.VMRun(cBytecodeList)
         if bool(exception):
-            raise RuntimeError(exception.contents.errMsg)
+            raise RuntimeError(exception.contents.errMsg.decode('ASCII'))
 
     def dumpBytecodes(self, bytecodeList):  # proxy function to interact with real VM
         for bytecode in bytecodeList:
@@ -43,4 +41,3 @@ class VirtualMachine:
         cPtr = cBuffer
         self.vmdll.disassembleBytecode(cPtr, c_int(bytecode))
         print(cPtr.value.decode('ascii'))
-

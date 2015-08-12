@@ -35,4 +35,12 @@ void disassembleXor(char *strBuffer, int bytecode);
 void disassembleBra(char *strBuffer, int bytecode);
 void disassembleBit(char *strBuffer, int bytecode);
 
+void disassembleFLdrImm(char *strBuffer, int bytecode);
+void disassembleFldr(char *strBuffer, int bytecode);
+void disassembleFstr(char *strBuffer, int bytecode);
+void disassembleFadd(char *strBuffer, int bytecode);
+void disassembleFsub(char *strBuffer, int bytecode);
+void disassembleFmul(char *strBuffer, int bytecode);
+void disassembleFdiv(char *strBuffer, int bytecode);
+
 #endif // Disassembler_H
