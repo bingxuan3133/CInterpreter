@@ -441,24 +441,6 @@ void xorRegisters(int bytecode) {
 }
 
 //----------------------
-//    Compare
-//----------------------
-
-void isEqual(int bytecode) {
-  int resultReg = getRd(bytecode);
-  int reg2 = getR1(bytecode);
-  int reg1 = getR2(bytecode);
-  reg[resultReg].data = reg[reg1].data == reg[reg2].data;
-}
-
-void isGreater(int bytecode) {
-  int resultReg = getRd(bytecode);
-  int reg2 = getR1(bytecode);
-  int reg1 = getR2(bytecode);
-  reg[resultReg].data = reg[reg1].data < reg[reg2].data;
-}
-
-//----------------------
 //    Floating Point
 //----------------------
 
@@ -517,9 +499,8 @@ void fmultiplyRegisters(int bytecode) {
 
 void fdivideRegisters(int bytecode) {
   int resultQuotientReg = getRd(bytecode);
-  int resultRemainderReg = getR1(bytecode);
-  int dReg1 = getR2(bytecode);
-  int dReg2 = getR3(bytecode);
+  int dReg1 = getR1(bytecode);
+  int dReg2 = getR2(bytecode);
   int quotient = dReg[dReg1].data / dReg[dReg2].data;
   dReg[resultQuotientReg].data = quotient;
 }
@@ -540,4 +521,43 @@ void branchIfTrue(int bytecode) {
   if(statusReg.B) {
     moveProgramCounter(relativeAddress);
   }
+}
+
+//----------------------
+//    Compare
+//----------------------
+
+void compareIfEqual(int bytecode) {
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
+  reg[resultReg].data = reg[reg1].data == reg[reg2].data;
+}
+
+void compareIfLessThan(int bytecode) {
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
+  reg[resultReg].data = reg[reg1].data < reg[reg2].data;
+}
+
+void compareIfLessThanOrEqual(int bytecode) {
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
+  reg[resultReg].data = reg[reg1].data <= reg[reg2].data;
+}
+
+void compareIfMoreThan(int bytecode) {
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
+  reg[resultReg].data = reg[reg1].data > reg[reg2].data;
+}
+
+void compareIfMoreThanOrEqual(int bytecode) {
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
+  reg[resultReg].data = reg[reg1].data >= reg[reg2].data;
 }

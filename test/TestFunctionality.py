@@ -75,17 +75,20 @@ class MyTestCase(unittest.TestCase):
         self.manager.setParser(parser)
         token = parser.parseStatement(0)
         byteCodes =self.generator.generateCode(token)
-        byteCodes.insert(0, self.byteCodeGenerator.dumpRegisterHex([7]))  # hacked bytecode to display r7 value
-        byteCodes.insert(2, self.byteCodeGenerator.dumpRegisterHex([7]))  #
+        byteCodes.insert(0, self.byteCodeGenerator.dumpRegisterHex([0]))  # hacked bytecode to display r7 value
+        byteCodes.insert(2, self.byteCodeGenerator.dumpRegisterHex([0]))  #
         byteCodes.append(self.byteCodeGenerator.halt())
 
         vm = VirtualMachine()
         cbytecodes = vm.convertToCArray(byteCodes)
-        vm.VMStep(cbytecodes)
-        vm.VMStep(cbytecodes)
-        vm.VMStep(cbytecodes)
-        vm.VMStep(cbytecodes)
         vm.dumpBytecodes(cbytecodes)
+        vm.VMStep(cbytecodes)
+        vm.VMStep(cbytecodes)
+        vm.VMStep(cbytecodes)
+        vm.VMStep(cbytecodes)
+        vm.VMStep(cbytecodes)
+        vm.VMStep(cbytecodes)
+        vm.VMStep(cbytecodes)
 
     def test_VMStep_should_raise_RuntimeError_given_invalid_bytecode(self):
         bytecodes = [0xfff12380]

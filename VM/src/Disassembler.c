@@ -46,17 +46,16 @@ void (*disassemble[256])(char*, int)  = { [DUMPR] = disassembleDumpr,
  *            0   bytecode cannot be disassembled
  */
 int __declspec(dllexport) disassembleBytecodes(char *strBuffer, int *bytecode) {
-  int i = 0;
-  while((unsigned char)bytecode[i] != halt()) {
-    disassembleBytecode(strBuffer, bytecode[i]);
+  while((unsigned char)bytecode[getProgramCounter()] != halt()) {
+    disassembleBytecode(strBuffer, bytecode[getProgramCounter()]);
     while(*strBuffer != '\0')  // Find \0 to write and add newline
       strBuffer++;
     sprintf(strBuffer, "\n");
-    i++;
+    moveProgramCounter(1);
     while(*strBuffer != '\0')  // Find \0 to write
       strBuffer++;
   }
-  disassembleHalt(strBuffer, bytecode[i]);
+  disassembleHalt(strBuffer, bytecode[getProgramCounter()]);
 }
 
 /**
@@ -334,6 +333,32 @@ void disassembleXor(char *strBuffer, int bytecode) {
 }
 
 // floating point
+
+void disassembleFldrImm(char *strBuffer, int bytecode) {
+  int regIndex = getRd(bytecode);
+  int pc = getProgramCounter();
+  long long high_unint32 = (unsigned long long)getVMBytecode(pc + 2)<<32;
+  long long low_unint32 = (unsigned long long)getVMBytecode(pc + 1);
+  double value = high_unint32 + low_unint32;
+  moveProgramCounter(2);
+  sprintf(strBuffer, "fldr r%d #%d", regIndex, value);
+}
+
+void disassembleFldr(char *strBuffer, int bytecode) {
+  int dRegisterToBeLoaded = getRd(bytecode);
+  int referenceRegister = getR1(bytecode);
+  int relativeAddress = bytecode >> (8 + 2 * MAX_REG_BIT);
+  sprintf(strBuffer, "fldr d%d [r%d + #%d]", dRegisterToBeLoaded, referenceRegister, relativeAddress);
+}
+
+void disassembleFstr(char *strBuffer, int bytecode) {
+  int *ref;
+  int dRegisterToBeStored = getRd(bytecode);
+  int referenceRegister = getR1(bytecode);
+  int relativeAddress = bytecode >> (8 + 2 * MAX_REG_BIT);
+  sprintf(strBuffer, "fstr d%d [r%d + #%d]", dRegisterToBeStored, referenceRegister, relativeAddress);
+}
+
 void disassembleFadd(char *strBuffer, int bytecode) {
   int resultReg = getRd(bytecode);
   int reg1 = getR1(bytecode);
@@ -357,7 +382,7 @@ void disassembleFdiv(char *strBuffer, int bytecode) {
   int resultQuotientReg = getRd(bytecode);
   int reg1 = getR1(bytecode);
   int reg2 = getR2(bytecode);
-  sprintf(strBuffer, "fdiv d%d d%d d%d", resultQuotientReg, resultRemainderReg, reg1, reg2);
+  sprintf(strBuffer, "fdiv d%d d%d d%d", resultQuotientReg, reg1, reg2);
 }
 
 void disassembleBra(char *strBuffer, int bytecode) {

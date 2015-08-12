@@ -12,7 +12,7 @@ import struct
 
 class ByteCodeGenerator:
     byteCodeList = []
-    byteRequired = {'char': 1, 'short': 1, 'int': 4, 'long': 4, 'float': 4, 'double': 8}
+    byteRequired = {'char': 1, 'short': 2, 'int': 4, 'long': 4, 'float': 4, 'double': 8}
     variablesInThisAST = {}
     variableCounter = 0
     memorySize = 0
@@ -47,11 +47,11 @@ class ByteCodeGenerator:
         return number
 
     def loadRegister(self, GPR=[]):
-        number = 0x04 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 17
+        number = 0x05 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def storeRegister(self, GPR=[]):
-        number = 0x06 | GPR[0] << 8 | GPR[1] << 11
+        number = 0x07 | GPR[0] << 8 | GPR[1] << 11
         return number
 
     def loadMultiple(self, GPR=[]):
@@ -86,54 +86,54 @@ class ByteCodeGenerator:
         number = 0x12 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
-    def branchIfTrue(self, GPR = []):
-        #GPR[0] == The number that needed to be branch
-        #GPR[1] == The register number that refers to
-        number = 0x12 | GPR[0] << 8 | GPR[1] << 11
-        return number
-
-    def branch(self, GPR =[]):
-        number = 0x13 | GPR[0] << 8
-        return number
-
-    def compareIsLessThan(self, GPR=[]):
-        number = 0x02 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
-        return number
-
-    def compareRegister(self,GPR=[]):
-        number = 0x03 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
-        return number
-
-    def compareIsLessThanOrEqual(self,GPR=[]):
-        number = 0x04 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
-        return number
-
-    def compareIsGreaterThan(self, GPR=[]):
-        number = 0x05 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
-        return number
-
-    def compareIsGreaterThanOrEqual(self, GPR=[]):
-        number = 0x06 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
-        return number
-
     def loadFloatingPoint(self,GPR = []):
-        number = 0x14 | GPR[0] << 8
+        number = 0x13 | GPR[0] << 8
         return number
 
     def immediateFloatingPoint(self, GPR=[]):
         number = GPR[0] | GPR[1] << 8 | GPR[2] << 16 | GPR[3] << 24
         return number
 
-    def addFloatingRegister(self, GPR = []):
-        number = 0x15 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+    def loadFloatingPointRegister(self, GPR = []):
+        number = 0x14 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def storeFloatingPointRegister(self, GPR =[]):
-        number = 0x11 | GPR[0] << 8 | GPR[1] << 11
+        number = 0x15 | GPR[0] << 8 | GPR[1] << 11
         return number
 
-    def loadFloatingPointRegister(self, GPR = []):
-        number = 0x11 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+    def addFloatingRegister(self, GPR = []):
+        number = 0x16 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        return number
+
+    def branch(self, GPR =[]):
+        number = 0x1a | GPR[0] << 8
+        return number
+
+    def branchIfTrue(self, GPR = []):
+        #GPR[0] == The number that needed to be branch
+        #GPR[1] == The register number that refers to
+        number = 0x1b | GPR[0] << 8 | GPR[1] << 11
+        return number
+
+    def compareIfEqual(self,GPR=[]):
+        number = 0x1c | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        return number
+
+    def compareIfLessThan(self, GPR=[]):
+        number = 0x1d | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        return number
+
+    def compareIfLessThanOrEqual(self,GPR=[]):
+        number = 0x1e | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        return number
+
+    def compareIfGreaterThan(self, GPR=[]):
+        number = 0x1f | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
+        return number
+
+    def compareIfGreaterThanOrEqual(self, GPR=[]):
+        number = 0x20 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def halt(self):
@@ -318,10 +318,11 @@ class ByteCodeGenerator:
         def declByteCode(self,sequenceCheck = None, token = None, index = -1):
             recordTheVariable(None, self)
             return thisGenerator.byteCodeList
-        generationFunction = { '(literal)':([None], [generateLiteralCode]), '(identifier)':([None], [generateIdentifierCode]), '(systemToken)':([None], [noByteCode]),'(floating)':([None], [generateFloatingPointLoad]),
+        generationFunction = { '(literal)':([None], [generateLiteralCode]),
+                               '(identifier)':([None], [generateIdentifierCode]), '(systemToken)':([None], [noByteCode]),'(floating)':([None], [generateFloatingPointLoad]),
                             '+':([None],[generalByteCode]),'-':([None],[generalByteCode],), '*':([None],[generalByteCode]), '/':([None],[generalByteCode]),'==':([None],[generalByteCode]),'|':([None],[generalByteCode]),'%':([None],[generalByteCode]),
                             '=':([None],[generalByteCode]),'<':([None],[generalByteCode]),'<=':([None],[generalByteCode]),'>':([None],[generalByteCode]),'>=':([None],[generalByteCode]),'&&':([None],[generalByteCode]),
-                            'int':([None],[generalByteCode]),'long':([None],[generalByteCode]), 'short':([None],[generalByteCode]),
+                            'int':([None],[generalByteCode]),'long':([None],[generalByteCode]), 'short':([None],[generalByteCode]),'char':([None],[generalByteCode]),'double':([None],[generalByteCode]),'float':([None],[generalByteCode]),
                             '(def)':([None],[defByteCode]),'(decl)':([None],[declByteCode]),
                             'if':([None],[ifByteCode]),'while':([None],[whileByteCode]),'do':([None],[doByteCode]),'else':([None],[noByteCode]),
                             ',':([None],[noByteCode]),'(multiple)':([None],[noByteCode]),'--':([None],[noByteCode]),'++':([None],[noByteCode]),
@@ -333,7 +334,7 @@ class ByteCodeGenerator:
 
         respectiveByteCodeFunction = {
                                     '=': self.storeRegister, '+': self.addRegister,'-': self.subRegister, '*': self.multiplyRegister, '/': self.divideRegister,'|': self.orRegister,'%':self.modulusRegister,
-                                    '==':self.compareRegister,'<':self.compareIsLessThan,'<=':self.compareIsLessThanOrEqual,'>':self.compareIsGreaterThan,'>=':self.compareIsGreaterThanOrEqual,
+                                    '==':self.compareIfEqual,'<':self.compareIfLessThan,'<=':self.compareIfLessThanOrEqual,'>':self.compareIfGreaterThan,'>=':self.compareIfGreaterThanOrEqual,
                                     '&&':self.orRegister,
                                     '(systemToken)': self.nothing, ';': self.nothing, ',': self.nothing, '}': self.nothing, '{': self.nothing}
 
@@ -368,5 +369,6 @@ class ByteCodeGenerator:
         newList.append(self.loadValue([self.mapping.getAFreeWorkingRegister(), self.memorySize]))
         newList.append(self.subRegister([self.mapping.framePointerRegister, self.mapping.framePointerRegister,self.mapping.releaseAWorkingRegister()]))
         newList.extend(oldList)
+        self.memorySize = 0
         return newList
 
