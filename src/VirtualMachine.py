@@ -8,7 +8,11 @@ class C_Exception(Structure):
 class VirtualMachine:
     def __init__(self):
         self.vmdll = cdll.LoadLibrary('../VM/build/release/out/c/VirtualMachine.dll')
-        self.vmdll.VMinit(100)
+        cCharArray100_t = c_char * 1024
+        cBuffer = cCharArray100_t(0)
+        self.cPtr = c_char_p(None)
+        self.cPtr = cBuffer
+        self.vmdll.VMinit(100, self.cPtr)  # replace cPtr with None if printing in VM is desired
 
     def convertToCArray(self, bytecodeList):
         size = len(bytecodeList)
@@ -20,6 +24,7 @@ class VirtualMachine:
         #vmstep.argtypes = [POINTER(c_int)]
         self.vmdll.VMStep.restype = POINTER(C_Exception)
         exception = self.vmdll.VMStep(cBytecodeList)
+        print(self.cPtr.value.decode('ascii'))
         if bool(exception):
             raise RuntimeError(exception.contents.errMsg.decode('ASCII'))
 

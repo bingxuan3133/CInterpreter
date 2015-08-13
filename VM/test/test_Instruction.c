@@ -3,12 +3,13 @@
 #include "VirtualMachine.h"
 #include "Exception.h"
 #include "Disassembler.h"
+#include "Print.h"
 #include <stdio.h>
 
 #define merge2Registers(regHigh, regLow) (unsigned long long)reg[regHigh].data << 32 | (unsigned)reg[regLow].data
 
 void setUp(void) {
-  VMinit(10);
+  VMinit(10, NULL);
 }
 
 void tearDown(void) {

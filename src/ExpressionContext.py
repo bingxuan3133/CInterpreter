@@ -11,6 +11,7 @@ class ExpressionContext(Context):
         self.addInfixOperator('/', 100)
         self.addInfixOperator('%', 100)
         self.addInfixOperator('=', 1)
+        self.addInfixOperator('!=', 25)
         self.addInfixOperator('|', 15)
         self.addInfixOperator('||', 5)
         self.addInfixOperator('&', 20)

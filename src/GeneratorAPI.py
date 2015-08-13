@@ -23,5 +23,5 @@ class GeneratorAPI:
             self.byteCodeGenerator.mapping.reset()
 
         Code = self.byteCodeGenerator.injectPrologue(Code)
-
+        Code.append(0xffffffff)
         return Code

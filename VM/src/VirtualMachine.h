@@ -35,7 +35,7 @@ extern Register reg[MAX_REG];
 extern DoubleRegister dReg[MAX_REG];
 
 // Export Functions
-void __declspec(dllexport) VMinit(int memorySize);
+void __declspec(dllexport) VMinit(int memorySize, char *buffer);
 void VMConfig(int memorySize);
 Exception* __declspec(dllexport) VMRun(int *bytecode);
 Exception* __declspec(dllexport) VMStep(int *bytecode);

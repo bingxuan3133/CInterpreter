@@ -2,6 +2,7 @@
 #include "Disassembler.h"
 #include "Instruction.h"
 #include "Exception.h"
+#include "Print.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -86,7 +87,7 @@ int __declspec(dllexport) disassembleBytecode(char *strBuffer, int bytecode) {
 void dumpBytecodes(int *bytecode) {
   char dumpBuffer[1000] = {0};
   disassembleBytecodes(dumpBuffer, bytecode);
-  printf("%s", dumpBuffer);
+  _printf("%s", dumpBuffer);
 }
 
 /**
@@ -96,7 +97,7 @@ void dumpBytecode(int bytecode) {
   char dumpBuffer[500] = {0};
   unsigned char opcode = bytecode;
   disassembleBytecode(dumpBuffer, bytecode);
-  printf("%s", dumpBuffer);
+  _printf("%s", dumpBuffer);
 }
 
 void disassembleHalt(char *strBuffer, int bytecode) {
