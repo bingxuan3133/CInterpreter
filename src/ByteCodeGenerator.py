@@ -206,7 +206,7 @@ class ByteCodeGenerator:
             if token.data[0].id in thisGenerator.byteRequired:
                 thisGenerator.variableCounter += 1
                 thisGenerator.memorySize += thisGenerator.byteRequired[token.data[0].id]
-                thisGenerator.variablesInThisAST[token.data[1].data[0]] = thisGenerator.memorySize
+                thisGenerator.variablesInThisAST[token.data[1].data[0]] = thisGenerator.memorySize - thisGenerator.byteRequired[token.data[0].id]
 
         def noByteCode(self,sequenceCheck = None, token = None, index = -1):
             if self.id == "(":
@@ -320,18 +320,50 @@ class ByteCodeGenerator:
         def declByteCode(self,sequenceCheck = None, token = None, index = -1):
             recordTheVariable(None, self)
             return thisGenerator.byteCodeList
-        generationFunction = { '(literal)':([None], [generateLiteralCode]),
-                               '(identifier)':([None], [generateIdentifierCode]), '(systemToken)':([None], [noByteCode]),'(floating)':([None], [generateFloatingPointLoad]),
-                            '+':([None],[generalByteCode]),'-':([None],[generalByteCode],), '*':([None],[generalByteCode]), '/':([None],[generalByteCode]),'==':([None],[generalByteCode]),'|':([None],[generalByteCode]),'%':([None],[generalByteCode]),
-                            '=':([None],[generalByteCode]),'<':([None],[generalByteCode]),'<=':([None],[generalByteCode]),'>':([None],[generalByteCode]),'>=':([None],[generalByteCode]),'&&':([None],[generalByteCode]),
-                            'int':([None],[generalByteCode]),'long':([None],[generalByteCode]), 'short':([None],[generalByteCode]),'char':([None],[generalByteCode]),'double':([None],[generalByteCode]),'float':([None],[generalByteCode]),
-                            '(def)':([None],[defByteCode]),'(decl)':([None],[declByteCode]),
-                            'if':([None],[ifByteCode]),'while':([None],[whileByteCode]),'do':([None],[doByteCode]),'else':([None],[noByteCode]),
-                            ',':([None],[noByteCode]),'(multiple)':([None],[noByteCode]),'--':([None],[noByteCode]),'++':([None],[noByteCode]),
-                            '||':([None],[noByteCode]),'&':([None],[noByteCode]),
-                            'unsigned':([None],[noByteCode]),'signed':([None],[noByteCode]),
-                            '(':([None],[noByteCode]),';':([None],[noByteCode]),')':([None],[noByteCode]),'{':([None],[noByteCode]),'}':([None],[noByteCode]),
-                            ']':([None],[noByteCode]),'[':([None],[noByteCode]),
+        generationFunction = {  '(literal)':([None], [generateLiteralCode]),
+                                '(identifier)':([None], [generateIdentifierCode]),
+                                '(systemToken)':([None], [noByteCode]),
+                                '(floating)':([None], [generateFloatingPointLoad]),
+                                '+':([None],[generalByteCode]),
+                                '-':([None],[generalByteCode]),
+                                '*':([None],[generalByteCode]),
+                                '/':([None],[generalByteCode]),
+                                '==':([None],[generalByteCode]),
+                                '|':([None],[generalByteCode]),
+                                '%':([None],[generalByteCode]),
+                                '=':([None],[generalByteCode]),
+                                '<':([None],[generalByteCode]),
+                                '<=':([None],[generalByteCode]),
+                                '>':([None],[generalByteCode]),
+                                '>=':([None],[generalByteCode]),
+                                '&&':([None],[generalByteCode]),
+                                'int':([None],[generalByteCode]),
+                                'long':([None],[generalByteCode]),
+                                'short':([None],[generalByteCode]),
+                                'char':([None],[generalByteCode]),
+                                'double':([None],[generalByteCode]),
+                                'float':([None],[generalByteCode]),
+                                '(def)':([None],[defByteCode]),
+                                '(decl)':([None],[declByteCode]),
+                                'if':([None],[ifByteCode]),
+                                'while':([None],[whileByteCode]),
+                                'do':([None],[doByteCode]),
+                                'else':([None],[noByteCode]),
+                                ',':([None],[noByteCode]),
+                                '(multiple)':([None],[noByteCode]),
+                                '--':([None],[noByteCode]),
+                                '++':([None],[noByteCode]),
+                                '||':([None],[noByteCode]),
+                                '&':([None],[noByteCode]),
+                                'unsigned':([None],[noByteCode]),
+                                'signed':([None],[noByteCode]),
+                                '(':([None],[noByteCode]),
+                                ';':([None],[noByteCode]),
+                                ')':([None],[noByteCode]),
+                                '{':([None],[noByteCode]),
+                                '}':([None],[noByteCode]),
+                                ']':([None],[noByteCode]),
+                                '[':([None],[noByteCode]),
                             }
 
         respectiveByteCodeFunction = {
