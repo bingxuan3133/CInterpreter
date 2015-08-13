@@ -567,10 +567,10 @@ void test_branch(void) {
 
 void test_branchIfTrue(void) {
   moveProgramCounter(0x40);
-  branchIfTrue(bit(-0x10));
+  branchIfTrue(bit(0, -0x10));
   TEST_ASSERT_EQUAL_HEX(0x40, getProgramCounter());
-  setStatusBit('B');
-  branchIfTrue(bit(-0x10));
+  reg[0].data = 1;
+  branchIfTrue(bit(0, -0x10));
   TEST_ASSERT_EQUAL_HEX(0x30, getProgramCounter());
 }
 
@@ -610,4 +610,17 @@ void test_fstr(void) {
   fstoreRegisterIntoMemory(fstr(1, REG_7, 0));
   TEST_ASSERT_EQUAL_HEX(0xBBBB, bytecode[1]);
   TEST_ASSERT_EQUAL_HEX(0xAAAA, bytecode[2]);
+}
+
+void test_faddRegisters_should_add_2_registers(void) {
+  dReg[0].data = 1.17896512;
+  dReg[1].data = 0.82103488;
+  faddRegisters(fadd(REG_0, REG_0, REG_1));
+  TEST_ASSERT_EQUAL_FLOAT(2.0, dReg[0].data);
+}
+void test_fsubRegisters_should_perform_subtraction_between_2_registers(void) {
+  dReg[0].data = 1.17896512;
+  dReg[1].data = 0.82103488;
+  fsubtractRegisters(fsub(REG_0, REG_0, REG_1));
+  TEST_ASSERT_EQUAL(0.35793024, reg[0].data);
 }

@@ -94,21 +94,21 @@
 #define fldrImm(reg) \
                 FLDR_IMM | (reg)<<8 
 #define fldr(reg, refReg, imm) \
-                LDR_MEM | (reg)<<8 | (refReg)<<(8+MAX_REG_BIT) | (imm)<<(8+2*MAX_REG_BIT)
+                FLDR | (reg)<<8 | (refReg)<<(8+MAX_REG_BIT) | (imm)<<(8+2*MAX_REG_BIT)
 #define fstr(reg, refReg, imm) \
-                STR_MEM | (reg)<<8 | (refReg)<<(8+MAX_REG_BIT) | (imm)<<(8+2*MAX_REG_BIT)
+                FSTR | (reg)<<8 | (refReg)<<(8+MAX_REG_BIT) | (imm)<<(8+2*MAX_REG_BIT)
 #define fadd(resultReg, reg1, reg2) \
-                ADD | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
+                FADD | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
 #define fsub(resultReg, reg1, reg2) \
-                SUB | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
+                FSUB | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
 #define fmul(resultRegH, resultRegL, reg1, reg2) \
-                MUL | (resultRegH)<<8 | (resultRegL)<<(8+MAX_REG_BIT) | (reg1)<<(8+2*MAX_REG_BIT) | (reg2)<<(8+3*MAX_REG_BIT)
+                FMUL | (resultRegH)<<8 | (resultRegL)<<(8+MAX_REG_BIT) | (reg1)<<(8+2*MAX_REG_BIT) | (reg2)<<(8+3*MAX_REG_BIT)
 #define fdiv(resultRegQ, reg1, reg2) \
-                DIV | (resultRegQ)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
+                FDIV | (resultRegQ)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)
 #define bra(refAddress) \
                 BRA | (refAddress)<<8
-#define bit(refAddress) \
-                BRA_IF_TRUE | (refAddress)<<8
+#define bit(reg, refAddress) \
+                BRA_IF_TRUE | (reg)<<8 | (refAddress)<<(8+MAX_REG_BIT)
 // compare
 #define cmpe \
                 CMPE | (resultReg)<<8 | (reg1)<<(8+MAX_REG_BIT) | (reg2)<<(8+2*MAX_REG_BIT)

@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 void setUp(void) {
+ VMinit(0);
 }
 
 void tearDown(void){
@@ -66,7 +67,7 @@ void test_disassemble_arithmetic(void) {
   bytecode[4] = and(REG_0, REG_0, REG_1);
   bytecode[5] = or(REG_0, REG_0, REG_1);
   bytecode[6] = xor(REG_0, REG_0, REG_1);
-  bytecode[7] = 0xFFFFFFFF;
+  bytecode[7] = halt();
 
   disassembleBytecodes(&buffer[0], &bytecode[0]);
   printf("test_disassemble_arithmetic\n");
@@ -113,7 +114,7 @@ void test_disassembleDefault2(void) {
   printf("%s\n", &buffer[0]);
 }
 
-void xtest_python_violation(void) {
+void test_python_violation(void) {
   char buffer[500] = {0};
   int bytecode[20] = {538628, 5378, 82163, 276, 2581, 538628, 206082, 1286,\
                       1062916, 2049282, 1286, 1587204, 4097282, 1286, -2539, halt()};

@@ -510,15 +510,14 @@ void fdivideRegisters(int bytecode) {
 //----------------------
 
 void branch(int bytecode) {
-  int resultReg = getRd(bytecode);
   int relativeAddress = bytecode >> 8;
   moveProgramCounter(relativeAddress);
 }
 
 void branchIfTrue(int bytecode) {
   int resultReg = getRd(bytecode);
-  int relativeAddress = bytecode >> 8;
-  if(statusReg.B) {
+  int relativeAddress = bytecode >> (8 + MAX_REG_BIT);
+  if(reg[resultReg].data) {
     moveProgramCounter(relativeAddress);
   }
 }

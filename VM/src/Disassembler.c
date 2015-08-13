@@ -100,7 +100,7 @@ void disassembleHalt(char *strBuffer, int bytecode) {
 }
 
 void disassembleDefault(char *strBuffer, int bytecode) {
-  sprintf(strBuffer, "Invalid Bytecode!");
+  sprintf(strBuffer, "Invalid Bytecode! (0x%08x)", bytecode);
 }
 
 // Disassemble Functions
@@ -341,7 +341,7 @@ void disassembleFldrImm(char *strBuffer, int bytecode) {
   long long low_unint32 = (unsigned long long)getVMBytecode(pc + 1);
   double value = high_unint32 + low_unint32;
   moveProgramCounter(2);
-  sprintf(strBuffer, "fldr r%d #%d", regIndex, value);
+  sprintf(strBuffer, "fldr r%d #%f", regIndex, value);
 }
 
 void disassembleFldr(char *strBuffer, int bytecode) {
