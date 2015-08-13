@@ -17,6 +17,7 @@ from FlowControlContext import *
 from RegisterAllocator import *
 from InformationInjector import *
 from ByteCodeGenerator import *
+from GeneratorAPI import *
 
 class TestFlowControlByteCodeGeneration(unittest.TestCase):
     def setUp(self):
@@ -37,6 +38,7 @@ class TestFlowControlByteCodeGeneration(unittest.TestCase):
         self.manager.setCurrentContexts(self.contexts)
         self.byteCodeGenerator = ByteCodeGenerator(self.context, self.manager)
         self.informationInjector = InformationInjector()
+        self.generator = GeneratorAPI(self.context,self.manager)
 
     def test_generateByteCode_will_make_code_for_if(self):
         lexer = LexerStateMachine('if(x==2 ) { }', self.context)
@@ -114,9 +116,10 @@ class TestFlowControlByteCodeGeneration(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 4]),byteCodes[5])
         self.assertEqual(self.byteCodeGenerator.loadValue([5,1000]),byteCodes[6])
         self.assertEqual(self.byteCodeGenerator.storeRegister([5, 7, 4]),byteCodes[7])
-        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 4]),byteCodes[8])
-        self.assertEqual(self.byteCodeGenerator.loadValue([5, 2000]),byteCodes[9])
-        self.assertEqual(self.byteCodeGenerator.storeRegister([5, 7, 4]),byteCodes[10])
+        self.assertEqual(self.byteCodeGenerator.branch([3]),byteCodes[8])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 4]),byteCodes[9])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 2000]),byteCodes[10])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([5, 7, 4]),byteCodes[11])
 
 
     def test_byteCodeGenerator_will_generate_code_for_the_while_loop_that_contain_no_statements(self):
@@ -228,6 +231,20 @@ class TestFlowControlByteCodeGeneration(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.compareIfEqual([0, 0, 5]), byteCodes[11])
         self.assertEqual(self.byteCodeGenerator.branchIfTrue([0, 1]), byteCodes[12])
         self.assertEqual(self.byteCodeGenerator.branch([-14]), byteCodes[13])
+
+    def test123(self):
+        lexer = LexerStateMachine("""int x = 2;
+                                while(x ==2){
+                                   x = 2;
+                                    x = 100;
+                                    }
+                                    """, self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatements(0)
+
+        byteCodes = self.generator.generateCode(token)
+        byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
 
 if __name__ == '__main__':
     unittest.main()

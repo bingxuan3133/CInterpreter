@@ -78,10 +78,10 @@ class MyTestCase(unittest.TestCase):
         byteCodes.insert(0, self.byteCodeGenerator.dumpRegisterHex([0]))  # hacked bytecode to display r7 value
         byteCodes.insert(2, self.byteCodeGenerator.dumpRegisterHex([0]))  #
         byteCodes.append(self.byteCodeGenerator.halt())
-
+        instructionString = []
         vm = VirtualMachine()
+
         cbytecodes = vm.convertToCArray(byteCodes)
-        vm.dumpBytecodes(cbytecodes)
         vm.VMStep(cbytecodes)
         vm.VMStep(cbytecodes)
         vm.VMStep(cbytecodes)
@@ -148,8 +148,21 @@ class MyTestCase(unittest.TestCase):
         cbytecodes = vm.convertToCArray(bytecodes)
         vm.dumpBytecodes(cbytecodes)
 
-    def test_test(self):
+    def test_invalid_bytecode(self):
+        lexer = LexerStateMachine('int x = 5; if(x==5){x=6;}else{x=7;}', self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatements(0)
+        bytecodes = self.generator.generateCode(token)
         vm = VirtualMachine()
-        vm.dumpBytecode(0x5f798270)
+        cbytecodes = vm.convertToCArray(bytecodes)
+        vm.dumpBytecodes(cbytecodes)
+        lexer = LexerStateMachine('x = x +5;', self.context)
+        parser.lexer = lexer
+        token = parser.parseStatements(0)
+        bytecodes = self.generator.generateCode(token)
+        cbytecodes = vm.convertToCArray(bytecodes)
+        vm.dumpBytecodes(cbytecodes)
+
 if __name__ == '__main__':
     unittest.main()

@@ -17,6 +17,7 @@ class ByteCodeGenerator:
     variableStack = []
     variableCounter = 0
     memorySize = 0
+    verboseByteCode = True  # inject the C statement into the bytecodes list if True
 
 
 
@@ -204,6 +205,7 @@ class ByteCodeGenerator:
         thisGenerator = self
         thisGenerator.byteCodeList =[]
         def recordTheVariable(self,token):
+            thisGenerator.byteCodeList.append(token.data[1].oriString)
             if token.data[0].id in thisGenerator.byteRequired:
                 thisGenerator.variableCounter += 1
                 for member in thisGenerator.variablesInThisAST:
@@ -224,6 +226,7 @@ class ByteCodeGenerator:
                 destinationRegister = thisGenerator.mapping.getALargestWorkingRegister()
             Code = thisGenerator.loadValue([destinationRegister, token.data[index].data[0]])
             thisGenerator.byteCodeList.append(Code)
+            #thisGenerator.appendByteCode(Code)
 
         def generateFloatingPointLoad (self,sequenceCheck = None, token = None, index = -1):
             thisGenerator.lastUseInstruction = thisGenerator.loadFloatingPoint
@@ -277,21 +280,29 @@ class ByteCodeGenerator:
             thisGenerator.mapping.reset()
             tempLocation = thisGenerator.byteCodeList.__len__()
             for statement in self.data[1][0].data:
+                if isinstance(statement,list):
+                    statement = statement[0]
                 statement.generateByteCode()
                 thisGenerator.mapping.reset()
             thisGenerator.byteCodeList.insert(tempLocation, thisGenerator.branch([thisGenerator.byteCodeList.__len__()-tempLocation]))
             if self.data.__len__() == 3:
                 for statement in self.data[2].data[0][0].data:
+                    tempLocation = thisGenerator.byteCodeList.__len__()
                     statement.generateByteCode()
                     thisGenerator.mapping.reset()
+                    thisGenerator.byteCodeList.insert(tempLocation, thisGenerator.branch([thisGenerator.byteCodeList.__len__()-tempLocation]))
             return thisGenerator.byteCodeList
 
         def whileByteCode(self,sequenceCheck = None, token = None, index = -1):
+            if thisGenerator.verboseByteCode:
+                thisGenerator.byteCodeList.append(self.data[0].oriString.strip())
             self.data[0].generateByteCode()
             thisGenerator.byteCodeList.append(thisGenerator.branchIfTrue([thisGenerator.mapping.releaseAWorkingRegister(),1]))
             thisGenerator.mapping.reset()
             tempLocation = thisGenerator.byteCodeList.__len__()
             for statement in self.data[1][0].data:
+                if thisGenerator.verboseByteCode:
+                    thisGenerator.byteCodeList.append(statement.oriString.strip())
                 statement.generateByteCode()
                 thisGenerator.mapping.reset()
             branchSize = thisGenerator.byteCodeList.__len__()-tempLocation
@@ -344,6 +355,7 @@ class ByteCodeGenerator:
                                 '|':([None],[generalByteCode]),
                                 '%':([None],[generalByteCode]),
                                 '=':([None],[generalByteCode]),
+                                '!=':([None],[generalByteCode]),
                                 '<':([None],[generalByteCode]),
                                 '<=':([None],[generalByteCode]),
                                 '>':([None],[generalByteCode]),
@@ -418,3 +430,5 @@ class ByteCodeGenerator:
         self.memorySize = 0
         return newList
 
+    def appendByteCode(self, ):
+        pass

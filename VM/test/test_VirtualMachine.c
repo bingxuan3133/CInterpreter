@@ -3,9 +3,10 @@
 #include "Instruction.h"
 #include "Disassembler.h"
 #include "Exception.h"
+#include "Print.h"
 
 void setUp(void) {
-  VMinit(10);
+  VMinit(10, NULL);
 }
 
 void tearDown(void) {
@@ -44,11 +45,11 @@ void xtest_read_binary_file(void) {
 */
 
 void test_VMinit(void) {
-  VMinit(100);
+  VMinit(100, NULL);
   TEST_ASSERT_EQUAL((int)memoryStack, reg[7].data);
   TEST_ASSERT_EQUAL((int)memoryStack, reg[7].base);
   TEST_ASSERT_EQUAL(100, reg[7].limit);
-  VMinit(100);
+  VMinit(100, NULL);
   TEST_ASSERT_EQUAL(100, reg[7].limit);
 }
 

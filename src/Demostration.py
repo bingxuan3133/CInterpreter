@@ -41,7 +41,7 @@ while(1):
     try:
         token = parser.parseStatements(0)
         byteCodes = generator.generateCode(token)
-        byteCodes.append(0xffffffff)  # to halt the VM
+          # to halt the VM
         cbytecode = vm.convertToCArray(byteCodes)
         vm.dumpBytecodes(cbytecode)
         vm.VMRun(cbytecode)

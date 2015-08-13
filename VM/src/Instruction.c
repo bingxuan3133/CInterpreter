@@ -1,6 +1,7 @@
 #include "VirtualMachine.h"
 #include "Instruction.h"
 #include "Exception.h"
+#include "Print.h"
 #include <stdio.h>
 
 
@@ -145,12 +146,12 @@ void execute(int bytecode) {
 
 void dumpRegister(int bytecode) {
   int regIndex = getRd(bytecode);
-  printf("r%d: %d\n", regIndex, reg[regIndex].data);
+  _printf("r%d: %d\n", regIndex, reg[regIndex].data);
 }
 
 void dumpRegisterHex(int bytecode) {
   int regIndex = getRd(bytecode);
-  printf("r%d: 0x%x\n", regIndex, reg[regIndex].data);
+  _printf("r%d: 0x%x\n", regIndex, reg[regIndex].data);
 }
 
 /**
