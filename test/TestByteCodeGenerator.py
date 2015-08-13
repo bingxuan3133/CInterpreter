@@ -782,5 +782,51 @@ class TestByteCodeGenerator(unittest.TestCase):
         self.assertEqual(self.byteCodeGenerator.loadFloatingPointRegister([5, 7, 8]),byteCodes[7])
         self.assertEqual(self.byteCodeGenerator.storeFloatingPointRegister([0, 7, 8]),byteCodes[8])
 
+    def test_generateByteCode_for_the_equation_that_do_post_increment(self):
+        lexer = LexerStateMachine("""int name = 0;
+                                  name ++;""", self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatements(0)
+        self.informationInjector.injectRegisterRequired(token)
+        self.byteCodeGenerator.verboseByteCode = True
+        self.byteCodeGenerator.initGeneration()
+        byteCodes = token[0].generateByteCode()
+        byteCodes = token[1].generateByteCode()
+        byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
+        self.assertEqual(self.byteCodeGenerator.loadValue([0, 4]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.subRegister([7, 7, 0]),byteCodes[1])
+        self.assertEqual('int name = 0;', byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 0]), byteCodes[3])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 0]),byteCodes[4])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([5, 7, 0]),byteCodes[5])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7 ,0]),byteCodes[6])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 1]),byteCodes[7])
+        self.assertEqual(self.byteCodeGenerator.addRegister([0, 0, 5 ]), byteCodes[8])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([0, 7, 0]),byteCodes[9])
+
+    def test_generateByteCode_for_the_equation_that_do_post_decrement(self):
+        lexer = LexerStateMachine("""int name = 0;
+                                     name --;""", self.context)
+        parser = Parser(lexer, self.manager)
+        self.manager.setParser(parser)
+        token = parser.parseStatements(0)
+        self.informationInjector.injectRegisterRequired(token)
+        self.byteCodeGenerator.verboseByteCode = True
+        self.byteCodeGenerator.initGeneration()
+        byteCodes = token[0].generateByteCode()
+        byteCodes = token[1].generateByteCode()
+        byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
+        self.assertEqual(self.byteCodeGenerator.loadValue([0, 4]), byteCodes[0])
+        self.assertEqual(self.byteCodeGenerator.subRegister([7, 7, 0]),byteCodes[1])
+        self.assertEqual('int name = 0;', byteCodes[2])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7, 0]), byteCodes[3])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 0]),byteCodes[4])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([5, 7, 0]),byteCodes[5])
+        self.assertEqual(self.byteCodeGenerator.loadRegister([0, 7 ,0]),byteCodes[6])
+        self.assertEqual(self.byteCodeGenerator.loadValue([5, 1]),byteCodes[7])
+        self.assertEqual(self.byteCodeGenerator.subRegister([0, 0, 5 ]), byteCodes[8])
+        self.assertEqual(self.byteCodeGenerator.storeRegister([0, 7, 0]),byteCodes[9])
+
 if __name__ == '__main__':
     unittest.main()
