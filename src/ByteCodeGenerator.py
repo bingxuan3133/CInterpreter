@@ -266,6 +266,9 @@ class ByteCodeGenerator:
         def generalByteCode(self,sequenceCheck = None, token = None, index = -1):
             if self.id == '(':
                 self = self.data[0]
+            if thisGenerator.verboseByteCode:
+                if self.oriString not in thisGenerator.byteCodeList:
+                    thisGenerator.byteCodeList.append(self.oriString)
             pushed = thisGenerator.registerAllocator.decideWhetherToPush(self)
             side = thisGenerator.findOutAndGenerateCorrectSideCode(self, respectiveByteCodeFunction[self.id])
             thisGenerator.side = side
@@ -287,11 +290,14 @@ class ByteCodeGenerator:
                 thisGenerator.mapping.reset()
             thisGenerator.byteCodeList.insert(tempLocation, thisGenerator.branch([thisGenerator.byteCodeList.__len__()-tempLocation]))
             if self.data.__len__() == 3:
+                tempLocation = thisGenerator.byteCodeList.__len__()
+                if thisGenerator.verboseByteCode:
+                    thisGenerator.byteCodeList.append(self.data[2].id)
                 for statement in self.data[2].data[0][0].data:
-                    tempLocation = thisGenerator.byteCodeList.__len__()
                     statement.generateByteCode()
                     thisGenerator.mapping.reset()
                     thisGenerator.byteCodeList.insert(tempLocation, thisGenerator.branch([thisGenerator.byteCodeList.__len__()-tempLocation]))
+                    tempLocation = thisGenerator.byteCodeList.__len__()
             return thisGenerator.byteCodeList
 
         def whileByteCode(self,sequenceCheck = None, token = None, index = -1):
@@ -314,6 +320,8 @@ class ByteCodeGenerator:
             return thisGenerator.byteCodeList
 
         def doByteCode(self,sequenceCheck = None, token = None, index = -1):
+            if thisGenerator.verboseByteCode:
+                thisGenerator.byteCodeList.append(self.id)
             tempLocation = thisGenerator.byteCodeList.__len__()
             for statement in self.data[1][0].data:
                 statement.generateByteCode()
@@ -472,5 +480,3 @@ class ByteCodeGenerator:
         self.memorySize = 0
         return newList
 
-    def appendByteCode(self, ):
-        pass
