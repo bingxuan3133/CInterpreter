@@ -37,12 +37,14 @@ extern DoubleRegister dReg[MAX_REG];
 // Export Functions
 void __declspec(dllexport) VMinit(int memorySize, char *buffer);
 void VMConfig(int memorySize);
-Exception* __declspec(dllexport) VMRun(int *bytecode);
-Exception* __declspec(dllexport) VMStep(int *bytecode);
+int* __declspec(dllexport) VMLoad(int *bytecode, int size);
+int*  __declspec(dllexport) VMLoadAppend(int *bytecode, int size);
+void __declspec(dllexport) VMLoadFree();
+Exception* __declspec(dllexport) VMRun();
+Exception* __declspec(dllexport) VMStep();
 
-void _VMLoad(char* filepath, int *bytecode);
-void _VMRun(int *bytecode);
-void _VMStep(int *bytecode);
+void _VMRun();
+void _VMStep();
 
 int getVMBytecode(int pc);
 void loadVMBytecode(int *bytecode);

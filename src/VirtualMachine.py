@@ -20,18 +20,31 @@ class VirtualMachine:
         cBytecodeList = cBytecodeList_t(*bytecodeList)
         return cBytecodeList
 
-    def VMStep(self, cBytecodeList):  # proxy function to interact with real VM
+    def VMLoad(self, mixedList):  # proxy function to interact with real VM
+        self.vmdll.VMLoad.restype = POINTER(c_int)
+        bytecodeList = []
+        for item in mixedList:
+            if isinstance(item, str):
+                print(item)
+            else:
+                print(format(item, '08x') + '   ' + self.disassembleBytecode(item))
+                bytecodeList.append(item)
+        cBytecodeList = self.convertToCArray(bytecodeList)
+        bytecodeAddress = self.vmdll.VMLoad(cBytecodeList, len(cBytecodeList))
+        return bytecodeAddress
+
+    def VMStep(self):  # proxy function to interact with real VM
         #vmstep.argtypes = [POINTER(c_int)]
         self.vmdll.VMStep.restype = POINTER(C_Exception)
-        exception = self.vmdll.VMStep(cBytecodeList)
+        exception = self.vmdll.VMStep()
         print(self.cPtr.value.decode('ascii'))
         if bool(exception):
             raise RuntimeError(exception.contents.errMsg.decode('ASCII'))
 
-    def VMRun(self, cBytecodeList):  # proxy function to interact with real VM
+    def VMRun(self):  # proxy function to interact with real VM
         #vmstep.argtypes = [POINTER(c_int)]
         self.vmdll.VMRun.restype = POINTER(C_Exception)
-        exception = self.vmdll.VMRun(cBytecodeList)
+        exception = self.vmdll.VMRun()
         if bool(exception):
             raise RuntimeError(exception.contents.errMsg.decode('ASCII'))
 
@@ -46,3 +59,11 @@ class VirtualMachine:
         cPtr = cBuffer
         self.vmdll.disassembleBytecode(cPtr, c_int(bytecode))
         print(cPtr.value.decode('ascii'))
+
+    def disassembleBytecode(self, bytecode):  # proxy function to interact with real VM
+        cCharArray100_t = c_char * 100
+        cBuffer = cCharArray100_t(0)
+        cPtr = c_char_p(None)
+        cPtr = cBuffer
+        self.vmdll.disassembleBytecode(cPtr, c_int(bytecode))
+        return cPtr.value.decode('ascii')

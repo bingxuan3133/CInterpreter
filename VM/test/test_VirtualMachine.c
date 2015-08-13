@@ -46,9 +46,7 @@ void xtest_read_binary_file(void) {
 
 void test_VMinit(void) {
   VMinit(100, NULL);
-  TEST_ASSERT_EQUAL((int)memoryStack, reg[7].data);
-  TEST_ASSERT_EQUAL((int)memoryStack, reg[7].base);
-  TEST_ASSERT_EQUAL(100, reg[7].limit);
+  TEST_ASSERT_EQUAL((int)(memoryStack+100), reg[7].data);
   VMinit(100, NULL);
   TEST_ASSERT_EQUAL(100, reg[7].limit);
 }
@@ -67,7 +65,8 @@ void test_VMRun(void) {
   bytecodes[7] = dumprHex(REG_0);
   bytecodes[8] = dumprHex(REG_1);
   bytecodes[9] = 0xffffffff;
-  VMRun(bytecodes);
+  VMLoad(bytecodes, 10);
+  VMRun();
   printf("stop\n");
 }
 
@@ -75,7 +74,7 @@ void test_VMStep_test(void) {
   int bytecodes[10] = {0};
   char strBuffer[300] = {0};
   bytecodes[0] = halt();
-
+  VMLoad(bytecodes, 1);
   VMStep(bytecodes);
 }
 
@@ -84,10 +83,10 @@ void test_VMStep(void) {
   char strBuffer[300] = {0};
   bytecodes[0] = ldrImm(REG_0, 0x50);
   bytecodes[1] = ldrImm(REG_0, 0x100);
-
-  VMStep(bytecodes);
+  VMLoad(bytecodes, 2);
+  VMStep();
   TEST_ASSERT_EQUAL_HEX(0x50, reg[REG_0].data);
-  VMStep(bytecodes);
+  VMStep();
   TEST_ASSERT_EQUAL_HEX(0x100, reg[REG_0].data);
 }
 
@@ -96,8 +95,8 @@ void test_Proxy_VMStep(void) {
   char strBuffer[300] = {0};
   bytecodes[0] = ldrMemSafe(REG_0, REG_0, 0x01); // <-- invalid memory access
   Exception *exception;
-  
-  exception = VMStep(bytecodes);
+  VMLoad(bytecodes, 1);
+  exception = VMStep();
   TEST_ASSERT_NOT_NULL(exception);
   TEST_ASSERT_EQUAL(INVALID_MEMORY_ACCESS, exception->errCode);
   TEST_ASSERT_EQUAL(ldrMemSafe(REG_0, REG_0, 0x01), exception->bc);
@@ -121,6 +120,7 @@ void test_Proxy_VMRun(void) {
   bytecodes[10] = halt();
   Exception *exception;
   
+  VMLoad(bytecodes, 11);
   exception = VMRun(bytecodes);
   TEST_ASSERT_NOT_NULL(exception);
   TEST_ASSERT_EQUAL(INVALID_MEMORY_ACCESS, exception->errCode);
@@ -136,6 +136,7 @@ void test_Proxy_VMRun_should_return_INVALID_BYTECODE_exception(void) {
   bytecodes[1] = halt();
   Exception *exception;
   
+  VMLoad(bytecodes, 2);
   exception = VMRun(bytecodes);
   TEST_ASSERT_NOT_NULL(exception);
   TEST_ASSERT_EQUAL_STRING("ERROR: invalid bytecode (0x01230123, pc = 0).", exception->errMsg);

@@ -42,18 +42,13 @@ class MyTestCase(unittest.TestCase):
         byteCodes.insert(0, self.byteCodeGenerator.dumpRegisterHex([7]))  # hacked bytecode to display r7 value
         byteCodes.insert(2, self.byteCodeGenerator.dumpRegisterHex([7]))  #
 
-        vmdll = cdll.LoadLibrary('../VM/build/release/out/c/VirtualMachine.dll')
-
-        byteCodes.append(0xffffffff)  # to halt the VM
-        byteCodesSize = len(byteCodes)
-        cByteCodes_t = c_int * byteCodesSize
-        cByteCodes = cByteCodes_t(*byteCodes)
-
-        vmdll.restype = POINTER(C_Exception)
-        exception = vmdll.VMStep(cByteCodes)
-        exception = vmdll.VMStep(cByteCodes)
-        exception = vmdll.VMStep(cByteCodes)
-        exception = vmdll.VMStep(cByteCodes)
+        vm = VirtualMachine()
+        vm.VMLoad(byteCodes)
+        vm.restype = POINTER(C_Exception)
+        exception = vm.VMStep()
+        exception = vm.VMStep()
+        exception = vm.VMStep()
+        exception = vm.VMStep()
 
     def test_call_directly_to_dll_VMRun(self):
         lexer = LexerStateMachine('int x;', self.context)
@@ -61,13 +56,10 @@ class MyTestCase(unittest.TestCase):
         self.manager.setParser(parser)
         token = parser.parseStatement(0)
         byteCodes =self.generator.generateCode(token)
-        vmdll = cdll.LoadLibrary('../VM/build/release/out/c/VirtualMachine.dll')
+        vm = VirtualMachine()
 
-        byteCodes.append(0xffffffff)  # to halt the VM
-        bytecodesSize = len(byteCodes)
-        cByteCodes_t = c_int * bytecodesSize
-        cByteCodes = cByteCodes_t(*byteCodes)
-        vmdll.VMRun(cByteCodes)
+        vm.VMLoad(byteCodes)
+        vm.VMRun()
 
     def test_VMStep(self):
         lexer = LexerStateMachine('int x = 5;', self.context)
@@ -81,14 +73,14 @@ class MyTestCase(unittest.TestCase):
         instructionString = []
         vm = VirtualMachine()
 
-        cbytecodes = vm.convertToCArray(byteCodes)
-        vm.VMStep(cbytecodes)
-        vm.VMStep(cbytecodes)
-        vm.VMStep(cbytecodes)
-        vm.VMStep(cbytecodes)
-        vm.VMStep(cbytecodes)
-        vm.VMStep(cbytecodes)
-        vm.VMStep(cbytecodes)
+        vm.VMLoad(byteCodes)
+        vm.VMStep()
+        vm.VMStep()
+        vm.VMStep()
+        vm.VMStep()
+        vm.VMStep()
+        vm.VMStep()
+        vm.VMStep()
 
     def test_VMStep_should_raise_RuntimeError_given_invalid_bytecode(self):
         bytecodes = [0xfff12380]
@@ -96,8 +88,8 @@ class MyTestCase(unittest.TestCase):
         vm = VirtualMachine()
 
         try:
-            cbytecodes = vm.convertToCArray(bytecodes)
-            vm.VMStep(cbytecodes)
+            vm.VMLoad(bytecodes)
+            vm.VMStep()
         except RuntimeError as e:
             self.assertEqual('ERROR: invalid bytecode (0xfff12380, pc = 0).', e.args[0])
             #self.assertEqual('ERROR: invalid bytecode (0xfff12314, pc = 2).', e.errMsg)
@@ -108,13 +100,9 @@ class MyTestCase(unittest.TestCase):
         self.manager.setParser(parser)
         token = parser.parseStatement(0)
         byteCodes =self.generator.generateCode(token)
-        vmdll = cdll.LoadLibrary('../VM/build/release/out/c/VirtualMachine.dll')
-
-        byteCodes.append(0xffffffff)  # to halt the VM
-        byteCodesSize = len(byteCodes)
-        cByteCodes_t = c_int * byteCodesSize
-        cByteCodes = cByteCodes_t(*byteCodes)
-        vmdll.VMRun(cByteCodes)
+        vm = VirtualMachine()
+        vm.VMLoad(byteCodes)
+        vm.VMRun()
 
     def test_VMStep_while_loop(self):
         lexer = LexerStateMachine('int x, y, z; while( x == 2) {x = 100;\n y = 1000;\n z=2000;} ', self.context)
@@ -122,18 +110,16 @@ class MyTestCase(unittest.TestCase):
         self.manager.setParser(parser)
         token = parser.parseStatements(0)
         bytecodes = self.generator.generateCode(token)
-        bytecodes.append(0xff)
 
         vm = VirtualMachine()
-        cbytecodes = vm.convertToCArray(bytecodes)
-        vm.dumpBytecodes(cbytecodes)
-        vm.VMStep(cbytecodes)
-        vm.VMStep(cbytecodes)
-        vm.VMStep(cbytecodes)
-        vm.VMStep(cbytecodes)
-        vm.VMStep(cbytecodes)
-        vm.VMStep(cbytecodes)
-        vm.VMStep(cbytecodes)
+        vm.VMLoad(bytecodes)
+        vm.VMStep()
+        vm.VMStep()
+        vm.VMStep()
+        vm.VMStep()
+        vm.VMStep()
+        vm.VMStep()
+        vm.VMStep()
 
     def test_dumpBytecodes(self):
         lexer = LexerStateMachine('while( x == 2) {x = 100;\n y = 1000;\n z=2000;} ', self.context)
@@ -145,8 +131,7 @@ class MyTestCase(unittest.TestCase):
         self.byteCodeGenerator.variablesInThisAST['z'] = 12
         bytecodes = self.generator.generateCode(token)
         vm = VirtualMachine()
-        cbytecodes = vm.convertToCArray(bytecodes)
-        vm.dumpBytecodes(cbytecodes)
+        vm.VMLoad(bytecodes)
 
     def test_invalid_bytecode(self):
         lexer = LexerStateMachine('int x = 5; if(x==5){x=6;}else{x=7;}', self.context)
@@ -155,8 +140,7 @@ class MyTestCase(unittest.TestCase):
         token = parser.parseStatements(0)
         bytecodes = self.generator.generateCode(token)
         vm = VirtualMachine()
-        cbytecodes = vm.convertToCArray(bytecodes)
-        vm.dumpBytecodes(cbytecodes)
+        vm.VMLoad(bytecodes)
         lexer = LexerStateMachine('x = x +5;', self.context)
         parser.lexer = lexer
         token = parser.parseStatements(0)

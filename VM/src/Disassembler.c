@@ -93,11 +93,11 @@ void dumpBytecodes(int *bytecode) {
 /**
  *  Simpler version of disassembleBytecode
  */
-void dumpBytecode(int bytecode) {
-  char dumpBuffer[500] = {0};
+void __declspec(dllexport) printBytecode(int bytecode) {
+  char dumpBuffer[100] = {0};
   unsigned char opcode = bytecode;
   disassembleBytecode(dumpBuffer, bytecode);
-  _printf("%s", dumpBuffer);
+  _printf("%08x %s", bytecode, dumpBuffer);
 }
 
 void disassembleHalt(char *strBuffer, int bytecode) {
@@ -105,13 +105,13 @@ void disassembleHalt(char *strBuffer, int bytecode) {
 }
 
 void disassembleDefault(char *strBuffer, int bytecode) {
-  sprintf(strBuffer, "Invalid Bytecode! (0x%08x)", bytecode);
+  sprintf(strBuffer, "", bytecode);
 }
 
 // Disassemble Functions
 void disassembleDumpr(char *strBuffer, int bytecode) {
   int regIndex = getRd(bytecode);
-  sprintf(strBuffer, "dumpr r%d", regIndex);
+  sprintf(strBuffer, "%08x dumpr r%d", regIndex);
 }
 
 void disassembleDumprHex(char *strBuffer, int bytecode) {
