@@ -17,7 +17,7 @@ class ByteCodeGenerator:
     variableStack = []
     variableCounter = 0
     memorySize = 0
-    verboseByteCode = True  # inject the C statement into the bytecodes list if True
+    verboseByteCode = False  # inject the C statement into the bytecodes list if True
 
 
 
@@ -205,7 +205,8 @@ class ByteCodeGenerator:
         thisGenerator = self
         thisGenerator.byteCodeList =[]
         def recordTheVariable(self,token):
-            thisGenerator.byteCodeList.append(token.data[1].oriString)
+            if thisGenerator.verboseByteCode:
+                thisGenerator.byteCodeList.append(token.data[1].oriString)
             if token.data[0].id in thisGenerator.byteRequired:
                 thisGenerator.variableCounter += 1
                 for member in thisGenerator.variablesInThisAST:
@@ -323,6 +324,47 @@ class ByteCodeGenerator:
             thisGenerator.byteCodeList.append(thisGenerator.branch([-branchSize]))
             return thisGenerator.byteCodeList
 
+        def multipleByteCode(self,sequenceCheck = None, token = None, index = -1):
+            for token in self.data:
+                token.generateByteCode(sequenceCheck, self.data[0], index = 1)
+            return thisGenerator.byteCodeList
+
+        def incrementByteCode(self,sequenceCheck = None, token = None, index = -1):
+            stackpointer = thisGenerator.mapping.framePointerRegister
+            relativeAddress = thisGenerator.variablesInThisAST[self.data[0].data[0]]
+            GPR = [thisGenerator.mapping.getAFreeWorkingRegister(), stackpointer, relativeAddress]
+            Code = thisGenerator.loadRegister(GPR)
+            thisGenerator.byteCodeList.append(Code)
+            Code = thisGenerator.loadValue([thisGenerator.mapping.getALargestWorkingRegister(), 1])
+            thisGenerator.byteCodeList.append(Code)
+            destinationRegister = thisGenerator.mapping.releaseAWorkingRegister()
+            source1 = destinationRegister
+            source2 = thisGenerator.mapping.releaseALargestWorkingRegister()
+            GPR = [destinationRegister,source1,source2]
+            Code = thisGenerator.addRegister(GPR)
+            thisGenerator.byteCodeList.append(Code)
+            Code = thisGenerator.storeRegister([thisGenerator.mapping.getAFreeWorkingRegister(),stackpointer,relativeAddress])
+            thisGenerator.byteCodeList.append(Code)
+            return thisGenerator.byteCodeList
+
+        def decrementByteCode(self,sequenceCheck = None, token = None, index = -1):
+            stackpointer = thisGenerator.mapping.framePointerRegister
+            relativeAddress = thisGenerator.variablesInThisAST[self.data[0].data[0]]
+            GPR = [thisGenerator.mapping.getAFreeWorkingRegister(), stackpointer, relativeAddress]
+            Code = thisGenerator.loadRegister(GPR)
+            thisGenerator.byteCodeList.append(Code)
+            Code = thisGenerator.loadValue([thisGenerator.mapping.getALargestWorkingRegister(), 1])
+            thisGenerator.byteCodeList.append(Code)
+            destinationRegister = thisGenerator.mapping.releaseAWorkingRegister()
+            source1 = destinationRegister
+            source2 = thisGenerator.mapping.releaseALargestWorkingRegister()
+            GPR = [destinationRegister,source1,source2]
+            Code = thisGenerator.subRegister(GPR)
+            thisGenerator.byteCodeList.append(Code)
+            Code = thisGenerator.storeRegister([thisGenerator.mapping.getAFreeWorkingRegister(),stackpointer,relativeAddress])
+            thisGenerator.byteCodeList.append(Code)
+            return thisGenerator.byteCodeList
+
         def defByteCode(self,sequenceCheck = None, token = None, index = -1):
             recordTheVariable(None, self.data[0])
             sequenceCheck = 0
@@ -374,9 +416,9 @@ class ByteCodeGenerator:
                                 'do':([None],[doByteCode]),
                                 'else':([None],[noByteCode]),
                                 ',':([None],[noByteCode]),
-                                '(multiple)':([None],[noByteCode]),
-                                '--':([None],[noByteCode]),
-                                '++':([None],[noByteCode]),
+                                '(multiple)':([None],[multipleByteCode]),
+                                '--':([None],[decrementByteCode]),
+                                '++':([None],[incrementByteCode]),
                                 '||':([None],[noByteCode]),
                                 '&':([None],[noByteCode]),
                                 'unsigned':([None],[noByteCode]),
