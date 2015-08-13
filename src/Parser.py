@@ -42,8 +42,12 @@ class Parser:
         else:                               # For one statement
             returnedToken = self.parse(bindingPower)
             if returnedToken.id == '(multiple)':  # For declaration & definition
+                try:
+                    self.lexer.peep(';')
+                except:
+                    self.scopeBuilder.popCurrentScope(len(returnedToken.data))
+                    raise
                 list.extend(returnedToken.data)
-                self.lexer.peep(';')
                 self.lexer.advance()
                 return list
             else:

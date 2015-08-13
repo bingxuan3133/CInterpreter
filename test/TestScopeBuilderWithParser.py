@@ -111,8 +111,26 @@ class TestParseStatementToMockBuildScope(unittest.TestCase):
             self.fail()
         except SyntaxError as e:
             self.assertEqual("Error[1][9]:Redeclaration of 'x'"+ '\n' +
-                               'int x, *x;'+ '\n' +
-                               '        ^',e.msg)
+                             'int x, *x;'+ '\n' +
+                             '        ^',e.msg)
+
+    def test_buildScope_should_not_raise_given_redeclaration_of_x(self):
+        lexer = LexerStateMachine('int x', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        try:
+            parser.parseStatement(0)
+        except SyntaxError as e:
+            self.assertEqual("Error[1][6]:Expecting ; before (systemToken)" + '\n' +
+                             'int x' + '\n' +
+                             '     ^', e.msg)
+        try:
+            lexer = LexerStateMachine('int x;', self.context)
+            parser.lexer = lexer
+            parser.parseStatement(0)
+        except SyntaxError as e:
+            print(e.msg)
+            self.fail('Should not raise')
 
 if __name__ == '__main__':
     unittest.main()

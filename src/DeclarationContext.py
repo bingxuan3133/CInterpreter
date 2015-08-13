@@ -305,7 +305,6 @@ class DeclarationContext(Context):
                     self.expressionList.append(expressionToken)
                 else:
                     self.errorToken = nextToken
-            nextToken = thisContext.contextManager.parser.lexer.peep(';')
             ddToken = thisContext.buildDeclAndDefToken(self)
             return ddToken
         def led(self, token):
@@ -478,7 +477,6 @@ class DeclarationContext(Context):
                     self.expressionList.append(expressionToken)
                 else:
                     self.errorToken = nextToken
-            nextToken = thisContext.contextManager.parser.lexer.peep(';')
             ddToken = thisContext.buildDeclAndDefToken(self)
             return ddToken
         def led(self, token):
@@ -703,7 +701,6 @@ class DeclarationContext(Context):
                     self.expressionList.append(expressionToken)
                 else:
                     self.errorToken = nextToken
-            nextToken = thisContext.contextManager.parser.lexer.peep(';')
             ddToken = thisContext.buildDeclAndDefToken(self)
             return ddToken
 
@@ -798,7 +795,6 @@ class DeclarationContext(Context):
                     self.expressionList.append(expressionToken)
                 else:
                     self.errorToken = nextToken
-            nextToken = thisContext.contextManager.parser.lexer.peep(';')
             ddToken = thisContext.buildDeclAndDefToken(self)
             return ddToken
 
