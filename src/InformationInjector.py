@@ -30,10 +30,14 @@ class InformationInjector:
             token = tokenToInject.data[0]
         elif tokenToInject.id == '(def)':
             token = tokenToInject.data[1]
-            self.insertBasicInformationForLiteral(token)
+            if token.id == '(literal)':
+                self.insertBasicInformationForLiteral(token)
+            else:
+                self.injectRegisterRequired(token)
             return
-        elif tokenToInject.id == '(None)':
-            pass
+        elif tokenToInject.id == '(multiple)':
+            self.injectRegisterRequired(tokenToInject.data[0])
+            return
         elif tokenToInject.id == '(decl)':
             return
         else:
