@@ -392,14 +392,13 @@ void disassembleFdiv(char *strBuffer, int bytecode) {
 // branch
 
 void disassembleBra(char *strBuffer, int bytecode) {
-  int resultReg = getRd(bytecode);
   int relativeAddress = bytecode >> 8;
-  sprintf(strBuffer, "bra r%d #%d", resultReg, relativeAddress);
+  sprintf(strBuffer, "bra #%d", relativeAddress);
 }
 
 void disassembleBit(char *strBuffer, int bytecode) {
   int resultReg = getRd(bytecode);
-  int relativeAddress = bytecode >> 8;
+  int relativeAddress = bytecode >> (8 + MAX_REG_BIT);
   sprintf(strBuffer, "bit r%d #%d", resultReg, relativeAddress);
 }
 

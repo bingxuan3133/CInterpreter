@@ -41,9 +41,9 @@ Exception* __declspec(dllexport) VMStep(int *bytecode) {
   }
 }
 
-void VMConfig(int memorySize) {
+void VMConfig(int memorySize) {  // memorySize = number of 4 bytes
   memoryStack = malloc(memorySize*4);
-  reg[MAX_REG - 1].data = (int)memoryStack;
+  reg[MAX_REG - 1].data = (int)(memoryStack + memorySize);
   reg[MAX_REG - 1].base = (int)memoryStack;
   reg[MAX_REG - 1].limit = memorySize;
 }

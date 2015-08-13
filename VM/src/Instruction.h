@@ -143,23 +143,23 @@ typedef enum {
   OR = 0x11,
   XOR = 0x12,
   FLDR_IMM = 0x13,
-  FLDR ,
-  FSTR ,
-  FADD ,
-  FSUB ,
-  FMUL ,
-  FDIV,
-  BRA ,
-  BRA_IF_TRUE ,
-  CMPE,
-  CMPLT,
-  CMPLTE,
-  CMPGT,
-  CMPGTE,
+  FLDR = 0x14,
+  FSTR = 0x15,
+  FADD = 0x16,
+  FSUB = 0x17,
+  FMUL = 0x18,
+  FDIV = 0x19,
+  BRA = 0x1a,
+  BRA_IF_TRUE = 0x1b,
+  CMPE = 0x1c,
+  CMPLT = 0x1d,
+  CMPLTE = 0x1e,
+  CMPGT = 0x1f,
+  CMPGTE = 0x20,
   HALT = 0xff,
 } Instruction;
 
-#define MAX_INSTRUCTION BRA_IF_TRUE
+#define MAX_INSTRUCTION CMPGTE
 
 // main function
 void execute(int bytecode);

@@ -125,6 +125,7 @@ class MyTestCase(unittest.TestCase):
         self.byteCodeGenerator.variablesInThisAST['y'] = 8
         self.byteCodeGenerator.variablesInThisAST['z'] = 12
         bytecodes = self.generator.generateCode(token)
+        bytecodes.append(0xff)
 
         vm = VirtualMachine()
         cbytecodes = vm.convertToCArray(bytecodes)
@@ -146,7 +147,6 @@ class MyTestCase(unittest.TestCase):
         self.byteCodeGenerator.variablesInThisAST['y'] = 8
         self.byteCodeGenerator.variablesInThisAST['z'] = 12
         bytecodes = self.generator.generateCode(token)
-        print(bytecodes)
         vm = VirtualMachine()
         cbytecodes = vm.convertToCArray(bytecodes)
         vm.dumpBytecodes(cbytecodes)
