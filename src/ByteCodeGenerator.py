@@ -243,11 +243,13 @@ class ByteCodeGenerator:
                 destinationRegister = thisGenerator.mapping.getAFreeWorkingRegister()
             else:
                 destinationRegister = thisGenerator.mapping.getALargestWorkingRegister()
-
-            if thisGenerator.floatingFlag ==1:
-                Code = thisGenerator.loadFloatingPointRegister([destinationRegister, thisGenerator.mapping.framePointerRegister, thisGenerator.variablesInThisAST[token.data[index].data[0]]])
-            else:
-                Code = thisGenerator.loadRegister([destinationRegister, thisGenerator.mapping.framePointerRegister, thisGenerator.variablesInThisAST[token.data[index].data[0]]])
+            try:
+                if thisGenerator.floatingFlag ==1:
+                    Code = thisGenerator.loadFloatingPointRegister([destinationRegister, thisGenerator.mapping.framePointerRegister, thisGenerator.variablesInThisAST[token.data[index].data[0]]])
+                else:
+                    Code = thisGenerator.loadRegister([destinationRegister, thisGenerator.mapping.framePointerRegister, thisGenerator.variablesInThisAST[token.data[index].data[0]]])
+            except KeyError as e:
+                raise SyntaxError(Error.generateErrorMessageWithOneArguement("Variable {} is not declared!",token.data[index],e.args[0]))
             thisGenerator.byteCodeList.append(Code)
 
 

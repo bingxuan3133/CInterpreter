@@ -14,7 +14,7 @@ def generateErrorMessageWithOneArguement(ErrorMessage, ErrorToken, Actual):
         # This curly braces is the location of the arguement that you putted in.
         caretMessage = ' '*(ErrorToken.column-1)+'^'
         errorLabelWithLocation="Error[{}][{}]".format(ErrorToken.line,ErrorToken.column)
-        ErrorMessage.format(Actual)
+        ErrorMessage = ErrorMessage.format(Actual)
         firstLineError=errorLabelWithLocation+':'+ErrorMessage
         ErrorMessageWithInformation = firstLineError + '\n' + ErrorToken.oriString + '\n' + caretMessage
         return ErrorMessageWithInformation
@@ -25,7 +25,7 @@ def generateErrorMessageWithTwoArguement(ErrorMessage, ErrorToken, Actual, Expec
         # This curly braces is the location of the arguement that you putted in.
         caretMessage = ' '*(ErrorToken.column-1)+'^'
         errorLabelWithLocation="Error[{}][{}]".format(ErrorToken.line,ErrorToken.column)
-        ErrorMessage.format(Expected, Actual)
+        ErrorMessage = ErrorMessage.format(Expected, Actual)
         firstLineError=errorLabelWithLocation+':'+ErrorMessage
         ErrorMessageWithInformation = firstLineError + '\n' + ErrorToken.oriString + '\n' + caretMessage
         return ErrorMessageWithInformation
