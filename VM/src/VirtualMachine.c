@@ -6,6 +6,7 @@
 #include <malloc.h>
 
 int *VMbytecode;
+int VMbytecodeSize;
 int *memoryStack;
 unsigned int programCounter = 0;
 Register reg[MAX_REG];
@@ -23,25 +24,56 @@ void __declspec(dllexport) VMinit(int memorySize, char *buffer) {
 }
 
 // Export Functions
-Exception* __declspec(dllexport) VMRun(int *bytecode) {
+Exception* __declspec(dllexport) VMRun() {
   Exception* exception;
   Try {
-    _VMRun(bytecode);
+    _VMRun();
     return NULL;
   } Catch (exception) {
     return exception;
   }
 }
 
-Exception* __declspec(dllexport) VMStep(int *bytecode) {
+Exception* __declspec(dllexport) VMStep() {
   Exception* exception;
   Try {
-    _VMStep(bytecode);
+    _VMStep();
     return NULL;
   } Catch (exception) {
     return exception;
   }
 }
+
+int* __declspec(dllexport) VMLoad(int *bytecode, int size) {
+  VMbytecode = malloc(size*sizeof(int));
+  VMbytecodeSize = size;
+  int i;
+  for(i = 0; i < size; i++) {
+    VMbytecode[i] = bytecode[i];
+  }
+  return VMbytecode;
+}
+
+int* __declspec(dllexport) VMLoadAppend(int *bytecode, int size) {
+  int *oldVMbytecode = VMbytecode;
+  int oldSize = VMbytecodeSize;
+  VMbytecode = malloc((VMbytecodeSize + size)*sizeof(int));
+  VMbytecodeSize = size;
+  int i;
+  for(i = 0; i < oldSize; i++) {
+    VMbytecode[i] = oldVMbytecode[i];
+  }
+  for(i = 0; i < size; i++) {
+    VMbytecode[i + oldSize] = bytecode[i];
+  }
+  free(oldVMbytecode);
+  return VMbytecode;
+}
+
+void __declspec(dllexport) VMLoadFree() {
+  free(VMbytecode);
+}
+
 
 void VMConfig(int memorySize) {  // memorySize = number of 4 bytes
   memoryStack = malloc(memorySize*4);
@@ -51,36 +83,18 @@ void VMConfig(int memorySize) {  // memorySize = number of 4 bytes
 }
 
 // Inner Functions
-void _VMRun(int *bytecode) {
-  VMbytecode = bytecode;
-  while((unsigned char)bytecode[programCounter] != halt()) {
-    execute(bytecode[programCounter]);
+void _VMRun() {
+  while((unsigned char)VMbytecode[programCounter] != halt()) {
+    execute(VMbytecode[programCounter]);
     programCounter++;
   }
 }
 
-void _VMStep(int *bytecode) {
-  VMbytecode = bytecode;
-  if((unsigned char)bytecode[programCounter] != halt()) {
-    execute(bytecode[programCounter]);
+void _VMStep() {
+  if((unsigned char)VMbytecode[programCounter] != halt()) {
+    execute(VMbytecode[programCounter]);
     programCounter++;
   }
-}
-
-void _VMLoad(char* filepath, int *bytecode) {
-  // FILE *file;
-  // char fileNameBuffer[100];
-  // sprintf(fileNameBuffer, "%s", filepath);
-  // file = fopen(filepath, "r+");
-  // int i;
-  
-  // *bytecode = getBytecode(file);
-  // while(*bytecode != 0xFFFFFFFF) {
-    // bytecode++;
-    // *bytecode = getBytecode(file);
-  // }
-  
-  // fclose(file);
 }
 
 int getVMBytecode(int pc) {
