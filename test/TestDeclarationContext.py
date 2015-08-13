@@ -128,7 +128,7 @@ class TestDeclarationContextStartingWithShort(unittest.TestCase):
             parser.parseStatement(0)
             raise SyntaxError ("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Error[1][6]:Expecting (identifier) before (systemToken)"+'\n'+
+            self.assertEqual("Error[1][6]:Expecting (identifier) before EOF"+'\n'+
                              'short'+'\n'+
                              '     ^', e.msg)
 
@@ -140,7 +140,7 @@ class TestDeclarationContextStartingWithShort(unittest.TestCase):
             parser.parseStatement(0)
             raise SyntaxError("Exception test failed!")
         except SyntaxError as e:
-            self.assertEqual("Error[1][9]:Expecting ; before (systemToken)"+'\n'+
+            self.assertEqual("Error[1][9]:Expecting ; before EOF"+'\n'+
                              'short x '+'\n'+
                              '        ^', e.msg)
 

@@ -121,11 +121,11 @@ class ByteCodeGenerator:
         number = 0x1c | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
-    def compareIfLessThan(self, GPR=[]):
+    def compareIfLesserThan(self, GPR=[]):
         number = 0x1d | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
-    def compareIfLessThanOrEqual(self,GPR=[]):
+    def compareIfLesserThanOrEqual(self,GPR=[]):
         number = 0x1e | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
@@ -171,6 +171,10 @@ class ByteCodeGenerator:
                 GPR = [secondRegister,self.mapping.framePointerRegister,self.variableStack.pop()]
             else:
                 GPR = [firstRegister,self.mapping.framePointerRegister,self.variableStack.pop()]
+            Code = generateByteCode(GPR)
+            self.byteCodeList.append(Code)
+            #self.byteCodeList.insert(self.byteCodeList.__len__(),Code)
+            return
         else:
             if status != 0:
                 count = self.mapping.getASmallestFreeRegisterBeforePop(status)
@@ -266,7 +270,7 @@ class ByteCodeGenerator:
 
         def ifByteCode(self,sequenceCheck = None, token = None, index = -1):
             self.data[0].data[0].generateByteCode()
-            thisGenerator.byteCodeList.append(thisGenerator.branchIfTrue([1,thisGenerator.mapping.releaseAWorkingRegister()]))
+            thisGenerator.byteCodeList.append(thisGenerator.branchIfTrue([thisGenerator.mapping.releaseAWorkingRegister(),1]))
             thisGenerator.mapping.reset()
             tempLocation = thisGenerator.byteCodeList.__len__()
             for statement in self.data[1][0].data:
@@ -281,7 +285,7 @@ class ByteCodeGenerator:
 
         def whileByteCode(self,sequenceCheck = None, token = None, index = -1):
             self.data[0].generateByteCode()
-            thisGenerator.byteCodeList.append(thisGenerator.branchIfTrue([1,thisGenerator.mapping.releaseAWorkingRegister()]))
+            thisGenerator.byteCodeList.append(thisGenerator.branchIfTrue([thisGenerator.mapping.releaseAWorkingRegister(),1]))
             thisGenerator.mapping.reset()
             tempLocation = thisGenerator.byteCodeList.__len__()
             for statement in self.data[1][0].data:
@@ -300,7 +304,7 @@ class ByteCodeGenerator:
                 statement.generateByteCode()
                 thisGenerator.mapping.reset()
             self.data[0].generateByteCode()
-            thisGenerator.byteCodeList.append(thisGenerator.branchIfTrue([1,thisGenerator.mapping.releaseAWorkingRegister()]))
+            thisGenerator.byteCodeList.append(thisGenerator.branchIfTrue([thisGenerator.mapping.releaseAWorkingRegister(),1]))
             branchSize = thisGenerator.byteCodeList.__len__()-tempLocation+1
             thisGenerator.byteCodeList.append(thisGenerator.branch([-branchSize]))
             return thisGenerator.byteCodeList
@@ -327,7 +331,7 @@ class ByteCodeGenerator:
             return thisGenerator.byteCodeList
         generationFunction = {  '(literal)':([None], [generateLiteralCode]),
                                 '(identifier)':([None], [generateIdentifierCode]),
-                                '(systemToken)':([None], [noByteCode]),
+                                'EOF':([None], [noByteCode]),
                                 '(floating)':([None], [generateFloatingPointLoad]),
                                 '+':([None],[generalByteCode]),
                                 '-':([None],[generalByteCode]),
@@ -373,7 +377,7 @@ class ByteCodeGenerator:
 
         respectiveByteCodeFunction = {
                                     '=': self.storeRegister, '+': self.addRegister,'-': self.subRegister, '*': self.multiplyRegister, '/': self.divideRegister,'|': self.orRegister,'%':self.modulusRegister,
-                                    '==':self.compareIfEqual,'<':self.compareIfLessThan,'<=':self.compareIfLessThanOrEqual,'>':self.compareIfGreaterThan,'>=':self.compareIfGreaterThanOrEqual,
+                                    '==':self.compareIfEqual,'<':self.compareIfLesserThan,'<=':self.compareIfLesserThanOrEqual,'>':self.compareIfGreaterThan,'>=':self.compareIfGreaterThanOrEqual,
                                     '&&':self.orRegister,
                                     '(systemToken)': self.nothing, ';': self.nothing, ',': self.nothing, '}': self.nothing, '{': self.nothing}
 

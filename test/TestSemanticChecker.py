@@ -314,8 +314,8 @@ class TestSemanticCheckerDeclarationCheck(unittest.TestCase):
             semanticChecker.checkIfAssignmentValid(token[0])
             self.fail('Should raise')
         except SyntaxError as e:
-            self.assertEqual("Error[2][4]:(literal) do not have address" + '\n' +
-                             'x = &5' + '\n' +
+            self.assertEqual("Error[2][6]:(literal) do not have address" + '\n' +
+                             'x = &5;' + '\n' +
                              '     ^', e.msg)
 
 if __name__ == '__main__':

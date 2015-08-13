@@ -32,6 +32,8 @@ class InformationInjector:
             token = tokenToInject.data[1]
             self.insertBasicInformationForLiteral(token)
             return
+        elif tokenToInject.id == '(None)':
+            pass
         elif tokenToInject.id == '(decl)':
             return
         else:

@@ -89,7 +89,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(token.id, '(literal)')
         self.assertEqual(token.data[0], 5)
         token = lexer.advance()
-        self.assertEqual(token.id, '(systemToken)')
+        self.assertEqual(token.id, 'EOF')
         self.assertEqual(token.data[0], '(end)')
 
 if __name__ == '__main__':

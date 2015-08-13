@@ -93,7 +93,7 @@ class Context:
         def nud(self):
             thisContext.contextManager.parser.lexer.advance()
             return self
-        sym = self.symbol('(systemToken)')
+        sym = self.symbol('EOF')
         sym.arity = None
         sym.__repr__ = revealSelf
         sym.nud = nud
