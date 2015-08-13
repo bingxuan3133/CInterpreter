@@ -3,10 +3,11 @@
 #include "Exception.h"
 #include "VirtualMachine.h"
 #include "Instruction.h"
+#include "Print.h"
 #include <stdio.h>
 
 void setUp(void) {
- VMinit(0);
+ VMinit(0, NULL);
 }
 
 void tearDown(void){

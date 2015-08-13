@@ -3,6 +3,7 @@
 #include "VirtualMachine.h"
 #include "Instruction.h"
 #include "Disassembler.h"
+#include "Print.h"
 
 void setUp(void)
 {

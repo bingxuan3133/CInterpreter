@@ -1,6 +1,7 @@
 #include "VirtualMachine.h"
 #include "Instruction.h"
 #include "Exception.h"
+#include "Print.h"
 #include <stdio.h>
 #include <malloc.h>
 
@@ -11,8 +12,9 @@ Register reg[MAX_REG];
 DoubleRegister dReg[MAX_REG];
 Status statusReg;
 
-void __declspec(dllexport) VMinit(int memorySize) {
+void __declspec(dllexport) VMinit(int memorySize, char *buffer) {
   free(memoryStack);
+  pythonBuffer = buffer;
   VMbytecode = NULL;
   clearRegisters();
   clearProgramCounter();
