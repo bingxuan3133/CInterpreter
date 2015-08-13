@@ -14,6 +14,7 @@ class ByteCodeGenerator:
     byteCodeList = []
     byteRequired = {'char': 1, 'short': 2, 'int': 4, 'long': 4, 'float': 4, 'double': 8}
     variablesInThisAST = {}
+    variableStack = []
     variableCounter = 0
     memorySize = 0
 
@@ -51,7 +52,7 @@ class ByteCodeGenerator:
         return number
 
     def storeRegister(self, GPR=[]):
-        number = 0x07 | GPR[0] << 8 | GPR[1] << 11
+        number = 0x07 | GPR[0] << 8 | GPR[1] << 11 | GPR[2] << 14
         return number
 
     def loadMultiple(self, GPR=[]):
@@ -165,37 +166,33 @@ class ByteCodeGenerator:
         GPR=[]
         firstRegister = self.mapping.releaseALargestWorkingRegister()
         secondRegister = self.mapping.releaseAWorkingRegister()
-        if status != 0:
-            count = self.mapping.getASmallestFreeRegisterBeforePop(status)
-            GPR.insert(0,count)
-            GPR.insert(1,secondRegister)
-            GPR.insert(2,firstRegister)
-            #self.oracle.getALargestWorkingRegister()
-        else:
-            if sequence == 0 or sequence == None:
-                GPR.insert(0,secondRegister)
-                GPR.insert(1,secondRegister)
-                GPR.insert(2,firstRegister)
-                self.mapping.getAFreeWorkingRegister()
-            else:
-                GPR.insert(0,firstRegister)
-                GPR.insert(1,secondRegister)
-                GPR.insert(2,firstRegister)
-                self.mapping.getALargestWorkingRegister()
-            if self.side == "RIGHT":
-                temp = GPR[1]
-                GPR[1] =GPR[2]
-                GPR[2] = temp
-
         if self.isStoreFunction(generateByteCode):
             if self.lastUseInstruction == self.loadRegister:
-                GPR[0] = secondRegister
-                GPR[1] = firstRegister
+                GPR = [secondRegister,self.mapping.framePointerRegister,self.variableStack.pop()]
             else:
-                GPR[0] = firstRegister
-                GPR[1] = secondRegister
-
-
+                GPR = [firstRegister,self.mapping.framePointerRegister,self.variableStack.pop()]
+        else:
+            if status != 0:
+                count = self.mapping.getASmallestFreeRegisterBeforePop(status)
+                GPR.insert(0,count)
+                GPR.insert(1,secondRegister)
+                GPR.insert(2,firstRegister)
+                #self.oracle.getALargestWorkingRegister()
+            else:
+                if sequence == 0 or sequence == None:
+                    GPR.insert(0,secondRegister)
+                    GPR.insert(1,secondRegister)
+                    GPR.insert(2,firstRegister)
+                    self.mapping.getAFreeWorkingRegister()
+                else:
+                    GPR.insert(0,firstRegister)
+                    GPR.insert(1,secondRegister)
+                    GPR.insert(2,firstRegister)
+                    self.mapping.getALargestWorkingRegister()
+                if self.side == "RIGHT":
+                    temp = GPR[1]
+                    GPR[1] =GPR[2]
+                    GPR[2] = temp
         Code = generateByteCode(GPR)
         self.byteCodeList.append(Code)
 
@@ -248,9 +245,11 @@ class ByteCodeGenerator:
                     Code = thisGenerator.loadFloatingPointRegister([destinationRegister, thisGenerator.mapping.framePointerRegister, thisGenerator.variablesInThisAST[token.data[index].data[0]]])
                 else:
                     Code = thisGenerator.loadRegister([destinationRegister, thisGenerator.mapping.framePointerRegister, thisGenerator.variablesInThisAST[token.data[index].data[0]]])
+                thisGenerator.variableStack.append(thisGenerator.variablesInThisAST[token.data[index].data[0]])
             except KeyError as e:
                 raise SyntaxError(Error.generateErrorMessageWithOneArguement("Variable {} is not declared!",token.data[index],e.args[0]))
             thisGenerator.byteCodeList.append(Code)
+
 
 
         def generalByteCode(self,sequenceCheck = None, token = None, index = -1):
@@ -312,7 +311,13 @@ class ByteCodeGenerator:
             self.data[0].data[1].generateByteCode(sequenceCheck, self.data[0], index = 1)
             sequenceCheck = 1
             self.data[1].generateByteCode(sequenceCheck, self, index = 1)
-            Code = thisGenerator.storeRegister([thisGenerator.mapping.releaseALargestWorkingRegister(),thisGenerator.mapping.releaseAWorkingRegister()])
+            firstRegister = thisGenerator.mapping.releaseAWorkingRegister()
+            secondRegister = thisGenerator.mapping.releaseALargestWorkingRegister()
+            if thisGenerator.lastUseInstruction == thisGenerator.loadRegister:
+                GPR = [firstRegister,thisGenerator.mapping.framePointerRegister,thisGenerator.variableStack.pop()]
+            else:
+                GPR = [secondRegister,thisGenerator.mapping.framePointerRegister,thisGenerator.variableStack.pop()]
+            Code = thisGenerator.storeRegister(GPR)
             thisGenerator.byteCodeList.append(Code)
 
             return thisGenerator.byteCodeList

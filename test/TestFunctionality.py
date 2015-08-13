@@ -102,7 +102,7 @@ class MyTestCase(unittest.TestCase):
             self.assertEqual('ERROR: invalid bytecode (0xfff12380, pc = 0).', e.args[0])
             #self.assertEqual('ERROR: invalid bytecode (0xfff12314, pc = 2).', e.errMsg)
 
-    def xtest_call_directly_to_dll_VMRun(self):
+    def test_call_directly_to_dll_VMRun(self):
         lexer = LexerStateMachine('int x;', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
