@@ -57,7 +57,7 @@ class Parser:
     def parseStatements(self, bindingPower):
         list = []
         token = self.lexer.peep()
-        while token.id != '}' and token.id != '(systemToken)':
+        while token.id != '}' and token.id != 'EOF':
             returnedToken = self.parseStatement(bindingPower)
             if returnedToken is not None:
                 list.extend(returnedToken)

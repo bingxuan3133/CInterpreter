@@ -74,7 +74,7 @@ class TestParseStatement(unittest.TestCase):
             parser.parseStatement(0)
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Error[1][6]:Expecting ; before (systemToken)"+'\n'+
+            self.assertEqual("Error[1][6]:Expecting ; before EOF"+'\n'+
                              '2 + 3'+'\n'+
                              '     ^', e.msg)
 
@@ -90,7 +90,7 @@ class TestParseStatement(unittest.TestCase):
             parser.parseStatement(0)
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Error[1][4]:Expecting ; before (systemToken)"+'\n'+
+            self.assertEqual("Error[1][4]:Expecting ; before EOF"+'\n'+
                              '+ 3'+'\n'+
                              '   ^', e.msg)
 
@@ -261,7 +261,7 @@ class TestParseStatementWithBraces(unittest.TestCase):
             parser.parseStatement(0)
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Error[1][10]:Expecting } before (systemToken)"+'\n'+
+            self.assertEqual("Error[1][10]:Expecting } before EOF"+'\n'+
                              '{ 2 + 3 ;'+'\n'+
                              '         ^', e.msg)
 
@@ -273,7 +273,7 @@ class TestParseStatementWithBraces(unittest.TestCase):
             parser.parseStatement(0)
             raise SyntaxError("Exception test failed")
         except SyntaxError as e:
-            self.assertEqual("Error[1][14]:Expecting } before (systemToken)"+'\n'+
+            self.assertEqual("Error[1][14]:Expecting } before EOF"+'\n'+
                              '{ 2 + 3 ; { }'+'\n'+
                              '             ^', e.msg)
 

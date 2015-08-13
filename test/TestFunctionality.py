@@ -114,7 +114,7 @@ class MyTestCase(unittest.TestCase):
         byteCodesSize = len(byteCodes)
         cByteCodes_t = c_int * byteCodesSize
         cByteCodes = cByteCodes_t(*byteCodes)
-        vmdll._VMRun(cByteCodes)
+        vmdll.VMRun(cByteCodes)
 
     def test_VMStep_while_loop(self):
         lexer = LexerStateMachine('while( x == 2) {x = 100;\n y = 1000;\n z=2000;} ', self.context)
