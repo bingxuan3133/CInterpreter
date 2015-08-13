@@ -37,7 +37,7 @@ class TestPointerByteCodeGeneration(unittest.TestCase):
         self.manager.setCurrentContexts(self.contexts)
         self.byteCodeGenerator = ByteCodeGenerator(self.context, self.manager)
         self.informationInjector = InformationInjector()
-
+"""
     def test_generateByteCode_will_make_code_for_pointer_initialization(self):
         lexer = LexerStateMachine('char *ptr;', self.context)
         parser = Parser(lexer, self.manager)
@@ -49,6 +49,8 @@ class TestPointerByteCodeGeneration(unittest.TestCase):
         byteCodes = token.generateByteCode()
         byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
         self.assertEqual(self.byteCodeGenerator.loadValue([0, 4]),byteCodes[0])
+        """
+
 
 if __name__ == '__main__':
     unittest.main()
