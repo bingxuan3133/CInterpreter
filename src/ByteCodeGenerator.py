@@ -206,8 +206,11 @@ class ByteCodeGenerator:
         def recordTheVariable(self,token):
             if token.data[0].id in thisGenerator.byteRequired:
                 thisGenerator.variableCounter += 1
+                for member in thisGenerator.variablesInThisAST:
+                    thisGenerator.variablesInThisAST[member] += thisGenerator.byteRequired[token.data[0].id]
+                thisGenerator.variablesInThisAST[token.data[1].data[0]] = thisGenerator.memorySize
                 thisGenerator.memorySize += thisGenerator.byteRequired[token.data[0].id]
-                thisGenerator.variablesInThisAST[token.data[1].data[0]] = thisGenerator.memorySize - thisGenerator.byteRequired[token.data[0].id]
+
 
         def noByteCode(self,sequenceCheck = None, token = None, index = -1):
             if self.id == "(":

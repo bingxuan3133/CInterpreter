@@ -121,7 +121,7 @@ class TestParseStatementToMockBuildScope(unittest.TestCase):
         try:
             parser.parseStatement(0)
         except SyntaxError as e:
-            self.assertEqual("Error[1][6]:Expecting ; before (systemToken)" + '\n' +
+            self.assertEqual("Error[1][6]:Expecting ; before EOF" + '\n' +
                              'int x' + '\n' +
                              '     ^', e.msg)
         try:

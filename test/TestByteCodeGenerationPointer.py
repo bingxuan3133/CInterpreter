@@ -48,6 +48,7 @@ class TestPointerByteCodeGeneration(unittest.TestCase):
         self.byteCodeGenerator.initGeneration()
         byteCodes = token.generateByteCode()
         byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
+        self.assertEqual(self.byteCodeGenerator.loadValue([0, 4]),byteCodes[0])
 
 
 
