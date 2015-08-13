@@ -17,7 +17,6 @@ void (*disassemble[256])(char*, int)  = { [DUMPR] = disassembleDumpr,
                                           [STM] = disassembleStm,
                                           [LDMS] = disassembleLdms,
                                           [STMS] = disassembleStms,
-                                          // [SUB_IMM] = disassembleSubImm,
                                           [ADD] = disassembleAdd,
                                           [SUB] = disassembleSub,
                                           [MUL] = disassembleMul,
@@ -34,6 +33,11 @@ void (*disassemble[256])(char*, int)  = { [DUMPR] = disassembleDumpr,
                                           [FDIV] = disassembleFdiv,
                                           [BRA] = disassembleBra,
                                           [BRA_IF_TRUE] = disassembleBit,
+                                          [CMPE] = disassembleCmpe,
+                                          [CMPLT] = disassembleCmplt,
+                                          [CMPLTE] = disassembleCmplte,
+                                          [CMPGT] = disassembleCmpgt,
+                                          [CMPGTE] = disassembleCmpgte,
                                           [HALT] = disassembleHalt
                                           };
 //
@@ -385,6 +389,8 @@ void disassembleFdiv(char *strBuffer, int bytecode) {
   sprintf(strBuffer, "fdiv d%d d%d d%d", resultQuotientReg, reg1, reg2);
 }
 
+// branch
+
 void disassembleBra(char *strBuffer, int bytecode) {
   int resultReg = getRd(bytecode);
   int relativeAddress = bytecode >> 8;
@@ -395,4 +401,41 @@ void disassembleBit(char *strBuffer, int bytecode) {
   int resultReg = getRd(bytecode);
   int relativeAddress = bytecode >> 8;
   sprintf(strBuffer, "bit r%d #%d", resultReg, relativeAddress);
+}
+
+// compare
+
+void disassembleCmpe(char *strBuffer, int bytecode) {
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
+  sprintf(strBuffer, "cmpe r%d r%d r%d", resultReg, reg1, reg2);
+}
+
+void disassembleCmplt(char *strBuffer, int bytecode) {
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
+  sprintf(strBuffer, "cmplt r%d r%d r%d", resultReg, reg1, reg2);
+}
+
+void disassembleCmplte(char *strBuffer, int bytecode) {
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
+  sprintf(strBuffer, "cmplte r%d r%d r%d", resultReg, reg1, reg2);
+}
+
+void disassembleCmpgt(char *strBuffer, int bytecode) {
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
+  sprintf(strBuffer, "cmpgt r%d r%d r%d", resultReg, reg1, reg2);
+}
+
+void disassembleCmpgte(char *strBuffer, int bytecode) {
+  int resultReg = getRd(bytecode);
+  int reg1 = getR1(bytecode);
+  int reg2 = getR2(bytecode);
+  sprintf(strBuffer, "cmpgte r%d r%d r%d", resultReg, reg1, reg2);
 }

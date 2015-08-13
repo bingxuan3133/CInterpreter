@@ -24,7 +24,6 @@ void disassembleStm(char *strBuffer, int bytecode);
 void disassembleLdms(char *strBuffer, int bytecode);
 void disassembleStms(char *strBuffer, int bytecode);
 
-// void disassembleSubImm(char *strBuffer, int bytecode);
 void disassembleAdd(char *strBuffer, int bytecode);
 void disassembleSub(char *strBuffer, int bytecode);
 void disassembleMul(char *strBuffer, int bytecode);
@@ -32,8 +31,6 @@ void disassembleDiv(char *strBuffer, int bytecode);
 void disassembleAnd(char *strBuffer, int bytecode);
 void disassembleOr(char *strBuffer, int bytecode);
 void disassembleXor(char *strBuffer, int bytecode);
-void disassembleBra(char *strBuffer, int bytecode);
-void disassembleBit(char *strBuffer, int bytecode);
 
 void disassembleFldrImm(char *strBuffer, int bytecode);
 void disassembleFldr(char *strBuffer, int bytecode);
@@ -42,5 +39,14 @@ void disassembleFadd(char *strBuffer, int bytecode);
 void disassembleFsub(char *strBuffer, int bytecode);
 void disassembleFmul(char *strBuffer, int bytecode);
 void disassembleFdiv(char *strBuffer, int bytecode);
+
+void disassembleBra(char *strBuffer, int bytecode);
+void disassembleBit(char *strBuffer, int bytecode);
+
+void disassembleCmpe(char *strBuffer, int bytecode);
+void disassembleCmplt(char *strBuffer, int bytecode);
+void disassembleCmplte(char *strBuffer, int bytecode);
+void disassembleCmpgt(char *strBuffer, int bytecode);
+void disassembleCmpgte(char *strBuffer, int bytecode);
 
 #endif // Disassembler_H

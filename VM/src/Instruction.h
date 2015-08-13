@@ -151,6 +151,11 @@ typedef enum {
   FDIV,
   BRA ,
   BRA_IF_TRUE ,
+  CMPE,
+  CMPLT,
+  CMPLTE,
+  CMPGT,
+  CMPGTE,
   HALT = 0xff,
 } Instruction;
 
@@ -195,6 +200,17 @@ void fdivideRegisters(int bytecode);
 void fandRegisters(int bytecode);
 void forRegisters(int bytecode);
 void fxorRegisters(int bytecode);
+
+// branch
+void branch(int bytecode);
+void branchIfTrue(int bytecode);
+
+// compare
+void compareIfEqual(int bytecode);
+void compareIfLesserThan(int bytecode);
+void compareIfLesserThanOrEqual(int bytecode);
+void compareIfGreaterThan(int bytecode);
+void compareIfGreaterThanOrEqual(int bytecode);
 
 // helper functions
 int getRd(int bytecode);

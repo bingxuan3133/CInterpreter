@@ -47,9 +47,9 @@ class Parser:
                 self.lexer.advance()
                 return list
             else:
+                self.lexer.peep(';')
                 self.scopeBuilder.buildScope(returnedToken)
                 self.semanticChecker.semanticCheck(returnedToken)
-                self.lexer.peep(';')
                 self.lexer.advance()
                 list.append(returnedToken)
                 return list

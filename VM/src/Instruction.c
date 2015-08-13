@@ -24,7 +24,21 @@ void (*instruction[256])(int)  = {[DUMPR] = dumpRegister,
                                   [DIV] = divideRegisters,
                                   [AND] = andRegisters,
                                   [OR] = orRegisters,
-                                  [XOR] = xorRegisters
+                                  [XOR] = xorRegisters,
+                                  [FLDR_IMM] = floadRegisterWithImmediate,
+                                  [FLDR] = floadRegisterFromMemory,
+                                  [FSTR] = fstoreRegisterIntoMemory,
+                                  [FADD] = faddRegisters,
+                                  [FSUB] = fsubtractRegisters,
+                                  [FMUL] = fmultiplyRegisters,
+                                  [FDIV] = fdivideRegisters,
+                                  [BRA] = branch,
+                                  [BRA_IF_TRUE] = branchIfTrue,
+                                  [CMPE] = compareIfEqual,
+                                  [CMPLT] = compareIfLesserThan,
+                                  [CMPLTE] = compareIfLesserThanOrEqual,
+                                  [CMPGT] = compareIfGreaterThan,
+                                  [CMPGTE] = compareIfGreaterThanOrEqual
                                   };
 //
 
@@ -533,28 +547,28 @@ void compareIfEqual(int bytecode) {
   reg[resultReg].data = reg[reg1].data == reg[reg2].data;
 }
 
-void compareIfLessThan(int bytecode) {
+void compareIfLesserThan(int bytecode) {
   int resultReg = getRd(bytecode);
   int reg1 = getR1(bytecode);
   int reg2 = getR2(bytecode);
   reg[resultReg].data = reg[reg1].data < reg[reg2].data;
 }
 
-void compareIfLessThanOrEqual(int bytecode) {
+void compareIfLesserThanOrEqual(int bytecode) {
   int resultReg = getRd(bytecode);
   int reg1 = getR1(bytecode);
   int reg2 = getR2(bytecode);
   reg[resultReg].data = reg[reg1].data <= reg[reg2].data;
 }
 
-void compareIfMoreThan(int bytecode) {
+void compareIfGreaterThan(int bytecode) {
   int resultReg = getRd(bytecode);
   int reg1 = getR1(bytecode);
   int reg2 = getR2(bytecode);
   reg[resultReg].data = reg[reg1].data > reg[reg2].data;
 }
 
-void compareIfMoreThanOrEqual(int bytecode) {
+void compareIfGreaterThanOrEqual(int bytecode) {
   int resultReg = getRd(bytecode);
   int reg1 = getR1(bytecode);
   int reg2 = getR2(bytecode);
