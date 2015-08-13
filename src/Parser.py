@@ -31,7 +31,7 @@ class Parser:
         elif firstToken.id == '{':            # For one block of statements
             self.scopeBuilder.buildScope(firstToken)
             returnedToken = self.parse(bindingPower)
-            self.scopeBuilder.destroyScope()
+            self.scopeBuilder.destroyCurrentScope()
             list.append(returnedToken)
             return list
         elif firstToken and firstToken.id in self.contextManager.getContext('FlowControl').symbolTable:  # For some context that do not need ';'

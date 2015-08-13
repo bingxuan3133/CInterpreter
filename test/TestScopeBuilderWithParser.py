@@ -47,8 +47,8 @@ class TestParseStatementToMockBuildScope(unittest.TestCase):
         calls = [call(token[0]), call(token[1]), call(token[1].data[0])]
         mockScopeBuilder.buildScope.assert_has_calls(calls, any_order=False)
         calls = [call()]
-        mockScopeBuilder.destroyScope.assert_has_calls(calls)
-        self.assertEqual(1, mockScopeBuilder.destroyScope.call_count)
+        mockScopeBuilder.destroyCurrentScope.assert_has_calls(calls)
+        self.assertEqual(1, mockScopeBuilder.destroyCurrentScope.call_count)
 
     def test_parseStatements_complex_nested_brace_should_call_buildScope_properly(self):
         lexer = LexerStateMachine('int x; {int y; {int z; {int a;} int b; }};', self.context)
@@ -65,8 +65,8 @@ class TestParseStatementToMockBuildScope(unittest.TestCase):
         calls.extend(calls3)
         mockScopeBuilder.buildScope.assert_has_calls(calls, any_order=False)
         calls = [call(), call(), call()]
-        mockScopeBuilder.destroyScope.assert_has_calls(calls, any_order=False)
-        self.assertEqual(3, mockScopeBuilder.destroyScope.call_count)
+        mockScopeBuilder.destroyCurrentScope.assert_has_calls(calls, any_order=False)
+        self.assertEqual(3, mockScopeBuilder.destroyCurrentScope.call_count)
 
     def test_buildScope_should_raise_given_redeclaration_of_x(self):
         lexer = LexerStateMachine('int x; int x;', self.context)

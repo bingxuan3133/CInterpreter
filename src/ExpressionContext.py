@@ -1,4 +1,5 @@
 from Context import *
+import Error
 
 class ExpressionContext(Context):
     def __init__(self, contextManeger):
@@ -6,6 +7,7 @@ class ExpressionContext(Context):
         self.addPrefixInfixOperator('+', 70)
         self.addPrefixInfixOperator('-', 70)
         self.addPrefixInfixOperator('*', 100)
+        self.addByReferenceOperator('&', 100)
         self.addInfixOperator('/', 100)
         self.addInfixOperator('%', 100)
         self.addInfixOperator('=', 1)
@@ -88,6 +90,21 @@ class ExpressionContext(Context):
         symClass.nud = nud
         return symClass
 
+    def addByReferenceOperator(self, id, bindingPower = 0):
+        thisContext = self
+        symClass = self.addInfixOperator(id, bindingPower)
+        def nud(self):
+            self.arity = thisContext.PREFIX_UNARY
+            thisContext.contextManager.parser.lexer.advance()
+            returnedToken = thisContext.contextManager.parser.parse(120)
+            idenToken = thisContext.getIdentifier(returnedToken)
+            if idenToken is None:
+                raise SyntaxError(Error.generateErrorMessageWithNoArguement('(literal) do not have address', returnedToken))
+            self.data.append(returnedToken)
+            return self
+        symClass.nud = nud
+        return symClass
+
     def addGroupOperator(self, id, bindingPower = 0):
         thisContext = self
         def nud(self):
@@ -121,3 +138,19 @@ class ExpressionContext(Context):
         symClass.nud = nud
         symClass.led = led
         return
+
+    def getIdentifier(self, token):
+        """
+        This is a helper function used to retrieve the identifier on the left most of an token tree
+        :param token:
+        :return: token  - identifier is found and return
+                 None   - no identifier is found
+        """
+        if hasattr(token, 'id') and token.id == '(identifier)':
+            return token
+        else:
+            if hasattr(token, 'data') and len(token.data) > 0:
+                token = self.getIdentifier(token.data[0])
+                return token
+            else:
+                return None

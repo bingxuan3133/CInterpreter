@@ -231,8 +231,23 @@ class TestSemanticCheckerDeclarationCheck(unittest.TestCase):
                              '*x = y + z;' + '\n' +
                              '   ^', e.msg)
 
-    def test_isAllDefined_should_raise_given_x_is_not_compatible_to_y_plus_z(self):
+    def test_checkIfAssignmentValid_should_not_raise_given_the_highest_pointer_level_of_rvalue_equal_pointer_level_of_lvalue(self):
         lexer = LexerStateMachine('int *x, *y, *z;\nx = y + *z;', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        semanticChecker = SemanticChecker(parser.scopeBuilder)
+        try:
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            semanticChecker.checkIfAllTokenTypeValid(token[0])
+            semanticChecker.checkIfAssignmentValid(token[0])
+        except SyntaxError as e:
+            self.fail('Should not raise')
+
+    def test_checkIfAssignmentValid_should_raise_given_pointer_level_of_rvalue_is_2_pointer_level_of_lvalue_is_1(self):
+        lexer = LexerStateMachine('int *x, *y, *z;\nx = y + &z;', self.context)
         parser = Parser(lexer, self.contextManager)
         self.contextManager.setParser(parser)
         semanticChecker = SemanticChecker(parser.scopeBuilder)
@@ -246,8 +261,62 @@ class TestSemanticCheckerDeclarationCheck(unittest.TestCase):
             self.fail('Should raise')
         except SyntaxError as e:
             self.assertEqual("Error[2][3]:Incompatible assignment" + '\n' +
-                             'x = y + *z;' + '\n' +
+                             'x = y + &z;' + '\n' +
                              '  ^', e.msg)
+
+    def test_checkIfAssignmentValid_should_raise_given_addressof_lvalue_of_assignment(self):
+        # addressof = &
+        lexer = LexerStateMachine('int *x, *y, *z;\n&x = &y + &z;', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        semanticChecker = SemanticChecker(parser.scopeBuilder)
+        try:
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            semanticChecker.checkIfAllTokenTypeValid(token[0])
+            semanticChecker.checkIfAssignmentValid(token[0])
+            self.fail('Should raise')
+        except SyntaxError as e:
+            self.assertEqual("Error[2][4]:Invalid lvalue in assignment" + '\n' +
+                             '&x = &y + &z;' + '\n' +
+                             '   ^', e.msg)
+
+    def test_checkIfAssignmentValid_should_not_raise_given_assigning_addressof_y_to_a_pointer(self):
+        # addressof = &
+        lexer = LexerStateMachine('int *x, y;\nx = &y;', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        semanticChecker = SemanticChecker(parser.scopeBuilder)
+        try:
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            semanticChecker.checkIfAllTokenTypeValid(token[0])
+            semanticChecker.checkIfAssignmentValid(token[0])
+        except SyntaxError as e:
+            self.fail('Should not raise')
+
+    def test_checkIfAssignmentValid_should_raise_given_assigning_addressof_5_to_a_pointer(self):
+        # addressof = &
+        lexer = LexerStateMachine('int *x;\nx = &5;', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        semanticChecker = SemanticChecker(parser.scopeBuilder)
+        try:
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            semanticChecker.checkIfAllTokenTypeValid(token[0])
+            semanticChecker.checkIfAssignmentValid(token[0])
+            self.fail('Should raise')
+        except SyntaxError as e:
+            self.assertEqual("Error[2][4]:(literal) do not have address" + '\n' +
+                             'x = &5' + '\n' +
+                             '     ^', e.msg)
 
 if __name__ == '__main__':
     unittest.main()

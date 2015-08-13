@@ -19,19 +19,26 @@ class SemanticChecker:
     #  =================
     def checkIfAssignmentValid(self, token):
         if token.id == '=':
-            leftType = self.checkIfAssignmentValid(token.data[0])
+            leftType = self.getTokenType(token.data[0])
             rightType = self.checkIfAssignmentValid(token.data[1])
             if len(leftType) != len(rightType) or leftType[0] != rightType[0]:
                 caretMessage = ' '*(token.column-1)+'^'
                 raise SyntaxError("Error[{}][{}]:Incompatible assignment\n{}\n{}"\
                                   .format(token.line,token.column,token.oriString,caretMessage))
         elif token.id == '(def)':
-            leftType = self.checkIfAssignmentValid(token.data[0].data[1])
+            leftType = self.getTokenType(token.data[0].data[1])
             rightType = self.checkIfAssignmentValid(token.data[1])
             if len(leftType) != len(rightType) or leftType[0] != rightType[0]:
                 caretMessage = ' '*(token.column-1)+'^'
                 raise SyntaxError("Error[{}][{}]:Incompatible assignment\n{}\n{}"\
                                   .format(token.line,token.column,token.oriString,caretMessage))
+        elif token.arity == 3:
+            leftType = self.checkIfAssignmentValid(token.data[0])
+            rightType = self.checkIfAssignmentValid(token.data[1])
+            if len(leftType) > len(rightType):
+                return leftType
+            else:
+                return rightType
         else:
             self.checkIfTokenTypeValid(token)
             typeList = self.getTokenType(token)
@@ -60,6 +67,11 @@ class SemanticChecker:
                               .format(idenToken.line,idenToken.column,idenToken.data[0],idenToken.oriString,caretMessage))
 
     def getTokenType(self, token):      # token = idenToken
+        if token.id == '(literal)':
+            if isinstance(token.data[0], int):
+                return ['int']
+            else:
+                return ['double']
         declToken = self.scopeBuilder.findGlobal(token.data[0])
         if token.id == '(identifier)':
             typeList = self.getIdentifierDeclarationTypeList(declToken)  # a list of token declaration types - eg: [int, *, []
@@ -68,6 +80,8 @@ class SemanticChecker:
             typeList = self.getTokenType(token.data[0])
             if token.id in ('*', '['):
                 typeList.pop()
+            elif token.id is '&':
+                typeList.append('*')
             return typeList
 
     def getIdentifierDeclarationTypeList(self, token):  # token = declToken from scope

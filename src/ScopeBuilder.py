@@ -41,7 +41,7 @@ class ScopeBuilder:
         self.scopeHistory.append(copy.deepcopy(self.scope.list))
         return
 
-    def destroyScope(self):
+    def destroyCurrentScope(self):
         self.currentScope = self.currentScope.parentScope
         self.currentScope.list.pop()
         self.currentScope.displayList.pop()
