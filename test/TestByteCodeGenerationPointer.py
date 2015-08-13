@@ -50,7 +50,5 @@ class TestPointerByteCodeGeneration(unittest.TestCase):
         byteCodes = self.byteCodeGenerator.injectPrologue(byteCodes)
         self.assertEqual(self.byteCodeGenerator.loadValue([0, 4]),byteCodes[0])
 
-
-
 if __name__ == '__main__':
     unittest.main()

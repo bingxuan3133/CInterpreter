@@ -117,13 +117,10 @@ class MyTestCase(unittest.TestCase):
         vmdll.VMRun(cByteCodes)
 
     def test_VMStep_while_loop(self):
-        lexer = LexerStateMachine('while( x == 2) {x = 100;\n y = 1000;\n z=2000;} ', self.context)
+        lexer = LexerStateMachine('int x, y, z; while( x == 2) {x = 100;\n y = 1000;\n z=2000;} ', self.context)
         parser = Parser(lexer, self.manager)
         self.manager.setParser(parser)
-        token = parser.parseStatement(0)
-        self.byteCodeGenerator.variablesInThisAST['x'] = 4
-        self.byteCodeGenerator.variablesInThisAST['y'] = 8
-        self.byteCodeGenerator.variablesInThisAST['z'] = 12
+        token = parser.parseStatements(0)
         bytecodes = self.generator.generateCode(token)
         bytecodes.append(0xff)
 
@@ -151,5 +148,8 @@ class MyTestCase(unittest.TestCase):
         cbytecodes = vm.convertToCArray(bytecodes)
         vm.dumpBytecodes(cbytecodes)
 
+    def test_test(self):
+        vm = VirtualMachine()
+        vm.dumpBytecode(0x5f798270)
 if __name__ == '__main__':
     unittest.main()

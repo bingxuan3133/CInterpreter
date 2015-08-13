@@ -25,7 +25,7 @@ vm = VirtualMachine()
 parser = Parser(None, contextManager)
 contextManager.setParser(parser)
 
-print('Imba Cinterpreter')
+print('Imba the Cinterpreter')
 while(1):
     stopSymbol = ' '
     StringCode = ''
