@@ -19,6 +19,7 @@ contextManager.addContext('FlowControl', flowControlContext)
 contextManager.setCurrentContexts(contexts)
 
 generator = GeneratorAPI(context, contextManager)
+generator.enableVerboseByteCode()
 byteCodeGenerator = ByteCodeGenerator(context, contextManager)
 informationInjector = InformationInjector()
 vm = VirtualMachine()

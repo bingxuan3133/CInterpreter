@@ -30,6 +30,7 @@ class MyTestCase(unittest.TestCase):
         self.manager.setCurrentContexts(self.contexts)
 
         self.generator = GeneratorAPI(self.context, self.manager)
+        self.generator.enableVerboseByteCode()
         self.byteCodeGenerator = ByteCodeGenerator(self.context, self.manager)
         self.informationInjector = InformationInjector()
 
@@ -140,13 +141,13 @@ class MyTestCase(unittest.TestCase):
         token = parser.parseStatements(0)
         bytecodes = self.generator.generateCode(token)
         vm = VirtualMachine()
+        print(bytecodes)
         vm.VMLoad(bytecodes)
         lexer = LexerStateMachine('x = x +5;', self.context)
         parser.lexer = lexer
         token = parser.parseStatements(0)
         bytecodes = self.generator.generateCode(token)
-        cbytecodes = vm.convertToCArray(bytecodes)
-        vm.dumpBytecodes(cbytecodes)
+        vm.VMLoadAppend(bytecodes)
 
 if __name__ == '__main__':
     unittest.main()
