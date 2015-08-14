@@ -12,6 +12,7 @@ import struct
 
 class ByteCodeGenerator:
     byteCodeList = []
+    tempList = []
     byteRequired = {'char': 1, 'short': 2, 'int': 4, 'long': 4, 'float': 4, 'double': 8}
     variablesInThisAST = {}
     variableStack = []
@@ -89,7 +90,7 @@ class ByteCodeGenerator:
         return number
 
     def loadFloatingPoint(self,GPR = []):
-        number = 0x13 | GPR[0] << 8
+        number = 0x13 | GPR[0] << 8 | GPR[1] << 11
         return number
 
     def immediateFloatingPoint(self, GPR=[]):
@@ -236,12 +237,13 @@ class ByteCodeGenerator:
                 destinationRegister1 = thisGenerator.mapping.getAFreeWorkingRegister()
             else:
                 destinationRegister1 = thisGenerator.mapping.getALargestWorkingRegister()
-            Code = thisGenerator.loadFloatingPoint([destinationRegister1])
+            size = thisGenerator.tempList.__len__()
+            Code = thisGenerator.loadFloatingPoint([destinationRegister1,size+1])
             thisGenerator.byteCodeList.append(Code)
             Code = thisGenerator.immediateFloatingPoint([floatPack[0],floatPack[1],floatPack[2],floatPack[3]])
-            thisGenerator.byteCodeList.append(Code)
+            thisGenerator.tempList.append(Code)
             Code = thisGenerator.immediateFloatingPoint([floatPack[4],floatPack[5],floatPack[6],floatPack[7]])
-            thisGenerator.byteCodeList.append(Code)
+            thisGenerator.tempList.append(Code)
 
             thisGenerator.floatingFlag = 1
 
@@ -266,6 +268,9 @@ class ByteCodeGenerator:
         def generalByteCode(self,sequenceCheck = None, token = None, index = -1):
             if self.id == '(':
                 self = self.data[0]
+            if thisGenerator.verboseByteCode:
+                if self.oriString not in thisGenerator.byteCodeList:
+                    thisGenerator.byteCodeList.append(self.oriString)
             pushed = thisGenerator.registerAllocator.decideWhetherToPush(self)
             side = thisGenerator.findOutAndGenerateCorrectSideCode(self, respectiveByteCodeFunction[self.id])
             thisGenerator.side = side
@@ -287,11 +292,14 @@ class ByteCodeGenerator:
                 thisGenerator.mapping.reset()
             thisGenerator.byteCodeList.insert(tempLocation, thisGenerator.branch([thisGenerator.byteCodeList.__len__()-tempLocation]))
             if self.data.__len__() == 3:
+                tempLocation = thisGenerator.byteCodeList.__len__()
+                if thisGenerator.verboseByteCode:
+                    thisGenerator.byteCodeList.append(self.data[2].id)
                 for statement in self.data[2].data[0][0].data:
-                    tempLocation = thisGenerator.byteCodeList.__len__()
                     statement.generateByteCode()
                     thisGenerator.mapping.reset()
                     thisGenerator.byteCodeList.insert(tempLocation, thisGenerator.branch([thisGenerator.byteCodeList.__len__()-tempLocation]))
+                    tempLocation = thisGenerator.byteCodeList.__len__()
             return thisGenerator.byteCodeList
 
         def whileByteCode(self,sequenceCheck = None, token = None, index = -1):
@@ -314,6 +322,8 @@ class ByteCodeGenerator:
             return thisGenerator.byteCodeList
 
         def doByteCode(self,sequenceCheck = None, token = None, index = -1):
+            if thisGenerator.verboseByteCode:
+                thisGenerator.byteCodeList.append(self.id)
             tempLocation = thisGenerator.byteCodeList.__len__()
             for statement in self.data[1][0].data:
                 statement.generateByteCode()
@@ -462,7 +472,11 @@ class ByteCodeGenerator:
 
 
     def injectPrologue(self, oldList):
+        oldList.append(0xffffffff)
+        for number in self.tempList:
+            oldList.append(number)
         self.mapping.reset()
+        self.tempList = []
         if self.memorySize == 0:
             return oldList
         newList=[]
@@ -470,7 +484,6 @@ class ByteCodeGenerator:
         newList.append(self.subRegister([self.mapping.framePointerRegister, self.mapping.framePointerRegister,self.mapping.releaseAWorkingRegister()]))
         newList.extend(oldList)
         self.memorySize = 0
+
         return newList
 
-    def appendByteCode(self, ):
-        pass

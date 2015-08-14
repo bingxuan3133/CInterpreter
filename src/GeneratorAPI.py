@@ -6,10 +6,15 @@ class GeneratorAPI:
         self.byteCodeGenerator = ByteCodeGenerator(context, contextManager)
         self.informationInjector = InformationInjector()
 
+    def enableVerboseByteCode(self):
+        self.byteCodeGenerator.verboseByteCode =True
+    def disableVerboseByteCode(self):
+        self.byteCodeGenerator.verboseByteCode =False
+
 
     #An API adapter for connecting the others module
     def generateCode(self, tokens):
-        Code = None
+        Code = []
         self.byteCodeGenerator.byteCodeList = []
         self.byteCodeGenerator.initGeneration()
         if isinstance(tokens, list):
@@ -23,5 +28,5 @@ class GeneratorAPI:
             self.byteCodeGenerator.mapping.reset()
 
         Code = self.byteCodeGenerator.injectPrologue(Code)
-        Code.append(0xffffffff)
+
         return Code
