@@ -33,11 +33,26 @@ class VirtualMachine:
         bytecodeAddress = self.vmdll.VMLoad(cBytecodeList, len(cBytecodeList))
         return bytecodeAddress
 
+    def VMLoadAppend(self, mixedList):  # proxy function to interact with real VM
+        self.vmdll.VMLoad.restype = POINTER(c_int)
+        bytecodeList = []
+        for item in mixedList:
+            if isinstance(item, str):
+                print(item)
+            else:
+                print(format(item, '08x') + '   ' + self.disassembleBytecode(item))
+                bytecodeList.append(item)
+        cBytecodeList = self.convertToCArray(bytecodeList)
+        bytecodeAddress = self.vmdll.VMLoadAppend(cBytecodeList, len(cBytecodeList))
+        return bytecodeAddress
+
     def VMStep(self):  # proxy function to interact with real VM
         #vmstep.argtypes = [POINTER(c_int)]
         self.vmdll.VMStep.restype = POINTER(C_Exception)
+        self.vmdll.VMgetBytecode.restype = c_int
         exception = self.vmdll.VMStep()
-        print(self.cPtr.value.decode('ascii'))
+        bytecode = self.vmdll.VMgetBytecode()
+        print(format(bytecode, '08x') + '   ' + self.disassembleBytecode(bytecode))
         if bool(exception):
             raise RuntimeError(exception.contents.errMsg.decode('ASCII'))
 

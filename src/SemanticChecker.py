@@ -1,4 +1,5 @@
 __author__ = 'admin'
+import Error
 
 class SemanticChecker:
     def __init__(self, scopeBuilder=None):
@@ -19,6 +20,7 @@ class SemanticChecker:
     #  =================
     def checkIfAssignmentValid(self, token):
         if token.id == '=':
+            self.checkIfLvalueValid(token)
             leftType = self.getTokenType(token.data[0])
             rightType = self.checkIfAssignmentValid(token.data[1])
             if len(leftType) != len(rightType) or leftType[0] != rightType[0]:
@@ -52,6 +54,16 @@ class SemanticChecker:
         else:
             self.checkIfTokenTypeValid(token)
             pass
+
+    def checkIfLvalueValid(self, token):
+        if token.data[0].id == '&':
+            raise SyntaxError(Error.generateErrorMessageWithNoArguement('Invalid lvalue type of assignment', token))
+        elif token.data[0].id in ('(identifier)', '(literal)'):
+            return
+        elif token.data[0].arity == 3 and token.data[0].id != '[':
+            Error.generateErrorMessageWithNoArguement('Invalid lvalue type of assignment', token)
+        else:
+            self.checkIfLvalueValid(token.data[0])
 
     def checkIfTokenTypeValid(self, token):
         idenToken = self.getIdentifier(token)

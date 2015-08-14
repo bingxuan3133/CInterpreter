@@ -24,6 +24,8 @@ informationInjector = InformationInjector()
 vm = VirtualMachine()
 parser = Parser(None, contextManager)
 contextManager.setParser(parser)
+semanticChecker = SemanticChecker(parser.scopeBuilder)
+semanticChecker.isEnable = True
 
 print('Imba the Cinterpreter')
 while(1):
@@ -36,14 +38,13 @@ while(1):
     StringList = StringCode.split('\n')
     lexer = LexerStateMachine(StringCode, context)
     parser.lexer = lexer
-    
+
     tokenList = []
     try:
         token = parser.parseStatements(0)
         byteCodes = generator.generateCode(token)
+        vm.VMLoad(byteCodes)
           # to halt the VM
-        cbytecode = vm.convertToCArray(byteCodes)
-        vm.dumpBytecodes(cbytecode)
-        vm.VMRun(cbytecode)
+        vm.VMRun()
     except SyntaxError as e:
         print(e.msg)

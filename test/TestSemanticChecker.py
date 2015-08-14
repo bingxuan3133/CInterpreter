@@ -279,7 +279,7 @@ class TestSemanticCheckerDeclarationCheck(unittest.TestCase):
             semanticChecker.checkIfAssignmentValid(token[0])
             self.fail('Should raise')
         except SyntaxError as e:
-            self.assertEqual("Error[2][4]:Invalid lvalue in assignment" + '\n' +
+            self.assertEqual("Error[2][4]:Invalid lvalue type of assignment" + '\n' +
                              '&x = &y + &z;' + '\n' +
                              '   ^', e.msg)
 
@@ -298,6 +298,24 @@ class TestSemanticCheckerDeclarationCheck(unittest.TestCase):
             semanticChecker.checkIfAssignmentValid(token[0])
         except SyntaxError as e:
             self.fail('Should not raise')
+
+    def test_checkIfAssignmentValid_should_raise_given_addressof_addressof_y(self):
+        # addressof = &
+        lexer = LexerStateMachine('int *x, y;\nx = &&y;', self.context)
+        parser = Parser(lexer, self.contextManager)
+        self.contextManager.setParser(parser)
+        semanticChecker = SemanticChecker(parser.scopeBuilder)
+        try:
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            token = parser.parseStatement(0)
+            semanticChecker.checkIfAllIdentifiersAreDefined(token[0])
+            semanticChecker.checkIfAllTokenTypeValid(token[0])
+            semanticChecker.checkIfAssignmentValid(token[0])
+        except SyntaxError as e:
+            self.assertEqual("Error[2][5]:Expect (literal) or (identifier) before &&" + '\n' +
+                             'x = &&y;' + '\n' +
+                             '    ^', e.msg)
 
     def test_checkIfAssignmentValid_should_raise_given_assigning_addressof_5_to_a_pointer(self):
         # addressof = &

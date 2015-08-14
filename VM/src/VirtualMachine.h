@@ -39,6 +39,7 @@ void __declspec(dllexport) VMinit(int memorySize, char *buffer);
 void VMConfig(int memorySize);
 int* __declspec(dllexport) VMLoad(int *bytecode, int size);
 int*  __declspec(dllexport) VMLoadAppend(int *bytecode, int size);
+int __declspec(dllexport) VMgetBytecode(int *bytecode);
 void __declspec(dllexport) VMLoadFree();
 Exception* __declspec(dllexport) VMRun();
 Exception* __declspec(dllexport) VMStep();

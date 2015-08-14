@@ -14,7 +14,6 @@ class ExpressionContext(Context):
         self.addInfixOperator('!=', 25)
         self.addInfixOperator('|', 15)
         self.addInfixOperator('||', 5)
-        self.addInfixOperator('&', 20)
         self.addInfixOperator('&&', 6)
         self.addInfixOperator('==', 10)
         self.addInfixOperator('<', 10)
@@ -31,6 +30,8 @@ class ExpressionContext(Context):
         self.addOperator('}', 0)
         self.addOperator(')', 0)
 
+        self.addPrintOperator('print', 0)
+
     def addInfixOperator(self, id, bindingPower = 0):
         """
         Add Infix operator into symbol table
@@ -39,6 +40,8 @@ class ExpressionContext(Context):
         :return:
         """
         thisContext = self
+        def nud(self):
+            raise SyntaxError(Error.generateErrorMessageWithOneArguement('Expect (literal) or (identifier) before {}', self, self.id))
         def led(self, leftToken):
             self.arity = thisContext.BINARY  # some token has prefix and infix characteristic
             self.data.append(leftToken)
@@ -49,7 +52,7 @@ class ExpressionContext(Context):
 
         symClass = self.symbol(id, bindingPower)
         symClass.arity = self.BINARY
-        #symClass.nud = self.nud
+        symClass.nud = nud
         symClass.led = led
         return symClass
 
@@ -68,6 +71,8 @@ class ExpressionContext(Context):
 
     def addPostfixOperator(self, id, bindingPower = 0):
         thisContext = self
+        def nud(self):
+            raise SyntaxError(Error.generateErrorMessageWithNoArguement('Expect (identifier) before {}', self, self.id))
         def led(self, leftToken):
             self.data.append(leftToken)
             thisContext.contextManager.parser.lexer.advance()
@@ -93,7 +98,7 @@ class ExpressionContext(Context):
 
     def addByReferenceOperator(self, id, bindingPower = 0):
         thisContext = self
-        symClass = self.addInfixOperator(id, bindingPower)
+        symClass = self.addInfixOperator(id, 20)
         def nud(self):
             self.arity = thisContext.PREFIX_UNARY
             thisContext.contextManager.parser.lexer.advance()
@@ -134,6 +139,24 @@ class ExpressionContext(Context):
             self.data = returnedList
             thisContext.contextManager.parser.lexer.peep('}')
             thisContext.contextManager.parser.lexer.advance()
+            return self
+        symClass = self.addOperator(id, bindingPower)  # removed the nud and led
+        symClass.nud = nud
+        symClass.led = led
+        return
+
+    def addPrintOperator(self, id, bindingPower = 0 ):
+        thisContext = self
+        def nud(self):
+            print(thisContext.contextManager.parser.lexer.advance())
+            print(thisContext.contextManager.parser.lexer.peep('('))
+            print(thisContext.contextManager.parser.lexer.advance())
+            token = thisContext.contextManager.parser.parse(0)
+            self.data.append(token)
+            print(thisContext.contextManager.parser.lexer.peep(')'))
+            print(thisContext.contextManager.parser.lexer.advance())
+            return self
+        def led(self):
             return self
         symClass = self.addOperator(id, bindingPower)  # removed the nud and led
         symClass.nud = nud

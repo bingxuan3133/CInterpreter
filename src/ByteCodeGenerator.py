@@ -430,6 +430,7 @@ class ByteCodeGenerator:
                                 '}':([None],[noByteCode]),
                                 ']':([None],[noByteCode]),
                                 '[':([None],[noByteCode]),
+                                'print':([None],[noByteCode]),
                             }
 
         respectiveByteCodeFunction = {

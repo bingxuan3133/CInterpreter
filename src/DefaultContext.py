@@ -12,6 +12,7 @@ class DefaultContext(Context):
         self.addOperator('--', 0)
         self.addOperator('if', 0)
         self.addOperator('while', 0)
+        self.addOperator('print', 0)
 
     def addOperator(self, id, bindingPower = 0, nud = None, led = None):
         def nud(self):

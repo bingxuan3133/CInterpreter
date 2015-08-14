@@ -70,6 +70,10 @@ int* __declspec(dllexport) VMLoadAppend(int *bytecode, int size) {
   return VMbytecode;
 }
 
+int __declspec(dllexport) VMgetBytecode(int *bytecode) {
+  return *bytecode;
+}
+
 void __declspec(dllexport) VMLoadFree() {
   free(VMbytecode);
 }
