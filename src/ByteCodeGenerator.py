@@ -12,6 +12,7 @@ import struct
 
 class ByteCodeGenerator:
     byteCodeList = []
+    tempList = []
     byteRequired = {'char': 1, 'short': 2, 'int': 4, 'long': 4, 'float': 4, 'double': 8}
     variablesInThisAST = {}
     variableStack = []
@@ -89,7 +90,7 @@ class ByteCodeGenerator:
         return number
 
     def loadFloatingPoint(self,GPR = []):
-        number = 0x13 | GPR[0] << 8
+        number = 0x13 | GPR[0] << 8 | GPR[1] << 11
         return number
 
     def immediateFloatingPoint(self, GPR=[]):
@@ -236,12 +237,13 @@ class ByteCodeGenerator:
                 destinationRegister1 = thisGenerator.mapping.getAFreeWorkingRegister()
             else:
                 destinationRegister1 = thisGenerator.mapping.getALargestWorkingRegister()
-            Code = thisGenerator.loadFloatingPoint([destinationRegister1])
+            size = thisGenerator.tempList.__len__()
+            Code = thisGenerator.loadFloatingPoint([destinationRegister1,size+1])
             thisGenerator.byteCodeList.append(Code)
             Code = thisGenerator.immediateFloatingPoint([floatPack[0],floatPack[1],floatPack[2],floatPack[3]])
-            thisGenerator.byteCodeList.append(Code)
+            thisGenerator.tempList.append(Code)
             Code = thisGenerator.immediateFloatingPoint([floatPack[4],floatPack[5],floatPack[6],floatPack[7]])
-            thisGenerator.byteCodeList.append(Code)
+            thisGenerator.tempList.append(Code)
 
             thisGenerator.floatingFlag = 1
 
@@ -470,7 +472,11 @@ class ByteCodeGenerator:
 
 
     def injectPrologue(self, oldList):
+        oldList.append(0xffffffff)
+        for number in self.tempList:
+            oldList.append(number)
         self.mapping.reset()
+        self.tempList = []
         if self.memorySize == 0:
             return oldList
         newList=[]
@@ -478,5 +484,6 @@ class ByteCodeGenerator:
         newList.append(self.subRegister([self.mapping.framePointerRegister, self.mapping.framePointerRegister,self.mapping.releaseAWorkingRegister()]))
         newList.extend(oldList)
         self.memorySize = 0
+
         return newList
 
